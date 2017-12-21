@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "generator-polymer-init-custom-build": "^2.2.1"
+  }
+}
