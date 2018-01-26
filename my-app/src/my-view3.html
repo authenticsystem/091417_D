@@ -9,6 +9,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<!-- <link rel="import" href="../bower_components/mp-calendar/mp-calendar.html"> -->
+<!-- <link rel="import" href="../bower_components/mp-calendar/mp-calendar-theme.html"> -->
+<!-- <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html"> -->
+<!-- <link rel="import" href="../bower_components/paper-button/paper-button.html"> -->
+<!-- <link rel="import" href="../bower_components/paper-chip/paper-chip.html"> -->
+<!-- <link rel="import" href="../bower_components/paper-card/paper-card.html"> -->
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/pf-calendar/pf-calendar.html">
+<link rel="import" href="../bower_components/pf-calendar-events/pf-calendar-events.html">
+<link rel="import" href="../bower_components/pf-calendar-events-data/pf-calendar-events-data.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -29,6 +40,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-icon-button.menu {
         margin-right: 16px;
       }
+
+      paper-dialog#PatientInfo {
+        width: 100%;
+      }
+
+      pf-calendar-events {
+        margin-top: 1%;
+      }
     </style>
 
     <app-header-layout fullbleed has-scrolling-region>
@@ -38,13 +57,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <div main-title>Appointments</div>
         </app-toolbar>
       </app-header>
+      <pf-calendar-events calendarstyle="material-calendar" data="{{appointment}}"></pf-calendar-events>
 
-      <div class="card">
-        <div class="circle">3</div>
-        <h1>View Three</h1>
-        <p>Modus commodo minimum eum te, vero utinam assueverit per eu.</p>
-        <p>Ea duis bonorum nec, falli paulo aliquid ei eum.Has at minim mucius aliquam, est id tempor laoreet.Pro saepe pertinax ei, ad pri animal labores suscipiantur.</p>
-      </div>
 
     </app-header-layout>
 
@@ -59,10 +73,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           narrow: {
             type: Boolean,
             notify: true
-          }
+          },
+          appointment: {
+            type: Object
+          },
         };
-      }
 
+      }
+      _onSelectedDate() {
+        this.$.PatientInfo.open();
+      }
       toggleDrawer() {
         this.dispatchEvent(new CustomEvent('toggleDrawer', {
           bubbles: true, composed: true, detail: {
@@ -70,7 +90,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }));
         this.$.narrow = !this.$.narrow;
-      }      
+      }
     }
 
     window.customElements.define(MyView3.is, MyView3);
