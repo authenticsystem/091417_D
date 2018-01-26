@@ -19,13 +19,19 @@
     "paper-item": "PolymerElements/paper-item#^2.0.0",
     "paper-input": "PolymerElements/paper-input#^2.0.0",
     "paper-card": "PolymerElements/paper-card#2.0.0",
-    "iron-ajax":"PolymerElements/iron-ajax#2.0.5",
-    "iron-list" : "PolymerElements/iron-list#2.0.10",
+    "iron-ajax": "PolymerElements/iron-ajax#2.0.5",
+    "iron-list": "PolymerElements/iron-list#2.0.10",
     "polymerfire": "firebase/polymerfire#^2.2.0",
     "paper-fab": "PolymerElements/paper-fab#^2.0.0",
     "iron-scroll-target-behavior": "PolymerElements/iron-scroll-target-behavior#^2.0.0",
-    "iron-scroll-threshold":"PolymerElements/iron-scroll-threshold#^2.0.0"
-    
+    "iron-scroll-threshold": "PolymerElements/iron-scroll-threshold#^2.0.0",
+    "neon-animation": "PolymerElements/neon-animation#^2.1.0",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.1",
+    "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
+    "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.1",
+    "paper-tabs": "PolymerElements/paper-tabs#^2.0.0",
+    "paper-button": "PolymerElements/paper-button#^2.0.0",
+    "paper-alert-dialog": "Collaborne/paper-alert-dialog#^2.0.1"
   },
   "resolutions": {
     "polymer": "^2.0.0"

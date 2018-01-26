@@ -1,0 +1,141 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tab.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-patients-view">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+
+                padding: 10px;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            .pad {
+                padding: 0 16px;
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .primary {
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .avatar {
+                height: 40px;
+                width: 40px;
+                border-radius: 20px;
+                box-sizing: border-box;
+                background-color: #DDD;
+            }
+
+            paper-tabs {
+                background-color: #a284e9;
+                color: #fff;
+            }
+
+            paper-fab.fab-menu {
+                position: fixed;
+                right: 32px;
+                bottom: 32px;
+            }
+        </style>
+
+        <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+                <app-toolbar primary>
+                    <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                    <div main-title>
+                        <app-toolbar>
+                            <img class="avatar" sizing="contain" src="../images/user.png"></img>
+                            <div class="pad">
+                                <div class="primary">Dr. Liz Grimes</div>
+                                <div class="shortText">MD</div>
+                            </div>
+                        </app-toolbar>
+                    </div>
+                    <paper-icon-button icon="my-icons:print"></paper-icon-button>
+                    <paper-menu-button>
+                        <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+                        <paper-listbox slot="dropdown-content">
+                            <paper-item>Edit</paper-item>
+                            <paper-item>Delete</paper-item>
+                        </paper-listbox>
+                    </paper-menu-button>
+                </app-toolbar>
+            </app-header>
+
+            <div class="card">
+                <paper-tabs selected="0" scrollable>
+                    <paper-tab>Patient Info</paper-tab>
+                    <paper-tab>Cases</paper-tab>
+                </paper-tabs>
+            </div>
+
+        </app-header-layout>
+
+        <paper-fab class="fab-menu" icon="my-icons:add" on-tap="togglePaperFab"></paper-fab>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-patients-view',
+
+            properties: {
+                narrow: {
+                    type: Boolean,
+                    notify: true
+                }
+            },
+
+            toggleDrawer() {
+                this.dispatchEvent(new CustomEvent('toggleDrawer', {
+                    bubbles: true, composed: true, detail: {
+                        narrow: this.$.narrow
+                    }
+                }));
+                this.$.narrow = !this.$.narrow;
+            }
+        })
+    </script>
+</dom-module>
