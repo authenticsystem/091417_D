@@ -29,6 +29,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 
 <link rel="lazy-import" href="my-dashboard.html">
+<link rel="lazy-import" href="my-account.html">
+<link rel="lazy-import" href="my-signin.html">
+<link rel="lazy-import" href="my-register-signin.html">
+<link rel="lazy-import" href="my-email-verification.html">
+<link rel="lazy-import" href="my-account-link.html">
+<link rel="lazy-import" href="my-cases.html">
+<link rel="lazy-import" href="my-case-new.html">
 <link rel="lazy-import" href="my-view2.html">
 <link rel="lazy-import" href="my-view3.html">
 <link rel="lazy-import" href="my-patients.html">
@@ -60,7 +67,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .drawer-list {
-        margin: 16px;
+        margin: 10px;
       }
 
       .drawer-list a {
@@ -68,6 +75,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         /* padding: 0 16px; */
         text-decoration: none;
         color: var(--app-secondary-color);
+
         /* line-height: 40px; */
       }
 
@@ -156,11 +164,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </app-route>
 
 
-    <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+    <app-drawer-layout has-scrolling-region fullbleed narrow="{{narrow}}" id="drawerLayout">
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
         <app-header fixed>
           <app-toolbar>
-            <iron-image class="avatar" sizing="contain" src=""></iron-image>
+            <iron-image class="avatar" sizing="contain" src="../images/user.png"></iron-image>
             <div class="pad">
               <div class="primary">Dr. Liz Grimes</div>
               <div class="shortText">MD</div>
@@ -174,67 +182,100 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-fab mini icon="my-icons:my-location"></paper-fab>
         </app-header>
 
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="dashboard" href="[[rootPath]]">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:dashboard" slot="item-icon"></iron-icon>
-              <span>Dashboard</span>
-            </paper-icon-item>
-          </a>
+        <div style=" 
+        height:80vh;
+        overflow: scroll;
+        overflow-x: hidden; ">
+          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+            <a name="dashboard" href="[[rootPath]]">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:dashboard" slot="item-icon"></iron-icon>
+                <span>Dashboard</span>
+              </paper-icon-item>
+            </a>
 
-          <a name="view2" href="[[rootPath]]view2">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:add-alert" slot="item-icon"></iron-icon>
-              <span>Notifications</span>
-            </paper-icon-item>
-          </a>
+            <a name="view2" href="[[rootPath]]view2">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:add-alert" slot="item-icon"></iron-icon>
+                <span>Notifications</span>
+              </paper-icon-item>
+            </a>
 
-          <a name="view3" href="[[rootPath]]view3">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:event" slot="item-icon"></iron-icon>
-              <span>Appointments</span>
-            </paper-icon-item>
-          </a>
+            <a name="dashboard" href="[[rootPath]]">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:dashboard" slot="item-icon"></iron-icon>
+                <span>Calendar</span>
+              </paper-icon-item>
+            </a>
 
-          <a name="patients" href="[[rootPath]]patients">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:supervisor-account" slot="item-icon"></iron-icon>
-              <span>Patients</span>
-            </paper-icon-item>
-          </a>
+            <a name="patients" href="[[rootPath]]patients">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:supervisor-account" slot="item-icon"></iron-icon>
+                <span>Patients</span>
+              </paper-icon-item>
+            </a>
 
-          <a name="queue" href="[[rootPath]]queue">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:list" slot="item-icon"></iron-icon>
-              <span>Queue</span>
-            </paper-icon-item>
-          </a>
+            <a name="queue" href="[[rootPath]]queue">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:list" slot="item-icon"></iron-icon>
+                <span>Queue</span>
+              </paper-icon-item>
+            </a>
 
-          <a name="billing" href="[[rootPath]]billing">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:send" slot="item-icon"></iron-icon>
-              <span>Billing</span>
-            </paper-icon-item>
-          </a>
+            <a name="account" href="[[rootPath]]account">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:account-circle" slot="item-icon"></iron-icon>
+                <span>My account</span>
+              </paper-icon-item>
+            </a>
 
-          <a name="collection" href="[[rootPath]]collection">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:payment" slot="item-icon"></iron-icon>
-              <span>Collection</span>
-            </paper-icon-item>
-          </a>
+            <a name="cases" href="[[rootPath]]cases">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:list" slot="item-icon"></iron-icon>
+                <span>Cases</span>
+              </paper-icon-item>
+            </a>
 
-          <a name="reports" href="[[rootPath]]reports">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:trending-up" slot="item-icon"></iron-icon>
-              <span>Reports</span>
-            </paper-icon-item>
-          </a>
-        </iron-selector>
+            <a name="billing" href="[[rootPath]]billing">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:send" slot="item-icon"></iron-icon>
+                <span>Billing</span>
+              </paper-icon-item>
+            </a>
+
+            <a name="collection" href="[[rootPath]]collection">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:payment" slot="item-icon"></iron-icon>
+                <span>Collection</span>
+              </paper-icon-item>
+            </a>
+            <hr>
+            <a name="dashboard" href="[[rootPath]]signin">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:account-circle" slot="item-icon"></iron-icon>
+                <span>Settings</span>
+              </paper-icon-item>
+            </a>
+
+            <a name="view3" href="[[rootPath]]view3">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:event" slot="item-icon"></iron-icon>
+                <span>Logout</span>
+              </paper-icon-item>
+            </a>
+
+            <a name="reports" href="[[rootPath]]reports">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:trending-up" slot="item-icon"></iron-icon>
+                <span>Help</span>
+              </paper-icon-item>
+            </a>
+          </iron-selector>
+        </div>
       </app-drawer>
 
       <!-- <app-header-layout fullbleed>  -->
-          <!-- <app-header slot="header" fixed>
+      <!-- <app-header slot="header" fixed>
             <app-toolbar>
               <paper-icon-button id="toggle" icon="my-icons:menu" drawer-toggle></paper-icon-button>
               <div main-title>Patients</div>
@@ -244,13 +285,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
         <my-dashboard name="dashboard"></my-dashboard>
+        <my-account name="account"></my-account>
+        <my-signin name="signin"></my-signin>
+        <my-register-signin name="register-signin"></my-register-signin>
+        <my-email-verification name="email-verification"></my-email-verification>
+        <my-account-link name="account-link"></my-account-link>
+        <my-cases name="cases"></my-cases>
+        <my-case-new name="case-new"></my-case-new>
         <my-view2 name="view2"></my-view2>
         <my-view3 name="view3"></my-view3>
         <my-patients narrow="{{narrow}}" name="patients"></my-patients>
         <my-view404 name="view404"></my-view404>
       </iron-pages>
 
-    <!-- </app-header-layout> -->
+      <!-- </app-header-layout> -->
 
     </app-drawer-layout>
 

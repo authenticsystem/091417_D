@@ -1,0 +1,221 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-input-container.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+
+<dom-module id="my-signin">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+                /* overflow: hidden; */
+            }
+
+            @media (min-width: 767px) {
+                .main-container {
+                    height: 100%;
+                    background-color: white;
+                    max-width: 370px;
+                    margin: 16px auto;
+                    padding: 40px;
+                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                }
+
+            }
+
+            @media (max-width: 767px) {
+                :host {
+                    height: 100%;
+                }
+                .main-container {
+                    height: 100%;
+                    background-color: white;
+                    margin: 0 auto;
+                    padding: 40px;
+                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                }
+
+            }
+
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+                height: 38px;
+            }
+
+            .action {
+                /* display: inline-block; */
+                float: right;
+            }
+
+            .moreoption {
+                /* display: inline-block; */
+                float: left;
+            }
+
+            .footer {
+                height: 48px;
+                /* align-items: middle; */
+            }
+
+            .header {
+                font-size: 24px;
+                font-weight: 400;
+            }
+
+            #errorMsgDiv {
+                color: red;
+            }
+
+            /* .socialBtn{
+                text-align: center;
+            } */
+
+            .hr1 {
+                width: 35%;
+                float: left
+            }
+
+            .hr2 {
+                width: 35%;
+                float: right
+            }
+        </style>
+
+        <firebase-auth id="auth" user="{{user}}" provider="password" on-error="handleError"></firebase-auth>
+
+        <div class="main-container">
+            <a style="text-decoration:none;" href="/">
+                <iron-image placeholder="images/manifest/icon-512x512.png" data-src="images/manifest/icon-512x512.png" sizing="cover" preload
+                    fade style="width:128px; height:128px;"></iron-image>
+            </a>
+            </br>
+
+            <div class="header">Sign in</div>
+            <div>to continue to BaseEMR</div>
+            <br>
+            <div id="errorMsgDiv" style="display: none;">
+                <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}</div>
+
+            <paper-input label="Email" value="{{email}}" always-float-label required auto-validate error-message=""></paper-input>
+            <paper-input label="Password" type="password" value="{{password}}" always-float-label required auto-validate error-message=""></paper-input>
+            <div class="footer">
+                <div class="moreoption">
+                    <paper-menu-button>
+                        <div slot="dropdown-trigger" style="color: royalblue;">More options</div>
+                        <paper-listbox slot="dropdown-content">
+                            <paper-item>
+                                <a style="text-decoration:none;" href="/register-signin">Create Account?</a>
+                            </paper-item>
+                            <!-- <paper-item>Forgot Password?</paper-item> -->
+                        </paper-listbox>
+                    </paper-menu-button>
+                </div>
+                <div class="action">
+                    <paper-button received-focus-from-keyboard id="next" class="green" on-tap="_signIn">next</paper-button>
+                </div>
+            </div>
+            <!-- <div style="text-align: center; margin-top:10px">
+                <hr class="hr1">OR LOGIN AS
+                <hr class="hr2">
+            </div> -->
+
+
+
+            <!-- </div> -->
+            <!-- </div> -->
+            <!-- end of main container -->
+        </div>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-signin',
+
+            handleError() {
+                var errormsg = Polymer.dom(this.root).querySelector("#errorMsgDiv");
+                errormsg.setAttribute("style", "display: block; background-color:red; color:white; text-align:center; border-radius: 5px; opacity:0.5; padding:5px");
+                this.validationMessage = 'Invalid email or password.';
+            },
+            // _facebook() {
+            //     var provider = new firebase.auth.FacebookAuthProvider();
+            //     firebase.auth().signInWithPopup(provider).then(function (response) {
+            //         app = this.document.querySelector('my-app');
+            //         app.set('route.path', '/');
+            //     })
+            // },
+            // _google() {
+            //     var provider = new firebase.auth.GoogleAuthProvider();
+            //     firebase.auth().signInWithPopup(provider).then(function (response) {
+            //         app = this.document.querySelector('my-app');
+            //         app.set('route.path', '/');
+            //     })
+            // },
+
+            _signIn() {
+                // this.$.auth.createUserWithEmailAndPassword('hbsantillan@yahoo.com', '1'); 
+                if (!this.email || !this.password) {
+                    var errormsg = Polymer.dom(this.root).querySelector("#errorMsgDiv");
+                    errormsg.setAttribute("style", "display: block; background-color:red; color:white; text-align:center; border-radius: 5px; opacity:0.5; padding:5px");
+                    this.validationMessage = 'Invalid empty email or password.';
+                }
+                else {
+                    this.$.auth.signInWithEmailAndPassword(this.email, this.password)
+                        .then(function (response) {
+                            app = this.document.querySelector('my-app');
+                            app.set('route.path', '/');
+                        })
+                        .catch(function (error) {
+                            // Handle Errors here.
+
+                            // var errorCode = error.code;
+                            // var errorMessage = error.message;
+
+                            // if (errorCode === 'auth/wrong-password') {
+                            //     // alert('Wrong password');
+                            //     this.validationMessage = 'Wrong password';
+                            // }
+                            // else if (errorCode === 'auth/user-not-found') {
+                            //     // alert('There is no user corresponding to the given email.');
+                            //     this.validationMessage = 'There is no user corresponding to the given email.';
+                            // }
+                            // else if (errorCode === 'auth/invalid-email') {
+                            //     //    alert('The email address is not valid.');
+                            //     this.validationMessage = 'The email address is not valid.';
+                            // }
+                            // else {
+                            //     // alert(errorMessage);
+                            //     this.validationMessage = errorMessage;
+                            // }
+                        });
+                }
+            }
+
+            // this.$.auth.sendEmailVerification();
+
+            // console.log(this.user);
+
+            //if (this.user) {
+            //    if (this.user.emailVerified === false) {
+            //        this.user.sendEmailVerification();
+            //    }
+            //}
+
+
+        })
+
+    </script>
+</dom-module>

@@ -1,0 +1,233 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="my-icons.html">
+<!-- <link rel="import" href="shared-styles.html"> -->
+
+<dom-module id="my-cases">
+  <template>
+    <style include="shared-styles">
+      :host {
+        height: 100vh;
+        margin: 0;
+
+        display: flex;
+        flex-direction: column;
+      }
+
+      .item {
+        @apply --layout-horizontal;
+        padding: 20px;
+        background-color: white;
+        border-bottom: 1px solid #ddd;
+        cursor: pointer;
+        /* margin-bottom: 10px; */
+      }
+
+      .avatar {
+        height: 40px;
+        width: 40px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+
+      .pad {
+        padding: 0 16px;
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
+
+      .primary {
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .shortText,
+      .longText {
+        font-size: 14px;
+      }
+
+      .longText {
+        color: gray;
+        display: none;
+      }
+
+      .item:hover .shortText::after {
+        content: ' [+]';
+        color: gray;
+      }
+
+      .item.expanded:hover .shortText::after {
+        content: '';
+      }
+
+      .item.expanded .longText {
+        display: block;
+      }
+
+      .item.expanded:hover .longText::after {
+        content: ' [–]';
+      }
+
+      .spacer {
+        @apply --layout-flex;
+      }
+
+      @media (max-width: 768px) {
+        iron-list {
+          margin: 16px;
+          /* margin-top: 0px; */
+          display: flex;
+          height: 100vh;
+          flex-direction: column;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        }
+
+      }
+
+      @media (min-width: 768px) {
+        iron-list {
+          width: 736px;
+          margin: 16px auto;
+          /* margin-top: 0px; */
+          height: 100vh;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        }
+
+      }
+
+      app-header {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      }
+
+      paper-fab.fab-menu {
+        position: fixed;
+        right: 32px;
+        bottom: 32px;
+      }
+
+      paper-fab.fab-search {
+        position: fixed;
+        right: 40px;
+        bottom: 104px;
+      }
+
+      paper-icon-button.menu {
+        margin-right: 16px;
+      }
+    </style>
+
+    <iron-ajax auto url="src/data.json" last-response="{{items}}"></iron-ajax>
+
+    <app-header-layout fullbleed has-scrolling-region>
+      <app-header fixed slot="header">
+
+        <app-toolbar primary>
+          <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+          <div main-title>Cases</div>
+          <paper-icon-button icon="my-icons:search" on-tap="toggleSearch"></paper-icon-button>
+        </app-toolbar>
+
+      </app-header>
+
+      <iron-scroll-threshold on-lower-threshold="loadMoreData" id="threshold">
+        <iron-list items="[[items]]" as="item" selection-enabled multi-selection scroll-target="threshold">
+          <template>
+            <div class="divSeparator">
+              <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                <iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>
+                <div class="pad">
+                  <div class="primary">[[item.name]]</div>
+                  <div class="shortText">[[item.shortText]]</div>
+                  <div class="longText">[[item.longText]]</div>
+                </div>
+                <iron-icon icon$="[[iconForItem(item)]]"></iron-icon>
+              </div>
+            </div>
+          </template>
+        </iron-list>
+
+      </iron-scroll-threshold>
+    </app-header-layout>
+
+    <a href="/case-new">
+      <paper-fab class="fab-menu" icon="my-icons:add"></paper-fab>
+    </a>
+
+  </template>
+
+  <script>
+    class MyCases extends Polymer.Element {
+      static get is() { return 'my-cases'; }
+
+      static get properties() {
+        return {
+          items: {
+            type: Array,
+            value: function () {
+              return [];
+            }
+          }
+          , narrow: {
+            type: Boolean,
+            notify: true
+          }
+        };
+      }
+
+      iconForItem(item) {
+        return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';
+      }
+      getClassForItem(item, selected) {
+        return selected ? 'item expanded' : 'item';
+      }
+
+      toggleDrawer() {
+        this.dispatchEvent(new CustomEvent('toggleDrawer', {
+          bubbles: true, composed: true, detail: {
+            narrow: this.$.narrow
+          }
+        }));
+        this.$.narrow = !this.$.narrow;
+      }
+
+      togglePaperFab() {
+
+      }
+
+      loadMoreDat() {
+        var self = this;
+        var people = e.detail.response.results;
+        people.forEach(function (element) {
+          self.push('items', element);
+        });
+
+        asyncStuff(function done() {
+          ironScrollTheshold.clearTriggers();
+        });
+      }
+
+    }
+
+    window.customElements.define(MyCases.is, MyCases);
+  </script>
+</dom-module>

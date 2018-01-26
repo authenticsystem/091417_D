@@ -1,0 +1,164 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-email-verification">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+                /* overflow: hidden; */
+            }
+
+            @media (min-width: 767px) {
+                .main-container {
+                    height: 100%;
+                    background-color: white;
+                    max-width: 370px;
+                    margin: 16px auto;
+                    padding: 40px;
+                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                }
+
+            }
+
+            @media (max-width: 767px) {
+                :host {
+                    height: 100%;
+                }
+                .main-container {
+                    height: 100%;
+                    background-color: white;
+                    margin: 0 auto;
+                    padding: 40px;
+                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                }
+
+            }
+
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+                height: 38px;
+
+            }
+
+            paper-button.default {
+                height: 38px;
+            }
+
+            .action {
+                /* display: inline-block; */
+                float: right;
+            }
+
+            .footer {
+                height: 48px;
+                /* align-items: middle; */
+            }
+
+            .header {
+                font-size: 24px;
+                font-weight: 400;
+            }
+        </style>
+
+        <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError"></firebase-auth>
+
+        <div class="main-container">
+            <a style="text-decoration:none;" href="/">
+                <iron-image placeholder="images/manifest/icon-512x512.png" data-src="images/manifest/icon-512x512.png" sizing="cover" preload
+                    fade style="width:128px; height:128px;"></iron-image>
+            </a>
+            </br>
+            <div>
+                <div id="emailV">
+                    <div class="header">You've successfully registered to BaseEMR.</div>
+                    <span>Let us know if this email belongs to you.
+                        <br> Click the link in the email sent to the email below.
+                    </span>
+                    <!-- <div id="errorMessage" style="display: none;"> -->
+                    <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}
+                    <!-- <paper-input label="Name" id="displayName" value="{{displayName}}"></paper-input> -->
+                    <paper-input label="Email" id="email" readonly value="Bot"></paper-input>
+                    <paper-button style="text-transform:capitalize; color:rgb(4, 4, 143); font-size:13px; padding:0" href="" on-tap="_showDiv2">Change email?</paper-button>
+                    </br>
+                    </br>
+                    <div class="footer">
+                        <div class="action">
+                            <a style="text-decoration:none;" href="/signin">
+                                <paper-button class="default" raised>resend</paper-button>
+                            </a>
+                            <paper-button class="green">next</paper-button>
+                            <!-- <paper-button class="green" on-tap="_registerAccount">next</paper-button> -->
+                        </div>
+                    </div>
+                </div>
+                <div id="emailC" style="display:none;">
+                    <div class="header">Change email</div>
+                    <paper-input label="Email" always-float-label id="email" value="{{myemail}}"></paper-input>
+                    </br>
+                    </br>
+                    <div class="footer">
+                        <div class="action">
+                            <paper-button class="default" on-tap="_showDiv1">cancel</paper-button>
+                            <paper-button class="green">next</paper-button>
+                            <!-- <paper-button class="green" on-tap="_registerAccount">next</paper-button> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-email-verification',
+
+            handleError() {
+                var errormsg = Polymer.dom(this.root).querySelector("#errorMessage");
+                errormsg.setAttribute("style", "display: block; background-color:red; color:white; text-align:center; border-radius: 5px; opacity:0.5; padding:5px");
+                this.validationMessage = 'Invalid username/password';
+            },
+
+            _showDiv2() {
+                Polymer.dom(this.root).querySelector("#emailV").setAttribute("style", "display: none");
+                Polymer.dom(this.root).querySelector("#emailC").setAttribute("style", "display: block");
+            },
+
+            _showDiv1() {
+                Polymer.dom(this.root).querySelector("#emailV").setAttribute("style", "display: block");
+                Polymer.dom(this.root).querySelector("#emailC").setAttribute("style", "display: none");
+            },
+
+            _registerAccount() {
+                // here 1am
+                if (!this.email || !this.password) {
+                    var errormsg = Polymer.dom(this.root).querySelector("#errorMessage");
+                    errormsg.setAttribute("style", "display: block; background-color:red; color:white; text-align:center; border-radius: 5px; opacity:0.5; padding:5px");
+                    this.validationMessage = 'Invalid empty email or password.';
+                }
+                else {
+                    this.$.auth.createUserWithEmailAndPassword(this.email, this.password)
+                        .then(function (user) {
+                            app = this.document.querySelector('my-app');
+                            app.set('route.path', '/');
+                            user.sendEmailVerification().then(function () {
+                            });
+                        })
+                }
+            }
+        })
+
+    </script>
+</dom-module>

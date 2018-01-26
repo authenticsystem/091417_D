@@ -1,0 +1,259 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-account">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+
+                padding: 10px;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            @media (max-width: 768px) {
+                .div1 {
+                    text-align: center
+                }
+                /*.div2{
+                    flex:2; padding: 25px;
+                } */
+                .divHolder {
+                    display: block;
+                }
+            }
+
+            @media (min-width: 768px) {
+                .div1 {
+                    flex: 1;
+                }
+                .div2 {
+                    flex: 2;
+                    padding: 25px;
+                }
+                .divHolder {
+                    display: flex;
+                }
+            }
+
+            .upload-btn-wrapper {
+                position: relative;
+                overflow: hidden;
+                display: inline-block;
+                margin-left: 10px;
+            }
+
+            .btn {
+                border: 2px solid gray;
+                color: gray;
+                background-color: white;
+                padding: 5px 10px;
+                border-radius: 8px;
+                font-size: 15px;
+                font-weight: bold;
+            }
+
+            .upload-btn-wrapper input[type=file] {
+                font-size: 15px;
+                position: absolute;
+                left: 0;
+                top: 0;
+                opacity: 0;
+            }
+
+            a {
+                text-decoration: none;
+                background: yellow;
+                padding: 2px;
+                border-radius: 3px;
+                font-weight: 500;
+            }
+
+            #uploader {
+                -webkit-appearance: none;
+                /* appearance: none; */
+                width: 55%;
+                margin-left: 10px;
+                height:5px;
+                display: none;
+            }
+        </style>
+
+        <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+                <app-toolbar primary>
+                    <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                    <div main-title>My Account</div>
+                </app-toolbar>
+            </app-header>
+
+            <div class="card">
+                <div class="divHolder">
+                    <div class="div1">
+                        <img style="width:200px; border-radius:50%;" src="../images/user.png">
+                        <div class="upload-btn-wrapper">
+                            <button class="btn">Change profile picture</button>
+                            <input type="file" name="myfile"/>
+                        </div>
+                        <progress value="0" max="100" id="uploader">0%</progress>
+                    </div>
+                    <div class="div2">
+                        <div id="notChange">
+                            <paper-input label="Name" readonly value="Not defined"></paper-input>
+                            <paper-input label="Email" readonly value="Not defined"></paper-input>
+                            <span style="font-size:14px;">Account not link. Link account
+                                <a href="/account-link">here</a>.</span>
+                            <br>
+                            <paper-button style="float:right;" raised on-tap="_update">Update</paper-button>
+                        </div>
+                        <div id="change" style="display:none">
+                            <paper-input label="New name" value="{{myname}}" on-keyup="_ack" required auto-validate></paper-input>
+                            <paper-input label="New email" type="email" value="{{myemail}}" on-keyup="_ack" required auto-validate></paper-input>
+                            <span style="color:red; font-size:12px">{{msg}}</span>
+                            <br>
+                            <paper-button style="float:right;" raised on-tap="_save">Save</paper-button>
+                            <paper-button style="float:right;" on-tap="_notUpdate">Cancel</paper-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </app-header-layout>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-account',
+            properties: {
+                account: {
+                    type: Object,
+                },
+                verified: {
+                    type: Boolean,
+                    value: false
+                },
+            },
+
+            _update() {
+                Polymer.dom(this.root).querySelector("#notChange").setAttribute("style", "display: none;");
+                Polymer.dom(this.root).querySelector("#change").setAttribute("style", "display: block;");
+            },
+
+            _notUpdate() {
+                Polymer.dom(this.root).querySelector("#change").setAttribute("style", "display: none;");
+                Polymer.dom(this.root).querySelector("#notChange").setAttribute("style", "display: block;");
+                this.msg = '';
+            },
+
+            _save() {
+                if (this.myname && this.myemail) {
+                    this.msg = 'uki';
+                }
+                else {
+                    this.msg = "Please dont leave any field empty."
+                }
+            },
+
+            _ack() {
+                this.msg = '';
+            },
+
+            _role(e) {
+                if (Object.keys(e).length > 0) {
+                    this.verified = true;
+                    if (e[0].role) return e[0].role;
+                    else return 'Role not yet assign'
+                }
+                else {
+                    this.verified = false;
+                    return 'Role Unknown'
+                };
+            },
+
+            toggleDrawer() {
+                this.dispatchEvent(new CustomEvent('toggleDrawer', {
+                    bubbles: true, composed: true, detail: {
+                        narrow: this.$.narrow
+                    }
+                }));
+                this.$.narrow = !this.$.narrow;
+            },
+            // openDialog() {
+            //     var dialog = Polymer.dom(this.root).querySelector("#dialog");
+            //     this.$.dialog.open();
+            // },
+            // _upload(e) {
+            //     var fileButton = Polymer.dom(this.root).querySelector("#fileButton");
+            //     var uploader = Polymer.dom(this.root).querySelector("#uploader");
+
+            //     fileButton.addEventListener('change', function (e) {
+            //         //get file
+            //         var file = e.target.files[0];
+            //         //create storage
+            //         var user = firebase.auth().currentUser;
+            //         var storageRef = firebase.storage().ref('profilePic/' + file.name);
+            //         //upload file
+            //         var uploadTask = storageRef.put(file);
+            //         //update progressbar
+            //         uploadTask.on('state_changed',
+
+            //             function progress(snapshot) {
+            //                 var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            //                 uploader.value = percentage;
+            //             },
+            //             function error(err) {
+            //             },
+            //             function () {
+            //                 var downloadURL = uploadTask.snapshot.downloadURL;
+            //                 var user = firebase.auth().currentUser;
+            //                 user.updateProfile({
+            //                     photoURL: downloadURL
+            //                 }).then(function () {
+            //                     // Update successful.
+            //                     window.location.reload()
+            //                 }).catch(function (error) {
+            //                     // An error happened.
+            //                 });
+            //             }
+
+            //         );
+            //     });
+            // },
+            // _update() {
+            //     var user = firebase.auth().currentUser;
+            //     var name = Polymer.dom(this.root).querySelector("#name");
+            //     user.updateProfile({
+            //         displayName: name.value
+            //     }).then(function () {
+            //         // Update successful.
+            //         window.location.reload()
+            //     }).catch(function (error) {
+            //         // An error happened.
+            //     });
+            // }
+        })
+
+
+    </script>
+</dom-module>
