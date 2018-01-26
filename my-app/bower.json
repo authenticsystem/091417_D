@@ -30,11 +30,21 @@
     "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
     "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.1",
     "paper-tabs": "PolymerElements/paper-tabs#^2.0.0",
+    "paper-alert-dialog": "Collaborne/paper-alert-dialog#^2.0.1",
+    "mp-calendar": "mpachnis/mp-calendar#^2.0.0",
+    "paper-dialog": "PolymerElements/paper-dialog#^2.0.1",
     "paper-button": "PolymerElements/paper-button#^2.0.0",
-    "paper-alert-dialog": "Collaborne/paper-alert-dialog#^2.0.1"
+    "paper-chip": "fabbricadigitale/paper-chip#^1.0.0",
+    "chrome-tabs": "zedesk/chrome-tabs#^2.0.0",
+    "pf-calendar":"PFElements/pf-calendar#^0.3.0",
+     "iron-component-page":"PolymerElements/iron-component-page#^3.0.1"
   },
   "resolutions": {
-    "polymer": "^2.0.0"
+    "polymer": "^2.0.0",
+    "iron-selector": "^2.0.0",
+    "webcomponentsjs": "^1.0.0",
+    "iron-flex-layout": "^2.0.0",
+    "iron-behaviors": "^1.0.17"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0"
