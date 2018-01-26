@@ -18,7 +18,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="my-icons.html">
+
+<link rel="import" href="my-patients-new.html">
+<link rel="import" href="my-patients-view.html">
+<link rel="import" href="my-patients-edit.html">
 <!-- <link rel="import" href="shared-styles.html"> -->
 
 <dom-module id="my-patients">
@@ -134,42 +143,62 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-icon-button.menu {
         margin-right: 16px;
       }
-
     </style>
 
+    <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
+
     <iron-ajax auto url="src/data.json" last-response="{{items}}"></iron-ajax>
+    <div hidden$="{{!applicationActive}}">
+      <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+        <div name="">
+          <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+              <app-toolbar primary>
+                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                <div main-title>Patients</div>
+                <paper-icon-button icon="my-icons:search" on-tap="toggleSearch"></paper-icon-button>
+              </app-toolbar>
+            </app-header>
 
-    <app-header-layout fullbleed has-scrolling-region>
-      <app-header fixed slot="header">
-        <app-toolbar primary>
-          <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-          <div main-title>Patients</div>
-          <paper-icon-button icon="my-icons:search" on-tap="toggleSearch"></paper-icon-button>
-        </app-toolbar>
-      </app-header>
-      
-      <iron-scroll-threshold on-lower-threshold="loadMoreData" id="threshold">
-        <iron-list items="[[items]]" as="item" selection-enabled multi-selection scroll-target="threshold">
-          <template>
-            <div class="divSeparator">
-              <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-                <iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>
-                <div class="pad">
-                  <div class="primary">[[item.name]]</div>
-                  <div class="shortText">[[item.shortText]]</div>
-                  <div class="longText">[[item.longText]]</div>
-                </div>
-                <iron-icon icon$="[[iconForItem(item)]]"></iron-icon>
-              </div>
-            </div> 
-          </template>
-        </iron-list>
-       
-      </iron-scroll-threshold>
-    </app-header-layout>
+            <iron-scroll-threshold on-lower-threshold="loadMoreData" id="threshold">
+              <iron-list items="[[items]]" as="item" selection-enabled multi-selection scroll-target="threshold">
+                <template>
+                  <div class="divSeparator">
+                    <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                      <iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>
+                      <div class="pad">
+                        <div class="primary">[[item.name]]</div>
+                        <div class="shortText">[[item.shortText]]</div>
+                        <div class="longText">[[item.longText]]</div>
+                      </div>
+                      <paper-menu-button vertical-align="bottom" horizontal-align="right">
+                        <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
+                        <paper-listbox slot="dropdown-content">
+                          <paper-item>Edit</paper-item>
+                          <paper-item>Delete</paper-item>
+                        </paper-listbox>
+                      </paper-menu-button>
+                    </div>
+                  </div>
+                </template>
+              </iron-list>
+            </iron-scroll-threshold>
 
-    <paper-fab class="fab-menu" icon="my-icons:add" on-tap="togglePaperFab"></paper-fab>
+          </app-header-layout>
 
+          <a href="/patients/new" style="text-decoration: none;">
+            <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_patientsNew"></paper-fab>
+          </a>
+        </div>
+
+        <div name="/new">
+          <div id="patientsnew"></div>
+          <my-patients-new id="d23" path="" prev-route="{{route.prefix}}"></my-patients-new>
+        </div>
+
+        <div name="view404">Not found.</div>
+      </iron-pages>
+    </div>
   </template>
 
   <script>
@@ -221,6 +250,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         asyncStuff(function done() {
           ironScrollTheshold.clearTriggers();
         });
+      }
+
+      _patientsNew() {
+        var node = Polymer.dom(this.root).querySelector("#patientsnew");
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-patients-new");
+          newDiv.setAttribute("id", "d23");
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          // newDiv.setAttribute("block", "3")
+          //if open existing
+          var currentDiv = document.getElementById("patientsnew");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
       }
 
     }

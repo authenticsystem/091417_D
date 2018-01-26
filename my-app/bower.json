@@ -25,6 +25,7 @@
     "paper-fab": "PolymerElements/paper-fab#^2.0.0",
     "iron-scroll-target-behavior": "PolymerElements/iron-scroll-target-behavior#^2.0.0",
     "iron-scroll-threshold": "PolymerElements/iron-scroll-threshold#^2.0.0",
+<<<<<<< HEAD
     "paper-menu-button": "PolymerElements/paper-menu-button#^2.0.0",
     "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
     "paper-tooltip": "PolymerElements/paper-tooltip#^2.0.1",
@@ -36,6 +37,15 @@
     "paper-time-input": "ryanburns23/paper-time-input#^2.0.4",
     "short-unique-id": "hectorsantillan/short-unique-id#1.0.0",
     "app-media": "PolymerElements/app-media#^0.9.0"
+=======
+    "neon-animation": "PolymerElements/neon-animation#^2.1.0",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.1",
+    "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
+    "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.1",
+    "paper-tabs": "PolymerElements/paper-tabs#^2.0.0",
+    "paper-button": "PolymerElements/paper-button#^2.0.0",
+    "paper-alert-dialog": "Collaborne/paper-alert-dialog#^2.0.1"
+>>>>>>> origin/ardie
   },
   "resolutions": {
     "polymer": "^2.0.0"

@@ -1,0 +1,421 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-patients-new">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+      app-header {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      }
+
+      paper-icon-button.menu {
+        margin-right: 16px;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-drawer {
+        --app-drawer-content-container: {
+          background-color: #F4F5F6;
+        }
+      }
+
+      paper-item {
+        height: 64px;
+      }
+
+      .mnu {
+        padding: 13px;
+      }
+
+      @media (min-width: 800px) {
+        .footer {
+          position: absolute;
+          bottom: 16px;
+          width: 100%;
+        }
+        .paper-fab-0 {
+          position: absolute;
+          left: 48px;
+          bottom: 48px;
+        }
+
+        .paper-fab-1 {
+          position: absolute;
+          right: 48px;
+          bottom: 48px;
+        }
+
+      }
+
+      @media (max-width: 800px) {
+        .paper-fab-0 {
+          position: absolute;
+          left: 16px;
+          bottom: 48px;
+        }
+
+        .paper-fab-1 {
+          position: absolute;
+          right: 16px;
+          bottom: 48px;
+        }
+
+        .docu {
+          margin-left: 16px;
+          margin-right: 16px;
+        }
+      }
+    </style>
+
+    <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+      <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
+        <div class="mnu" role="listbox">
+          <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
+
+          <!-- on-tap="_selectPage" data-args="0" -->
+          <paper-item id="lotdetails">
+            <div class="circle-mini-first">1</div>
+            <span>Add to Queue</span>
+          </paper-item>
+
+          <!-- on-tap="_selectPage" data-args="1" -->
+          <paper-item id="buyersinformation">
+            <div class="circle-mini">2</div>
+            <span>Profile Picture</span>
+          </paper-item>
+
+          <!-- on-tap="_selectPage" data-args="2" -->
+          <paper-item id="samplecomputation">
+            <div class="circle-mini">3</div>
+            <span>Basic Information</span>
+          </paper-item>
+
+          <!-- on-tap="_selectPage" data-args="3" -->
+          <paper-item id="finalize">
+            <div class="circle-mini">4</div>
+            <span>Insurance</span>
+          </paper-item>
+
+          <!-- on-tap="_selectPage" data-args="4" -->
+          <paper-item id="complete">
+            <div class="circle-mini-last">5</div>
+            <span>In-case of Emergency</span>
+          </paper-item>
+
+          <!-- </iron-selector> -->
+        </div>
+      </app-drawer>
+
+
+      <app-header-layout id="appheader" has-scrolling-region>
+        <app-header fixed slot="header">
+          <app-toolbar>
+              <a href="/patients">
+                <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
+            </a>
+            <div main-title>New Patient</div>
+            <paper-icon-button drawer-toggle icon="my-icons:menu"></paper-icon-button>
+            <!-- <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button> -->
+          </app-toolbar>
+        </app-header>
+
+        <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+
+          <neon-animatable>
+            <div class="docu">
+
+              <div class="docu-header">
+                <span>1. Add to Queue</span>
+              </div>
+
+              <div class="details">
+                <paper-input></paper-input>
+              </div>
+
+            </div>
+          </neon-animatable>
+
+          <neon-animatable>
+            <div class="docu">
+
+              <div class="docu-header">
+                <span>2. Profile Picture</span>
+              </div>
+
+              <div class="details">
+                <paper-button raised on-tap="_capture">Take Photo</paper-button>
+                <div class="booth" style="width:400px; background-color: #ccc; border: 10px solid #ddd;
+                margin: 0 auto;">
+                  <video id="video" width="400" height="300"></video>
+                  <a href="#" id="capture" class="booth-capture-button" style="display:block; margin:10px 0; padding:10px 20px; background-color:blue; color:#fff; text-align: center; text-decoration:none">Take Photo</a>
+                  <canvas id="canvas" width="400" height="300" style="display:none"></canvas>
+                  <img src="../images/user.png" id="photo" alt="Photo of You" width="400" height="300"s></img>
+                </div>
+              </div>
+
+            </div>
+          </neon-animatable>
+
+          <neon-animatable>
+            <div class="docu">
+
+              <div class="docu-header">
+                <span>3. Basic Information</span>
+              </div>
+
+              <div class="details">
+                <paper-input id="email" label="E-mail Address"></paper-input>
+                <div style="display:flex">
+                  <paper-input id="fname" label="Firstname" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input id="mname" label="Middlename" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input id="lname" label="Lastname" style="width:100%"></paper-input>
+                </div>
+                <div style="display:flex;">
+                  <paper-input type="date" label="Birth date" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input type="number" label="Age" style="width:100%;"></paper-input>
+                </div>
+                <div style="display:flex;">
+                  <paper-dropdown-menu-light label="Marital Status" style="width:100%; margin-right:10px">
+                    <paper-listbox slot="dropdown-content" class="dropdown-content">
+                      <paper-item>Single</paper-item>
+                      <paper-item>Married</paper-item>
+                      <paper-item>Divorced</paper-item>
+                      <paper-item>Separated</paper-item>
+                      <paper-item>Widowed</paper-item>
+                    </paper-listbox>
+                  </paper-dropdown-menu-light>
+                  <paper-dropdown-menu-light label="Sex" style="width:100%; margin-right:10px">
+                    <paper-listbox slot="dropdown-content" class="dropdown-content">
+                      <paper-item>Male</paper-item>
+                      <paper-item>Female</paper-item>
+                    </paper-listbox>
+                  </paper-dropdown-menu-light>
+                  <paper-input type="number" label="Contact Number" style="width:100%;"></paper-input>
+                </div>
+                <paper-input label="Street Address"></paper-input>
+                <paper-input label="Occupation"></paper-input>
+                <div style="display:flex;">
+                  <paper-input label="Employer" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input type="number" label="Employer Phone no." style="width:100%"></paper-input>
+                </div>
+                <br>
+                <span>Referred to clinic by (please check one box)</span>
+                <div style="display:flex;">
+                  <paper-checkbox style="margin-right:10px">Dr</paper-checkbox>
+                  <paper-checkbox style="margin-right:10px">Insurance Plan</paper-checkbox>
+                  <paper-checkbox>Hospital</paper-checkbox>
+                </div>
+              </div>
+
+            </div>
+          </neon-animatable>
+
+          <neon-animatable>
+            <div class="docu">
+
+              <div class="docu-header">
+                <span>4. Insurance</span>
+              </div>
+
+              <div class="details">
+                <div style="display: flex">
+                  <paper-input Label="ID Card Number" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input type="date" Label="Birth date" style="width:100%;"></paper-input>
+                </div>
+                <paper-input Label="Address (If different)"></paper-input>
+                <paper-input type="number" Label="Home phone no."></paper-input>
+                <paper-input Label="Please indicate primary insurance"></paper-input>
+                <paper-input Label="Relationship to patient"></paper-input>
+              </div>
+
+            </div>
+          </neon-animatable>
+
+          <neon-animatable>
+            <div class="docu">
+
+              <div class="docu-header">
+                <span>5. In-case of emergency</span>
+              </div>
+
+              <div class="details">
+                <div style="display:flex">
+                  <paper-input label="Name of local friend or relative" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input label="Relationship to patient" style="width:100%;"></paper-input>
+                </div>
+                <div style="display:flex">
+                  <paper-input type="number" label="Home phone no." style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input type="number" label="Work phone no" style="width:100%;"></paper-input>
+                </div>
+              </div>
+
+            </div>
+          </neon-animatable>
+
+        </neon-animated-pages>
+
+      </app-header-layout>
+
+      <div class="footer">
+        <div hidden$="[[favlefthide]]">
+          <paper-fab style="background: #1976d2;" id="favleft" class="paper-fab-0" icon="my-icons:" on-tap="_select1"></paper-fab>
+        </div>
+        <div hidden$="[[favrighthide]]">
+          <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+        </div>
+      </div>
+
+    </app-drawer-layout>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-patients-new',
+
+      properties: {
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        selectedPage: Number,
+        entryanimation: {
+          type: String,
+          value: "slide-from-right-animation"
+        },
+        exitanimation: {
+          type: String,
+          value: "slide-left-animation"
+        },
+        favlefthide: {
+          type: Boolean,
+          value: true
+        },
+        favrighthide: {
+          type: Boolean,
+          value: true
+        },
+      },
+
+      toggleDrawer() {
+        this.dispatchEvent(new CustomEvent('toggleDrawer', {
+          bubbles: true, composed: true, detail: {
+            narrow: this.$.narrow
+          }
+        }));
+        this.$.narrow = !this.$.narrow;
+      },
+      ready() {
+        this.selectedPage = 0;
+        this.favrighthide = false;
+      },
+
+      _select1(e) {
+        this.entryanimation = "slide-from-left-animation";
+        this.exitanimation = "slide-right-animation";
+        if (parseInt(this.selectedPage) <= 3) {
+          if (parseInt(this.selectedPage) !== 0) {
+            this.selectedPage = (parseInt(this.selectedPage) - 1);
+
+            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+
+
+            if (this.selectedPage === 0) {
+              this.favlefthide = true;
+            }
+
+            this.favrighthide = false;
+          }
+          else {
+            this.favlefthide = true;
+            this.favrighthide = false;
+          }
+        }
+        else {
+          this.selectedPage = 3;
+        }
+
+      },
+      _select2(e) {
+        this.entryanimation = "slide-from-right-animation";
+        this.exitanimation = "slide-left-animation";
+
+        if (parseInt(this.selectedPage) !== 4) {
+          this.selectedPage = (parseInt(this.selectedPage) + 1);
+          Polymer.dom(this.root).querySelector("#favleft").setAttribute("style", "background: #1976d2;");
+          Polymer.dom(this.root).querySelector("#favleft").setAttribute("icon", "my-icons:chevron-left");
+          this.favlefthide = false;
+        }
+        else {
+          this.selectedPage = 0;
+          this.favlefthide = true;
+        }
+
+      },
+
+      _capture(){
+        var video = Polymer.dom(this.root).querySelector("#video"),
+        canvas = Polymer.dom(this.root).querySelector("#canvas"),
+        context = canvas.getContext('2d'),
+        photo = Polymer.dom(this.root).querySelector("#photo"),
+        vendorUrl = window.URL || window.webkitURL;
+
+        navigator.getMedia = navigator.getUserMedia ||
+                              navigator.webkitGetUserMedia ||
+                              navigator.mozGetUserMedia ||
+                              navigator.msGetUserMedia;
+        navigator.getMedia({
+          video: true,
+          audio: false
+        }, function(stream){
+          video.src = vendorUrl.createObjectURL(stream);
+          video.play();
+        }, function(error){
+
+        });
+        Polymer.dom(this.root).querySelector("#capture").addEventListener('click', function(){
+          
+          context.drawImage(video, 0, 0, 400, 300);
+          photo.setAttribute('src', canvas.toDataURL('image/png'));
+         
+        });
+
+      }
+    })
+  </script>
+</dom-module>
