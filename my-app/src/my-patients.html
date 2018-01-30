@@ -23,8 +23,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="my-icons.html">
 
+<link rel="import" href="search-bar.html">
 <link rel="import" href="my-patients-new.html">
 <link rel="import" href="my-patients-view.html">
 <link rel="import" href="my-patients-edit.html">
@@ -48,6 +50,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         border-bottom: 1px solid #ddd;
         cursor: pointer;
         /* margin-bottom: 10px; */
+      }
+
+      .item:hover {
+        background: rgb(240, 240, 240);
       }
 
       .avatar {
@@ -79,10 +85,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: none;
       }
 
-      .item:hover .shortText::after {
+      /* .item:hover .shortText::after {
         content: ' [+]';
         color: gray;
-      }
+      } */
 
       .item.expanded:hover .shortText::after {
         content: '';
@@ -92,9 +98,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
       }
 
-      .item.expanded:hover .longText::after {
+      /* .item.expanded:hover .longText::after {
         content: ' [–]';
-      }
+      } */
 
       .spacer {
         @apply --layout-flex;
@@ -105,11 +111,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 16px;
           /* margin-top: 0px; */
           display: flex;
-          height: 100vh;
+          /* height: 100vh; */
           flex-direction: column;
           box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
         }
-
+        paper-search-bar {
+          margin-left: 80px;
+          width: 50%;
+          color: black;
+        }
       }
 
       @media (min-width: 768px) {
@@ -117,16 +127,47 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           width: 736px;
           margin: 16px auto;
           /* margin-top: 0px; */
-          height: 100vh;
+          /* height: 100vh; */
           box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        }
+        paper-search-bar {
+          margin-left: 50px;
+          width: 50%;
+          color: black;
         }
 
       }
 
-      app-header {
+      #tool1 {
         color: rgb(255, 255, 255);
         background-color: #673AB7;
       }
+
+      #tool2 {
+        background-color: white;
+      }
+
+      #btn-arrow {
+        position: absolute;
+        color: black;
+      }
+
+      #btn-menu {
+        color: gray;
+        position: fixed;
+        right: 40px;
+      }
+
+      #btn-clear {
+        position: fixed;
+        right: 80px;
+        color: gray;
+      }
+
+      /* app-header {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      } */
 
       paper-fab.fab-menu {
         position: fixed;
@@ -144,37 +185,63 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-right: 16px;
       }
     </style>
-
+    
     <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail/:key" tail="{{detailRoute}}" data="{{detailData}}" active="{{detailActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route>
 
-    <iron-ajax auto url="src/data.json" last-response="{{items}}"></iron-ajax>
+    <!-- <iron-ajax auto url="src/data.json" last-response="{{items}}"></iron-ajax> -->
     <div hidden$="{{!applicationActive}}">
       <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
         <div name="">
           <app-header-layout fullbleed has-scrolling-region>
             <app-header fixed slot="header">
-              <app-toolbar primary>
-                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                <div main-title>Patients</div>
-                <paper-icon-button icon="my-icons:search" on-tap="toggleSearch"></paper-icon-button>
-              </app-toolbar>
+              <template is="dom-if" if="{{!openSearch}}">
+                <app-toolbar primary id="tool1">
+                  <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                  <div main-title>Patients</div>
+                  <!-- <div main-title hidden$="{{access}}">Opps!</div> -->
+                  <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+                </app-toolbar>
+              </template>
+
+              <template is="dom-if" if="{{openSearch}}">
+                <app-toolbar primary id="tool2">
+                  <paper-icon-button id="btn-arrow" icon="my-icons:chevron-left" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                  <paper-search-bar id="search" query="{{search}}" disable-filter-button></paper-search-bar>
+                  <template is="dom-if" if="{{search}}">
+                    <paper-icon-button id="btn-clear" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
+                  </template>
+                  <paper-menu-button id="btn-menu" horizontal-align="right">
+                    <paper-icon-button slot="dropdown-trigger" icon="my-icons:tune"></paper-icon-button>
+                    <paper-listbox style="cursor:pointer" slot="dropdown-content" selected="{{filterBy}}">
+                      <paper-item style="display:none;">Filter By</paper-item>
+                      <paper-item>Filter1</paper-item>
+                      <paper-item>Filter2</paper-item>
+                    </paper-listbox>
+                  </paper-menu-button>
+                </app-toolbar>
+              </template>
             </app-header>
 
-            <iron-scroll-threshold on-lower-threshold="loadMoreData" id="threshold">
-              <iron-list items="[[items]]" as="item" selection-enabled multi-selection scroll-target="threshold">
+            <iron-scroll-threshold id="threshold">
+
+              <firebase-query id="query" path="/patients" data="{{mypatients}}">
+              </firebase-query>
+
+              <iron-list items="[[mypatients]]" as="item" selection-enabled multi-selection scroll-target="threshold">
                 <template>
                   <div class="divSeparator">
                     <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-                      <iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>
-                      <div class="pad">
-                        <div class="primary">[[item.name]]</div>
-                        <div class="shortText">[[item.shortText]]</div>
-                        <div class="longText">[[item.longText]]</div>
+                      <iron-image class="avatar" sizing="contain" src="../images/user.png"></iron-image>
+                      <div class="pad" on-tap="_selectThis">
+                        <div class="primary">[[item.name.firstname]]</div>
+                        <div class="shortText">[[item.description]]</div>
                       </div>
                       <paper-menu-button vertical-align="bottom" horizontal-align="right">
                         <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
                         <paper-listbox slot="dropdown-content">
-                          <paper-item>Edit</paper-item>
+                          <paper-item on-tap="_editThis">Edit</paper-item>
                           <paper-item>Delete</paper-item>
                         </paper-listbox>
                       </paper-menu-button>
@@ -196,6 +263,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <my-patients-new id="d23" path="" prev-route="{{route.prefix}}"></my-patients-new>
         </div>
 
+        <div name="/view">
+          <div id="patientsview"></div>
+          <my-patients-view id="d25" path="" prev-route="{{route.prefix}}"></my-patients-view>
+        </div>
+
+        <div name="/edit">
+          <div id="patientsedit"></div>
+          <my-patients-edit id="d26" path="" prev-route="{{route.prefix}}"></my-patients-edit>
+        </div>
+
         <div name="view404">Not found.</div>
       </iron-pages>
     </div>
@@ -212,11 +289,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: function () {
               return [];
             }
-          }
-          , narrow: {
+          },
+          narrow: {
             type: Boolean,
             notify: true
-          }
+          },
+          openSearch: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
         };
       }
 
@@ -236,20 +318,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.narrow = !this.$.narrow;
       }
 
-      togglePaperFab() {
-
+      toggleSearch() {
+        this.openSearch = true;
       }
 
-      loadMoreDat() {
-        var self = this;
-        var people = e.detail.response.results;
-        people.forEach(function (element) {
-          self.push('items', element);
-        });
+      toggleReturn() {
+        this.openSearch = false;
+        this.search = '';
+      }
 
-        asyncStuff(function done() {
-          ironScrollTheshold.clearTriggers();
-        });
+      toggleClear() {
+        this.search = '';
+      }
+
+      _selectThis() {
+        window.location = "/patients/view";
+      }
+
+      _editThis() {
+        window.location = "/patients/edit";
       }
 
       _patientsNew() {

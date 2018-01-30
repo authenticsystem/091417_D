@@ -143,8 +143,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-header-layout id="appheader" has-scrolling-region>
         <app-header fixed slot="header">
           <app-toolbar>
+            <a href="/patients">
+              <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
+            </a>
             <div main-title>Edit Patient</div>
-            <paper-icon-button drawer-toggle icon="my-icons:menu"></paper-icon-button>
+            <paper-menu-button>
+              <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
+              <paper-listbox slot="dropdown-content" style="cursor:pointer">
+                <paper-item>Discard</paper-item>
+                <paper-item>Delete</paper-item>
+              </paper-listbox>
+            </paper-menu-button>
+            <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button>
             <!-- <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button> -->
           </app-toolbar>
         </app-header>
@@ -179,7 +189,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <video id="video" width="400" height="300"></video>
                   <a href="#" id="capture" class="booth-capture-button" style="display:block; margin:10px 0; padding:10px 20px; background-color:blue; color:#fff; text-align: center; text-decoration:none">Take Photo</a>
                   <canvas id="canvas" width="400" height="300" style="display:none"></canvas>
-                  <img src="../images/user.png" id="photo" alt="Photo of You" width="400" height="300"s></img>
+                  <img src="../images/user.png" id="photo" alt="Photo of You" width="400" height="300" s></img>
                 </div>
               </div>
 
@@ -384,27 +394,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
-      _capture(){
+      _capture() {
         var video = Polymer.dom(this.root).querySelector("#video"),
-        canvas = Polymer.dom(this.root).querySelector("#canvas"),
-        context = canvas.getContext('2d'),
-        photo = Polymer.dom(this.root).querySelector("#photo"),
-        vendorUrl = window.URL || window.webkitURL;
+          canvas = Polymer.dom(this.root).querySelector("#canvas"),
+          context = canvas.getContext('2d'),
+          photo = Polymer.dom(this.root).querySelector("#photo"),
+          vendorUrl = window.URL || window.webkitURL;
 
         navigator.getMedia = navigator.getUserMedia ||
-                              navigator.webkitGetUserMedia ||
-                              navigator.mozGetUserMedia ||
-                              navigator.msGetUserMedia;
+          navigator.webkitGetUserMedia ||
+          navigator.mozGetUserMedia ||
+          navigator.msGetUserMedia;
         navigator.getMedia({
           video: true,
           audio: false
-        }, function(stream){
+        }, function (stream) {
           video.src = vendorUrl.createObjectURL(stream);
           video.play();
-        }, function(error){
+        }, function (error) {
 
         });
-        Polymer.dom(this.root).querySelector("#capture").addEventListener('click', function(){
+        Polymer.dom(this.root).querySelector("#capture").addEventListener('click', function () {
           context.drawImage(video, 0, 0, 400, 300);
           photo.setAttribute('src', canvas.toDataURL('image/png'));
         });

@@ -1,0 +1,182 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-register-signin">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+                /* overflow: hidden; */
+            }
+
+            @media (min-width: 767px) {
+                .main-container {
+                    height: 100%;
+                    background-color: white;
+                    max-width: 370px;
+                    margin: 16px auto;
+                    padding: 40px;
+                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                }
+
+            }
+
+            @media (max-width: 767px) {
+                :host {
+                    height: 100%;
+                }
+                .main-container {
+                    height: 100%;
+                    background-color: white;
+                    margin: 0 auto;
+                    padding: 40px;
+                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                }
+
+            }
+
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+            }
+
+            .action paper-button {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                width: 80px;
+            }
+
+            .action {
+                /* display: inline-block; */
+                float: right;
+            }
+
+            .footer {
+                height: 48px;
+                /* align-items: middle; */
+            }
+
+            .header {
+                font-size: 24px;
+                font-weight: 400;
+            }
+        </style>
+
+        <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError"></firebase-auth>
+
+        <div class="main-container">
+            <a style="text-decoration:none;" href="/">
+                <iron-image placeholder="images/manifest/icon-512x512.png" data-src="images/manifest/icon-512x512.png" sizing="cover" preload
+                    fade style="width:128px; height:128px;"></iron-image>
+            </a>
+            </br>
+            <div>
+                <div class="header">Create account</div>
+                <div>for BaseEMR</div>
+                </br>
+                <div id="errorMsgDiv" style="display: none;">
+                    <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}</div>
+                <!-- <paper-input label="Name" id="displayName" value="{{displayName}}"></paper-input> -->
+                <paper-input required auto-validate label="Email" id="email" value="{{email}}"></paper-input>
+                <paper-input required auto-validate label="Password" type="password" id="password" value="{{password}}"></paper-input>
+                <paper-input required auto-validate label="Confirm password" type="password" id="password" value="{{confirmPass}}"></paper-input>
+                <br>
+                <div class="footer">
+                    <div class="action">
+                        <paper-button on-tap="_canCel">cancel</paper-button>
+                        <paper-button class="green" on-tap="_registerAccount">next</paper-button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-register-signin',
+            properties: {
+                confirmPass: {
+                    type: String,
+                    observer: '_confirmPassChanged'
+                }
+            },
+
+            _confirmPassChanged() {
+                if (this.confirmPass) {
+                    if (this.confirmPass != this.password) {
+                        Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                        this.validationMessage = 'Password do not match.';
+                    }
+                    else {
+                        Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
+                        this.validationMessage = '';
+                    }
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Please confirm your password.';
+                }
+            },
+
+            handleError() {
+                Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                this.validationMessage = 'The email address is already in use by another account.';
+            },
+
+            _canCel() {
+                window.location = '/signin';
+                // window.location.reload();
+            },
+
+            _registerAccount() {
+                if (!this.email) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Please enter your email address.';
+                }
+                else if (!this.password) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Please enter your password.';
+                }
+                else if (this.password.length < 6) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Password must be greater than or equal to six.';
+                }
+                else if (!this.confirmPass) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Please confirm your password.';
+                }
+                else {
+                    var atpos = this.email.indexOf("@");
+                    var dotpos = this.email.lastIndexOf(".");
+
+                    if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= this.email.length) {
+                        Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                        this.validationMessage = 'Invalid email address.';
+                    }
+                    else {
+                        this.$.auth.createUserWithEmailAndPassword(this.email, this.password)
+                            .then(function (user) {
+                                app = this.document.querySelector('my-app');
+                                app.set('route.path', '/');
+                                user.sendEmailVerification().then(function () {
+                                });
+                            })
+                    }
+                }
+            }
+        })
+
+    </script>
+</dom-module>

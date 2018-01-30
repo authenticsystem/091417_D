@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
-<dom-module id="my-view3">
+<dom-module id="my-appointments">
   <template>
     <style include="shared-styles">
       :host {
@@ -65,8 +65,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyView3 extends Polymer.Element {
-      static get is() { return 'my-view3'; }
+    class MyAppointments extends Polymer.Element {
+      static get is() { return 'my-appointments'; }
 
       static get properties() {
         return {
@@ -93,6 +93,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     }
 
-    window.customElements.define(MyView3.is, MyView3);
+    window.customElements.define(MyAppointments.is, MyAppointments);
   </script>
 </dom-module>

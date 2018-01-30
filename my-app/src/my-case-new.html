@@ -1,0 +1,700 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<!-- <link rel="import" href="../bower_components/app-route/app-route.html"> -->
+<!-- <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html"> -->
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/datetime-picker/datetime-picker.html">
+<link rel="import" href="../bower_components/paper-suggest-textarea/paper-suggest-textarea.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html">
+<link rel="import" href="../bower_components/paper-time-input/paper-time-input.html">
+<link rel="import" href="../bower_components/app-media/app-media.html">
+
+<link rel="import" href="short-unique-id.html">
+<!-- <link rel="import" href="suggest.html"> -->
+
+
+<dom-module id="my-case-new">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            app-header paper-icon-button {
+                --paper-icon-button-ink-color: #000000;
+            }
+
+            app-drawer-layout:not([narrow]) [drawer-toggle] {
+                display: none;
+            }
+
+            app-drawer {
+                --app-drawer-content-container: {
+                    background-color: #F4F5F6;
+                }
+            }
+
+            paper-icon-button.menu {
+                margin-right: 15px;
+            }
+
+            paper-item {
+                height: 64px;
+            }
+
+            .mnu {
+                padding: 16px;
+            }
+
+            paper-fab {
+                background: #1976d2;
+            }
+
+            .labelitem {
+                padding: 0px;
+                margin: 0;
+            }
+
+
+
+            @media (min-width: 800px) {
+                .footer {
+                    position: absolute;
+                    bottom: 16px;
+                    width: 100%;
+                }
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 48px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 48px;
+                    bottom: 48px;
+                }
+
+            }
+
+            @media (max-width: 800px) {
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 16px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 16px;
+                    bottom: 48px;
+                }
+
+                .docu {
+                    margin-left: 16px;
+                    margin-right: 16px;
+                }
+
+            }
+
+
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+            }
+
+
+            datetime-picker.begin {
+                --datetime-selected-background: #2362EC;
+                --datetime-background: #071533;
+                --datetime-color: #eeeeee;
+            }
+
+            datetime-picker.end {
+                --datetime-selected-background: #CC1C1C;
+                --datetime-background: #071533;
+                --datetime-color: #eeeeee;
+            }
+
+            paper-item:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
+
+            .avatar {
+                height: 40px;
+                width: 40px;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: transparent;
+            }
+
+            .pad {
+                padding: 0 16px;
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .col-md {
+                padding: 6px;
+            }
+
+            .primary {
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .longText {
+                color: gray;
+                display: none;
+            }
+
+            #textera {
+                padding: 16px;
+                font-size: 14px;
+                font-weight: 300;
+                width: 95%;
+                font-family: Arial;
+            }
+
+            #list {
+                border: 2px solid #ddbff5;
+                padding: 0;
+            }
+
+            #item {
+                height: 0;
+                font-size: 15px;
+            }
+
+            /* app-media-video{
+
+            } */
+        </style>
+
+        <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+            <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
+                <div class="mnu" role="listbox">
+                    <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
+                    <!-- on-tap="_selectPage" data-args="0" -->
+                    <paper-item id="patientInfo" on-tap="{{select(0)}}">
+                        <div class="circle-mini-first">1</div>
+                        <span>Patient Info</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="1" -->
+                    <paper-item id="prevCases" on-tap="{{select(1)}}">
+                        <div class="circle-mini">2</div>
+                        <span>Previous Cases</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="2" -->
+                    <paper-item id="history">
+                        <div class="circle-mini" on-tap="{{select(2)}}">3</div>
+                        <span>History</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="3" -->
+                    <paper-item id="diagnosis">
+                        <div class="circle-mini" on-tap="{{select(3)}}">4</div>
+                        <span>Diagnosis</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="4" -->
+                    <paper-item id="healthRecords" on-tap="{{select(4)}}">
+                        <div class="circle-mini">5</div>
+                        <span>Health Records</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="5" -->
+                    <paper-item id="treatment" on-tap="{{select(5)}}">
+                        <div class="circle-mini">6</div>
+                        <span>Treatment</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="6" -->
+                    <paper-item id="nextVisit" on-tap="{{select(6)}}">
+                        <div class="circle-mini">7</div>
+                        <span>Next Visit Schedule</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="7" -->
+                    <paper-item id="billing" on-tap="{{select(7)}}">
+                        <div class="circle-mini-last">8</div>
+                        <span>Billing</span>
+                    </paper-item>
+                    <!-- </iron-selector> -->
+                </div>
+            </app-drawer>
+
+            <app-header-layout id="appheader" has-scrolling-region>
+                <app-header fixed slot="header">
+                    <app-toolbar>
+                        <a href="/cases">
+                            <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
+                        </a>
+                        <div main-title>Add Case</div>
+                        <paper-menu-button>
+                            <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+                            <paper-listbox style="cursor:pointer" slot="dropdown-content">
+                                <paper-item>Discard</paper-item>
+                                <paper-item>Delete</paper-item>
+                            </paper-listbox>
+                        </paper-menu-button>
+
+                        <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button>
+                    </app-toolbar>
+                    <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3.5%;">
+                        <img class="avatar" src="../images/user.png"></img>
+                        <div class="pad">
+                            <div class="primary">Dr. Liz Grimes</div>
+                            <div class="shortText">MD</div>
+                            <div class="longText"></div>
+                        </div>
+                    </app-toolbar>
+                </app-header>
+
+                <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+                    <neon-animatable>
+                        <div class="docu">
+
+                            <div class="docu-header">
+                                <span>1. Patient Info</span>
+                            </div>
+                            <div class="details">
+                                <paper-input always-float-label="true" required="true" auto-validate="true" type="number" label="Cellphone No." value="{{cellphone}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="First Name" value="{{firstname}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="Middle Name" value="{{middlename}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="Last Name" value="{{lastname}}"></paper-input>
+                                <paper-input always-float-label="true" label="Suffix" value="{{suffix}}"></paper-input>
+                                <paper-input always-float-label="true" type="email" label="Email" value="{{email}}"></paper-input>
+                            </div>
+
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <firebase-query path="/buyers" order-by-child='cellphone' equal-to='{{draftdata_buyerdetails_cellphone}}' limit-to-first=1
+                            data="{{buyersList}}"></firebase-query>
+
+                        <div class="docu">
+                            <div class="docu-header">2. Previous Cases</div>
+                            <div class="details">
+                                <paper-input always-float-label="true" required="true" auto-validate="true" type="number" label="Case 1" value="{{case1}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="Case 2" value="{{case2}}"></paper-input>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <firebase-query path="/agents" order-by-child='cellphone' equal-to='{{draftdata_agentdetails_cellphone}}' limit-to-first=1
+                            data="{{agentsList}}"></firebase-query>
+
+                        <div class="docu">
+                            <div class="docu-header">3. History</div>
+                            <div class="detais">
+                                <paper-input always-float-label="true" required="true" auto-validate="true" type="number" label="History 1" value="{{history1}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="History 2" value="{{history2}}"></paper-input>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="docu-header">4. Diagnosis</div>
+
+                            <div class="details">
+                                Case #009
+                                <div class="col-md">
+                                    <!-- <div>Diagnosis</div> -->
+                                    <!-- <textarea id="textera" rows="10">{{vale}}</textarea> -->
+                                    <paper-textarea id="textarea" always-float-label value="{{myValue}}" label="Diagnosis">
+                                    </paper-textarea>
+                                    <div hidden$="{{!myValue}}">
+                                        <paper-listbox id="list" style="cursor:pointer">
+                                            <paper-item id="item">Discard</paper-item>
+                                            <paper-item id="item">Delete</paper-item>
+                                        </paper-listbox>
+                                    </div>
+                                    <!-- <div hidden$="{{!value}}">
+                                        asd
+                                    </div> -->
+
+                                </div>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="docu-header">5. Health Records</div>
+                            <div class="details">
+                                Case #009
+                                <div style="text-align:center; margin-top:15px;">
+                                    <!-- <br>
+                                    <div class="upload-btn-wrapper">
+                                        <button class="btn">Take a photo</button>
+                                        <input type="file" name="myfile1" accept="image/*" capture/>
+                                    </div>
+                                    <br>
+                                    <div class="upload-btn-wrapper">
+                                        <button class="btn">Take a video</button>
+                                        <input type="file" name="myfile2" accept="video/*" />
+                                    </div>
+                                    <br> -->
+                                    <div id="vidHolder" style="display:none">
+                                        <video id="healthVid" width="200" controls></video>
+                                    </div>
+                                    <div id="picHolder" style="display:none">
+                                        <img id="healthPic" style="width:200px; height:200px; border-radius:50%;" src="../images/user.png">
+                                    </div>
+                                    <br>
+                                    <div class="upload-btn-wrapper">
+                                        <button class="btn">Upload a photo or video</button>
+                                        <input on-change="_changepic" type="file" name="myfile3" accept="image/jpeg,image/png,video/*" />
+                                    </div>
+
+                                </div>
+                                <!-- <app-media-devices kind="videoinput" selected-device="{{videoDevice}}">
+                            </app-media-devices>
+                            <app-media-devices kind="audioinput" selected-device="{{audioDevice}}">
+                            </app-media-devices> -->
+
+                                <!-- ...devices are connected to the media stream.... -->
+                                <!-- <app-media-stream
+                            video-device="[[videoDevice]]"
+                            audio-device="[[audioDevice]]"
+                            stream="{{stream}}"
+                            active>
+                        </app-media-stream> -->
+
+                                <!-- ...media stream is connected to the video output... -->
+                                <!-- <app-media-video id="video" source="[[stream]]" on-click="record" autoplay muted mirror>
+                            </app-media-video> -->
+                                <!-- <app-media-image-capture 
+                                id="imageCapture" 
+                                stream="[[videoDevice]]" 
+                                focus-mode="single-shot" 
+                                last-photo="{{photo}}"> 
+                            </app-media-image-capture> -->
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="docu-header">6. Treatment</div>
+
+                            <div class="details">
+                                Case # 009
+                                <div class="col-md">
+                                    <div>Treatment</div>
+                                    <div>
+                                        <textarea id="textera" rows="10"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="docu-header">7. Next Visit Schedule</div>
+
+                            <div class="details">
+                                Later
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="docu-header">8. Billing</div>
+
+                            <div class="details">
+                                Later
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                </neon-animated-pages>
+
+            </app-header-layout>
+
+            <div class="footer">
+                <div>
+                    <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
+                </div>
+                <div>
+                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+                </div>
+            </div>
+
+        </app-drawer-layout>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-case-new',
+
+            properties: {
+                narrow: {
+                    type: Boolean,
+                    notify: true
+                },
+                selectedPage: Number,
+                entryanimation: {
+                    type: String,
+                    value: "slide-from-right-animation"
+                },
+                exitanimation: {
+                    type: String,
+                    value: "slide-left-animation"
+                },
+                favlefthide: {
+                    type: Boolean,
+                    value: true
+                },
+                favrighthide: {
+                    type: Boolean,
+                    value: true
+                }
+                // users:{
+                //     type: Array
+                // },
+            },
+
+            _changepic() {
+                if (event.target.files[0]) {
+                    if (event.target.files[0].type == 'image/png' || event.target.files[0].type == 'image/jpeg') {
+                        Polymer.dom(this.root).querySelector("#picHolder").style.display = 'block';
+                        Polymer.dom(this.root).querySelector("#vidHolder").style.display = 'none';
+                        Polymer.dom(this.root).querySelector("#healthPic").src = URL.createObjectURL(event.target.files[0]);
+                    }
+                    else {
+                        Polymer.dom(this.root).querySelector("#picHolder").style.display = 'none';
+                        Polymer.dom(this.root).querySelector("#vidHolder").style.display = 'block';
+                        Polymer.dom(this.root).querySelector("#healthVid").src = URL.createObjectURL(event.target.files[0]);
+                    }
+                }
+            },
+
+            onReplace() {
+                this.$.textarea.addReplacement(this.id, this.suggestQuery);
+                this.$.textarea.replaceCurrentSelection(this.suggestQuery);
+                this.$.textarea.focus();
+            },
+            // select(e) {
+            //     console.log(e);
+            //     // if (this.e) {
+            //     //     this.selectedPage = e;
+            //     // }
+            //     // else {
+            //     //     this.selectedPage = 0;
+            //     // }
+            // },
+
+            // observers: [
+            //     'fulllotDataChanged(fullLotData.*)',
+            //     'draftdatatypeChanged(draftdata_type.*)',
+            //     'startDateTimeValueChanged(startDateTimeValue,expiryHoursDaysValue)',
+            //     'draftdata_buyerdetails_cellphoneChanged(draftdata_buyerdetails_cellphone,draftdata_buyerdetails_firstname,draftdata_buyerdetails_middlename,draftdata_buyerdetails_lastname)',
+            //     'draftdata_agentdetails_cellphoneChanged(draftdata_agentdetails_cellphone,draftdata_agentdetails_firstname,draftdata_agentdetails_middlename,draftdata_agentdetails_lastname)',
+            //     'lastApplicationChanged(lastApplication.*)',
+            // ],
+
+            // _getPrevRoute() {
+            //     return this.prevRoute || '/applications'
+            // },
+
+            // draftdata_buyerdetails_cellphoneChanged() {
+            //     if (this.draftdata_buyerdetails_cellphone && this.draftdata_buyerdetails_firstname && this.draftdata_buyerdetails_middlename && this.draftdata_buyerdetails_lastname) {
+            //         this.favrighthide = false;
+            //     }
+            //     else {
+            //         this.favrighthide = true;
+            //     }
+            // },
+
+            // draftdata_agentdetails_cellphoneChanged() {
+            //     if (this.draftdata_agentdetails_cellphone && this.draftdata_agentdetails_firstname && this.draftdata_agentdetails_middlename && this.draftdata_agentdetails_lastname) {
+            //         this.favrighthide = false;
+            //     }
+            //     else {
+            //         this.favrighthide = true;
+            //     }
+            // },
+
+            // draftdatatypeChanged(e) {
+            //     if (e) {
+            //         if (this.isStartDateTimeInvalid === true) {
+            //             this.favrighthide = true;
+            //         }
+            //         else {
+            //             this.favrighthide = false;
+            //         }
+            //     }
+            //     else {
+            //         this.favrighthide = true;
+            //     }
+            // },
+
+            // getpath() {
+            //     this.applicationKey = this.guid();
+            //     this.path = 'applications/' + this.applicationKey;
+
+            //     return this.path;
+            // },
+
+            toggleDrawer() {
+                // this.dispatchEvent(new CustomEvent('toggleDrawer', {
+                //     bubbles: true, composed: true, detail: {
+                //         narrow: this.$.narrow
+                //     }
+                // }));
+                // this.$.narrow = !this.$.narrow;
+
+                Polymer.dom(this.parentNode).removeChild(this);
+
+            },
+
+            // _currentPage(e, s) {
+            //     return s === e;
+            // },
+
+            ready() {
+                this.selectedPage = 0;
+                // this.users = [
+                //     {username:'User1'},
+                //     {username:'User2'},
+                //     {username:'User3'},
+                // ];
+            },
+
+            _select1(e) {
+                this.entryanimation = "slide-from-left-animation";
+                this.exitanimation = "slide-right-animation";
+
+                if (parseInt(this.selectedPage) <= 7) {
+                    if (parseInt(this.selectedPage) !== 0) {
+                        this.selectedPage = (parseInt(this.selectedPage) - 1);
+
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+
+
+                        if (this.selectedPage === 0) {
+                            this.favlefthide = true;
+                        }
+
+                        this.favrighthide = false;
+                    }
+                    else {
+                        this.favlefthide = true;
+                        this.favrighthide = false;
+                    }
+                }
+                else {
+                    this.selectedPage = 7;
+                }
+
+            },
+
+            _select2(e) {
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                if (parseInt(this.selectedPage) >= 0) {
+                    if (parseInt(this.selectedPage) == 7) {
+                        //complete
+                    }
+                    else {
+                        this.favlefthide = false;
+                        this.favrighthide = false;
+
+                        // if (this.draftdata_buyerdetails_cellphone && this.draftdata_buyerdetails_firstname && this.draftdata_buyerdetails_middlename && this.draftdata_buyerdetails_lastname
+                        //     && this.draftdata_agentdetails_cellphone && this.draftdata_agentdetails_firstname && this.draftdata_agentdetails_middlename && this.draftdata_agentdetails_lastname) {
+                        //     this.favrighthide = false;
+                        // }
+                        // else {
+                        //     this.favrighthide = true;
+                        // }
+                    }
+
+                    if (parseInt(this.selectedPage) !== 7) {
+                        this.selectedPage = (parseInt(this.selectedPage) + 1);
+
+                        if (this.selectedPage === 7) {
+                            //change color and icon here
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                        }
+                    }
+
+
+                }
+                else {
+                    this.selectedPage = 0;
+                    this.favlefthide = true;
+                    this.favrighthide = false;
+                }
+            },
+
+            // _rdChanged(newData, oldData) {
+            //     this.fromRD = true;
+            // },
+
+            // _ldChanged(newData, oldData) {
+            //     this.fromLD = true;
+            // },
+
+            // s4: function () {
+            //     return Math.floor((1 + Math.random()) * 0x10000)
+            //         .toString(16)
+            //         .substring(1);
+            // },
+
+            // guid: function () {
+            //     var uid = new ShortUniqueId();
+            //     return uid.randomUUID(8);
+            // }
+
+        })
+
+    </script>
+</dom-module>
