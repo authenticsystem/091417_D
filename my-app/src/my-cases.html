@@ -7,7 +7,6 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
-
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
@@ -18,7 +17,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+
+<link rel="import" href="search-bar.html">
 <!-- <link rel="import" href="shared-styles.html"> -->
 
 <dom-module id="my-cases">
@@ -70,21 +77,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: none;
       }
 
-      .item:hover .shortText::after {
-        content: ' [+]';
-        color: gray;
-      }
-
-      .item.expanded:hover .shortText::after {
-        content: '';
-      }
-
-      .item.expanded .longText {
-        display: block;
-      }
-
-      .item.expanded:hover .longText::after {
-        content: ' [–]';
+      .item:hover {
+        background: rgb(240, 240, 240);
       }
 
       .spacer {
@@ -96,11 +90,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 16px;
           /* margin-top: 0px; */
           display: flex;
-          height: 100vh;
+          /* height: 100vh; */
           flex-direction: column;
           box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
         }
-
+        paper-search-bar {
+          margin-left: 80px;
+          width: 50%;
+          color: black;
+        }
       }
 
       @media (min-width: 768px) {
@@ -108,16 +106,46 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           width: 736px;
           margin: 16px auto;
           /* margin-top: 0px; */
-          height: 100vh;
+          /* height: 100vh; */
           box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
         }
-
+        paper-search-bar {
+          margin-left: 50px;
+          width: 50%;
+          color: black;
+        }
       }
 
-      app-header {
+      #tool1 {
         color: rgb(255, 255, 255);
         background-color: #673AB7;
       }
+
+      #tool2 {
+        background-color: white;
+      }
+
+      #btn-arrow {
+        position: absolute;
+        color: black;
+      }
+
+      #btn-menu {
+        color: gray;
+        position: fixed;
+        right: 40px;
+      }
+
+      #btn-clear {
+        position: fixed;
+        right: 80px;
+        color: gray;
+      }
+
+      /* app-header {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      } */
 
       paper-fab.fab-menu {
         position: fixed;
@@ -136,37 +164,63 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <iron-ajax auto url="src/data.json" last-response="{{items}}"></iron-ajax>
-
     <app-header-layout fullbleed has-scrolling-region>
       <app-header fixed slot="header">
+        <template is="dom-if" if="{{!openSearch}}">
+          <app-toolbar primary id="tool1">
+            <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+            <div main-title>Cases</div>
+            <!-- <div main-title hidden$="{{access}}">Opps!</div> -->
+            <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+          </app-toolbar>
+        </template>
 
-        <app-toolbar primary>
-          <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-          <div main-title>Cases</div>
-          <paper-icon-button icon="my-icons:search" on-tap="toggleSearch"></paper-icon-button>
-        </app-toolbar>
-
+        <template is="dom-if" if="{{openSearch}}">
+          <app-toolbar primary id="tool2">
+            <paper-icon-button id="btn-arrow" icon="my-icons:chevron-left" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+            <paper-search-bar id="search" query="{{search}}" disable-filter-button></paper-search-bar>
+            <template is="dom-if" if="{{search}}">
+              <paper-icon-button id="btn-clear" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
+            </template>
+            <paper-menu-button id="btn-menu" horizontal-align="right">
+              <paper-icon-button slot="dropdown-trigger" icon="my-icons:tune"></paper-icon-button>
+              <paper-listbox style="cursor:pointer" slot="dropdown-content" selected="{{filterBy}}">
+                <paper-item style="display:none;">Filter By</paper-item>
+                <paper-item>Filter1</paper-item>
+                <paper-item>Filter2</paper-item>
+              </paper-listbox>
+            </paper-menu-button>
+          </app-toolbar>
+        </template>
       </app-header>
 
-      <iron-scroll-threshold on-lower-threshold="loadMoreData" id="threshold">
-        <iron-list items="[[items]]" as="item" selection-enabled multi-selection scroll-target="threshold">
+      <iron-scroll-threshold id="threshold">
+
+        <firebase-query id="query" path="/cases" data="{{mycases}}">
+        </firebase-query>
+
+        <iron-list items="[[mycases]]" as="item" selection-enabled multi-selection scroll-target="threshold">
           <template>
             <div class="divSeparator">
               <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-                <iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>
-                <div class="pad">
-                  <div class="primary">[[item.name]]</div>
-                  <div class="shortText">[[item.shortText]]</div>
-                  <div class="longText">[[item.longText]]</div>
+                <iron-image class="avatar" sizing="contain" src="../images/user.png"></iron-image>
+                <div class="pad" on-tap="_selectThis">
+                  <div class="primary">[[item.case]]</div>
+                  <div class="shortText">[[item.description]]</div>
                 </div>
-                <iron-icon icon$="[[iconForItem(item)]]"></iron-icon>
+                <paper-menu-button vertical-align="bottom" horizontal-align="right">
+                  <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
+                  <paper-listbox slot="dropdown-content">
+                    <paper-item on-tap="_editThis">Edit</paper-item>
+                    <paper-item>Delete</paper-item>
+                  </paper-listbox>
+                </paper-menu-button>
               </div>
             </div>
           </template>
         </iron-list>
-
       </iron-scroll-threshold>
+
     </app-header-layout>
 
     <a href="/case-new">
@@ -186,11 +240,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: function () {
               return [];
             }
-          }
-          , narrow: {
+          },
+          narrow: {
             type: Boolean,
             notify: true
-          }
+          },
+          openSearch: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
         };
       }
 
@@ -210,20 +269,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.narrow = !this.$.narrow;
       }
 
-      togglePaperFab() {
-
+      toggleSearch() {
+        this.openSearch = true;
       }
 
-      loadMoreDat() {
-        var self = this;
-        var people = e.detail.response.results;
-        people.forEach(function (element) {
-          self.push('items', element);
-        });
+      toggleReturn() {
+        this.openSearch = false;
+        this.search = '';
+      }
 
-        asyncStuff(function done() {
-          ironScrollTheshold.clearTriggers();
-        });
+      toggleClear() {
+        this.search = '';
+      }
+
+      _editThis() {
+        window.location = "/case-edit";
       }
 
     }

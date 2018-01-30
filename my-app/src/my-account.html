@@ -57,31 +57,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
             }
 
-            .upload-btn-wrapper {
-                position: relative;
-                overflow: hidden;
-                display: inline-block;
-                margin-left: 10px;
-            }
-
-            .btn {
-                border: 2px solid gray;
-                color: gray;
-                background-color: white;
-                padding: 5px 10px;
-                border-radius: 8px;
-                font-size: 15px;
-                font-weight: bold;
-            }
-
-            .upload-btn-wrapper input[type=file] {
-                font-size: 15px;
-                position: absolute;
-                left: 0;
-                top: 0;
-                opacity: 0;
-            }
-
             a {
                 text-decoration: none;
                 background: yellow;
@@ -95,7 +70,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 /* appearance: none; */
                 width: 55%;
                 margin-left: 10px;
-                height:5px;
+                height: 5px;
                 display: none;
             }
         </style>
@@ -114,7 +89,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <img style="width:200px; border-radius:50%;" src="../images/user.png">
                         <div class="upload-btn-wrapper">
                             <button class="btn">Change profile picture</button>
-                            <input type="file" name="myfile"/>
+                            <input type="file" name="myfile" accept="image/*" />
                         </div>
                         <progress value="0" max="100" id="uploader">0%</progress>
                     </div>
@@ -122,7 +97,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <div id="notChange">
                             <paper-input label="Name" readonly value="Not defined"></paper-input>
                             <paper-input label="Email" readonly value="Not defined"></paper-input>
-                            <span style="font-size:14px;">Account not link. Link account
+                            <span style="font-size:14px;">Account not activated. Activate account
                                 <a href="/account-link">here</a>.</span>
                             <br>
                             <paper-button style="float:right;" raised on-tap="_update">Update</paper-button>

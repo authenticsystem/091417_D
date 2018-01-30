@@ -5,7 +5,7 @@
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
-
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 
 <link rel="import" href="shared-styles.html">
 
@@ -65,14 +65,36 @@
             }
 
             .header {
-                font-size: 24px;
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            .action paper-button {
+                height: 32px;
+                font-size: 12px;
                 font-weight: 400;
+                width: 80px;
+            }
+
+            #errorMsgDiv1 {
+                margin-bottom: 15px;
+                padding: 6px 12px;
+                font-size: 14px;
+                background-color: #ffdddd;
+                border-left: 6px solid #f44336;
+            }
+
+            .moreoption {
+                float: left;
             }
         </style>
 
         <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError"></firebase-auth>
 
         <div class="main-container">
+
+            <paper-toast id="toastResend" text="Email verification resend." duration="3000"></paper-toast>
+
             <a style="text-decoration:none;" href="/">
                 <iron-image placeholder="images/manifest/icon-512x512.png" data-src="images/manifest/icon-512x512.png" sizing="cover" preload
                     fade style="width:128px; height:128px;"></iron-image>
@@ -80,36 +102,66 @@
             </br>
             <div>
                 <div id="emailV">
-                    <div class="header">You've successfully registered to BaseEMR.</div>
-                    <span>Let us know if this email belongs to you.
-                        <br> Click the link in the email sent to the email below.
+                    <div class="header">Email not yet verify</div>
+                    <span style="font-size:14px;">Let us know if this email belongs to you. Click the link in the email sent to
+                        <b>{{user.email}}</b>.
                     </span>
-                    <!-- <div id="errorMessage" style="display: none;"> -->
-                    <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}
-                    <!-- <paper-input label="Name" id="displayName" value="{{displayName}}"></paper-input> -->
-                    <paper-input label="Email" id="email" readonly value="Bot"></paper-input>
-                    <paper-button style="text-transform:capitalize; color:rgb(4, 4, 143); font-size:13px; padding:0" href="" on-tap="_showDiv2">Change email?</paper-button>
                     </br>
                     </br>
                     <div class="footer">
+                        <!-- <paper-button style="text-transform:capitalize; color:rgb(4, 4, 143); font-size:13px; padding:0" href="" on-tap="_showDiv2">Sign out</paper-button> -->
+                        <!-- <paper-button style="text-transform:capitalize; color:rgb(4, 4, 143); font-size:13px; padding:0" href="" on-tap="_showDiv2">Change email?</paper-button> -->
+                        <div class="moreoption">
+                            <paper-menu-button>
+                                <div slot="dropdown-trigger" style="color: royalblue; font-size:15px;">More options</div>
+                                <paper-listbox slot="dropdown-content">
+                                    <paper-item>
+                                        <a style="text-decoration:none;" href="#" on-tap="_showDiv2">Change email?</a>
+                                    </paper-item>
+                                    <paper-item>
+                                        <a style="text-decoration:none;" href="#" on-tap="_signOut">Sign out</a>
+                                    </paper-item>
+                                </paper-listbox>
+                            </paper-menu-button>
+                        </div>
                         <div class="action">
-                            <a style="text-decoration:none;" href="/signin">
-                                <paper-button class="default" raised>resend</paper-button>
-                            </a>
-                            <paper-button class="green">next</paper-button>
+                            <paper-button class="default" on-tap="_resend" raised>resend</paper-button>
+                            <paper-button class="green" on-tap="_reload">next</paper-button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="emailC" style="display:none;">
+                    <div class="header">
+                        <span style="font-weight:400">Change email</span> {{user.email}}</div>
+                    <div id="errorMsgDiv" style="display: none;">
+                        <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}</div>
+                    <paper-input label="New email address" always-float-label id="email" value="{{email}}"></paper-input>
+                    </br>
+                    <div class="footer">
+                        <div class="action">
+                            <paper-button class="default" on-tap="_reload">cancel</paper-button>
+                            <paper-button class="green" on-tap="_changeEmail">next</paper-button>
                             <!-- <paper-button class="green" on-tap="_registerAccount">next</paper-button> -->
                         </div>
                     </div>
                 </div>
-                <div id="emailC" style="display:none;">
-                    <div class="header">Change email</div>
-                    <paper-input label="Email" always-float-label id="email" value="{{myemail}}"></paper-input>
-                    </br>
+
+                <div id="reAuth" style="display:none;">
+                    <div class="header">Re-authentication required
+                        <br>
+                        <span style="font-size:14px; font-weight:400;">Please enter your old email and password to continue.
+                        </span>
+                    </div>
+                    <div id="errorMsgDiv1" style="display:none">
+                        <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}</div>
+                    <paper-input label="Old email" value="{{oldEmail}}" always-float-label required auto-validate error-message=""></paper-input>
+                    <paper-input label="Password" type="password" value="{{password}}" always-float-label required auto-validate error-message=""></paper-input>
                     </br>
                     <div class="footer">
                         <div class="action">
-                            <paper-button class="default" on-tap="_showDiv1">cancel</paper-button>
-                            <paper-button class="green">next</paper-button>
+                            <paper-button class="default" on-tap="_reload">cancel</paper-button>
+                            <paper-button class="green" on-tap="_reChangeEmail">next</paper-button>
                             <!-- <paper-button class="green" on-tap="_registerAccount">next</paper-button> -->
                         </div>
                     </div>
@@ -126,36 +178,88 @@
             is: 'my-email-verification',
 
             handleError() {
-                var errormsg = Polymer.dom(this.root).querySelector("#errorMessage");
-                errormsg.setAttribute("style", "display: block; background-color:red; color:white; text-align:center; border-radius: 5px; opacity:0.5; padding:5px");
-                this.validationMessage = 'Invalid username/password';
+                Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                this.validationMessage = 'Invalid email or password.';
+            },
+
+            _signOut() {
+                this.$.auth.signOut();
+                window.location.reload();
+            },
+
+            _reload() {
+                window.location.reload();
+            },
+
+            _resend() {
+                var toast = Polymer.dom(this.root).querySelector("#toastResend");
+                var user = firebase.auth().currentUser;
+                user.sendEmailVerification().then(function () {
+                    toast.opened = true;
+                });
             },
 
             _showDiv2() {
                 Polymer.dom(this.root).querySelector("#emailV").setAttribute("style", "display: none");
                 Polymer.dom(this.root).querySelector("#emailC").setAttribute("style", "display: block");
+                Polymer.dom(this.root).querySelector("#reAuth").style.display = 'none';
             },
 
-            _showDiv1() {
-                Polymer.dom(this.root).querySelector("#emailV").setAttribute("style", "display: block");
-                Polymer.dom(this.root).querySelector("#emailC").setAttribute("style", "display: none");
-            },
-
-            _registerAccount() {
-                // here 1am
-                if (!this.email || !this.password) {
-                    var errormsg = Polymer.dom(this.root).querySelector("#errorMessage");
-                    errormsg.setAttribute("style", "display: block; background-color:red; color:white; text-align:center; border-radius: 5px; opacity:0.5; padding:5px");
-                    this.validationMessage = 'Invalid empty email or password.';
+            _reChangeEmail() {
+                if (!this.oldEmail) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv1").style.display = 'block';
+                    this.validationMessage = 'Please enter your email.';
+                }
+                else if (!this.password) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv1").style.display = 'block';
+                    this.validationMessage = 'Please enter your password.';
                 }
                 else {
-                    this.$.auth.createUserWithEmailAndPassword(this.email, this.password)
+                    var newEmail = this.email;
+                    var err = Polymer.dom(this.root).querySelector("#errorMsgDiv1");
+                    err.style.display = 'none';
+
+                    this.validationMessage = 'The email address is already in use by another account.';
+
+                    this.$.auth.signInWithEmailAndPassword(this.oldEmail, this.password)
                         .then(function (user) {
-                            app = this.document.querySelector('my-app');
-                            app.set('route.path', '/');
-                            user.sendEmailVerification().then(function () {
-                            });
+                            err.style.display = 'none';
+                            user.updateEmail(newEmail)
+                                .then(function () {
+                                    window.location.reload();
+                                })
+                                .catch((error) => {
+                                    err.style.display = 'block';
+                                });
                         })
+                        .catch(function (error) {
+                            err.style.display = 'block';
+                        });
+                }
+            },
+
+            _changeEmail() {
+                // here 1am
+                if (!this.email) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Please enter your email address.';
+                }
+                else {
+                    var atpos = this.email.indexOf("@");
+                    var dotpos = this.email.lastIndexOf(".");
+
+                    if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= this.email.length) {
+                        Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                        this.validationMessage = 'Invalid email address.';
+                    }
+                    else {
+                        Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
+                        this.validationMessage = '';
+                        Polymer.dom(this.root).querySelector("#reAuth").style.display = 'block';
+                        Polymer.dom(this.root).querySelector("#emailC").setAttribute("style", "display: none");
+                        Polymer.dom(this.root).querySelector("#emailV").setAttribute("style", "display: none");
+                        // this.user.updateEmail(this.email);
+                    }
                 }
             }
         })

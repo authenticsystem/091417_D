@@ -82,25 +82,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <app-header-layout fullbleed has-scrolling-region>
             <app-header fixed slot="header">
-                <app-toolbar primary>
-                    <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                    <div main-title>
-                        <app-toolbar>
-                            <img class="avatar" sizing="contain" src="../images/user.png"></img>
-                            <div class="pad">
-                                <div class="primary">Dr. Liz Grimes</div>
-                                <div class="shortText">MD</div>
-                            </div>
-                        </app-toolbar>
-                    </div>
+                <app-toolbar>
+                    <a href="/patients">
+                        <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
+                    </a>
+                    <div main-title>View Patient</div>
                     <paper-icon-button icon="my-icons:print"></paper-icon-button>
                     <paper-menu-button>
                         <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
-                        <paper-listbox slot="dropdown-content">
+                        <paper-listbox style="cursor:pointer" slot="dropdown-content">
                             <paper-item>Edit</paper-item>
                             <paper-item>Delete</paper-item>
                         </paper-listbox>
                     </paper-menu-button>
+                </app-toolbar>
+                <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3%;">
+                    <img class="avatar" src="../images/user.png"></img>
+                    <div class="pad">
+                        <div class="primary">Dr. Liz Grimes</div>
+                        <div class="shortText">MD</div>
+                        <div class="longText"></div>
+                    </div>
                 </app-toolbar>
             </app-header>
 
@@ -113,7 +115,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         </app-header-layout>
 
-        <paper-fab class="fab-menu" icon="my-icons:add" on-tap="togglePaperFab"></paper-fab>
+        <paper-menu-button>
+                <!-- <paper-icon-button icon="my-icons:add" slot="dropdown-trigger" alt="menu"></paper-icon-button> -->
+            <paper-fab class="fab-menu" icon="my-icons:add" slot="dropdown-trigger" alt="menu"></paper-fab>
+            <paper-listbox style="cursor:pointer;" slot="dropdown-content">
+                <paper-item>Add Case</paper-item>
+                <paper-item>Add to Queue</paper-item>
+            </paper-listbox>
+        </paper-menu-button>
 
     </template>
 

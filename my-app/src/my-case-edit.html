@@ -37,8 +37,7 @@
 <link rel="import" href="short-unique-id.html">
 <!-- <link rel="import" href="suggest.html"> -->
 
-
-<dom-module id="my-case-new">
+<dom-module id="my-case-edit">
     <template>
         <style include="shared-styles">
             :host {
@@ -192,16 +191,6 @@
                 font-family: Arial;
             }
 
-            #list {
-                border: 2px solid #ddbff5;
-                padding: 0;
-            }
-
-            #item {
-                height: 0;
-                font-size: 15px;
-            }
-
             /* app-media-video{
 
             } */
@@ -268,7 +257,7 @@
                         <a href="/cases">
                             <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
                         </a>
-                        <div main-title>Add Case</div>
+                        <div main-title>Edit Case</div>
                         <paper-menu-button>
                             <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
                             <paper-listbox style="cursor:pointer" slot="dropdown-content">
@@ -297,12 +286,49 @@
                                 <span>1. Patient Info</span>
                             </div>
                             <div class="details">
-                                <paper-input always-float-label="true" required="true" auto-validate="true" type="number" label="Cellphone No." value="{{cellphone}}"></paper-input>
-                                <paper-input always-float-label="true" required="true" auto-validate="true" label="First Name" value="{{firstname}}"></paper-input>
-                                <paper-input always-float-label="true" required="true" auto-validate="true" label="Middle Name" value="{{middlename}}"></paper-input>
-                                <paper-input always-float-label="true" required="true" auto-validate="true" label="Last Name" value="{{lastname}}"></paper-input>
-                                <paper-input always-float-label="true" label="Suffix" value="{{suffix}}"></paper-input>
-                                <paper-input always-float-label="true" type="email" label="Email" value="{{email}}"></paper-input>
+                                <app-media-devices kind="videoinput" selected-device="{{videoDevice}}">
+                                </app-media-devices>
+                                <app-media-devices kind="audioinput" selected-device="{{audioDevice}}">
+                                </app-media-devices>
+
+                                <!-- ...devices are connected to the media stream.... -->
+                                <!-- <app-media-stream video-device="[[videoDevice]]" audio-device="[[audioDevice]]" stream="{{stream}}" active>
+                                </app-media-stream> -->
+
+                                <!-- ...media stream is connected to the video output... -->
+                                <app-media-video id="video" source="[[stream]]" on-click="record" autoplay muted mirror>
+                                </app-media-video>
+
+                                <!-- ...and the recorder... -->
+                                <!-- <app-media-recorder id="recorder" stream="[[stream]]" duration="[[duration]]" elapsed="{{elapsed}}" data="{{recording}}">
+                                </app-media-recorder> -->
+
+                                <!-- ...and the audio analyser... -->
+                                <!-- <app-media-audio source="[[stream]]" analyser="{{analyser}}">
+                                </app-media-audio> -->
+
+                                <app-media-image-capture
+                                id="imageCapture"
+                                stream="[[videoStream]]"
+                                focus-mode="single-shot"
+                                red-eye-reduction
+                                last-photo="{{photo}}">
+                                </app-media-image-capture>
+
+                                <section id="recordings">
+                                    <template is="dom-repeat" items="[[recordings]]" as="recording">
+                                        <a href="[[_toObjectURL(recording)]]" download="video.webm">
+                                            <app-media-video source="[[recording]]" loop autoplay muted>
+                                            </app-media-video>
+                                        </a>
+                                    </template>
+                                </section>
+
+                                <div id="progress"></div>
+
+                                <!-- ...analyser is connceted to the waveform visualizer! -->
+                                <app-media-waveform id="waveform" analyser="[[analyser]]" active>
+                                </app-media-waveform>
                             </div>
 
                         </div>
@@ -315,8 +341,12 @@
                         <div class="docu">
                             <div class="docu-header">2. Previous Cases</div>
                             <div class="details">
-                                <paper-input always-float-label="true" required="true" auto-validate="true" type="number" label="Case 1" value="{{case1}}"></paper-input>
-                                <paper-input always-float-label="true" required="true" auto-validate="true" label="Case 2" value="{{case2}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" type="number" label="Cellphone No." value="{{draftdata_buyerdetails_cellphone}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="First Name" value="{{draftdata_buyerdetails_firstname}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="Middle Name" value="{{draftdata_buyerdetails_middlename}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="Last Name" value="{{draftdata_buyerdetails_lastname}}"></paper-input>
+                                <paper-input always-float-label="true" label="Suffix" value="{{draftdata_buyerdetails_suffix}}"></paper-input>
+                                <paper-input always-float-label="true" type="email" label="Email" value="{{draftdata_buyerdetails_email}}"></paper-input>
                             </div>
                         </div>
                     </neon-animatable>
@@ -328,8 +358,12 @@
                         <div class="docu">
                             <div class="docu-header">3. History</div>
                             <div class="detais">
-                                <paper-input always-float-label="true" required="true" auto-validate="true" type="number" label="History 1" value="{{history1}}"></paper-input>
-                                <paper-input always-float-label="true" required="true" auto-validate="true" label="History 2" value="{{history2}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" type="number" label="Cellphone No." value="{{draftdata_agentdetails_cellphone}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="First Name" value="{{draftdata_agentdetails_firstname}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="Middle Name" value="{{draftdata_agentdetails_middlename}}"></paper-input>
+                                <paper-input always-float-label="true" required="true" auto-validate="true" label="Last Name" value="{{draftdata_agentdetails_lastname}}"></paper-input>
+                                <paper-input always-float-label="true" label="Suffix" value="{{draftdata_agentdetails_suffix}}"></paper-input>
+                                <paper-input always-float-label="true" type="email" label="Email" value="{{draftdata_agentdetails_email}}"></paper-input>
                             </div>
                         </div>
                     </neon-animatable>
@@ -342,19 +376,9 @@
                                 Case #009
                                 <div class="col-md">
                                     <!-- <div>Diagnosis</div> -->
-                                    <!-- <textarea id="textera" rows="10">{{vale}}</textarea> -->
-                                    <paper-textarea id="textarea" always-float-label value="{{myValue}}" label="Diagnosis">
-                                    </paper-textarea>
-                                    <div hidden$="{{!myValue}}">
-                                        <paper-listbox id="list" style="cursor:pointer">
-                                            <paper-item id="item">Discard</paper-item>
-                                            <paper-item id="item">Delete</paper-item>
-                                        </paper-listbox>
-                                    </div>
-                                    <!-- <div hidden$="{{!value}}">
-                                        asd
-                                    </div> -->
-
+                                    <paper-suggest-textarea id="textarea" value="{{value}}" value-with-ids="{{valueWithIds}}" suggest-query="{{suggestQuery}}"
+                                        autofocus placeholder="Diagnosis here">
+                                    </paper-suggest-textarea>
                                 </div>
                             </div>
                         </div>
@@ -363,56 +387,26 @@
                     <neon-animatable>
                         <div class="docu">
                             <div class="docu-header">5. Health Records</div>
-                            <div class="details">
-                                Case #009
-                                <div style="text-align:center; margin-top:15px;">
-                                    <!-- <br>
-                                    <div class="upload-btn-wrapper">
-                                        <button class="btn">Take a photo</button>
-                                        <input type="file" name="myfile1" accept="image/*" capture/>
-                                    </div>
-                                    <br>
-                                    <div class="upload-btn-wrapper">
-                                        <button class="btn">Take a video</button>
-                                        <input type="file" name="myfile2" accept="video/*" />
-                                    </div>
-                                    <br> -->
-                                    <div id="vidHolder" style="display:none">
-                                        <video id="healthVid" width="200" controls></video>
-                                    </div>
-                                    <div id="picHolder" style="display:none">
-                                        <img id="healthPic" style="width:200px; height:200px; border-radius:50%;" src="../images/user.png">
-                                    </div>
-                                    <br>
-                                    <div class="upload-btn-wrapper">
-                                        <button class="btn">Upload a photo or video</button>
-                                        <input on-change="_changepic" type="file" name="myfile3" accept="image/jpeg,image/png,video/*" />
-                                    </div>
-
-                                </div>
-                                <!-- <app-media-devices kind="videoinput" selected-device="{{videoDevice}}">
+                            <!-- <app-media-devices kind="videoinput" selected-device="{{videoDevice}}">
                             </app-media-devices>
                             <app-media-devices kind="audioinput" selected-device="{{audioDevice}}">
                             </app-media-devices> -->
 
-                                <!-- ...devices are connected to the media stream.... -->
-                                <!-- <app-media-stream
+                            <!-- ...devices are connected to the media stream.... -->
+                            <!-- <app-media-stream
                             video-device="[[videoDevice]]"
                             audio-device="[[audioDevice]]"
                             stream="{{stream}}"
                             active>
                         </app-media-stream> -->
 
-                                <!-- ...media stream is connected to the video output... -->
-                                <!-- <app-media-video id="video" source="[[stream]]" on-click="record" autoplay muted mirror>
+                            <!-- ...media stream is connected to the video output... -->
+                            <!-- <app-media-video id="video" source="[[stream]]" on-click="record" autoplay muted mirror>
                             </app-media-video> -->
-                                <!-- <app-media-image-capture 
-                                id="imageCapture" 
-                                stream="[[videoDevice]]" 
-                                focus-mode="single-shot" 
-                                last-photo="{{photo}}"> 
+                            <!-- <app-media-image-capture id="imageCapture" stream="[[videoDevice]]" focus-mode="single-shot" last-photo="{{photo}}">
                             </app-media-image-capture> -->
-                            </div>
+
+                        </div>
                         </div>
                     </neon-animatable>
 
@@ -471,7 +465,7 @@
 
     <script>
         Polymer({
-            is: 'my-case-new',
+            is: 'my-case-edit',
 
             properties: {
                 narrow: {
@@ -494,31 +488,53 @@
                 favrighthide: {
                     type: Boolean,
                     value: true
-                }
+                },
+                recording: {
+                    type: Blob,
+                    observer: '_recordingChanged'
+                },
+                recordings: {
+                    type: Array,
+                    value: function () {
+                        return [];
+                    }
+                },
+
+                duration: {
+                    type: Number,
+                    value: 3000
+                },
+
+                elapsed: {
+                    type: Number,
+                    observer: '_elapsedChanged'
+                },
                 // users:{
                 //     type: Array
                 // },
             },
 
-            _changepic() {
-                if (event.target.files[0]) {
-                    if (event.target.files[0].type == 'image/png' || event.target.files[0].type == 'image/jpeg') {
-                        Polymer.dom(this.root).querySelector("#picHolder").style.display = 'block';
-                        Polymer.dom(this.root).querySelector("#vidHolder").style.display = 'none';
-                        Polymer.dom(this.root).querySelector("#healthPic").src = URL.createObjectURL(event.target.files[0]);
-                    }
-                    else {
-                        Polymer.dom(this.root).querySelector("#picHolder").style.display = 'none';
-                        Polymer.dom(this.root).querySelector("#vidHolder").style.display = 'block';
-                        Polymer.dom(this.root).querySelector("#healthVid").src = URL.createObjectURL(event.target.files[0]);
-                    }
-                }
-            },
 
-            onReplace() {
-                this.$.textarea.addReplacement(this.id, this.suggestQuery);
-                this.$.textarea.replaceCurrentSelection(this.suggestQuery);
-                this.$.textarea.focus();
+
+            record: function () {
+                this.classList.add('recording');
+                this.$.recorder.start();
+            },
+            _recordingChanged: function (recording) {
+                if (recording != null) {
+                    this.push('recordings', recording);
+                }
+                this.classList.remove('recording');
+                this.async(function () {
+                    this.$.progress.style.transform = '';
+                }, 600);
+            },
+            _elapsedChanged: function (elapsed) {
+                var progress = Math.min(100 * elapsed / this.duration, 100);
+                this.$.progress.style.transform = 'translateX(' + (-100 + progress) + '%)';
+            },
+            _toObjectURL: function (blob) {
+                return URL.createObjectURL(blob);
             },
             // select(e) {
             //     console.log(e);

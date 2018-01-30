@@ -46,8 +46,13 @@
             paper-button.green {
                 background-color: var(--paper-green-500);
                 color: white;
-                height: 38px;
+            }
 
+            .action paper-button {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                width: 80px;
             }
 
             .action {
@@ -78,22 +83,17 @@
                 <div class="header">Create account</div>
                 <div>for BaseEMR</div>
                 </br>
-                <div id="errorMessage" style="display: none;">
+                <div id="errorMsgDiv" style="display: none;">
                     <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}</div>
                 <!-- <paper-input label="Name" id="displayName" value="{{displayName}}"></paper-input> -->
-                <paper-input label="Email" id="email" value="{{email}}"></paper-input>
-                <paper-input label="Password" type="password" id="password" value="{{password}}"></paper-input>
-                </br>
-                </br>
+                <paper-input required auto-validate label="Email" id="email" value="{{email}}"></paper-input>
+                <paper-input required auto-validate label="Password" type="password" id="password" value="{{password}}"></paper-input>
+                <paper-input required auto-validate label="Confirm password" type="password" id="password" value="{{confirmPass}}"></paper-input>
+                <br>
                 <div class="footer">
                     <div class="action">
-                        <a style="text-decoration:none;" href="/signin">
-                            <paper-button>cancel</paper-button>
-                        </a>
-                        <a style="text-decoration:none;" href="/email-verification">
-                            <paper-button class="green">next</paper-button>
-                        </a>
-                        <!-- <paper-button class="green" on-tap="_registerAccount">next</paper-button> -->
+                        <paper-button on-tap="_canCel">cancel</paper-button>
+                        <paper-button class="green" on-tap="_registerAccount">next</paper-button>
                     </div>
                 </div>
             </div>
@@ -106,28 +106,74 @@
     <script>
         Polymer({
             is: 'my-register-signin',
+            properties: {
+                confirmPass: {
+                    type: String,
+                    observer: '_confirmPassChanged'
+                }
+            },
+
+            _confirmPassChanged() {
+                if (this.confirmPass) {
+                    if (this.confirmPass != this.password) {
+                        Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                        this.validationMessage = 'Password do not match.';
+                    }
+                    else {
+                        Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
+                        this.validationMessage = '';
+                    }
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Please confirm your password.';
+                }
+            },
 
             handleError() {
-                var errormsg = Polymer.dom(this.root).querySelector("#errorMessage");
-                errormsg.setAttribute("style", "display: block; background-color:red; color:white; text-align:center; border-radius: 5px; opacity:0.5; padding:5px");
-                this.validationMessage = 'Invalid username/password';
+                Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                this.validationMessage = 'The email address is already in use by another account.';
+            },
+
+            _canCel() {
+                window.location = '/signin';
+                // window.location.reload();
             },
 
             _registerAccount() {
-                // here 1am
-                if (!this.email || !this.password) {
-                    var errormsg = Polymer.dom(this.root).querySelector("#errorMessage");
-                    errormsg.setAttribute("style", "display: block; background-color:red; color:white; text-align:center; border-radius: 5px; opacity:0.5; padding:5px");
-                    this.validationMessage = 'Invalid empty email or password.';
+                if (!this.email) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Please enter your email address.';
+                }
+                else if (!this.password) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Please enter your password.';
+                }
+                else if (this.password.length < 6) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Password must be greater than or equal to six.';
+                }
+                else if (!this.confirmPass) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                    this.validationMessage = 'Please confirm your password.';
                 }
                 else {
-                    this.$.auth.createUserWithEmailAndPassword(this.email, this.password)
-                        .then(function (user) {
-                            app = this.document.querySelector('my-app');
-                            app.set('route.path', '/');
-                            user.sendEmailVerification().then(function () {
-                            });
-                        })
+                    var atpos = this.email.indexOf("@");
+                    var dotpos = this.email.lastIndexOf(".");
+
+                    if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= this.email.length) {
+                        Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                        this.validationMessage = 'Invalid email address.';
+                    }
+                    else {
+                        this.$.auth.createUserWithEmailAndPassword(this.email, this.password)
+                            .then(function (user) {
+                                app = this.document.querySelector('my-app');
+                                app.set('route.path', '/');
+                                user.sendEmailVerification().then(function () {
+                                });
+                            })
+                    }
                 }
             }
         })
