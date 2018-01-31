@@ -13,6 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
@@ -21,6 +22,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/neon-animations.html">
 <link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -56,6 +59,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 64px;
       }
 
+      paper-item:hover {
+        background: rgba(104, 58, 183, 0.26);
+        cursor: pointer;
+      }
+
+      #item {
+        height: 0;
+      }
+
       .mnu {
         padding: 13px;
       }
@@ -78,6 +90,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           bottom: 48px;
         }
 
+        #info {
+          display: flex;
+        }
       }
 
       @media (max-width: 800px) {
@@ -104,37 +119,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
         <div class="mnu" role="listbox">
           <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
-
-          <!-- on-tap="_selectPage" data-args="0" -->
-          <paper-item id="lotdetails">
-            <div class="circle-mini-first">1</div>
-            <span>Add to Queue</span>
-          </paper-item>
-
           <!-- on-tap="_selectPage" data-args="1" -->
           <paper-item id="buyersinformation">
-            <div class="circle-mini">2</div>
+            <div class="circle-mini-first">1</div>
             <span>Profile Picture</span>
           </paper-item>
 
           <!-- on-tap="_selectPage" data-args="2" -->
           <paper-item id="samplecomputation">
-            <div class="circle-mini">3</div>
+            <div class="circle-mini">2</div>
             <span>Basic Information</span>
           </paper-item>
 
           <!-- on-tap="_selectPage" data-args="3" -->
           <paper-item id="finalize">
-            <div class="circle-mini">4</div>
+            <div class="circle-mini">3</div>
             <span>Insurance</span>
           </paper-item>
 
           <!-- on-tap="_selectPage" data-args="4" -->
           <paper-item id="complete">
-            <div class="circle-mini-last">5</div>
+            <div class="circle-mini">4</div>
             <span>In-case of Emergency</span>
           </paper-item>
 
+          <paper-item id="complete">
+            <div class="circle-mini">5</div>
+            <span>Finalize</span>
+          </paper-item>
+
+          <paper-item id="complete">
+            <div class="circle-mini-last">6</div>
+            <span>Completed</span>
+          </paper-item>
           <!-- </iron-selector> -->
         </div>
       </app-drawer>
@@ -146,7 +163,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <a href="/patients">
               <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
             </a>
-            <div main-title>Edit Patient</div>
+            <div main-title>Add Patient</div>
             <paper-menu-button>
               <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
               <paper-listbox slot="dropdown-content" style="cursor:pointer">
@@ -159,93 +176,101 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-toolbar>
         </app-header>
 
+        <firebase-query id="query" path="/sampleDoctor/patients" order-by-key equal-to="{{editKey}}" data="{{mypatient}}">
+        </firebase-query>
+
         <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
 
           <neon-animatable>
             <div class="docu">
 
               <div class="docu-header">
-                <span>1. Add to Queue</span>
+                <span>1. Profile Picture</span>
               </div>
 
-              <div class="details">
-                <paper-input></paper-input>
-              </div>
+              <div class="details" style="text-align:center">
 
+                <img id="profilePic" style="width:200px; height:200px; border-radius:50%;" src="../images/user.png">
+                <br>
+                <div class="upload-btn-wrapper">
+                  <button class="btn">Upload profile picture</button>
+                  <input on-change="_changepic" type="file" name="myfile" accept="image/*" />
+                </div>
+              </div>
             </div>
           </neon-animatable>
 
           <neon-animatable>
-            <div class="docu">
 
+            <div class="docu">
               <div class="docu-header">
-                <span>2. Profile Picture</span>
+                <span>2. Basic Information</span>
               </div>
 
               <div class="details">
-                <paper-button raised on-tap="_capture">Take Photo</paper-button>
-                <div class="booth" style="width:400px; background-color: #ccc; border: 10px solid #ddd;
-                margin: 0 auto;">
-                  <video id="video" width="400" height="300"></video>
-                  <a href="#" id="capture" class="booth-capture-button" style="display:block; margin:10px 0; padding:10px 20px; background-color:blue; color:#fff; text-align: center; text-decoration:none">Take Photo</a>
-                  <canvas id="canvas" width="400" height="300" style="display:none"></canvas>
-                  <img src="../images/user.png" id="photo" alt="Photo of You" width="400" height="300" s></img>
+                <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
+                <div id="info">
+                  <paper-input id="fname" value="{{fname}}" label="Firstname" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input id="mname" value="{{mname}}" label="Middlename" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input id="lname" value="{{lname}}" label="Lastname" style="width:100%"></paper-input>
                 </div>
-              </div>
-
-            </div>
-          </neon-animatable>
-
-          <neon-animatable>
-            <div class="docu">
-
-              <div class="docu-header">
-                <span>3. Basic Information</span>
-              </div>
-
-              <div class="details">
-                <paper-input id="email" label="E-mail Address"></paper-input>
-                <div style="display:flex">
-                  <paper-input id="fname" label="Firstname" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input id="mname" label="Middlename" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input id="lname" label="Lastname" style="width:100%"></paper-input>
+                <div id="info">
+                  <paper-input type="date" value="{{bday}}" label="Birth date" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input type="number" value="{{age}}" label="Age" style="width:100%;"></paper-input>
                 </div>
-                <div style="display:flex;">
-                  <paper-input type="date" label="Birth date" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input type="number" label="Age" style="width:100%;"></paper-input>
-                </div>
-                <div style="display:flex;">
+                <div id="info">
                   <paper-dropdown-menu-light label="Marital Status" style="width:100%; margin-right:10px">
-                    <paper-listbox slot="dropdown-content" class="dropdown-content">
-                      <paper-item>Single</paper-item>
-                      <paper-item>Married</paper-item>
-                      <paper-item>Divorced</paper-item>
-                      <paper-item>Separated</paper-item>
-                      <paper-item>Widowed</paper-item>
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{status}}" class="dropdown-content">
+                      <paper-item id="item">Single</paper-item>
+                      <paper-item id="item">Married</paper-item>
+                      <paper-item id="item">Divorced</paper-item>
+                      <paper-item id="item">Separated</paper-item>
+                      <paper-item id="item">Widowed</paper-item>
                     </paper-listbox>
                   </paper-dropdown-menu-light>
                   <paper-dropdown-menu-light label="Sex" style="width:100%; margin-right:10px">
-                    <paper-listbox slot="dropdown-content" class="dropdown-content">
-                      <paper-item>Male</paper-item>
-                      <paper-item>Female</paper-item>
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{sex}}" class="dropdown-content">
+                      <paper-item id="item">Male</paper-item>
+                      <paper-item id="item">Female</paper-item>
                     </paper-listbox>
                   </paper-dropdown-menu-light>
-                  <paper-input type="number" label="Contact Number" style="width:100%;"></paper-input>
+                  <paper-input type="number" value="{{contact}}" label="Contact Number" style="width:100%;"></paper-input>
                 </div>
-                <paper-input label="Street Address"></paper-input>
-                <paper-input label="Occupation"></paper-input>
-                <div style="display:flex;">
-                  <paper-input label="Employer" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input type="number" label="Employer Phone no." style="width:100%"></paper-input>
+                <paper-input value="{{address}}" label="Street Address"></paper-input>
+                <paper-input value="{{occupation}}" label="Occupation"></paper-input>
+                <div id="info">
+                  <paper-input value="{{employer}}" label="Employer" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input value="{{emp_phone}}" type="number" label="Employer Phone no." style="width:100%"></paper-input>
                 </div>
                 <br>
                 <span>Referred to clinic by (please check one box)</span>
-                <div style="display:flex;">
+                <div id="info">
                   <paper-checkbox style="margin-right:10px">Dr</paper-checkbox>
                   <paper-checkbox style="margin-right:10px">Insurance Plan</paper-checkbox>
                   <paper-checkbox>Hospital</paper-checkbox>
                 </div>
               </div>
+            </div>
+
+          </neon-animatable>
+
+          <neon-animatable>
+            <div class="docu">
+
+              <div class="docu-header">
+                <span>3. Insurance</span>
+              </div>
+
+              <div class="details">
+                <div id="info">
+                  <paper-input value="{{card}}" Label="ID Card Number" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input value="{{bdate}}" type="date" Label="Birth date" style="width:100%;"></paper-input>
+                </div>
+                <paper-input value="{{in_address}}" Label="Address (If different)"></paper-input>
+                <paper-input value="{{home_phone}}" type="number" Label="Home phone no."></paper-input>
+                <paper-input value="{{indicate}}" Label="Please indicate primary insurance"></paper-input>
+                <paper-input value="{{p_relation}}" Label="Relationship to patient"></paper-input>
+              </div>
 
             </div>
           </neon-animatable>
@@ -254,18 +279,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="docu">
 
               <div class="docu-header">
-                <span>4. Insurance</span>
+                <span>4. In-case of emergency</span>
               </div>
 
               <div class="details">
-                <div style="display: flex">
-                  <paper-input Label="ID Card Number" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input type="date" Label="Birth date" style="width:100%;"></paper-input>
+                <div id="info">
+                  <paper-input value="{{name_e}}" label="Name of local friend or relative" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input value="{{relation_e}}" label="Relationship to patient" style="width:100%;"></paper-input>
                 </div>
-                <paper-input Label="Address (If different)"></paper-input>
-                <paper-input type="number" Label="Home phone no."></paper-input>
-                <paper-input Label="Please indicate primary insurance"></paper-input>
-                <paper-input Label="Relationship to patient"></paper-input>
+                <div id="info">
+                  <paper-input value="{{phone_e}}" type="number" label="Home phone no." style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input value="{{work_phone}}" type="number" label="Work phone no" style="width:100%;"></paper-input>
+                </div>
               </div>
 
             </div>
@@ -273,22 +298,59 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <neon-animatable>
             <div class="docu">
-
-              <div class="docu-header">
-                <span>5. In-case of emergency</span>
-              </div>
+              <div class="docu-header">5. Finalize</div>
 
               <div class="details">
-                <div style="display:flex">
-                  <paper-input label="Name of local friend or relative" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input label="Relationship to patient" style="width:100%;"></paper-input>
+                <div style="margin-bottom:10px;">Please review the following details:</div>
+                <div style="font-weight:bold">Basic Information</div>
+                <div style="margin-left:10px;">
+                  <div>Email address: {{email}}</div>
+                  <div>Firstname: {{fname}}</div>
+                  <div>Middlename: {{mname}}</div>
+                  <div>Lastname: {{lname}}</div>
+                  <div>Birth date: {{bday}}</div>
+                  <div>Age: {{age}}</div>
+                  <div>Marital Status: {{stat}}</div>
+                  <div>Sex: {{gender}}</div>
+                  <div>Contact no: {{contact}}</div>
+                  <div>Street address: {{address}}</div>
+                  <div>Occupation: {{occupation}}</div>
+                  <div>Employer: {{employer}}</div>
+                  <div>Employer phone no: {{emp_phone}}</div>
                 </div>
-                <div style="display:flex">
-                  <paper-input type="number" label="Home phone no." style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input type="number" label="Work phone no" style="width:100%;"></paper-input>
+                <div style="font-weight:bold">Insurance</div>
+                <div style="margin-left:10px;">
+                  <div>ID Card no: {{card}}</div>
+                  <div>Birth date: {{bdate}}</div>
+                  <div>address: {{in_address}}</div>
+                  <div>Home phone no: {{home_phone}}</div>
+                  <div>Primary insurance: {{indicate}}</div>
+                  <div>Relationship to patient: {{p_relation}}</div>
+                </div>
+                <div style="font-weight:bold">In-case of emergency</div>
+                <div style="margin-left:10px;">
+                  <div>Name: {{name_e}}</div>
+                  <div>Relationship to patient: {{relation_e}}</div>
+                  <div>Home phone no: {{phone_e}}</div>
+                  <div>Work phone no: {{work_phone}}</div>
                 </div>
               </div>
+            </div>
+          </neon-animatable>
 
+          <neon-animatable>
+            <div class="docu">
+              <div class="docu-header">6. Completed</div>
+
+              <div class="details">
+                <paper-item>
+                  <paper-item-body>
+                    <div id="saveSuccess" style="color: green;">{{saveSuccess}}</div>
+                    <div id="saveFailed" style="color: red;">{{saveError}}</div>
+                  </paper-item-body>
+                </paper-item>
+
+              </div>
             </div>
           </neon-animatable>
 
@@ -298,7 +360,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <div class="footer">
         <div hidden$="[[favlefthide]]">
-          <paper-fab style="background: #1976d2;" id="favleft" class="paper-fab-0" icon="my-icons:" on-tap="_select1"></paper-fab>
+          <paper-fab style="background: #1976d2;" id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
         </div>
         <div hidden$="[[favrighthide]]">
           <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
@@ -335,6 +397,155 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: true
         },
+        editKey: String,
+        gender: String,
+        stat: String,
+        personal: Object,
+        insurance: Object,
+        emergency: Object,
+        mypatient: Object
+      },
+
+      observers: [
+        'personalInfoChanged(email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
+        'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
+        'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
+        'mypatientChanged(mypatient)'
+      ],
+
+      mypatientChanged(e) {
+        if (e.length > 0) {
+          this.email = e[0].personal.email;
+          this.fname = e[0].personal.firstname;
+          this.mname = e[0].personal.middlename;
+          this.lname = e[0].personal.lastname;
+          this.bday = e[0].personal.birthday;
+          this.age = e[0].personal.age;
+          this.contact = e[0].personal.contact;
+          this.address = e[0].personal.address;
+          this.occupation = e[0].personal.occupation;
+          this.employer = e[0].personal.employer;
+          this.emp_phone = e[0].personal.emp_phone;
+
+
+          if (e[0].personal.sex == 'male') {
+            this.sex = 0;
+          }
+          if (e[0].personal.sex == 'female') {
+            this.sex = 1;
+          }
+          if (e[0].personal.status == 'single') {
+            this.status = 0;
+          }
+          if (e[0].personal.status == 'married') {
+            this.status = 1;
+          }
+          if (e[0].personal.status == 'divorced') {
+            this.status = 2;
+          }
+          if (e[0].personal.status == 'separated') {
+            this.status = 3;
+          }
+          if (e[0].personal.status == 'widowed') {
+            this.status = 4;
+          }
+
+          this.card = e[0].insurance.card;
+          this.bdate = e[0].insurance.birthday;
+          this.in_address = e[0].insurance.address;
+          this.home_phone = e[0].insurance.home_phone;
+          this.indicate = e[0].insurance.primary_insurance;
+          this.p_relation = e[0].insurance.relationship;
+
+          this.name_e = e[0].emergency.name;
+          this.relation_e = e[0].emergency.relationship;
+          this.phone_e = e[0].emergency.home_phone;
+          this.work_phone = e[0].emergency.work_phone;
+        }
+      },
+
+      personalInfoChanged(email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
+        if (sex == 0) {
+          this.gender = 'male';
+        }
+        if (sex == 1) {
+          this.gender = 'female';
+        }
+        if (status == 0) {
+          this.stat = 'single';
+        }
+        if (status == 1) {
+          this.stat = 'married';
+        }
+        if (status == 2) {
+          this.stat = 'divorced'
+        }
+        if (status == 3) {
+          this.stat = 'separated';
+        }
+        if (status == 4) {
+          this.stat = 'widowed';
+        }
+
+        if (!email || !fname || !mname || !lname || !bday || !age || !contact || !address || !occupation || !employer || !emp_phone || !this.gender || !this.stat) {
+          this.favrighthide = true;
+        }
+        else {
+          this.favrighthide = false;
+          this.personal = {
+            email: email,
+            firstname: fname,
+            middlename: mname,
+            lastname: lname,
+            birthday: bday,
+            age: age,
+            status: this.stat,
+            sex: this.gender,
+            contact: contact,
+            address: address,
+            occupation: occupation,
+            employer: employer,
+            emp_phone: emp_phone
+          }
+        }
+      },
+
+      insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation) {
+        if (!card || !bdate || !in_address || !home_phone || !indicate || !p_relation) {
+          this.favrighthide = true;
+        }
+        else {
+          this.favrighthide = false;
+          this.insurance = {
+            card: card,
+            birthday: bdate,
+            address: in_address,
+            home_phone: home_phone,
+            primary_insurance: indicate,
+            relationship: p_relation
+          }
+        }
+      },
+
+      emergencyChanged(name_e, relation_e, phone_e, work_phone) {
+        if (!name_e || !relation_e || !phone_e || !work_phone) {
+          this.favrighthide = true;
+        }
+        else {
+          this.favrighthide = false;
+          this.emergency = {
+            name: name_e,
+            relationship: relation_e,
+            home_phone: phone_e,
+            work_phone: work_phone
+          }
+        }
+      },
+
+      _changepic() {
+        if (event.target.files[0]) {
+          Polymer.dom(this.root).querySelector("#profilePic").src = URL.createObjectURL(event.target.files[0]);
+        }
       },
 
       toggleDrawer() {
@@ -345,6 +556,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }));
         this.$.narrow = !this.$.narrow;
       },
+
       ready() {
         this.selectedPage = 0;
         this.favrighthide = false;
@@ -353,19 +565,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _select1(e) {
         this.entryanimation = "slide-from-left-animation";
         this.exitanimation = "slide-right-animation";
-        if (parseInt(this.selectedPage) <= 3) {
+
+        if (parseInt(this.selectedPage) <= 5) {
           if (parseInt(this.selectedPage) !== 0) {
             this.selectedPage = (parseInt(this.selectedPage) - 1);
-
-            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
-            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
-
 
             if (this.selectedPage === 0) {
               this.favlefthide = true;
             }
 
-            this.favrighthide = false;
+            if (this.selectedPage == 4) {
+              this.favrighthide = true;
+            }
+            else {
+              Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+              Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+              this.favrighthide = false;
+            }
+
           }
           else {
             this.favlefthide = true;
@@ -373,53 +590,82 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }
         else {
-          this.selectedPage = 3;
+          this.selectedPage = 5;
         }
 
       },
+
       _select2(e) {
         this.entryanimation = "slide-from-right-animation";
         this.exitanimation = "slide-left-animation";
 
-        if (parseInt(this.selectedPage) !== 4) {
-          this.selectedPage = (parseInt(this.selectedPage) + 1);
-          Polymer.dom(this.root).querySelector("#favleft").setAttribute("style", "background: #1976d2;");
-          Polymer.dom(this.root).querySelector("#favleft").setAttribute("icon", "my-icons:chevron-left");
-          this.favlefthide = false;
+        if (parseInt(this.selectedPage) >= 0) {
+
+          if (parseInt(this.selectedPage) == 0) {
+            if (!this.email || !this.fname || !this.mname || !this.lname || !this.bday || !this.age || !this.contact || !this.address || !this.occupation || !this.employer || !this.emp_phone || !this.gender || !this.stat) {
+              this.favlefthide = false;
+              this.favrighthide = true;
+            }
+            else {
+              this.favlefthide = false;
+              this.favrighthide = false;
+            }
+          }
+
+          if (parseInt(this.selectedPage) == 1) {
+            if (!this.card || !this.bdate || !this.in_address || !this.home_phone || !this.indicate || !this.p_relation) {
+              this.favlefthide = false;
+              this.favrighthide = true;
+            }
+            else {
+              this.favlefthide = false;
+              this.favrighthide = false;
+            }
+          }
+
+          if (parseInt(this.selectedPage) == 2) {
+            if (!this.name_e || !this.relation_e || !this.phone_e || !this.work_phone) {
+              this.favlefthide = false;
+              this.favrighthide = true;
+            }
+            else {
+              this.favlefthide = false;
+              this.favrighthide = false;
+            }
+          }
+
+          if (parseInt(this.selectedPage) == 4) {
+            //complete
+            var ref = firebase.database().ref("/sampleDoctor/patients/" + this.editKey);
+            var push = ref.update({
+              personal: this.personal,
+              insurance: this.insurance,
+              emergency: this.emergency
+            });
+            this.saveSuccess = 'Patient successfully updated.';
+          }
+
+          if (parseInt(this.selectedPage) !== 5) {
+
+            this.selectedPage = (parseInt(this.selectedPage) + 1);
+
+            if (parseInt(this.selectedPage) == 4) {
+              Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+              Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+            }
+
+            if (parseInt(this.selectedPage) == 5) {
+              this.favlefthide = false;
+              this.favrighthide = true;
+            }
+          }
         }
         else {
           this.selectedPage = 0;
           this.favlefthide = true;
+          this.favrighthide = false;
         }
-
       },
-
-      _capture() {
-        var video = Polymer.dom(this.root).querySelector("#video"),
-          canvas = Polymer.dom(this.root).querySelector("#canvas"),
-          context = canvas.getContext('2d'),
-          photo = Polymer.dom(this.root).querySelector("#photo"),
-          vendorUrl = window.URL || window.webkitURL;
-
-        navigator.getMedia = navigator.getUserMedia ||
-          navigator.webkitGetUserMedia ||
-          navigator.mozGetUserMedia ||
-          navigator.msGetUserMedia;
-        navigator.getMedia({
-          video: true,
-          audio: false
-        }, function (stream) {
-          video.src = vendorUrl.createObjectURL(stream);
-          video.play();
-        }, function (error) {
-
-        });
-        Polymer.dom(this.root).querySelector("#capture").addEventListener('click', function () {
-          context.drawImage(video, 0, 0, 400, 300);
-          photo.setAttribute('src', canvas.toDataURL('image/png'));
-        });
-
-      }
     })
   </script>
 </dom-module>

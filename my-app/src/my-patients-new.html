@@ -59,6 +59,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 64px;
       }
 
+      paper-item:hover {
+        background: rgba(104, 58, 183, 0.26);
+        cursor: pointer;
+      }
+
+      #item {
+        height: 0;
+      }
+
       .mnu {
         padding: 13px;
       }
@@ -167,10 +176,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <!-- on-tap="_selectPage" data-args="4" -->
           <paper-item id="complete">
-            <div class="circle-mini-last">4</div>
+            <div class="circle-mini">4</div>
             <span>In-case of Emergency</span>
           </paper-item>
 
+          <paper-item id="complete">
+            <div class="circle-mini">5</div>
+            <span>Finalize</span>
+          </paper-item>
+
+          <paper-item id="complete">
+            <div class="circle-mini-last">6</div>
+            <span>Completed</span>
+          </paper-item>
           <!-- </iron-selector> -->
         </div>
       </app-drawer>
@@ -284,17 +302,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div id="info">
                   <paper-dropdown-menu-light label="Marital Status" style="width:100%; margin-right:10px">
                     <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{status}}" class="dropdown-content">
-                      <paper-item>Single</paper-item>
-                      <paper-item>Married</paper-item>
-                      <paper-item>Divorced</paper-item>
-                      <paper-item>Separated</paper-item>
-                      <paper-item>Widowed</paper-item>
+                      <paper-item id="item">Single</paper-item>
+                      <paper-item id="item">Married</paper-item>
+                      <paper-item id="item">Divorced</paper-item>
+                      <paper-item id="item">Separated</paper-item>
+                      <paper-item id="item">Widowed</paper-item>
                     </paper-listbox>
                   </paper-dropdown-menu-light>
                   <paper-dropdown-menu-light label="Sex" style="width:100%; margin-right:10px">
                     <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{sex}}" class="dropdown-content">
-                      <paper-item name="male">Male</paper-item>
-                      <paper-item name="female">Female</paper-item>
+                      <paper-item id="item">Male</paper-item>
+                      <paper-item id="item">Female</paper-item>
                     </paper-listbox>
                   </paper-dropdown-menu-light>
                   <paper-input type="number" value="{{contact}}" label="Contact Number" style="width:100%;"></paper-input>
@@ -361,15 +379,59 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <neon-animatable>
             <div class="docu">
-
-              <div class="docu-header">
-                <span>Patient Successfully added</span>
-              </div>
+              <div class="docu-header">5. Finalize</div>
 
               <div class="details">
+                <div style="margin-bottom:10px;">Please review the following details:</div>
+                <div style="font-weight:bold">Basic Information</div>
+                <div style="margin-left:10px;">
+                  <div>Email address: {{email}}</div>
+                  <div>Firstname: {{fname}}</div>
+                  <div>Middlename: {{mname}}</div>
+                  <div>Lastname: {{lname}}</div>
+                  <div>Birth date: {{bday}}</div>
+                  <div>Age: {{age}}</div>
+                  <div>Marital Status: {{stat}}</div>
+                  <div>Sex: {{gender}}</div>
+                  <div>Contact no: {{contact}}</div>
+                  <div>Street address: {{address}}</div>
+                  <div>Occupation: {{occupation}}</div>
+                  <div>Employer: {{employer}}</div>
+                  <div>Employer phone no: {{emp_phone}}</div>
+                </div>
+                <div style="font-weight:bold">Insurance</div>
+                <div style="margin-left:10px;">
+                  <div>ID Card no: {{card}}</div>
+                  <div>Birth date: {{bdate}}</div>
+                  <div>address: {{in_address}}</div>
+                  <div>Home phone no: {{home_phone}}</div>
+                  <div>Primary insurance: {{indicate}}</div>
+                  <div>Relationship to patient: {{p_relation}}</div>
+                </div>
+                <div style="font-weight:bold">In-case of emergency</div>
+                <div style="margin-left:10px;">
+                  <div>Name: {{name_e}}</div>
+                  <div>Relationship to patient: {{relation_e}}</div>
+                  <div>Home phone no: {{phone_e}}</div>
+                  <div>Work phone no: {{work_phone}}</div>
+                </div>
+              </div>
+            </div>
+          </neon-animatable>
+
+          <neon-animatable>
+            <div class="docu">
+              <div class="docu-header">6. Completed</div>
+
+              <div class="details">
+                <paper-item>
+                  <paper-item-body>
+                    <div id="saveSuccess" style="color: green;">{{saveSuccess}}</div>
+                    <div id="saveFailed" style="color: red;">{{saveError}}</div>
+                  </paper-item-body>
+                </paper-item>
 
               </div>
-
             </div>
           </neon-animatable>
 
@@ -416,6 +478,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: true
         },
+        gender: String,
+        stat: String,
         personal: Object,
         insurance: Object,
         emergency: Object
@@ -431,15 +495,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
       ],
 
-      sexChanged(sex) {
-        console.log(sex);
-      },
-
       personalInfoChanged(email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
-        var gender;
-        var stat;
-  
-        if (!email || !fname || !mname || !lname || !bday || !age || !contact || !address || !occupation || !employer || !emp_phone || !gender || !stat) {
+        if (sex == 0) {
+          this.gender = 'male';
+        }
+        if (sex == 1) {
+          this.gender = 'female';
+        }
+        if (status == 0) {
+          this.stat = 'single';
+        }
+        if (status == 1) {
+          this.stat = 'married';
+        }
+        if (status == 2) {
+          this.stat = 'divorced'
+        }
+        if (status == 3) {
+          this.stat = 'separated';
+        }
+        if (status == 4) {
+          this.stat = 'widowed';
+        }
+
+        if (!email || !fname || !mname || !lname || !bday || !age || !contact || !address || !occupation || !employer || !emp_phone || !this.gender || !this.stat) {
           this.favrighthide = true;
         }
         else {
@@ -451,8 +530,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             lastname: lname,
             birthday: bday,
             age: age,
-            status: '',
-            sex: '',
+            status: this.stat,
+            sex: this.gender,
             contact: contact,
             address: address,
             occupation: occupation,
@@ -522,19 +601,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.entryanimation = "slide-from-left-animation";
         this.exitanimation = "slide-right-animation";
 
-        if (parseInt(this.selectedPage) <= 3) {
+        if (parseInt(this.selectedPage) <= 5) {
           if (parseInt(this.selectedPage) !== 0) {
             this.selectedPage = (parseInt(this.selectedPage) - 1);
-
-            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
-            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
-
 
             if (this.selectedPage === 0) {
               this.favlefthide = true;
             }
 
-            this.favrighthide = false;
+            if (this.selectedPage == 4) {
+              this.favrighthide = true;
+            }
+            else {
+              Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+              Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+              this.favrighthide = false;
+            }
+
           }
           else {
             this.favlefthide = true;
@@ -542,7 +625,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }
         else {
-          this.selectedPage = 3;
+          this.selectedPage = 5;
         }
 
       },
@@ -554,7 +637,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (parseInt(this.selectedPage) >= 0) {
 
           if (parseInt(this.selectedPage) == 0) {
-            if (!this.email) {
+            if (!this.email || !this.fname || !this.mname || !this.lname || !this.bday || !this.age || !this.contact || !this.address || !this.occupation || !this.employer || !this.emp_phone || !this.gender || !this.stat) {
               this.favlefthide = false;
               this.favrighthide = true;
             }
@@ -565,7 +648,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
           if (parseInt(this.selectedPage) == 1) {
-            if (!this.card) {
+            if (!this.card || !this.bdate || !this.in_address || !this.home_phone || !this.indicate || !this.p_relation) {
               this.favlefthide = false;
               this.favrighthide = true;
             }
@@ -576,7 +659,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
           if (parseInt(this.selectedPage) == 2) {
-            if (!this.name_e) {
+            if (!this.name_e || !this.relation_e || !this.phone_e || !this.work_phone) {
               this.favlefthide = false;
               this.favrighthide = true;
             }
@@ -586,7 +669,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
 
-          if (parseInt(this.selectedPage) == 3) {
+          if (parseInt(this.selectedPage) == 4) {
             //complete
             var ref = firebase.database().ref("/sampleDoctor/patients");
             var push = ref.push({
@@ -594,20 +677,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               insurance: this.insurance,
               emergency: this.emergency
             });
+
+            if (push.key) {
+              this.saveSuccess = 'Patient successfully added.';
+            }
+            else {
+              this.saveError = 'Opps! Something went wrong while saving patient.';
+            }
           }
 
-          if (parseInt(this.selectedPage) !== 4) {
+          if (parseInt(this.selectedPage) !== 5) {
 
             this.selectedPage = (parseInt(this.selectedPage) + 1);
 
-            if (parseInt(this.selectedPage) == 3) {
+            if (parseInt(this.selectedPage) == 4) {
               Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
               Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
             }
 
-            if (parseInt(this.selectedPage) == 4) {
+            if (parseInt(this.selectedPage) == 5) {
               this.favlefthide = false;
-              this.favrighthide = false;
+              this.favrighthide = true;
             }
           }
         }
