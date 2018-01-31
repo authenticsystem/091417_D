@@ -24,6 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="my-icons.html">
 
 <link rel="import" href="search-bar.html">
@@ -53,7 +54,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .item:hover {
-        background: rgb(240, 240, 240);
+        background: rgba(104, 58, 183, .15);
       }
 
       .avatar {
@@ -184,8 +185,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-icon-button.menu {
         margin-right: 16px;
       }
+
+      .action paper-button {
+        height: 32px;
+        font-size: 12px;
+        font-weight: 400;
+        width: 80px;
+      }
+
+      paper-button.green {
+        background-color: var(--paper-green-500);
+        color: white;
+      }
     </style>
-    
+
     <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
     <app-route route="{{route}}" pattern="/detail/:key" tail="{{detailRoute}}" data="{{detailData}}" active="{{detailActive}}"></app-route>
     <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route>
@@ -216,8 +229,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <paper-icon-button slot="dropdown-trigger" icon="my-icons:tune"></paper-icon-button>
                     <paper-listbox style="cursor:pointer" slot="dropdown-content" selected="{{filterBy}}">
                       <paper-item style="display:none;">Filter By</paper-item>
-                      <paper-item>Filter1</paper-item>
-                      <paper-item>Filter2</paper-item>
+                      <paper-item>By Firstname</paper-item>
+                      <paper-item>By Middlename</paper-item>
+                      <paper-item>By Lastname</paper-item>
                     </paper-listbox>
                   </paper-menu-button>
                 </app-toolbar>
@@ -226,23 +240,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             <iron-scroll-threshold id="threshold">
 
-              <firebase-query id="query" path="sampleDoctor/patients" data="{{mypatients}}">
+              <firebase-query id="query" path="/sampleDoctor/patients" data="{{mypatients}}" order-by-child="{{filterChild}}" start-at="{{searchChild}}"
+                end-at="{{searchChild}}">
               </firebase-query>
 
               <iron-list items="[[mypatients]]" as="item" selection-enabled multi-selection scroll-target="threshold">
                 <template>
                   <div class="divSeparator">
-                    <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                    <div id="{{item.$key}}" class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
                       <iron-image class="avatar" sizing="contain" src="../images/user.png"></iron-image>
-                      <div class="pad" on-tap="_selectThis">
-                        <div class="primary">[[item.personal.firstname]]</div>
-                        <div class="shortText">[[item.personal.description]]</div>
+                      <div id="{{item.$key}}" class="pad" on-tap="_selectThis">
+                        <div id="{{item.$key}}" class="primary">[[item.personal.firstname]] [[item.personal.middlename]] [[item.personal.lastname]]</div>
+                        <div id="{{item.$key}}" class="shortText">[[item.personal.address]]</div>
                       </div>
                       <paper-menu-button vertical-align="bottom" horizontal-align="right">
                         <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
                         <paper-listbox slot="dropdown-content">
-                          <paper-item on-tap="_editThis">Edit</paper-item>
-                          <paper-item>Delete</paper-item>
+                          <paper-item on-tap="_editThis" id="{{item.$key}}">Edit</paper-item>
+                          <paper-item on-tap="_openDelete" id="{{item.$key}}">Delete</paper-item>
                         </paper-listbox>
                       </paper-menu-button>
                     </div>
@@ -263,19 +278,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <my-patients-new id="d23" path="" prev-route="{{route.prefix}}"></my-patients-new>
         </div>
 
-        <div name="/view">
-          <div id="patientsview"></div>
-          <my-patients-view id="d25" path="" prev-route="{{route.prefix}}"></my-patients-view>
-        </div>
-
-        <div name="/edit">
-          <div id="patientsedit"></div>
-          <my-patients-edit id="d26" path="" prev-route="{{route.prefix}}"></my-patients-edit>
-        </div>
-
         <div name="view404">Not found.</div>
       </iron-pages>
     </div>
+
+    <div hidden$="{{!editActive}}">
+      <div id="patientsedit"></div>
+      <my-patients-edit id="d25" edit-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-patients-edit>
+    </div>
+
+    <div hidden$="{{!detailActive}}">
+      <div id="patientsview"></div>
+      <my-patients-view id="d26" view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-patients-view>
+    </div>
+
+    <paper-dialog id="deleteDialog" confirm-button="Done">
+      <h3>Are you sure you want to delete this patient?</h3>
+      <div class="buttons">
+        <div class="action">
+          <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>No</paper-button>
+          <paper-button id="dialBtn" on-tap="_deletePatient" toggles class="custom green">Yes</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
   </template>
 
   <script>
@@ -299,12 +325,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: false,
             notify: true
           },
+          filterBy: {
+            type: Number,
+            value: 1
+          }
         };
+      }
+
+      static get observers() {
+        return [
+          '_searchChanged(search, filterBy)',
+        ];
+      }
+
+      _searchChanged(search, filter) {
+        if (search) {
+          if (filter) {
+            if (filter == 1) {
+              this.filterChild = 'personal/firstname';
+            }
+            if (filter == 2) {
+              this.filterChild = 'personal/middlename';
+            }
+            if (filter == 3) {
+              this.filterChild = 'personal/lastname';
+            }
+          }
+          this.searchChild = search;
+        }
+        else {
+          this.searchChild = '';
+        }
       }
 
       iconForItem(item) {
         return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';
       }
+
       getClassForItem(item, selected) {
         return selected ? 'item expanded' : 'item';
       }
@@ -331,12 +388,56 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.search = '';
       }
 
-      _selectThis() {
-        window.location = "/patients/view";
+      _deletePatient(e) {
+        var deleteMe = Polymer.dom(e).rootTarget.getAttribute("alt");
+        var ref = firebase.database().ref('/sampleDoctor/patients');
+        ref.child(deleteMe).remove();
+        Polymer.dom(this.root).querySelector("#deleteDialog").close();
       }
 
-      _editThis() {
-        window.location = "/patients/edit";
+      _openDelete(e) {
+        var d_key = Polymer.dom(e).rootTarget.getAttribute("id");
+        var dialogBtn = Polymer.dom(this.root).querySelector("#dialBtn");
+        dialogBtn.setAttribute('alt', d_key);
+        Polymer.dom(this.root).querySelector("#deleteDialog").open();
+      }
+
+      _selectThis(e) {
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+        var node = Polymer.dom(this.root).querySelector("#patientsview");
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-patients-edit");
+          newDiv.setAttribute("id", "d26");
+          newDiv.setAttribute("view-key", data_args);
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          window.location = '/patients/detail/' + data_args;
+          //if open existing
+          var currentDiv = document.getElementById("patientsview");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
+      }
+
+      _editThis(e) {
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+        var node = Polymer.dom(this.root).querySelector("#patientsedit");
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-patients-edit");
+          newDiv.setAttribute("id", "d25");
+          newDiv.setAttribute("edit-key", data_args);
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          window.location = '/patients/edit/' + data_args;
+          //if open existing
+          var currentDiv = document.getElementById("patientsedit");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
       }
 
       _patientsNew() {
@@ -349,7 +450,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var newDiv = document.createElement("my-patients-new");
           newDiv.setAttribute("id", "d23");
           newDiv.setAttribute("prev-route", this.route.prefix);
-          // newDiv.setAttribute("block", "3")
           //if open existing
           var currentDiv = document.getElementById("patientsnew");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);

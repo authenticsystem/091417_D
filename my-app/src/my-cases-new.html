@@ -1,0 +1,591 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+
+<link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html">
+<link rel="import" href="../bower_components/paper-time-input/paper-time-input.html">
+<link rel="import" href="../bower_components/app-media/app-media.html">
+
+<link rel="import" href="short-unique-id.html">
+<!-- <link rel="import" href="suggest.html"> -->
+
+
+<dom-module id="my-cases-new">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            app-header paper-icon-button {
+                --paper-icon-button-ink-color: #000000;
+            }
+
+            app-drawer-layout:not([narrow]) [drawer-toggle] {
+                display: none;
+            }
+
+            app-drawer {
+                --app-drawer-content-container: {
+                    background-color: #F4F5F6;
+                }
+            }
+
+            paper-icon-button.menu {
+                margin-right: 15px;
+            }
+
+            paper-item {
+                height: 64px;
+            }
+
+            .mnu {
+                padding: 16px;
+            }
+
+            paper-fab {
+                background: #1976d2;
+            }
+
+            .labelitem {
+                padding: 0px;
+                margin: 0;
+            }
+
+
+
+            @media (min-width: 800px) {
+                .footer {
+                    position: absolute;
+                    bottom: 16px;
+                    width: 100%;
+                }
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 48px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 48px;
+                    bottom: 48px;
+                }
+
+            }
+
+            @media (max-width: 800px) {
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 16px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 16px;
+                    bottom: 48px;
+                }
+
+                .docu {
+                    margin-left: 16px;
+                    margin-right: 16px;
+                }
+
+            }
+
+
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+            }
+
+
+            datetime-picker.begin {
+                --datetime-selected-background: #2362EC;
+                --datetime-background: #071533;
+                --datetime-color: #eeeeee;
+            }
+
+            datetime-picker.end {
+                --datetime-selected-background: #CC1C1C;
+                --datetime-background: #071533;
+                --datetime-color: #eeeeee;
+            }
+
+            paper-item:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
+
+            .avatar {
+                height: 40px;
+                width: 40px;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: transparent;
+            }
+
+            .pad {
+                padding: 0 16px;
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .col-md {
+                padding: 6px;
+            }
+
+            .primary {
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .longText {
+                color: gray;
+                display: none;
+            }
+
+            /* #textera {
+                padding: 16px;
+                font-size: 14px;
+                font-weight: 300;
+                width: 95%;
+                font-family: Arial;
+            } */
+
+            #list {
+                border: 2px solid #ddbff5;
+                padding: 0;
+            }
+
+            #item {
+                height: 0;
+                font-size: 15px;
+            }
+
+            paper-textarea {
+                --paper-input-container: {
+                    background-color: #ede7f1;
+                    /* margin-right: 8px; */
+                }
+
+            }
+
+            /* app-media-video{
+
+            } */
+        </style>
+
+        <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+            <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
+                <div class="mnu" role="listbox">
+                    <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
+                    <!-- on-tap="_selectPage" data-args="0" -->
+                    <paper-item id="patientInfo" on-tap="{{select(0)}}">
+                        <div class="circle-mini-first">1</div>
+                        <span>Chief Complain</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="1" -->
+                    <paper-item id="prevCases" on-tap="{{select(1)}}">
+                        <div class="circle-mini">2</div>
+                        <span>History</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="2" -->
+                    <paper-item id="history">
+                        <div class="circle-mini" on-tap="{{select(2)}}">3</div>
+                        <span>Diagnosis</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="3" -->
+                    <paper-item id="diagnosis">
+                        <div class="circle-mini" on-tap="{{select(3)}}">4</div>
+                        <span>Treatment</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="4" -->
+                    <paper-item id="healthRecords" on-tap="{{select(4)}}">
+                        <div class="circle-mini">5</div>
+                        <span>Finalize</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="5" -->
+                    <paper-item id="treatment" on-tap="{{select(5)}}">
+                        <div class="circle-mini-last">6</div>
+                        <span>Complete</span>
+                    </paper-item>
+
+                    <!-- on-tap="_selectPage" data-args="6" -->
+                    <!-- <paper-item id="nextVisit" on-tap="{{select(6)}}">
+                        <div class="circle-mini">7</div>
+                        <span>Next Visit Schedule</span>
+                    </paper-item> -->
+
+                    <!-- on-tap="_selectPage" data-args="7" -->
+                    <!-- <paper-item id="billing" on-tap="{{select(7)}}">
+                        <div class="circle-mini-last">8</div>
+                        <span>Billing</span>
+                    </paper-item> -->
+                    <!-- </iron-selector> -->
+                </div>
+            </app-drawer>
+
+            <app-header-layout id="appheader" has-scrolling-region>
+                <app-header fixed slot="header">
+                    <app-toolbar>
+                        <a href="/cases">
+                            <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
+                        </a>
+                        <div main-title>Add Case</div>
+                        <paper-menu-button>
+                            <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+                            <paper-listbox style="cursor:pointer" slot="dropdown-content">
+                                <paper-item>Discard</paper-item>
+                                <paper-item>Delete</paper-item>
+                            </paper-listbox>
+                        </paper-menu-button>
+
+                        <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="toggleDrawer"></paper-icon-button>
+                    </app-toolbar>
+                    <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3.5%;">
+                        <img class="avatar" src="../images/user.png"></img>
+                        <div class="pad">
+                            <div class="primary">Dr. Liz Grimes</div>
+                            <div class="shortText">MD</div>
+                            <div class="longText"></div>
+                        </div>
+                    </app-toolbar>
+                </app-header>
+
+                <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+                    <neon-animatable>
+                        <div class="docu">
+
+                            <div class="docu-header">
+                                <span>1. Complain</span>
+                            </div>
+                            <div class="details">
+                                <paper-textarea rows="10" value="{{complain}}"></paper-textarea>
+                            </div>
+
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <!-- <firebase-query path="/buyers" order-by-child='cellphone' equal-to='{{draftdata_buyerdetails_cellphone}}' limit-to-first=1
+                            data="{{buyersList}}"></firebase-query> -->
+
+                        <div class="docu">
+                            <div class="docu-header">2. History</div>
+                            <div class="details">
+                                <paper-textarea rows="10" value="{{history}}"></paper-textarea>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <!-- <firebase-query path="/agents" order-by-child='cellphone' equal-to='{{draftdata_agentdetails_cellphone}}' limit-to-first=1
+                            data="{{agentsList}}"></firebase-query> -->
+
+                        <div class="docu">
+                            <div class="docu-header">3. Diagnosis</div>
+                            <div class="detais">
+                                <paper-textarea rows="10" value="{{diagnosis}}"></paper-textarea>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="docu-header">4. Treatment</div>
+                            <div class="details">
+                                <paper-textarea rows="10" value="{{treatment}}"></paper-textarea>
+                            </div>
+                        </div>
+                    </neon-animatable>
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="docu-header">4. Reiview Following Details</div>
+                            <div class="details">
+                                <div>Complain: {{complain}}</div>
+                                <div>History: {{history}}</div>
+                                <div>Diagnosis: {{diagnosis}}</div>
+                                <div>Treatment: {{treatment}}</div>
+
+                            </div>
+                        </div>
+                    </neon-animatable>
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="docu-header">6. Completed</div>
+
+                            <div class="details">
+                                <paper-item>
+                                    <paper-item-body>
+                                        <div id="saveSuccess" style="color: green;">{{saveSuccess}}</div>
+                                        <div id="saveFailed" style="color: red;">{{saveError}}</div>
+                                    </paper-item-body>
+                                </paper-item>
+
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                </neon-animated-pages>
+
+            </app-header-layout>
+
+            <div class="footer">
+                <div>
+                    <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
+                </div>
+                <div>
+                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+                </div>
+            </div>
+
+        </app-drawer-layout>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-cases-new',
+
+            properties: {
+                narrow: {
+                    type: Boolean,
+                    notify: true
+                },
+                selectedPage: Number,
+                entryanimation: {
+                    type: String,
+                    value: "slide-from-right-animation"
+                },
+                exitanimation: {
+                    type: String,
+                    value: "slide-left-animation"
+                },
+                favlefthide: {
+                    type: Boolean,
+                    value: true
+                },
+                favrighthide: {
+                    type: Boolean,
+                    value: true
+                },
+                complain: {
+                    type: String,
+                    value: ''
+                },
+                history: {
+                    type: String,
+                    value: ''
+                },
+                diagnosis: {
+                    type: String,
+                    value: ''
+                },
+                treatment: {
+                    type: String,
+                    value: ''
+                }
+                // users:{
+                //     type: Array
+                // },
+            },
+
+            // _changepic() {
+            //     if (event.target.files[0]) {
+            //         if (event.target.files[0].type == 'image/png' || event.target.files[0].type == 'image/jpeg') {
+            //             Polymer.dom(this.root).querySelector("#picHolder").style.display = 'block';
+            //             Polymer.dom(this.root).querySelector("#vidHolder").style.display = 'none';
+            //             Polymer.dom(this.root).querySelector("#healthPic").src = URL.createObjectURL(event.target.files[0]);
+            //         }
+            //         else {
+            //             Polymer.dom(this.root).querySelector("#picHolder").style.display = 'none';
+            //             Polymer.dom(this.root).querySelector("#vidHolder").style.display = 'block';
+            //             Polymer.dom(this.root).querySelector("#healthVid").src = URL.createObjectURL(event.target.files[0]);
+            //         }
+            //     }
+            // },
+
+            // onReplace() {
+            //     this.$.textarea.addReplacement(this.id, this.suggestQuery);
+            //     this.$.textarea.replaceCurrentSelection(this.suggestQuery);
+            //     this.$.textarea.focus();
+            // },
+
+            toggleDrawer() {
+                // this.dispatchEvent(new CustomEvent('toggleDrawer', {
+                //     bubbles: true, composed: true, detail: {
+                //         narrow: this.$.narrow
+                //     }
+                // }));
+                // this.$.narrow = !this.$.narrow;
+                // Polymer.dom(this.parentNode).removeChild(this);
+            },
+            ready() {
+                this.selectedPage = 0;
+                this.favrighthide = false;
+                this.favlefthide = true;
+            },
+
+            _select1(e) {
+                this.entryanimation = "slide-from-left-animation";
+                this.exitanimation = "slide-right-animation";
+
+                if (parseInt(this.selectedPage) <= 4) {
+                    if (parseInt(this.selectedPage) !== 0) {
+                        this.selectedPage = (parseInt(this.selectedPage) - 1);
+
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+
+
+                        if (this.selectedPage === 0) {
+                            this.favlefthide = true;
+
+                        }
+                        //         this.favrighthide = false;
+
+                    }
+                    //     else {
+                    //         this.favlefthide = true;
+                    //         this.favrighthide = false;
+                    //     }
+                    // }
+                    // else {
+                    //     this.selectedPage = 4;
+                }
+
+            },
+
+            _select2(e) {
+
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                if (parseInt(this.selectedPage) >= 0) {
+
+                    if (parseInt(this.selectedPage) == 0) {
+                        if (!this.complain) {
+                            this.favlefthide = false;
+                            this.favrighthide = true;
+                        }
+                        else {
+                            this.favlefthide = false;
+                            this.favrighthide = false;
+                        }
+                    }
+
+                    if (parseInt(this.selectedPage) == 1) {
+                        if (!this.history) {
+                            this.favlefthide = false;
+                            this.favrighthide = true;
+                        }
+                        else {
+                            this.favlefthide = false;
+                            this.favrighthide = false;
+                        }
+                    }
+
+                    if (parseInt(this.selectedPage) == 2) {
+                        if (!this.diagnosis) {
+                            this.favlefthide = false;
+                            this.favrighthide = true;
+                        }
+                        else {
+                            this.favlefthide = false;
+                            this.favrighthide = false;
+                        }
+                    }
+
+                    if (parseInt(this.selectedPage) == 3) {
+                        if (!this.treatment) {
+                            this.favlefthide = false;
+                            this.favrighthide = true;
+                        }
+                        else {
+                            this.favlefthide = false;
+                            this.favrighthide = false;
+                        }
+
+                    }
+
+                    if (parseInt(this.selectedPage) == 4) {
+
+                        this.favlefthide = false;
+                        this.favrighthide = true;
+                        //complete
+                        var ref = firebase.database().ref("/sampleDoctor/cases");
+                        var push = ref.push({
+                            complain: this.complain,
+                            history: this.history,
+                            diagnosis: this.diagnosis,
+                            treatment: this.treatment
+                        });
+                        if (push.key) {
+                            this.saveSuccess = 'Case successfully added.';
+                        }
+                        else {
+                            this.saveError = 'Opps! Something went wrong while saving new case.';
+                        }
+                    }
+
+                
+            }
+                if(parseInt(this.selectedPage) !== 6) {
+
+                this.selectedPage = (parseInt(this.selectedPage) + 1);
+
+                if (parseInt(this.selectedPage) == 5) {
+
+                    Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                    Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                }
+
+                if (parseInt(this.selectedPage) == 5) {
+                    this.favlefthide = false;
+                    this.favrighthide = false;
+                }
+            }
+
+                else {
+                this.selectedPage = 0;
+                this.favlefthide = true;
+                this.favrighthide = true;
+            }
+        },
+
+        })
+
+    </script>
+</dom-module>

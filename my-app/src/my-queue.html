@@ -125,71 +125,66 @@
                 right: 32px;
 
             }
-
-            paper-tabs {
-                background-color: hsl(251, 55%, 51%);
-                color: #DDD;
-                border-bottom-right-radius: 1%;
-            }
         </style>
 
         <iron-ajax auto url="src/data.json" last-response="{{items}}"></iron-ajax>
-        
+
         <app-header-layout fullbleed has-scrolling-region>
             <app-header fixed slot="header">
                 <app-toolbar primary>
                     <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                     <div main-title>Queue</div>
                 </app-toolbar>
-            </app-header>
-            <div class="card">   
-                <paper-tabs selected="{{tabs}}" scrollable noink>
+                <paper-tabs selected="{{tabs}}" scrollable fit-container>
                     <paper-tab>Doctor A.</paper-tab>
                     <paper-tab>Doctor B.</paper-tab>
                     <paper-tab>Doctor C.</paper-tab>
                     <paper-tab>Doctor D.</paper-tab>
                 </paper-tabs>
-     
-                <paper-card id="first" style="display:block">
-                    <div class="card-content">
-                        <iron-scroll-threshold on-lower-threshold="loadMoreData" id="threshold">
-                            <iron-list items="[[items]]" as="item" selection-enabled multi-selection scroll-target="threshold" style="height:400px;">
-                                <template>
-                                    <!-- <div class="divSeparator"> -->
-                                        <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-                                            <iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>
-                                            <!-- <iron-icon icon="my-icons:person" slot="item-icon"></iron-icon>  -->
-                                            <div class="pad">
-                                                <div class="primary">[[item.name]]</div>
-                                                <div class="longText">[[item.longText]]</div>
-                                            </div>
-                                            <!-- <div class="shortText">[[item.shortText]]</div> -->
-                                            <!-- <iron-icon icon$="[[iconForItem(item)]]"></iron-icon> -->
-                                        </div>
-                                    <!-- </div>  -->
-                                </template>
-                            </iron-list>
-                        </iron-scroll-threshold>
-                    </div> 
-                    <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_addDialog"></paper-fab>
-                </paper-card>
-                <paper-card id="second" style="display:none">
-                    <div class="card-content">
-                        second
-                    </div>
-                </paper-card>
-                <paper-card id="third" style="display:none">
-                    <div class="card-content">
-                        third
-                    </div>
-                </paper-card>
-                <paper-card id="fourth" style="display:none">
-                    <div class="card-content">
-                        fourth
-                    </div>
-                </paper-card>
+            </app-header>
 
-            </div>
+            <paper-card class="card" id="first" style="display:block">
+                <div class="card-content">
+                    <iron-scroll-threshold on-lower-threshold="loadMoreData" id="threshold">
+                        <iron-list items="[[items]]" as="item" selection-enabled multi-selection scroll-target="threshold" style="height:400px;">
+                            <template>
+                                <!-- <div class="divSeparator"> -->
+                                <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                                    <iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>
+                                    <!-- <iron-icon icon="my-icons:person" slot="item-icon"></iron-icon>  -->
+                                    <div class="pad">
+                                        <div class="primary">[[item.name]]</div>
+                                        <div class="longText">[[item.longText]]</div>
+                                    </div>
+                                    <!-- <div class="shortText">[[item.shortText]]</div> -->
+                                    <!-- <iron-icon icon$="[[iconForItem(item)]]"></iron-icon> -->
+                                </div>
+                                <!-- </div>  -->
+                            </template>
+                        </iron-list>
+                    </iron-scroll-threshold>
+                </div>
+                <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_addDialog"></paper-fab>
+            </paper-card>
+
+            <paper-card class="card" id="second" style="display:none">
+                <div class="card-content">
+                    second
+                </div>
+            </paper-card>
+
+            <paper-card class="card" id="third" style="display:none">
+                <div class="card-content">
+                    third
+                </div>
+            </paper-card>
+
+            <paper-card class="card" id="fourth" style="display:none">
+                <div class="card-content">
+                    fourth
+                </div>
+            </paper-card>
+
         </app-header-layout>
         <!-- <a href="/queue/new" style="text-decoration: none;">
             <paper-fab noink class="fab-menu" on-tap="_queueNew" icon="my-icons:add"></paper-fab>

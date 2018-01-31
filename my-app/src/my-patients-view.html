@@ -7,144 +7,372 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
-<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tab.html">
-<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/neon-animation/web-animations.html">
-<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
 <dom-module id="my-patients-view">
-    <template>
-        <style include="shared-styles">
-            :host {
-                display: block;
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
 
-                padding: 10px;
-            }
+        padding: 10px;
+      }
 
-            app-header {
-                color: rgb(255, 255, 255);
-                background-color: #673AB7;
-            }
+      app-header {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      }
 
-            paper-icon-button.menu {
-                margin-right: 16px;
-            }
+      paper-icon-button.menu {
+        margin-right: 16px;
+      }
 
-            .pad {
-                padding: 0 16px;
-                @apply --layout-flex;
-                @apply --layout-vertical;
-            }
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
 
-            .primary {
-                font-size: 16px;
-                font-weight: bold;
-            }
+      app-drawer {
+        --app-drawer-content-container: {
+          background-color: #F4F5F6;
+        }
+      }
 
-            .shortText,
-            .longText {
-                font-size: 14px;
-            }
+      paper-item {
+        height: 64px;
+      }
 
-            .avatar {
-                height: 40px;
-                width: 40px;
-                border-radius: 20px;
-                box-sizing: border-box;
-                background-color: #DDD;
-            }
+      paper-item:hover {
+        background: rgba(104, 58, 183, 0.26);
+        cursor: pointer;
+      }
 
-            paper-tabs {
-                background-color: #a284e9;
-                color: #fff;
-            }
+      #item {
+        height: 0;
+      }
 
-            paper-fab.fab-menu {
-                position: fixed;
-                right: 32px;
-                bottom: 32px;
-            }
-        </style>
+      .mnu {
+        padding: 13px;
+      }
 
-        <app-header-layout fullbleed has-scrolling-region>
-            <app-header fixed slot="header">
-                <app-toolbar>
-                    <a href="/patients">
-                        <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
-                    </a>
-                    <div main-title>View Patient</div>
-                    <paper-icon-button icon="my-icons:print"></paper-icon-button>
-                    <paper-menu-button>
-                        <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
-                        <paper-listbox style="cursor:pointer" slot="dropdown-content">
-                            <paper-item>Edit</paper-item>
-                            <paper-item>Delete</paper-item>
-                        </paper-listbox>
-                    </paper-menu-button>
-                </app-toolbar>
-                <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3%;">
-                    <img class="avatar" src="../images/user.png"></img>
-                    <div class="pad">
-                        <div class="primary">Dr. Liz Grimes</div>
-                        <div class="shortText">MD</div>
-                        <div class="longText"></div>
-                    </div>
-                </app-toolbar>
-            </app-header>
+      paper-fab.fab-menu {
+        position: fixed;
+        right: 32px;
+        bottom: 32px;
+      }
 
-            <div class="card">
-                <paper-tabs selected="0" scrollable>
-                    <paper-tab>Patient Info</paper-tab>
-                    <paper-tab>Cases</paper-tab>
-                </paper-tabs>
+      paper-fab.fab-menu2 {
+        position: fixed;
+        right: 41px;
+        bottom: 100px;
+      }
+
+      paper-fab.fab-menu3 {
+        position: fixed;
+        right: 41px;
+        bottom: 155px;
+      }
+
+      @media (min-width: 800px) {
+        .footer {
+          position: absolute;
+          bottom: 16px;
+          width: 100%;
+        }
+        .paper-fab-0 {
+          position: absolute;
+          left: 48px;
+          bottom: 48px;
+        }
+
+        .paper-fab-1 {
+          position: absolute;
+          right: 48px;
+          bottom: 48px;
+        }
+
+        #info {
+          display: flex;
+        }
+      }
+
+      @media (max-width: 800px) {
+        .paper-fab-0 {
+          position: absolute;
+          left: 16px;
+          bottom: 48px;
+        }
+
+        .paper-fab-1 {
+          position: absolute;
+          right: 16px;
+          bottom: 48px;
+        }
+
+        .docu {
+          margin-left: 16px;
+          margin-right: 16px;
+        }
+      }
+
+      .avatar {
+        height: 50px;
+        width: 50px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+
+      .pad {
+        padding: 0 16px;
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
+
+      .primary {
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .shortText,
+      .longText {
+        font-size: 14px;
+      }
+
+      .longText {
+        color: gray;
+        display: none;
+      }
+    </style>
+
+    <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+
+      <app-header-layout id="appheader" has-scrolling-region>
+        <app-header fixed slot="header">
+          <app-toolbar>
+            <a href="/patients">
+              <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
+            </a>
+            <div main-title>View Patient</div>
+            <paper-icon-button icon="my-icons:print" on-click="_print"></paper-icon-button>
+            <!-- <paper-menu-button>
+              <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+              <paper-listbox style="cursor:pointer" slot="dropdown-content">
+                <paper-item>Edit</paper-item>
+                <paper-item>Delete</paper-item>
+              </paper-listbox>
+            </paper-menu-button> -->
+          </app-toolbar>
+          <paper-tabs selected="{{selectedPage}}" scrollable fit-container>
+            <paper-tab>Patient Info</paper-tab>
+            <paper-tab>Cases</paper-tab>
+          </paper-tabs>
+        </app-header>
+
+        <firebase-query id="query" path="/sampleDoctor/patients" order-by-key equal-to="{{viewKey}}" data="{{mypatient}}">
+        </firebase-query>
+
+        <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+
+          <neon-animatable>
+            <div class="docu" id="printMe">
+              <div class="docu-header">
+                <img class="avatar" src="../images/user.png"></img>
+              </div>
+              <br>
+
+              <div class="details">
+                <div style="font-weight:bold">Basic Information</div>
+                <div style="margin-left:10px;">
+                  <div>Email address: {{email}}</div>
+                  <div>Firstname: {{fname}}</div>
+                  <div>Middlename: {{mname}}</div>
+                  <div>Lastname: {{lname}}</div>
+                  <div>Birth date: {{bday}}</div>
+                  <div>Age: {{age}}</div>
+                  <div>Marital Status: {{status}}</div>
+                  <div>Sex: {{sex}}</div>
+                  <div>Contact no: {{contact}}</div>
+                  <div>Street address: {{address}}</div>
+                  <div>Occupation: {{occupation}}</div>
+                  <div>Employer: {{employer}}</div>
+                  <div>Employer phone no: {{emp_phone}}</div>
+                </div>
+                <div style="font-weight:bold">Insurance</div>
+                <div style="margin-left:10px;">
+                  <div>ID Card no: {{card}}</div>
+                  <div>Birth date: {{bdate}}</div>
+                  <div>address: {{in_address}}</div>
+                  <div>Home phone no: {{home_phone}}</div>
+                  <div>Primary insurance: {{indicate}}</div>
+                  <div>Relationship to patient: {{p_relation}}</div>
+                </div>
+                <div style="font-weight:bold">In-case of emergency</div>
+                <div style="margin-left:10px;">
+                  <div>Name: {{name_e}}</div>
+                  <div>Relationship to patient: {{relation_e}}</div>
+                  <div>Home phone no: {{phone_e}}</div>
+                  <div>Work phone no: {{work_phone}}</div>
+                </div>
+              </div>
             </div>
+          </neon-animatable>
 
-        </app-header-layout>
+          <neon-animatable>
+            <div class="docu">
+              <div class="docu-header">Cases</div>
 
-        <paper-menu-button>
-                <!-- <paper-icon-button icon="my-icons:add" slot="dropdown-trigger" alt="menu"></paper-icon-button> -->
-            <paper-fab class="fab-menu" icon="my-icons:add" slot="dropdown-trigger" alt="menu"></paper-fab>
-            <paper-listbox style="cursor:pointer;" slot="dropdown-content">
-                <paper-item>Add Case</paper-item>
-                <paper-item>Add to Queue</paper-item>
-            </paper-listbox>
-        </paper-menu-button>
+              <div class="details">
+                <paper-item>
+                  <paper-item-body>
+                    <div id="saveSuccess" style="color: green;">{{saveSuccess}}</div>
+                    <div id="saveFailed" style="color: red;">{{saveError}}</div>
+                  </paper-item-body>
+                </paper-item>
+              </div>
+            </div>
+          </neon-animatable>
 
-    </template>
+        </neon-animated-pages>
 
-    <script>
-        Polymer({
-            is: 'my-patients-view',
+        <paper-fab id="more-fab" class="fab-menu" icon="my-icons:add" on-tap="_showMini" title="More options"></paper-fab>
+        <paper-fab id="less-fab" style="display:none" class="fab-menu" icon="my-icons:clear" on-tap="_hideMini" title="Hide options"></paper-fab>
+        <paper-fab class="fab-menu2" style="display:none" mini icon="my-icons:create-new-folder" title="Add case"></paper-fab>
+        <paper-fab class="fab-menu3" style="display:none" mini icon="my-icons:queue" title="Add to queue"></paper-fab>
 
-            properties: {
-                narrow: {
-                    type: Boolean,
-                    notify: true
-                }
-            },
+      </app-header-layout>
 
-            toggleDrawer() {
-                this.dispatchEvent(new CustomEvent('toggleDrawer', {
-                    bubbles: true, composed: true, detail: {
-                        narrow: this.$.narrow
-                    }
-                }));
-                this.$.narrow = !this.$.narrow;
-            }
-        })
-    </script>
+    </app-drawer-layout>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-patients-view',
+
+      properties: {
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        selectedPage: Number,
+        entryanimation: {
+          type: String,
+          value: "slide-from-right-animation"
+        },
+        exitanimation: {
+          type: String,
+          value: "slide-left-animation"
+        },
+        viewKey: String,
+        mypatient: Object
+      },
+
+      observers: [
+        'mypatientChanged(mypatient)',
+        'selectedPageChanged(selectedPage)'
+      ],
+
+      mypatientChanged(e) {
+        if (e.length > 0) {
+          this.email = e[0].personal.email;
+          this.fname = e[0].personal.firstname;
+          this.mname = e[0].personal.middlename;
+          this.lname = e[0].personal.lastname;
+          this.bday = e[0].personal.birthday;
+          this.age = e[0].personal.age;
+          this.contact = e[0].personal.contact;
+          this.address = e[0].personal.address;
+          this.occupation = e[0].personal.occupation;
+          this.employer = e[0].personal.employer;
+          this.emp_phone = e[0].personal.emp_phone;
+          this.sex = e[0].personal.sex;
+          this.status = e[0].personal.status;
+
+          this.card = e[0].insurance.card;
+          this.bdate = e[0].insurance.birthday;
+          this.in_address = e[0].insurance.address;
+          this.home_phone = e[0].insurance.home_phone;
+          this.indicate = e[0].insurance.primary_insurance;
+          this.p_relation = e[0].insurance.relationship;
+
+          this.name_e = e[0].emergency.name;
+          this.relation_e = e[0].emergency.relationship;
+          this.phone_e = e[0].emergency.home_phone;
+          this.work_phone = e[0].emergency.work_phone;
+        }
+      },
+
+      _print() {
+        var content = Polymer.dom(this.root).querySelector("#printMe").innerHTML;
+        var mywindow = window.open('', 'Print', 'height=600,width=800');
+        mywindow.document.write(content);
+        mywindow.print();
+      },
+
+      _showMini() {
+        Polymer.dom(this.root).querySelector("#more-fab").style.display = 'none';
+        Polymer.dom(this.root).querySelector("#less-fab").style.display = 'block';
+        Polymer.dom(this.root).querySelector(".fab-menu2").style.display = 'block';
+        Polymer.dom(this.root).querySelector(".fab-menu3").style.display = 'block';
+      },
+
+      _hideMini() {
+        Polymer.dom(this.root).querySelector("#more-fab").style.display = 'block';
+        Polymer.dom(this.root).querySelector("#less-fab").style.display = 'none';
+        Polymer.dom(this.root).querySelector(".fab-menu2").style.display = 'none';
+        Polymer.dom(this.root).querySelector(".fab-menu3").style.display = 'none';
+      },
+
+      _changepic() {
+        if (event.target.files[0]) {
+          Polymer.dom(this.root).querySelector("#profilePic").src = URL.createObjectURL(event.target.files[0]);
+        }
+      },
+
+      toggleDrawer() {
+        this.dispatchEvent(new CustomEvent('toggleDrawer', {
+          bubbles: true, composed: true, detail: {
+            narrow: this.$.narrow
+          }
+        }));
+        this.$.narrow = !this.$.narrow;
+      },
+
+      ready() {
+        this.selectedPage = 0;
+      },
+
+      selectedPageChanged(e) {
+        if (e == 0) {
+          this.entryanimation = "slide-from-right-animation";
+          this.exitanimation = "slide-left-animation";
+        }
+        else {
+          this.entryanimation = "slide-from-left-animation";
+          this.exitanimation = "slide-right-animation";
+        }
+      }
+    })
+  </script>
 </dom-module>

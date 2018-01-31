@@ -61,7 +61,8 @@
     "iron-selector": "^2.0.0",
     "webcomponentsjs": "^1.0.0",
     "iron-flex-layout": "^2.0.0",
-    "iron-behaviors": "^1.0.17"
+    "iron-behaviors": "^1.0.17",
+    "iron-a11y-keys-behavior": "^2.0.0"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0"
