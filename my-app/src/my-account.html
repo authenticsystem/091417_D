@@ -95,6 +95,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 width: 55%;
                 margin-left: 10px;
                 height: 5px;
+                display: none;
             }
 
             paper-button {
@@ -130,7 +131,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             <button class="btn">Change profile picture</button>
                             <input type="file" name="myfile" id="fileButton" on-tap="_upload" accept="image/*" />
                         </div>
-                        <progress value="0" max="100" id="uploader" style=" -webkit-appearance: none; width:100%; height:5px;">0%</progress>
+                        <progress value="0" max="100" id="uploader">0%</progress>
                     </div>
                     <div class="div2">
                         <div id="notChange">
@@ -374,6 +375,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     //upload file
                     var uploadTask = storageRef.put(file);
                     //update progressbar
+                    uploader.style.display = 'block';
                     uploadTask.on('state_changed',
 
                         function progress(snapshot) {

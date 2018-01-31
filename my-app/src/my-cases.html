@@ -202,7 +202,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                   <div main-title>Cases</div>
                   <!-- <div main-title hidden$="{{access}}">Opps!</div> -->
-                  <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+                  <!-- <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button> -->
                 </app-toolbar>
               </template>
 
@@ -364,7 +364,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       toggleSearch() {
-        // this.openSearch = true;
+        this.openSearch = true;
       }
 
       toggleReturn() {
