@@ -38,8 +38,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="my-email-verification.html">
 <link rel="lazy-import" href="my-account-link.html">
 <link rel="lazy-import" href="my-cases.html">
-<link rel="lazy-import" href="my-case-new.html">
-<link rel="lazy-import" href="my-case-edit.html">
 <link rel="lazy-import" href="my-reset-password.html">
 <link rel="lazy-import" href="my-billing.html">
 <link rel="lazy-import" href="my-collection.html">
@@ -312,10 +310,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <my-billing name="billing"></my-billing>
             <my-collection name="collection"></my-collection>
             <my-account-link name="account-link"></my-account-link>
-            <my-cases name="cases"></my-cases>
+            <my-cases name="cases" route="[[subroute]]"></my-cases>
             <my-help name="help"></my-help>
-            <my-case-new name="case-new"></my-case-new>
-            <my-case-edit name="case-edit"></my-case-edit>
             <my-view2 name="view2"></my-view2>
             <my-patients name="patients" route="[[subroute]]"></my-patients>
             <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>

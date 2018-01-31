@@ -7,6 +7,7 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
+
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
@@ -22,10 +23,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
-<link rel="import" href="my-icons.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="my-icons.html">
 
 <link rel="import" href="search-bar.html">
+<link rel="import" href="my-cases-new.html">
+<link rel="import" href="my-cases-view.html">
+<link rel="import" href="my-cases-edit.html">
 <!-- <link rel="import" href="shared-styles.html"> -->
 
 <dom-module id="my-cases">
@@ -46,6 +50,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         border-bottom: 1px solid #ddd;
         cursor: pointer;
         /* margin-bottom: 10px; */
+      }
+
+      .item:hover {
+        background: rgb(240, 240, 240);
       }
 
       .avatar {
@@ -77,9 +85,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: none;
       }
 
-      .item:hover {
-        background: rgb(240, 240, 240);
+      /* .item:hover .shortText::after {
+        content: ' [+]';
+        color: gray;
+      } */
+
+      .item.expanded:hover .shortText::after {
+        content: '';
       }
+
+      .item.expanded .longText {
+        display: block;
+      }
+
+      /* .item.expanded:hover .longText::after {
+        content: ' [–]';
+      } */
 
       .spacer {
         @apply --layout-flex;
@@ -114,6 +135,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           width: 50%;
           color: black;
         }
+
       }
 
       #tool1 {
@@ -164,69 +186,98 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-header-layout fullbleed has-scrolling-region>
-      <app-header fixed slot="header">
-        <template is="dom-if" if="{{!openSearch}}">
-          <app-toolbar primary id="tool1">
-            <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-            <div main-title>Cases</div>
-            <!-- <div main-title hidden$="{{access}}">Opps!</div> -->
-            <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
-          </app-toolbar>
-        </template>
+    <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail/:key" tail="{{detailRoute}}" data="{{detailData}}" active="{{detailActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route>
 
-        <template is="dom-if" if="{{openSearch}}">
-          <app-toolbar primary id="tool2">
-            <paper-icon-button id="btn-arrow" icon="my-icons:chevron-left" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-            <paper-search-bar id="search" query="{{search}}" disable-filter-button></paper-search-bar>
-            <template is="dom-if" if="{{search}}">
-              <paper-icon-button id="btn-clear" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
-            </template>
-            <paper-menu-button id="btn-menu" horizontal-align="right">
-              <paper-icon-button slot="dropdown-trigger" icon="my-icons:tune"></paper-icon-button>
-              <paper-listbox style="cursor:pointer" slot="dropdown-content" selected="{{filterBy}}">
-                <paper-item style="display:none;">Filter By</paper-item>
-                <paper-item>Filter1</paper-item>
-                <paper-item>Filter2</paper-item>
-              </paper-listbox>
-            </paper-menu-button>
-          </app-toolbar>
-        </template>
-      </app-header>
+    <!-- <iron-ajax auto url="src/data.json" last-response="{{items}}"></iron-ajax> -->
+    <div hidden$="{{!applicationActive}}">
+      <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+        <div name="">
+          <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+              <template is="dom-if" if="{{!openSearch}}">
+                <app-toolbar primary id="tool1">
+                  <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                  <div main-title>Cases</div>
+                  <!-- <div main-title hidden$="{{access}}">Opps!</div> -->
+                  <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+                </app-toolbar>
+              </template>
 
-      <iron-scroll-threshold id="threshold">
+              <template is="dom-if" if="{{openSearch}}">
+                <app-toolbar primary id="tool2">
+                  <paper-icon-button id="btn-arrow" icon="my-icons:chevron-left" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                  <paper-search-bar id="search" query="{{search}}" disable-filter-button></paper-search-bar>
+                  <template is="dom-if" if="{{search}}">
+                    <paper-icon-button id="btn-clear" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
+                  </template>
+                  <paper-menu-button id="btn-menu" horizontal-align="right">
+                    <paper-icon-button slot="dropdown-trigger" icon="my-icons:tune"></paper-icon-button>
+                    <paper-listbox style="cursor:pointer" slot="dropdown-content" selected="{{filterBy}}">
+                      <paper-item style="display:none;">Filter By</paper-item>
+                      <paper-item>By Firstname</paper-item>
+                      <paper-item>By Middlename</paper-item>
+                      <paper-item>By Lastname</paper-item>
+                    </paper-listbox>
+                  </paper-menu-button>
+                </app-toolbar>
+              </template>
+            </app-header>
 
-        <firebase-query id="query" path="/sampleDoctor/cases" data="{{mycases}}">
-        </firebase-query>
+            <iron-scroll-threshold id="threshold">
 
-        <iron-list items="[[mycases]]" as="item" selection-enabled multi-selection scroll-target="threshold">
-          <template>
-            <div class="divSeparator">
-              <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-                <iron-image class="avatar" sizing="contain" src="../images/user.png"></iron-image>
-                <div class="pad" on-tap="_selectThis">
-                  <div class="primary">[[item.case]]</div>
-                  <div class="shortText">[[item.description]]</div>
-                </div>
-                <paper-menu-button vertical-align="bottom" horizontal-align="right">
-                  <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
-                  <paper-listbox slot="dropdown-content">
-                    <paper-item on-tap="_editThis">Edit</paper-item>
-                    <paper-item>Delete</paper-item>
-                  </paper-listbox>
-                </paper-menu-button>
-                
-              </div>
-            </div>
-          </template>
-        </iron-list>
-      </iron-scroll-threshold>
+              <firebase-query id="query" path="/sampleDoctor/cases" data="{{mycases}}" order-by-child="{{filterChild}}" start-at="{{searchChild}}"
+                end-at="{{searchChild}}">
+              </firebase-query>
 
-    </app-header-layout>
+              <iron-list items="[[mycases]]" as="item" selection-enabled multi-selection scroll-target="threshold">
+                <template>
+                  <div class="divSeparator">
+                    <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                      <iron-image class="avatar" sizing="contain" src="../images/user.png"></iron-image>
+                      <div class="pad" id="{{item.$key}}" on-tap="_selectThis">
+                        <!-- <div class="primary">[[item.name.firstname]] [[item.name.middlename]] [[item.name.lastname]]</div> -->
+                        <div class="shortText">complain: [[item.complain]]</div>
+                      </div>
+                      <paper-menu-button vertical-align="bottom" horizontal-align="right">
+                        <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
+                        <paper-listbox slot="dropdown-content">
+                          <paper-item on-tap="_editThis" id="{{item.$key}}">Edit</paper-item>
+                          <paper-item>Delete</paper-item>
+                        </paper-listbox>
+                      </paper-menu-button>
+                    </div>
+                  </div>
+                </template>
+              </iron-list>
+            </iron-scroll-threshold>
 
-    <a href="/case-new">
-      <paper-fab class="fab-menu" icon="my-icons:add"></paper-fab>
-    </a>
+          </app-header-layout>
+
+          <a href="/cases/new" style="text-decoration: none;">
+            <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_caseNew"></paper-fab>
+          </a>
+        </div>
+
+        <div name="/new">
+          <div id="newcase"></div>
+          <my-cases-new id="d23" path="" prev-route="{{route.prefix}}"></my-cases-new>
+        </div>
+
+        <div name="view404">Not found.</div>
+      </iron-pages>
+    </div>
+
+    <div hidden$="{{!editActive}}">
+      <div id="caseedit"></div>
+      <my-cases-edit id="d25" edit-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-cases-edit>
+    </div>
+
+    <div hidden$="{{!detailActive}}">
+      <div id="casesview"></div>
+      <my-cases-view id="d26" view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-cases-view>
+    </div>
 
   </template>
 
@@ -251,12 +302,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: false,
             notify: true
           },
+          filterBy: {
+            type: Number,
+            value: 1
+          }
         };
+      }
+
+      static get observers() {
+        return [
+          '_searchChanged(search, filterBy)',
+        ];
+      }
+
+      _searchChanged(search, filter) {
+        if (search) {
+          if (filter) {
+            if (filter == 1) {
+              this.filterChild = 'personal/firstname';
+            }
+            if (filter == 2) {
+              this.filterChild = 'personal/middlename';
+            }
+            if (filter == 3) {
+              this.filterChild = 'personal/lastname';
+            }
+          }
+          this.searchChild = search;
+        }
+        else {
+          this.searchChild = '';
+        }
       }
 
       iconForItem(item) {
         return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';
       }
+
       getClassForItem(item, selected) {
         return selected ? 'item expanded' : 'item';
       }
@@ -283,9 +365,58 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.search = '';
       }
 
-      _editThis() {
+      _selectThis(e) {
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+        var node = Polymer.dom(this.root).querySelector("#casesview");
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-cases-edit");
+          newDiv.setAttribute("id", "d26");
+          newDiv.setAttribute("view-key", data_args);
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          window.location = '/cases/detail/' + data_args;
+          //if open existing
+          var currentDiv = document.getElementById("casesview");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
+      }
 
-        window.location = "/case-edit";
+      _editThis(e) {
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+        var node = Polymer.dom(this.root).querySelector("#caseedit");
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-cases-edit");
+          newDiv.setAttribute("id", "d25");
+          newDiv.setAttribute("edit-key", data_args);
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          window.location = '/cases/edit/' + data_args;
+          //if open existing
+          var currentDiv = document.getElementById("caseedit");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
+      }
+
+      _caseNew() {
+        var node = Polymer.dom(this.root).querySelector("#newcase");
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-cases-new");
+          newDiv.setAttribute("id", "d23");
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          //if open existing
+          var currentDiv = document.getElementById("newcase");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
       }
 
     }

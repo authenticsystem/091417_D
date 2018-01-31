@@ -26,7 +26,7 @@
 <!-- <link rel="import" href="suggest.html"> -->
 
 
-<dom-module id="my-case-new">
+<dom-module id="my-cases-new">
     <template>
         <style include="shared-styles">
             :host {
@@ -233,15 +233,15 @@
 
                     <!-- on-tap="_selectPage" data-args="4" -->
                     <paper-item id="healthRecords" on-tap="{{select(4)}}">
-                        <div class="circle-mini-last">5</div>
+                        <div class="circle-mini">5</div>
                         <span>Finalize</span>
                     </paper-item>
 
                     <!-- on-tap="_selectPage" data-args="5" -->
-                    <!-- <paper-item id="treatment" on-tap="{{select(5)}}">
+                    <paper-item id="treatment" on-tap="{{select(5)}}">
                         <div class="circle-mini-last">6</div>
-                        <span>Treatment</span>
-                    </paper-item> -->
+                        <span>Complete</span>
+                    </paper-item>
 
                     <!-- on-tap="_selectPage" data-args="6" -->
                     <!-- <paper-item id="nextVisit" on-tap="{{select(6)}}">
@@ -343,6 +343,21 @@
                             </div>
                         </div>
                     </neon-animatable>
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="docu-header">6. Completed</div>
+
+                            <div class="details">
+                                <paper-item>
+                                    <paper-item-body>
+                                        <div id="saveSuccess" style="color: green;">{{saveSuccess}}</div>
+                                        <div id="saveFailed" style="color: red;">{{saveError}}</div>
+                                    </paper-item-body>
+                                </paper-item>
+
+                            </div>
+                        </div>
+                    </neon-animatable>
 
                 </neon-animated-pages>
 
@@ -363,7 +378,7 @@
 
     <script>
         Polymer({
-            is: 'my-case-new',
+            is: 'my-cases-new',
 
             properties: {
                 narrow: {
@@ -392,15 +407,15 @@
                     value: ''
                 },
                 history: {
-                    type: Object,
+                    type: String,
                     value: ''
                 },
                 diagnosis: {
-                    type: Object,
+                    type: String,
                     value: ''
                 },
                 treatment: {
-                    type: Object,
+                    type: String,
                     value: ''
                 }
                 // users:{
@@ -441,7 +456,7 @@
             ready() {
                 this.selectedPage = 0;
                 this.favrighthide = false;
-                this.favlefthide=true;
+                this.favlefthide = true;
             },
 
             _select1(e) {
@@ -460,16 +475,16 @@
                             this.favlefthide = true;
 
                         }
-                        this.favrighthide = false;
+                        //         this.favrighthide = false;
 
                     }
-                    else {
-                        this.favlefthide = true;
-                        this.favrighthide = false;
-                    }
-                }
-                else {
-                    this.selectedPage = 4;
+                    //     else {
+                    //         this.favlefthide = true;
+                    //         this.favrighthide = false;
+                    //     }
+                    // }
+                    // else {
+                    //     this.selectedPage = 4;
                 }
 
             },
@@ -527,7 +542,7 @@
 
                     if (parseInt(this.selectedPage) == 4) {
 
-                        this.favlefthide = false; 
+                        this.favlefthide = false;
                         this.favrighthide = true;
                         //complete
                         var ref = firebase.database().ref("/sampleDoctor/cases");
@@ -537,31 +552,38 @@
                             diagnosis: this.diagnosis,
                             treatment: this.treatment
                         });
-
+                        if (push.key) {
+                            this.saveSuccess = 'Case successfully added.';
+                        }
+                        else {
+                            this.saveError = 'Opps! Something went wrong while saving new case.';
+                        }
                     }
+
+                
+            }
+                if(parseInt(this.selectedPage) !== 6) {
+
+                this.selectedPage = (parseInt(this.selectedPage) + 1);
+
+                if (parseInt(this.selectedPage) == 5) {
+
+                    Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                    Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
                 }
-                if (parseInt(this.selectedPage) !== 5) {
 
-                    this.selectedPage = (parseInt(this.selectedPage) + 1);
-
-                    if (parseInt(this.selectedPage) == 4) {
-
-                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
-                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
-                    }
-
-                    if (parseInt(this.selectedPage) == 4) {
-                        this.favlefthide = false;
-                        this.favrighthide = false;
-                    }
+                if (parseInt(this.selectedPage) == 5) {
+                    this.favlefthide = false;
+                    this.favrighthide = false;
                 }
+            }
 
                 else {
-                    this.selectedPage = 0;
-                    this.favlefthide = true;
-                    this.favrighthide = true;
-                }
-            },
+                this.selectedPage = 0;
+                this.favlefthide = true;
+                this.favrighthide = true;
+            }
+        },
 
         })
 
