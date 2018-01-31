@@ -265,15 +265,15 @@
                             <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
                         </a>
                         <div main-title>Add Case</div>
-                        <paper-menu-button>
+                        <!-- <paper-menu-button>
                             <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
                             <paper-listbox style="cursor:pointer" slot="dropdown-content">
                                 <paper-item>Discard</paper-item>
                                 <paper-item>Delete</paper-item>
                             </paper-listbox>
-                        </paper-menu-button>
+                        </paper-menu-button> -->
 
-                        <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="toggleDrawer"></paper-icon-button>
+                        <!-- <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="toggleDrawer"></paper-icon-button> -->
                     </app-toolbar>
                     <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3.5%;">
                         <img class="avatar" src="../images/user.png"></img>
@@ -333,7 +333,7 @@
                     </neon-animatable>
                     <neon-animatable>
                         <div class="docu">
-                            <div class="docu-header">4. Reiview Following Details</div>
+                            <div class="docu-header">5. Reiview Following Details</div>
                             <div class="details">
                                 <div>Complain: {{complain}}</div>
                                 <div>History: {{history}}</div>
@@ -510,8 +510,7 @@
                         if (this.selectedPage === 0) {
                             this.favlefthide = true;
                         }
-
-                        if (this.selectedPage == 3) {
+                        if (this.selectedPage == 4) {
                             this.favrighthide = true;
                         }
                         else {
@@ -527,7 +526,7 @@
                     }
                 }
                 else {
-                    this.selectedPage = 3;
+                    this.selectedPage = 4;
                 }
 
             },
@@ -536,7 +535,7 @@
                 this.entryanimation = "slide-from-right-animation";
                 this.exitanimation = "slide-left-animation";
                 if (parseInt(this.selectedPage) >= 0) {
-                    
+
 
                     if (parseInt(this.selectedPage) == 0) {
                         if (!this.complain) {
@@ -618,6 +617,10 @@
                     if (parseInt(this.selectedPage) == 4) {
                         this.favlefthide = false;
                         this.favrighthide = false;
+                    }
+                    else if(parseInt(this.selectedPage) == 5) {
+                        this.favlefthide = true;
+                        this.favrighthide = true;
                     }
                 }
 
