@@ -296,7 +296,7 @@
                                 <span>1. Complain</span>
                             </div>
                             <div class="details">
-                                <paper-textarea rows="10" value="{{complain}}"></paper-textarea>
+                                <paper-textarea rows="10" value="{{complain}}" readonly></paper-textarea>
                             </div>
 
                         </div>
@@ -309,7 +309,7 @@
                         <div class="docu">
                             <div class="docu-header">2. History</div>
                             <div class="details">
-                                <paper-textarea rows="10" value="{{history}}"></paper-textarea>
+                                <paper-textarea rows="10" value="{{history}}" readonly></paper-textarea>
                             </div>
                         </div>
                     </neon-animatable>
@@ -321,7 +321,7 @@
                         <div class="docu">
                             <div class="docu-header">3. Diagnosis</div>
                             <div class="detais">
-                                <paper-textarea rows="10" value="{{diagnosis}}"></paper-textarea>
+                                <paper-textarea rows="10" value="{{diagnosis}}" readonly></paper-textarea>
                             </div>
                         </div>
                     </neon-animatable>
@@ -330,7 +330,7 @@
                         <div class="docu">
                             <div class="docu-header">4. Treatment</div>
                             <div class="details">
-                                <paper-textarea rows="10" value="{{treatment}}"></paper-textarea>
+                                <paper-textarea rows="10" value="{{treatment}}" readonly></paper-textarea>
                             </div>
                         </div>
                     </neon-animatable>
@@ -367,10 +367,11 @@
             </app-header-layout>
 
             <div class="footer">
-                <div>
+                <div hidden$="[[favlefthide]]">
+
                     <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
                 </div>
-                <div>
+                <div hidden$="[[favrighthide]]">
                     <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
                 </div>
             </div>
@@ -487,21 +488,24 @@
                 this.entryanimation = "slide-from-right-animation";
                 this.exitanimation = "slide-left-animation";
                 if (parseInt(this.selectedPage) >= 0) {
-                    if (parseInt(this.selectedPage) == 1) {
+                    this.favlefthide = false;
+                    this.favrighthide = false;
+                }
+                // if (parseInt(this.selectedPage == 3)) {
+                //     this.favrighthide = true;
+                //     this.favlefthide=true;
+                // }
+
+                if (parseInt(this.selectedPage) !== 4) {
+                    this.selectedPage = (parseInt(this.selectedPage) + 1);
+
+                    if (parseInt(this.selectedPage) == 3) {
                         this.favlefthide = false;
                         this.favrighthide = true;
                     }
-                    else {
-                        this.favlefthide = false;
-                        this.favrighthide = false;
-                    }
-
-                    if (parseInt(this.selectedPage) !== 3) {
-                        this.selectedPage = (parseInt(this.selectedPage) + 1);
-                    }
-
-
                 }
+                
+                
                 else {
                     this.selectedPage = 0;
                     this.favlefthide = true;
@@ -510,41 +514,41 @@
 
 
 
-                    // if (parseInt(this.selectedPage) == 4) {
-                    //     //complete
-                    //     var ref = firebase.database().ref("/sampleDoctor/cases/"+this.editKey);
-                    //     var push = ref.update({
-                    //         complain: this.complain,
-                    //         history: this.history,
-                    //         diagnosis: this.diagnosis,
-                    //         treatment: this.treatment
-                    //     });
-                    //         this.saveSuccess = 'Case successfully updated.';
-                    // }
+                // if (parseInt(this.selectedPage) == 4) {
+                //     //complete
+                //     var ref = firebase.database().ref("/sampleDoctor/cases/"+this.editKey);
+                //     var push = ref.update({
+                //         complain: this.complain,
+                //         history: this.history,
+                //         diagnosis: this.diagnosis,
+                //         treatment: this.treatment
+                //     });
+                //         this.saveSuccess = 'Case successfully updated.';
+                // }
 
 
-            //     }
-            //     if (parseInt(this.selectedPage) !== 6) {
+                //     }
+                //     if (parseInt(this.selectedPage) !== 6) {
 
-            //         this.selectedPage = (parseInt(this.selectedPage) + 1);
+                //         this.selectedPage = (parseInt(this.selectedPage) + 1);
 
-            //         if (parseInt(this.selectedPage) == 5) {
+                //         if (parseInt(this.selectedPage) == 5) {
 
-            //             Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
-            //             Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
-            //         }
+                //             Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                //             Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                //         }
 
-            //         if (parseInt(this.selectedPage) == 5) {
-            //             this.favlefthide = false;
-            //             this.favrighthide = false;
-            //         }
-            //     }
+                //         if (parseInt(this.selectedPage) == 5) {
+                //             this.favlefthide = false;
+                //             this.favrighthide = false;
+                //         }
+                //     }
 
-            //     else {
-            //         this.selectedPage = 0;
-            //         this.favlefthide = true;
-            //         this.favrighthide = true;
-            //     }
+                //     else {
+                //         this.selectedPage = 0;
+                //         this.favlefthide = true;
+                //         this.favrighthide = true;
+                //     }
             },
 
         })

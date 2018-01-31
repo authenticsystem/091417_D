@@ -333,7 +333,7 @@
                     </neon-animatable>
                     <neon-animatable>
                         <div class="docu">
-                            <div class="docu-header">4. Reiview Following Details</div>
+                            <div class="docu-header">5. Reiview Following Details</div>
                             <div class="details">
                                 <div>Complain: {{complain}}</div>
                                 <div>History: {{history}}</div>
@@ -364,10 +364,10 @@
             </app-header-layout>
 
             <div class="footer">
-                <div>
+                <div hidden$="[[favlefthide]]">
                     <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
                 </div>
-                <div>
+                <div hidden$="[[favrighthide]]">
                     <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
                 </div>
             </div>
@@ -404,19 +404,23 @@
                 },
                 complain: {
                     type: String,
-                    value: ''
+                    value: '',
+                    observer: '_onComplain'
                 },
                 history: {
                     type: String,
-                    value: ''
+                    value: '',
+                    observer: '_onHistory'
                 },
                 diagnosis: {
                     type: String,
-                    value: ''
+                    value: '',
+                    observer: '_onDiagnosis'
                 },
                 treatment: {
                     type: String,
-                    value: ''
+                    value: '',
+                    observer: '_onTreatment'
                 }
                 // users:{
                 //     type: Array
@@ -455,90 +459,83 @@
             },
             ready() {
                 this.selectedPage = 0;
-                this.favrighthide = false;
+                this.favrighthide = true;
                 this.favlefthide = true;
+            },
+            _onComplain(complain) {
+                if (!complain) {
+                    this.favrighthide = true;
+                    this.favlefthide = true;
+                } else {
+                    this.favrighthide = false;
+                    this.favlefthide = true;
+                }
+            },
+            _onHistory(history) {
+                if (!history) {
+                    this.favrighthide = true;
+                    this.favlefthide = false;
+                } else {
+                    this.favlefthide = false;
+                    this.favrighthide = false;
+                }
+            },
+            _onDiagnosis(diagnosis) {
+                if (!diagnosis) {
+                    this.favrighthide = true;
+                    this.favlefthide = false;
+                } else {
+                    this.favlefthide = false;
+                    this.favrighthide = false;
+                }
+            },
+            _onTreatment(treatment) {
+                if (!treatment) {
+                    this.favrighthide = false;
+                    this.favlefthide = false;
+                } else {
+                    this.favlefthide = false;
+                    this.favrighthide = false;
+                }
             },
 
             _select1(e) {
                 this.entryanimation = "slide-from-left-animation";
                 this.exitanimation = "slide-right-animation";
 
-                if (parseInt(this.selectedPage) <= 4) {
+                if (parseInt(this.selectedPage) <= 5) {
                     if (parseInt(this.selectedPage) !== 0) {
                         this.selectedPage = (parseInt(this.selectedPage) - 1);
 
-                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
-                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
-
-
                         if (this.selectedPage === 0) {
                             this.favlefthide = true;
-
                         }
-                        //         this.favrighthide = false;
+
+                        if (this.selectedPage == 4) {
+                            this.favrighthide = true;
+                        }
+                        else {
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+                            this.favrighthide = false;
+                        }
 
                     }
-                    //     else {
-                    //         this.favlefthide = true;
-                    //         this.favrighthide = false;
-                    //     }
-                    // }
-                    // else {
-                    //     this.selectedPage = 4;
+                    else {
+                        this.favlefthide = true;
+                        this.favrighthide = false;
+                    }
+                }
+                else {
+                    this.selectedPage = 5;
                 }
 
             },
-
             _select2(e) {
 
                 this.entryanimation = "slide-from-right-animation";
                 this.exitanimation = "slide-left-animation";
                 if (parseInt(this.selectedPage) >= 0) {
-
-                    if (parseInt(this.selectedPage) == 0) {
-                        if (!this.complain) {
-                            this.favlefthide = false;
-                            this.favrighthide = true;
-                        }
-                        else {
-                            this.favlefthide = false;
-                            this.favrighthide = false;
-                        }
-                    }
-
-                    if (parseInt(this.selectedPage) == 1) {
-                        if (!this.history) {
-                            this.favlefthide = false;
-                            this.favrighthide = true;
-                        }
-                        else {
-                            this.favlefthide = false;
-                            this.favrighthide = false;
-                        }
-                    }
-
-                    if (parseInt(this.selectedPage) == 2) {
-                        if (!this.diagnosis) {
-                            this.favlefthide = false;
-                            this.favrighthide = true;
-                        }
-                        else {
-                            this.favlefthide = false;
-                            this.favrighthide = false;
-                        }
-                    }
-
-                    if (parseInt(this.selectedPage) == 3) {
-                        if (!this.treatment) {
-                            this.favlefthide = false;
-                            this.favrighthide = true;
-                        }
-                        else {
-                            this.favlefthide = false;
-                            this.favrighthide = false;
-                        }
-
-                    }
 
                     if (parseInt(this.selectedPage) == 4) {
 
@@ -560,30 +557,47 @@
                         }
                     }
 
-                
-            }
-                if(parseInt(this.selectedPage) !== 6) {
 
-                this.selectedPage = (parseInt(this.selectedPage) + 1);
-
-                if (parseInt(this.selectedPage) == 5) {
-
-                    Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
-                    Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
                 }
+                if (parseInt(this.selectedPage) !== 5) {
 
-                if (parseInt(this.selectedPage) == 5) {
+                    this.selectedPage = (parseInt(this.selectedPage) + 1);
+
+                    if (parseInt(this.selectedPage) == 4) {
+
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                    }
+                }
+                if (parseInt(this.selectedPage) == 4) {
                     this.favlefthide = false;
                     this.favrighthide = false;
                 }
-            }
+                else if (parseInt(this.selectedPage) == 5) {
+                    this.favlefthide = true;
+                    this.favrighthide = true;
+                }
+                else if (parseInt(this.selectedPage) == 3) {
+                    this.favlefthide = false;
+                    this.favrighthide = true;
+                }
+                else if (parseInt(this.selectedPage) == 2) {
+                    this.favlefthide = false;
+                    this.favrighthide = true;
+                }
+                else if (parseInt(this.selectedPage) == 1) {
+                    this.favlefthide = false;
+                    this.favrighthide = true;
+                }
+
 
                 else {
-                this.selectedPage = 0;
-                this.favlefthide = true;
-                this.favrighthide = true;
-            }
-        },
+                    this.selectedPage = 0;
+                    this.favlefthide = true;
+                    this.favrighthide = true;
+                }
+
+            },
 
         })
 
