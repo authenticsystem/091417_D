@@ -276,7 +276,7 @@
                             </paper-listbox>
                         </paper-menu-button> -->
 
-                        <!-- <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="toggleDrawer"></paper-icon-button> -->
+                        <paper-icon-button noink style="color: white;" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                     </app-toolbar>
                     <!-- <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3.5%;">
                         <img class="avatar" src="../images/user.png"></img>
@@ -336,12 +336,36 @@
                     </neon-animatable>
                     <neon-animatable>
                         <div class="docu">
-                            <div class="docu-header">5. Reiview Following Details</div>
+                            <div class="docu-header">5. Finalize</div>
                             <div class="details">
-                                <div>Complain: {{complain}}</div>
+
+                                <div style="margin-bottom:10px;">Please review the following details:</div>
+                                <table>
+                                    <tr>
+                                        <td>Complain</td>
+                                        <td>:</td>
+                                        <td>{{complain}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>History</td>
+                                        <td>:</td>
+                                        <td>{{history}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Diagnosis</td>
+                                        <td>:</td>
+                                        <td>{{diagnosis}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Treatment</td>
+                                        <td>:</td>
+                                        <td>{{treatment}}</td>
+                                    </tr>
+                                </table>
+                                <!-- <div>Complain: {{complain}}</div>
                                 <div>History: {{history}}</div>
                                 <div>Diagnosis: {{diagnosis}}</div>
-                                <div>Treatment: {{treatment}}</div>
+                                <div>Treatment: {{treatment}}</div> -->
 
                             </div>
                         </div>
