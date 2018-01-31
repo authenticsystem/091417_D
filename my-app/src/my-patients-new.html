@@ -209,7 +209,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </paper-listbox>
             </paper-menu-button>
             <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button> -->
-            <!-- <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button> -->
+            <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle></paper-icon-button>
           </app-toolbar>
         </app-header>
 
@@ -384,7 +384,127 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div class="details">
                 <div style="margin-bottom:10px;">Please review the following details:</div>
                 <div style="font-weight:bold">Basic Information</div>
-                <div style="margin-left:10px;">
+
+                <table>
+                  <tr>
+                    <td>Email address</td>
+                    <td>:</td>
+                    <td>{{email}}</td>
+                  </tr>
+                  <tr>
+                    <td>Firstname</td>
+                    <td>:</td>
+                    <td>{{fname}}</td>
+                  </tr>
+                  <tr>
+                    <td>Middlename</td>
+                    <td>:</td>
+                    <td>{{mname}}</td>
+                  </tr>
+                  <tr>
+                    <td>Lastname</td>
+                    <td>:</td>
+                    <td>{{lname}}</td>
+                  </tr>
+                  <tr>
+                    <td>Birth date</td>
+                    <td>:</td>
+                    <td>{{bday}}</td>
+                  </tr>
+                  <tr>
+                    <td>Age</td>
+                    <td>:</td>
+                    <td>{{age}}</td>
+                  </tr>
+                  <tr>
+                    <td>Marital Status</td>
+                    <td>:</td>
+                    <td>{{stat}}</td>
+                  </tr>
+                  <tr>
+                    <td>Sex</td>
+                    <td>:</td>
+                    <td>{{gender}}</td>
+                  </tr>
+                  <tr>
+                    <td>Contact no</td>
+                    <td>:</td>
+                    <td>{{contact}}</td>
+                  </tr>
+                  <tr>
+                    <td>Street address</td>
+                    <td>:</td>
+                    <td>{{address}}</td>
+                  </tr>
+                  <tr>
+                    <td>Occupation</td>
+                    <td>:</td>
+                    <td>{{occupation}}</td>
+                  </tr>
+                  <tr>
+                    <td>Employer</td>
+                    <td>:</td>
+                    <td>{{occupation}}</td>
+                  </tr>
+                  <tr>
+                    <td>Employer phone no</td>
+                    <td>:</td>
+                    <td>{{emp_phone}}</td>
+                  </tr>
+                </table>
+
+                <br>
+                <div style="font-weight:bold">Insurance</div>
+                <table>
+                  <tr>
+                    <td>ID Card no</td>
+                    <td>:</td>
+                    <td>{{card}}</td>
+                  </tr>
+                  <tr>
+                    <td>Birth date</td>
+                    <td>:</td>
+                    <td>{{bdate}}</td>
+                  </tr>
+                  <tr>
+                    <td>address</td>
+                    <td>:</td>
+                    <td>{{in_address}}</td>
+                  </tr>
+                  <tr>
+                    <td>Relationship to patient</td>
+                    <td>:</td>
+                    <td>{{p_relation}}</td>
+                  </tr>
+                </table>
+
+                <br>
+                <div style="font-weight:bold">In-case of emergency</div>
+                <table>
+                  <tr>
+                    <td>Name</td>
+                    <td>:</td>
+                    <td>{{name_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>Relationship to patient</td>
+                    <td>:</td>
+                    <td>{{relation_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>Home phone no</td>
+                    <td>:</td>
+                    <td>{{phone_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>Work phone no</td>
+                    <td>:</td>
+                    <td>{{work_phone}}</td>
+                  </tr>
+                </table>
+
+
+                <!-- <div style="margin-left:10px;">
                   <div>Email address: {{email}}</div>
                   <div>Firstname: {{fname}}</div>
                   <div>Middlename: {{mname}}</div>
@@ -414,7 +534,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <div>Relationship to patient: {{relation_e}}</div>
                   <div>Home phone no: {{phone_e}}</div>
                   <div>Work phone no: {{work_phone}}</div>
-                </div>
+                </div> -->
               </div>
             </div>
           </neon-animatable>
