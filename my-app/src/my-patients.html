@@ -25,6 +25,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="my-icons.html">
 
 <link rel="import" href="search-bar.html">
@@ -197,6 +198,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: var(--paper-green-500);
         color: white;
       }
+
+      paper-toast {
+        width: 300px;
+        margin-left: calc(50vw - 150px);
+      }
     </style>
 
     <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
@@ -243,6 +249,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <firebase-query id="query" path="/sampleDoctor/patients" data="{{mypatients}}" order-by-child="{{filterChild}}" start-at="{{searchChild}}"
                 end-at="{{searchChild}}">
               </firebase-query>
+
+              <paper-toast id="toastResetP" text="" duration="4000"></paper-toast>
 
               <iron-list items="[[mypatients]]" as="item" selection-enabled multi-selection scroll-target="threshold">
                 <template>
@@ -389,10 +397,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _deletePatient(e) {
+        var toast = Polymer.dom(this.root).querySelector("#toastResetP");
         var deleteMe = Polymer.dom(e).rootTarget.getAttribute("alt");
         var ref = firebase.database().ref('/sampleDoctor/patients');
         ref.child(deleteMe).remove();
         Polymer.dom(this.root).querySelector("#deleteDialog").close();
+        toast.opened = true;
+        toast.text = "Delete successfully.";
+
       }
 
       _openDelete(e) {
