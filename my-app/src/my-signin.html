@@ -7,6 +7,7 @@
 <link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
@@ -14,6 +15,7 @@
 
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 
 <dom-module id="my-signin">
     <template>
@@ -86,6 +88,9 @@
         <firebase-auth id="auth" user="{{user}}" provider="password" on-error="handleError"></firebase-auth>
 
         <div class="main-container">
+                
+            <paper-toast id="toastResetP" text="" duration="5000"></paper-toast>
+
             <a style="text-decoration:none;" href="/">
                 <iron-image placeholder="images/manifest/icon-512x512.png" data-src="images/manifest/icon-512x512.png" sizing="cover" preload
                     fade style="width:128px; height:128px;"></iron-image>
@@ -118,6 +123,7 @@
                 <div class="action">
                     <paper-button received-focus-from-keyboard id="next" class="green" on-tap="_signIn">next</paper-button>
                 </div>
+                <paper-spinner id="spinnerNext" active style="float:right; margin-right:10px; display:none"></paper-spinner>
             </div>
         </div>
 
@@ -127,12 +133,35 @@
         Polymer({
             is: 'my-signin',
 
+            properties:{
+                email:{
+                    type: String,
+                    observer: 'emailChanged'
+                },
+                password:{
+                    type: String,
+                    observer: 'passwordChanged'
+                }
+            },
+
             handleError() {
                 Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                 this.validationMessage = 'Invalid email or password.';
             },
+            
+            emailChanged(){
+                Polymer.dom(this.root).querySelector("#spinnerNext").style.display="none";
+                Polymer.dom(this.root).querySelector("#next").disabled=false;
+            },
+
+            passwordChanged(){
+                Polymer.dom(this.root).querySelector("#spinnerNext").style.display="none";
+                Polymer.dom(this.root).querySelector("#next").disabled=false;
+            },
 
             _signIn() {
+                Polymer.dom(this.root).querySelector("#spinnerNext").style.display="block";
+                Polymer.dom(this.root).querySelector("#next").disabled=true;
                 if (!this.email) {
                     Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                     this.validationMessage = 'Please enter your email.';
@@ -142,13 +171,15 @@
                     this.validationMessage = 'Please enter your password.';
                 }
                 else {
+                    var toast = Polymer.dom(this.root).querySelector("#toastResetP");
                     this.$.auth.signInWithEmailAndPassword(this.email, this.password)
                         .then(function (response) {
                             app = this.document.querySelector('my-app');
                             app.set('route.path', '/');
                         })
                         .catch(function (error) {
-
+                        toast.opened = true;
+                        toast.text = error.message;
                         });
                 }
             }

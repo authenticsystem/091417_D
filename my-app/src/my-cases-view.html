@@ -208,26 +208,26 @@
                 <div class="mnu" role="listbox">
                     <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
                     <!-- on-tap="_selectPage" data-args="0" -->
-                    <paper-item id="patientInfo" on-tap="{{select(0)}}">
+                    <paper-item id="chiefComplain" on-tap="{{select(0)}}">
                         <div class="circle-mini-first">1</div>
                         <span>Chief Complain</span>
                     </paper-item>
 
                     <!-- on-tap="_selectPage" data-args="1" -->
-                    <paper-item id="prevCases" on-tap="{{select(1)}}">
+                    <paper-item id="history" on-tap="{{select(1)}}">
                         <div class="circle-mini">2</div>
                         <span>History</span>
                     </paper-item>
 
                     <!-- on-tap="_selectPage" data-args="2" -->
-                    <paper-item id="history">
-                        <div class="circle-mini" on-tap="{{select(2)}}">3</div>
+                    <paper-item id="diagnosis" on-tap="{{select(2)}}">
+                        <div class="circle-mini">3</div>
                         <span>Diagnosis</span>
                     </paper-item>
 
                     <!-- on-tap="_selectPage" data-args="3" -->
-                    <paper-item id="diagnosis">
-                        <div class="circle-mini-last" on-tap="{{select(3)}}">4</div>
+                    <paper-item id="treatment" on-tap="{{select(3)}}">
+                        <div class="circle-mini-last">4</div>
                         <span>Treatment</span>
                     </paper-item>
 
@@ -368,7 +368,10 @@
 
             <div class="footer">
                 <div hidden$="[[favlefthide]]">
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/peter
                     <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
                 </div>
                 <div hidden$="[[favrighthide]]">
@@ -403,13 +406,15 @@
                     type: String,
                     value: "slide-left-animation"
                 },
+                route: Object,
+                routeData: Object,
                 favlefthide: {
                     type: Boolean,
                     value: true
                 },
                 favrighthide: {
                     type: Boolean,
-                    value: true
+                    value: false
                 },
                 complain: {
                     type: String,
@@ -451,8 +456,6 @@
             },
             ready() {
                 this.selectedPage = 0;
-                this.favrighthide = false;
-                this.favlefthide = true;
             },
 
             _select1(e) {
@@ -485,6 +488,7 @@
             },
 
             _select2(e) {
+                console.log(this.favrighthide);
                 this.entryanimation = "slide-from-right-animation";
                 this.exitanimation = "slide-left-animation";
                 if (parseInt(this.selectedPage) >= 0) {

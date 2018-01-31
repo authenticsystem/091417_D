@@ -21,6 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
@@ -47,6 +48,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="my-appointments.html">
 <link rel="lazy-import" href="my-patients.html">
 <link rel="lazy-import" href="my-queue.html">
+<link rel="lazy-import" href="my-map.html">
 <link rel="lazy-import" href="my-view404.html">
 
 
@@ -202,7 +204,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div style="height: 100%; overflow: auto;">
               <app-header fixed>
                 <app-toolbar>
-                  <iron-image class="avatar" sizing="contain" src="../images/user.png"></iron-image>
+                  <iron-image hidden$="{{!user.photoURL}}"class="avatar" sizing="contain" src="{{user.photoURL}}"></iron-image>
+                  <iron-icon hidden$="{{user.photoURL}}" class="avatar" icon="my-icons:account-circle" ></iron-icon>
                   <div class="pad">
                     <div class="primary">Dr. Liz Grimes</div>
                     <div class="shortText">MD</div>
@@ -213,7 +216,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <app-toolbar>
                   <div class="divHeaderLabelLocation">Location: (not set)</div>
                 </app-toolbar>
-                <paper-fab mini icon="my-icons:my-location"></paper-fab>
+                <paper-fab mini icon="my-icons:my-location" on-tap="_mymap"></paper-fab>
               </app-header>
 
               <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
@@ -316,6 +319,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <my-patients name="patients" route="[[subroute]]"></my-patients>
             <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
             <my-queue name="queue"></my-queue>
+            <my-map name="map"></my-map>
             <my-view404 name="view404"></my-view404>
           </iron-pages>
         </app-drawer-layout>
@@ -454,8 +458,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var drawerlayout = Polymer.dom(this.root).querySelector("#drawerLayout");
         drawerlayout.forceNarrow = e.detail.narrow;
       }
+
+      _mymap(){
+      window.location="/map";
     }
 
+    }
+    
     window.customElements.define(MyApp.is, MyApp);
   </script>
 </dom-module>
