@@ -196,7 +196,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <iron-scroll-threshold id="threshold">
 
-        <firebase-query id="query" path="/cases" data="{{mycases}}">
+        <firebase-query id="query" path="/sampleDoctor/cases" data="{{mycases}}">
         </firebase-query>
 
         <iron-list items="[[mycases]]" as="item" selection-enabled multi-selection scroll-target="threshold">
@@ -215,6 +215,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <paper-item>Delete</paper-item>
                   </paper-listbox>
                 </paper-menu-button>
+                
               </div>
             </div>
           </template>
@@ -283,6 +284,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _editThis() {
+
         window.location = "/case-edit";
       }
 
