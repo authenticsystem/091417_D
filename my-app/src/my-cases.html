@@ -238,7 +238,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <iron-image class="avatar" sizing="contain" src="../images/user.png"></iron-image>
                       <div class="pad" id="{{item.$key}}" on-tap="_selectThis">
                         <!-- <div class="primary">[[item.name.firstname]] [[item.name.middlename]] [[item.name.lastname]]</div> -->
-                        <div class="shortText">complain: [[item.complain]]</div>
+                        <div id="{{item.$key}}" class="shortText">complain: [[item.complain]]</div>
                       </div>
                       <paper-menu-button vertical-align="bottom" horizontal-align="right">
                         <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>

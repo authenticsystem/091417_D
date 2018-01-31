@@ -9,8 +9,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -42,6 +56,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 .divHolder {
                     display: block;
                 }
+
+                paper-menu-button {
+                    float: right;
+                    bottom: 16px;
+                }
             }
 
             @media (min-width: 768px) {
@@ -54,6 +73,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
                 .divHolder {
                     display: flex;
+                }
+
+                paper-menu-button {
+                    float: right;
+                    bottom: 26px;
                 }
             }
 
@@ -73,7 +97,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 height: 5px;
                 display: none;
             }
+
+            paper-button {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                width: 80px;
+            }
+
+            .green {
+                background: green;
+                color: white
+            }
         </style>
+
+        <firebase-auth id="auth" user="{{user}}" provider="google" on-error="showError"></firebase-auth>
 
         <app-header-layout fullbleed has-scrolling-region>
             <app-header fixed slot="header">
@@ -95,19 +133,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </div>
                     <div class="div2">
                         <div id="notChange">
-                            <paper-input label="Name" readonly value="Not defined"></paper-input>
-                            <paper-input label="Email" readonly value="Not defined"></paper-input>
+                            <paper-menu-button horizontal-align="right">
+                                <paper-icon-button title="More options" icon="my-icons:expand-more" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+                                <paper-listbox style="cursor:pointer" slot="dropdown-content">
+                                    <paper-item on-tap="_openChangeEmail">Change email</paper-item>
+                                    <paper-item on-tap="_openChangePassword">Change password</paper-item>
+                                </paper-listbox>
+                            </paper-menu-button>
+                            <paper-input label="Name" readonly value="{{read_name}}"></paper-input>
+                            <paper-input label="Email" readonly value="{{read_email}}"></paper-input>
                             <span style="font-size:14px;">Account not activated. Activate account
-                                <a href="/account-link">here</a>.</span>
-                            <br>
-                            <paper-button style="float:right;" raised on-tap="_update">Update</paper-button>
+                                <a href="/account-link">now</a>.</span>
+                            <!-- <br> -->
+                            <!-- <paper-button style="float:right;" raised on-tap="_update">Update</paper-button> -->
                         </div>
+
                         <div id="change" style="display:none">
-                            <paper-input label="New name" value="{{myname}}" on-keyup="_ack" required auto-validate></paper-input>
-                            <paper-input label="New email" type="email" value="{{myemail}}" on-keyup="_ack" required auto-validate></paper-input>
+                            <br>
+                            <br>
+                            <!-- <paper-input label="New name" value="{{myname}}" on-keyup="_ack" required auto-validate></paper-input> -->
+                            <paper-input label="New email" value="{{myemail}}" on-keyup="_ack" required auto-validate></paper-input>
                             <span style="color:red; font-size:12px">{{msg}}</span>
                             <br>
-                            <paper-button style="float:right;" raised on-tap="_save">Save</paper-button>
+                            <paper-button class="green" style="float:right;" on-tap="_validateEmail">Next</paper-button>
+                            <paper-button style="float:right;" on-tap="_notUpdate">Cancel</paper-button>
+                        </div>
+
+                        <div id="changePass" style="display:none">
+                            <paper-input label="New password" type="password" value="{{mypassword}}" on-keyup="_ack" required auto-validate></paper-input>
+                            <paper-input label="Confirm password" type="password" value="{{myconfirmpass}}" on-keyup="_ack" required auto-validate></paper-input>
+                            <span style="color:red; font-size:12px">{{msg}}</span>
+                            <br>
+                            <paper-button class="green" style="float:right;" on-tap="_validatePassword">Next</paper-button>
                             <paper-button style="float:right;" on-tap="_notUpdate">Cancel</paper-button>
                         </div>
                     </div>
@@ -115,6 +172,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
 
         </app-header-layout>
+
+        <paper-dialog id="reAuth" confirm-button="Done">
+            <h3 style="margin-bottom:-1em;">Re-authentication required</h3>
+            <div style="color:red; font-size:13px;margin-bottom:-1em;">{{validationMessage}}</div>
+            <paper-input on-keyup="_ack" style="margin-bottom:-1em;" label="Email" value="{{email}}" always-float-label id="email"></paper-input>
+            <paper-input on-keyup="_ack" label="Password" always-float-label type="password" value={{password}} id="email"></paper-input>
+            <div class="buttons" style="text-align:center">
+                <div class="action">
+                    <!-- <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>Cancel</paper-button> -->
+                    <paper-button on-tap="_update" style="background:rgb(207, 206, 206);">Submit</paper-button>
+                </div>
+            </div>
+        </paper-dialog>
+
     </template>
 
     <script>
@@ -128,43 +199,158 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     type: Boolean,
                     value: false
                 },
+                user: {
+                    type: Object,
+                    observer: 'userChanged'
+                },
+                read_name: {
+                    type: String,
+                    value: 'Not defined'
+                }
             },
 
-            _update() {
+            userChanged() {
+                if (this.user) {
+                    this.read_email = this.user.email;
+                    if (this.user.displayName) {
+                        this.read_name = this.user.displayName;
+                    }
+                }
+            },
+
+            _openChangePassword() {
+                Polymer.dom(this.root).querySelector("#notChange").setAttribute("style", "display: none;");
+                Polymer.dom(this.root).querySelector("#changePass").setAttribute("style", "display: block;");
+            },
+
+            _openChangeEmail() {
                 Polymer.dom(this.root).querySelector("#notChange").setAttribute("style", "display: none;");
                 Polymer.dom(this.root).querySelector("#change").setAttribute("style", "display: block;");
             },
 
-            _notUpdate() {
-                Polymer.dom(this.root).querySelector("#change").setAttribute("style", "display: none;");
-                Polymer.dom(this.root).querySelector("#notChange").setAttribute("style", "display: block;");
-                this.msg = '';
-            },
-
-            _save() {
-                if (this.myname && this.myemail) {
-                    this.msg = 'uki';
+            _validatePassword() {
+                if (!this.mypassword) {
+                    this.msg = "Please enter your new password.";
+                }
+                else if (!this.myconfirmpass) {
+                    this.msg = "Please confirm your password.";
+                }
+                else if (this.myconfirmpass != this.mypassword) {
+                    this.msg = "Your password do not match.";
+                }
+                else if (this.mypassword.length < 6) {
+                    this.msg = 'Password must be greater than or equal to six.';
                 }
                 else {
-                    this.msg = "Please dont leave any field empty."
+                    Polymer.dom(this.root).querySelector("#reAuth").open();
+                    this.msg = '';
+                }
+            },
+
+            _validateEmail() {
+                if (!this.myemail) {
+                    this.msg = "Please enter your new email address.";
+                }
+                else {
+                    var atpos = this.myemail.indexOf("@");
+                    var dotpos = this.myemail.lastIndexOf(".");
+
+                    if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= this.myemail.length) {
+                        this.msg = 'Invalid email address.';
+                    }
+                    else {
+                        Polymer.dom(this.root).querySelector("#reAuth").open();
+                        this.msg = '';
+                    }
+                }
+            },
+
+            _update() {
+                if (!this.email) {
+                    this.validationMessage = 'Please enter email.';
+                }
+                else if (!this.password) {
+                    this.validationMessage = 'Please enter password.';
+                }
+                else {
+                    this.validationMessage = '';
+
+                    if (this.mypassword) {
+                        var myNewPass = this.mypassword;
+                        var email = this.email;
+                        this.$.auth
+                            .signInWithEmailAndPassword(email, this.password)
+                            .then(function (user) {
+                                user.updatePassword(myNewPass)
+                                    .then(function () {
+                                        firebase.auth()
+                                            .signInWithEmailAndPassword(email, myNewPass)
+                                            .then(function () {
+                                                window.location.reload();
+                                            });
+                                    });
+                            })
+                            .catch((error) => {
+                                // console.log(error);
+                            });
+                    }
+                    else {
+                        var myNewEmail = this.myemail;
+                        this.$.auth
+                            .signInWithEmailAndPassword(this.email, this.password)
+                            .then(function (user) {
+                                user.updateEmail(myNewEmail)
+                                    .then(function () {
+                                        window.location = '';
+                                    });
+                            })
+                            .catch((error) => {
+                                // console.log(error);
+                            });
+                    }
+                }
+            },
+
+            showError() {
+                this.validationMessage = 'Invalid email or password.';
+            },
+
+            _notUpdate() {
+                Polymer.dom(this.root).querySelector("#change").setAttribute("style", "display: none;");
+                Polymer.dom(this.root).querySelector("#changePass").setAttribute("style", "display: none;");
+                Polymer.dom(this.root).querySelector("#notChange").setAttribute("style", "display: block;");
+                this.msg = '';
+                if (this.myconfirmpass) {
+                    this.myconfirmpass = '';
                 }
             },
 
             _ack() {
-                this.msg = '';
-            },
-
-            _role(e) {
-                if (Object.keys(e).length > 0) {
-                    this.verified = true;
-                    if (e[0].role) return e[0].role;
-                    else return 'Role not yet assign'
+                this.validationMessage = '';
+                if (this.myconfirmpass) {
+                    if (this.myconfirmpass != this.mypassword) {
+                        this.msg = 'Your password do not match.';
+                    }
+                    else {
+                        this.msg = '';
+                    }
                 }
                 else {
-                    this.verified = false;
-                    return 'Role Unknown'
-                };
+                    this.msg = '';
+                }
             },
+
+            // _role(e) {
+            //     if (Object.keys(e).length > 0) {
+            //         this.verified = true;
+            //         if (e[0].role) return e[0].role;
+            //         else return 'Role not yet assign'
+            //     }
+            //     else {
+            //         this.verified = false;
+            //         return 'Role Unknown'
+            //     };
+            // },
 
             toggleDrawer() {
                 this.dispatchEvent(new CustomEvent('toggleDrawer', {

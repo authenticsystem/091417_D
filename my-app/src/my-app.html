@@ -305,7 +305,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-drawer>
           <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <my-dashboard name="dashboard"></my-dashboard>
-            <my-account name="account"></my-account>
+            <my-account user={{user}} name="account"></my-account>
             <my-appointments name="appointments"></my-appointments>
             <my-billing name="billing"></my-billing>
             <my-collection name="collection"></my-collection>
