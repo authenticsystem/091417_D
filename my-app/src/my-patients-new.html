@@ -148,7 +148,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
         <div class="mnu" role="listbox">
-          <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
+          <!-- <iron-selector selected="profile" attr-for-selected="name"> -->
 
           <!-- on-tap="_selectPage" data-args="0" -->
           <!-- <paper-item id="lotdetails">
@@ -156,36 +156,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <span>Add to Queue</span>
           </paper-item> -->
 
-          <!-- on-tap="_selectPage" data-args="1" -->
-          <paper-item id="buyersinformation">
-            <div class="circle-mini-first">1</div>
-            <span>Profile Picture</span>
+          <!--  on-tap="_selectPage" id="0" -->
+          <paper-item id="0">
+            <div class="circle-mini-first" id="0">1</div>
+            <span id="0">Profile Picture</span>
           </paper-item>
 
           <!-- on-tap="_selectPage" data-args="2" -->
-          <paper-item id="samplecomputation">
-            <div class="circle-mini">2</div>
-            <span>Basic Information</span>
+          <paper-item id="1">
+            <div id="1" class="circle-mini">2</div>
+            <span id="1">Basic Information</span>
           </paper-item>
 
           <!-- on-tap="_selectPage" data-args="3" -->
-          <paper-item id="finalize">
-            <div class="circle-mini">3</div>
-            <span>Insurance</span>
+          <paper-item id="2">
+            <div id="2" class="circle-mini">3</div>
+            <span id="2">Insurance</span>
           </paper-item>
 
           <!-- on-tap="_selectPage" data-args="4" -->
-          <paper-item id="complete">
-            <div class="circle-mini">4</div>
-            <span>In-case of Emergency</span>
+          <paper-item id="3">
+            <div id="3" class="circle-mini">4</div>
+            <span id="3">In-case of Emergency</span>
           </paper-item>
 
-          <paper-item id="complete">
-            <div class="circle-mini">5</div>
-            <span>Finalize</span>
+          <paper-item id="4">
+            <div id="4" class="circle-mini">5</div>
+            <span id="4">Finalize</span>
           </paper-item>
 
-          <paper-item id="complete">
+          <paper-item>
             <div class="circle-mini-last">6</div>
             <span>Completed</span>
           </paper-item>
@@ -201,14 +201,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
             </a>
             <div main-title>Add Patient</div>
-            <paper-menu-button>
+            <!-- <paper-menu-button>
               <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
               <paper-listbox slot="dropdown-content" style="cursor:pointer">
                 <paper-item>Discard</paper-item>
                 <paper-item>Delete</paper-item>
               </paper-listbox>
             </paper-menu-button>
-            <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button>
+            <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button> -->
             <!-- <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button> -->
           </app-toolbar>
         </app-header>
@@ -494,6 +494,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
         'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
       ],
+
+      // _selectPage(e) {
+      //   var select = Polymer.dom(e).rootTarget.getAttribute("id");
+      //   this.selectedPage = select;
+      // },
 
       personalInfoChanged(email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
         if (sex == 0) {

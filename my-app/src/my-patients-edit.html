@@ -163,15 +163,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <a href="/patients">
               <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
             </a>
-            <div main-title>Add Patient</div>
-            <paper-menu-button>
+            <div main-title>Edit Patient</div>
+            <!-- <paper-menu-button horizontal-align="right">
               <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
               <paper-listbox slot="dropdown-content" style="cursor:pointer">
-                <paper-item>Discard</paper-item>
-                <paper-item>Delete</paper-item>
+                <paper-item>
+                  <a style="text-decoration:none" href="/patients">Discard</a>
+                </paper-item>
+                <paper-item on-tap="_openDelete">Delete</paper-item>
               </paper-listbox>
-            </paper-menu-button>
-            <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button>
+            </paper-menu-button> -->
+            <!-- <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button> -->
             <!-- <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button> -->
           </app-toolbar>
         </app-header>
