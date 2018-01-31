@@ -103,16 +103,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div class="div2">
                         <div id="notChange">
                             <span>
-                                <b style="font-size:26px;">Welcome to BaseEMR</b>
-                                <br>Enter your account key to continue.
+                                <b style="font-size:26px;">Activate your account</b>
+                                <br>Enter your account code to continue.
+                                <br>Don't have an account code? Contact BaseEMR administrator to get one.
                             </span>
-                            <paper-input label="Key" value="{{mykey}}" on-keyup="_ack" required auto-validate></paper-input>
+                            <paper-input label="Account code" value="{{mycode}}" on-keyup="_ack" required auto-validate></paper-input>
                             <br>
-                            <paper-button style="float:right;" raised on-tap="_update">Submit</paper-button>
+                            <paper-button style="float:right;" raised on-tap="_update">Next</paper-button>
                         </div>
                         <div id="change" style="display:none">
                             <span>
-                                <b style="font-size:26px;">Yey! Your almost done.</b>
+                                <b style="font-size:26px;">Verify if it is you</b>
                                 <br>Please enter the verification code that was sent on your mobile device.
                             </span>
                             <paper-input label="Verification code" value="{{mycode}}" on-keyup="_ack" required auto-validate></paper-input>
@@ -122,7 +123,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <div id="success" style="display:none">
                             <span>
                                 <b style="font-size:26px;">Yey! Your all set.</b>
-                                <br>Thank you for being a part of BaseEMR.
+                                <br>Your account has been activated. Thank you for joining BaseEMR.
                             </span>
                             <br>
                             <br>
