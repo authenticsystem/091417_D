@@ -24,6 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="my-icons.html">
 
 <link rel="import" href="search-bar.html">
@@ -53,7 +54,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .item:hover {
-        background: rgb(240, 240, 240);
+        background: rgba(104, 58, 183, .15);
       }
 
       .avatar {
@@ -184,6 +185,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-icon-button.menu {
         margin-right: 16px;
       }
+
+      .action paper-button {
+        height: 32px;
+        font-size: 12px;
+        font-weight: 400;
+        width: 80px;
+      }
+
+      paper-button.green {
+        background-color: var(--paper-green-500);
+        color: white;
+      }
     </style>
 
     <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
@@ -234,17 +247,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <iron-list items="[[mypatients]]" as="item" selection-enabled multi-selection scroll-target="threshold">
                 <template>
                   <div class="divSeparator">
-                    <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                    <div id="{{item.$key}}" class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
                       <iron-image class="avatar" sizing="contain" src="../images/user.png"></iron-image>
-                      <div class="pad" id="{{item.$key}}" on-tap="_selectThis">
-                        <div class="primary">[[item.personal.firstname]] [[item.personal.middlename]] [[item.personal.lastname]]</div>
-                        <div class="shortText">[[item.personal.address]]</div>
+                      <div id="{{item.$key}}" class="pad" on-tap="_selectThis">
+                        <div id="{{item.$key}}" class="primary">[[item.personal.firstname]] [[item.personal.middlename]] [[item.personal.lastname]]</div>
+                        <div id="{{item.$key}}" class="shortText">[[item.personal.address]]</div>
                       </div>
                       <paper-menu-button vertical-align="bottom" horizontal-align="right">
                         <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
                         <paper-listbox slot="dropdown-content">
                           <paper-item on-tap="_editThis" id="{{item.$key}}">Edit</paper-item>
-                          <paper-item>Delete</paper-item>
+                          <paper-item on-tap="_openDelete" id="{{item.$key}}">Delete</paper-item>
                         </paper-listbox>
                       </paper-menu-button>
                     </div>
@@ -278,6 +291,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div id="patientsview"></div>
       <my-patients-view id="d26" view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-patients-view>
     </div>
+
+    <paper-dialog id="deleteDialog" confirm-button="Done">
+      <h3>Are you sure you want to delete this patient?</h3>
+      <div class="buttons">
+        <div class="action">
+          <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>No</paper-button>
+          <paper-button id="dialBtn" on-tap="_deletePatient" toggles class="custom green">Yes</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
 
   </template>
 
@@ -363,6 +386,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       toggleClear() {
         this.search = '';
+      }
+
+      _deletePatient(e) {
+        var deleteMe = Polymer.dom(e).rootTarget.getAttribute("alt");
+        var ref = firebase.database().ref('/sampleDoctor/patients');
+        ref.child(deleteMe).remove();
+        Polymer.dom(this.root).querySelector("#deleteDialog").close();
+      }
+
+      _openDelete(e) {
+        var d_key = Polymer.dom(e).rootTarget.getAttribute("id");
+        var dialogBtn = Polymer.dom(this.root).querySelector("#dialBtn");
+        dialogBtn.setAttribute('alt', d_key);
+        Polymer.dom(this.root).querySelector("#deleteDialog").open();
       }
 
       _selectThis(e) {
