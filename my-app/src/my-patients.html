@@ -226,7 +226,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             <iron-scroll-threshold id="threshold">
 
-              <firebase-query id="query" path="/patients" data="{{mypatients}}">
+              <firebase-query id="query" path="sampleDoctor/patients" data="{{mypatients}}">
               </firebase-query>
 
               <iron-list items="[[mypatients]]" as="item" selection-enabled multi-selection scroll-target="threshold">
@@ -235,8 +235,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
                       <iron-image class="avatar" sizing="contain" src="../images/user.png"></iron-image>
                       <div class="pad" on-tap="_selectThis">
-                        <div class="primary">[[item.name.firstname]]</div>
-                        <div class="shortText">[[item.description]]</div>
+                        <div class="primary">[[item.personal.firstname]]</div>
+                        <div class="shortText">[[item.personal.description]]</div>
                       </div>
                       <paper-menu-button vertical-align="bottom" horizontal-align="right">
                         <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>

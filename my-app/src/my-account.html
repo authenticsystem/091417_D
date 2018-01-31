@@ -11,6 +11,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -71,7 +73,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 width: 55%;
                 margin-left: 10px;
                 height: 5px;
-                display: none;
             }
         </style>
 
@@ -86,17 +87,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="card">
                 <div class="divHolder">
                     <div class="div1">
-                        <img style="width:200px; border-radius:50%;" src="../images/user.png">
+                        <iron-icon hidden$="{{user.photoURL}}" icon="my-icons:account-circle" style=" height:180px;width:180px; max-width:180px; border-radius: 50%; object-fit: cover; object-position: center"></iron-icon>
+                        <iron-image hidden$="{{!user.photoURL}}" sizing="contain" src="{{user.photoURL}}" style=" height:180px;width:180px; max-width:180px; border-radius: 50%; object-fit: cover; object-position: center"></iron-image>
+                        <!-- <img $hidden="{{!user.photoURL}}" style="width:200px; border-radius:50%;" src="../images/user.png"> -->
                         <div class="upload-btn-wrapper">
                             <button class="btn">Change profile picture</button>
-                            <input type="file" name="myfile" accept="image/*" />
+                            <input type="file" name="myfile" id="fileButton" on-tap="_upload" accept="image/*" />
                         </div>
-                        <progress value="0" max="100" id="uploader">0%</progress>
+                        <progress value="0" max="100" id="uploader" style=" -webkit-appearance: none; width:100%; height:5px;">0%</progress>
                     </div>
                     <div class="div2">
                         <div id="notChange">
                             <paper-input label="Name" readonly value="Not defined"></paper-input>
-                            <paper-input label="Email" readonly value="Not defined"></paper-input>
+                            <paper-input label="Email" readonly value="{{user.email}}"></paper-input>
                             <span style="font-size:14px;">Account not activated. Activate account
                                 <a href="/account-link">here</a>.</span>
                             <br>
@@ -174,6 +177,58 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }));
                 this.$.narrow = !this.$.narrow;
             },
+
+            _upload(e) {
+                var fileButton = Polymer.dom(this.root).querySelector("#fileButton");
+                var uploader = Polymer.dom(this.root).querySelector("#uploader");
+
+                fileButton.addEventListener('change', function (e) {
+                    //get file
+                    var file = e.target.files[0];
+                    //create storage
+                    var storageRef = firebase.storage().ref('profilePicture/' + file.name);
+                    //upload file
+                    var uploadTask = storageRef.put(file);
+                    //update progressbar
+                    uploadTask.on('state_changed',
+
+                        function progress(snapshot) {
+                            var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            uploader.value = percentage;
+                            if (percentage === 100) {
+                                var user = firebase.auth().currentUser;
+                                var photoUrl = user.photoURL;
+                                if (user) {
+                                    console.log(user.photoURL);
+                                    // Create a reference to the file to delete
+                                    var desertRef = firebase.storage().refFromURL(user.photoURL);
+                                    // Delete the file
+                                    desertRef.delete().then(function () {
+                                        // File deleted successfully
+                                    }).catch(function (error) {
+                                        // Uh-oh, an error occurred!
+                                    });
+                                }
+                            }
+                        },
+                        function error(err) {
+                        },
+                        function () {
+                            var downloadURL = uploadTask.snapshot.downloadURL;
+                            var user = firebase.auth().currentUser;
+                            user.updateProfile({
+                                photoURL: downloadURL
+                            }).then(function () {
+                                // Update successful.
+                                window.location.reload()
+                            }).catch(function (error) {
+                                // An error happened.
+                            });
+                        }
+
+                    );
+                });
+            }
             // openDialog() {
             //     var dialog = Polymer.dom(this.root).querySelector("#dialog");
             //     this.$.dialog.open();

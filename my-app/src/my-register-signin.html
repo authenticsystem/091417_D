@@ -5,6 +5,7 @@
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
 
 <link rel="import" href="shared-styles.html">
@@ -93,8 +94,9 @@
                 <div class="footer">
                     <div class="action">
                         <paper-button on-tap="_canCel">cancel</paper-button>
-                        <paper-button class="green" on-tap="_registerAccount">next</paper-button>
+                        <paper-button id="next" class="green" on-tap="_registerAccount">next</paper-button>
                     </div>
+                    <paper-spinner id="nextSpinner" active style="float:right; margin-right:10px; display:none"></paper-spinner>
                 </div>
             </div>
 
@@ -110,10 +112,20 @@
                 confirmPass: {
                     type: String,
                     observer: '_confirmPassChanged'
+                },
+                email: {
+                    type: String,
+                    observer: 'emailChanged'
+                },
+                password: {
+                    type: String,
+                    observer: 'passwordChanged'
                 }
             },
 
             _confirmPassChanged() {
+                Polymer.dom(this.root).querySelector("#nextSpinner").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#next").disabled = false;
                 if (this.confirmPass) {
                     if (this.confirmPass != this.password) {
                         Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
@@ -140,7 +152,19 @@
                 // window.location.reload();
             },
 
+            emailChanged(){
+                Polymer.dom(this.root).querySelector("#nextSpinner").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#next").disabled = false;
+            },
+
+            passwordChanged(){
+                Polymer.dom(this.root).querySelector("#nextSpinner").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#next").disabled = false;
+            },
+
             _registerAccount() {
+                Polymer.dom(this.root).querySelector("#nextSpinner").style.display = 'block';
+                Polymer.dom(this.root).querySelector("#next").disabled = true;
                 if (!this.email) {
                     Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                     this.validationMessage = 'Please enter your email address.';
@@ -172,7 +196,7 @@
                                 app.set('route.path', '/');
                                 user.sendEmailVerification().then(function () {
                                 });
-                            })
+                            });
                     }
                 }
             }

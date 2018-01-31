@@ -17,24 +17,24 @@
 <!-- <link rel="import" href="../bower_components/app-route/app-route.html"> -->
 <!-- <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html"> -->
-<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<!-- <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html"> -->
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../bower_components/datetime-picker/datetime-picker.html">
-<link rel="import" href="../bower_components/paper-suggest-textarea/paper-suggest-textarea.html">
+<!-- <link rel="import" href="../bower_components/datetime-picker/datetime-picker.html"> -->
+<!-- <link rel="import" href="../bower_components/paper-suggest-textare3-suggest-textarea.html"> -->
 
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
-<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
-<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<!-- <link rel="import" href="../bower_components/paper-toast/paper-toast.html"> -->
+<!-- <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html"> -->
 
-<link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html">
-<link rel="import" href="../bower_components/paper-time-input/paper-time-input.html">
-<link rel="import" href="../bower_components/app-media/app-media.html">
+<!-- <link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html"> -->
+<!-- <link rel="import" href="../bower_components/paper-time-input/paper-time-input.html"> -->
+<!-- <link rel="import" href="../bower_components/app-media/app-media.html"> -->
 
-<link rel="import" href="short-unique-id.html">
+<!-- <link rel="import" href="short-unique-id.html"> -->
 <!-- <link rel="import" href="suggest.html"> -->
 
 
@@ -277,7 +277,7 @@
                             </paper-listbox>
                         </paper-menu-button>
 
-                        <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button>
+                        <paper-icon-button noink style="color: white;" icon="my-icons:menu"  drawer-toggle on-tap="drawer.toggle()"></paper-icon-button>
                     </app-toolbar>
                     <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3.5%;">
                         <img class="avatar" src="../images/user.png"></img>
@@ -309,8 +309,7 @@
                     </neon-animatable>
 
                     <neon-animatable>
-                        <firebase-query path="/buyers" order-by-child='cellphone' equal-to='{{draftdata_buyerdetails_cellphone}}' limit-to-first=1
-                            data="{{buyersList}}"></firebase-query>
+                        
 
                         <div class="docu">
                             <div class="docu-header">2. Previous Cases</div>
@@ -322,9 +321,7 @@
                     </neon-animatable>
 
                     <neon-animatable>
-                        <firebase-query path="/agents" order-by-child='cellphone' equal-to='{{draftdata_agentdetails_cellphone}}' limit-to-first=1
-                            data="{{agentsList}}"></firebase-query>
-
+                       
                         <div class="docu">
                             <div class="docu-header">3. History</div>
                             <div class="detais">
