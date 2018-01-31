@@ -208,26 +208,26 @@
                 <div class="mnu" role="listbox">
                     <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
                     <!-- on-tap="_selectPage" data-args="0" -->
-                    <paper-item id="patientInfo" on-tap="{{select(0)}}">
+                    <paper-item id="chiefComplain" on-tap="{{select(0)}}">
                         <div class="circle-mini-first">1</div>
                         <span>Chief Complain</span>
                     </paper-item>
 
                     <!-- on-tap="_selectPage" data-args="1" -->
-                    <paper-item id="prevCases" on-tap="{{select(1)}}">
+                    <paper-item id="history" on-tap="{{select(1)}}">
                         <div class="circle-mini">2</div>
                         <span>History</span>
                     </paper-item>
 
                     <!-- on-tap="_selectPage" data-args="2" -->
-                    <paper-item id="history">
-                        <div class="circle-mini" on-tap="{{select(2)}}">3</div>
+                    <paper-item id="diagnosis" on-tap="{{select(2)}}">
+                        <div class="circle-mini">3</div>
                         <span>Diagnosis</span>
                     </paper-item>
 
                     <!-- on-tap="_selectPage" data-args="3" -->
-                    <paper-item id="diagnosis">
-                        <div class="circle-mini-last" on-tap="{{select(3)}}">4</div>
+                    <paper-item id="treatment" on-tap="{{select(3)}}">
+                        <div class="circle-mini-last">4</div>
                         <span>Treatment</span>
                     </paper-item>
 
@@ -276,7 +276,7 @@
                             </paper-listbox>
                         </paper-menu-button>
 
-                        <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="toggleDrawer"></paper-icon-button>
+                        <paper-icon-button noink style="color: white;" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                     </app-toolbar>
                     <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3.5%;">
                         <img class="avatar" src="../images/user.png"></img>
@@ -367,10 +367,10 @@
             </app-header-layout>
 
             <div class="footer">
-                <div>
+                <div hidden$="[[favlefthide]]">
                     <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
                 </div>
-                <div>
+                <div hidden$="[[favrighthide]]">
                     <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
                 </div>
             </div>
@@ -402,13 +402,15 @@
                     type: String,
                     value: "slide-left-animation"
                 },
+                route: Object,
+                routeData: Object,
                 favlefthide: {
                     type: Boolean,
                     value: true
                 },
                 favrighthide: {
                     type: Boolean,
-                    value: true
+                    value: false
                 },
                 complain: {
                     type: String,
@@ -450,8 +452,6 @@
             },
             ready() {
                 this.selectedPage = 0;
-                this.favrighthide = false;
-                this.favlefthide = true;
             },
 
             _select1(e) {
@@ -484,6 +484,7 @@
             },
 
             _select2(e) {
+                console.log(this.favrighthide);
                 this.entryanimation = "slide-from-right-animation";
                 this.exitanimation = "slide-left-animation";
                 if (parseInt(this.selectedPage) >= 0) {
@@ -496,9 +497,11 @@
                         this.favrighthide = false;
                     }
 
-                    if (parseInt(this.selectedPage) !== 3) {
+                    if (parseInt(this.selectedPage) !== 2) {
                         this.selectedPage = (parseInt(this.selectedPage) + 1);
                     }
+
+                    this.favrighthide = false;
 
 
                 }
