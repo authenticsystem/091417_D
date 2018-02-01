@@ -465,36 +465,40 @@
             _onComplain(complain) {
                 if (!complain) {
                     this.favrighthide = true;
-                    this.favlefthide = true;
+                    // this.favlefthide = true;
                 } else {
+                    this.complain = complain;
                     this.favrighthide = false;
-                    this.favlefthide = true;
+                    // this.favlefthide = true;
                 }
             },
             _onHistory(history) {
                 if (!history) {
                     this.favrighthide = true;
-                    this.favlefthide = false;
+                    // this.favlefthide = false;
                 } else {
-                    this.favlefthide = false;
+                    // this.favlefthide = false;
+                    this.history = history;
                     this.favrighthide = false;
                 }
             },
             _onDiagnosis(diagnosis) {
                 if (!diagnosis) {
                     this.favrighthide = true;
-                    this.favlefthide = false;
+                    // this.favlefthide = false;
                 } else {
-                    this.favlefthide = false;
+                    // this.favlefthide = false;
+                    this.diagnosis = diagnosis;
                     this.favrighthide = false;
                 }
             },
             _onTreatment(treatment) {
                 if (!treatment) {
                     this.favrighthide = false;
-                    this.favlefthide = false;
+                    // this.favlefthide = false;
                 } else {
-                    this.favlefthide = false;
+                    // this.favlefthide = false;
+                    this.treatment = treatment;
                     this.favrighthide = false;
                 }
             },
@@ -539,8 +543,8 @@
 
                     if (parseInt(this.selectedPage) == 4) {
 
-                        this.favlefthide = false;
-                        this.favrighthide = true;
+                        // this.favlefthide = false;
+                        // this.favrighthide = true;
                         //complete
                         var ref = firebase.database().ref("/sampleDoctor/cases");
                         var push = ref.push({
@@ -568,34 +572,60 @@
                         Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
                         Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
                     }
+                    if (parseInt(this.selectedPage) == 5) {
+                    this.favlefthide = true;
+                    this.favrighthide = true;
                 }
                 if (parseInt(this.selectedPage) == 4) {
                     this.favlefthide = false;
                     this.favrighthide = false;
                 }
-                else if (parseInt(this.selectedPage) == 5) {
-                    this.favlefthide = true;
-                    this.favrighthide = true;
-                }
-                else if (parseInt(this.selectedPage) == 3) {
-                    this.favlefthide = false;
-                    this.favrighthide = true;
-                }
-                else if (parseInt(this.selectedPage) == 2) {
-                    this.favlefthide = false;
-                    this.favrighthide = true;
-                }
-                else if (parseInt(this.selectedPage) == 1) {
+                if (parseInt(this.selectedPage) == 3) {
                     this.favlefthide = false;
                     this.favrighthide = true;
                 }
 
+            }
+            else {
+                        this.selectedPage = 0;
+                        this.favlefthide = true;
+                        this.favrighthide = true;
+                    }
+             
+                // if (parseInt(this.selectedPage) == 4) {
+                //     this.favlefthide = false;
+                //     this.favrighthide = false;
+                // }
 
-                else {
-                    this.selectedPage = 0;
-                    this.favlefthide = true;
-                    this.favrighthide = true;
-                }
+                // else if (parseInt(this.selectedPage) == 3) {
+                //     this.favlefthide = false;
+                //     this.favrighthide = true;
+                // }
+                // else if (parseInt(this.selectedPage) == 2) {
+                //     this.favlefthide = false;
+                //     this.favrighthide = true;
+                // }
+                // else if (parseInt(this.selectedPage) == 1) {
+                //     this.favlefthide = false;
+                //     this.favrighthide = true;
+                // }
+
+
+                // else {
+                //     if (parseInt(this.selectedPage) == 3) {
+                //         // this.favlefthide = true;
+                //         this.favrighthide = false;
+                //     }
+                //     else if (parseInt(this.selectedPage) == 2) {
+                //         // this.favlefthide = true;
+                //         this.favrighthide = false;
+                //     }
+                //     else if (parseInt(this.selectedPage) == 1) {
+                //         // this.favlefthide = true;
+                //         this.favrighthide = false;
+                //     }
+                   
+                // }
 
             },
 
