@@ -429,22 +429,18 @@
                 },
                 complain: {
                     type: String,
-                    value: '',
                     observer: '_onComplain'
                 },
                 history: {
                     type: String,
-                    value: '',
                     observer: '_onHistory'
                 },
                 diagnosis: {
                     type: String,
-                    value: '',
                     observer: '_onDiagnosis'
                 },
                 treatment: {
                     type: String,
-                    value: '',
                     observer: '_onTreatment'
                 }
                 // users:{
@@ -482,44 +478,41 @@
                 // this.$.narrow = !this.$.narrow;
                 // Polymer.dom(this.parentNode).removeChild(this);
             },
+
             ready() {
                 this.selectedPage = 0;
                 this.favrighthide = true;
                 this.favlefthide = true;
             },
+
             _onComplain(complain) {
                 if (!complain) {
                     this.favrighthide = true;
-                    this.favlefthide = true;
                 } else {
                     this.favrighthide = false;
-                    this.favlefthide = true;
                 }
             },
+
             _onHistory(history) {
                 if (!history) {
                     this.favrighthide = true;
-                    this.favlefthide = false;
                 } else {
-                    this.favlefthide = false;
                     this.favrighthide = false;
                 }
             },
+
             _onDiagnosis(diagnosis) {
                 if (!diagnosis) {
                     this.favrighthide = true;
-                    this.favlefthide = false;
                 } else {
-                    this.favlefthide = false;
                     this.favrighthide = false;
                 }
             },
+
             _onTreatment(treatment) {
                 if (!treatment) {
-                    this.favrighthide = false;
-                    this.favlefthide = false;
+                    this.favrighthide = true;
                 } else {
-                    this.favlefthide = false;
                     this.favrighthide = false;
                 }
             },
@@ -556,14 +549,15 @@
                 }
 
             },
-            _select2(e) {
 
+            _select2(e) {
                 this.entryanimation = "slide-from-right-animation";
                 this.exitanimation = "slide-left-animation";
                 if (parseInt(this.selectedPage) >= 0) {
 
-                    if (parseInt(this.selectedPage) == 4) {
+                    this.favlefthide = false;
 
+                    if (parseInt(this.selectedPage) == 4) {
                         this.favlefthide = false;
                         this.favrighthide = true;
                         //complete
@@ -582,40 +576,44 @@
                         }
                     }
 
+                    if (this.selectedPage == 0) {
+                        if (!this.history) {
+                            this.favrighthide = true;
+                        }
+                        else {
+                            this.favrighthide = false;
+                        }
+                    }
 
-                }
-                if (parseInt(this.selectedPage) !== 5) {
+                    if (this.selectedPage == 1) {
+                        if (!this.diagnosis) {
+                            this.favrighthide = true;
+                        }
+                        else {
+                            this.favrighthide = false;
+                        }
+                    }
 
-                    this.selectedPage = (parseInt(this.selectedPage) + 1);
+                    if (this.selectedPage == 2) {
+                        if (!this.treatment) {
+                            this.favrighthide = true;
+                        }
+                        else {
+                            this.favrighthide = false;
+                        }
+                    }
 
-                    if (parseInt(this.selectedPage) == 4) {
+                    if (parseInt(this.selectedPage) !== 5) {
 
-                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
-                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                        this.selectedPage = (parseInt(this.selectedPage) + 1);
+
+                        if (parseInt(this.selectedPage) == 4) {
+
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                        }
                     }
                 }
-                if (parseInt(this.selectedPage) == 4) {
-                    this.favlefthide = false;
-                    this.favrighthide = false;
-                }
-                else if (parseInt(this.selectedPage) == 5) {
-                    this.favlefthide = true;
-                    this.favrighthide = true;
-                }
-                else if (parseInt(this.selectedPage) == 3) {
-                    this.favlefthide = false;
-                    this.favrighthide = true;
-                }
-                else if (parseInt(this.selectedPage) == 2) {
-                    this.favlefthide = false;
-                    this.favrighthide = true;
-                }
-                else if (parseInt(this.selectedPage) == 1) {
-                    this.favlefthide = false;
-                    this.favrighthide = true;
-                }
-
-
                 else {
                     this.selectedPage = 0;
                     this.favlefthide = true;
