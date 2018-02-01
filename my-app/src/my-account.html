@@ -25,8 +25,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="short-unique-id.html">
 
 <dom-module id="my-account">
     <template>
@@ -182,8 +184,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-input on-keyup="_ack" label="Password" always-float-label type="password" value={{password}} id="email"></paper-input>
             <div class="buttons" style="text-align:center">
                 <div class="action">
+                    <paper-spinner id="nextSpinner" active style="top:7px; display:none;"></paper-spinner>
                     <!-- <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>Cancel</paper-button> -->
-                    <paper-button on-tap="_update" style="background:rgb(207, 206, 206);">Submit</paper-button>
+                    <paper-button id="nextBtn" on-tap="_update" style="background:rgb(207, 206, 206);">Submit</paper-button>
                 </div>
             </div>
         </paper-dialog>
@@ -270,14 +273,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _update() {
                 if (!this.email) {
                     this.validationMessage = 'Please enter email.';
+                    Polymer.dom(this.root).querySelector("#nextBtn").disabled = true;
                 }
                 else if (!this.password) {
                     this.validationMessage = 'Please enter password.';
+                    Polymer.dom(this.root).querySelector("#nextBtn").disabled = true;
                 }
                 else {
+                    var spinner = Polymer.dom(this.root).querySelector("#nextSpinner");
+                    var btn = Polymer.dom(this.root).querySelector("#nextBtn");
                     this.validationMessage = '';
 
                     if (this.mypassword) {
+                        btn.disabled = true;
+                        spinner.style.display = 'inline-block';
                         var myNewPass = this.mypassword;
                         var email = this.email;
                         this.$.auth
@@ -288,25 +297,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                         firebase.auth()
                                             .signInWithEmailAndPassword(email, myNewPass)
                                             .then(function () {
+                                                spinner.style.display = 'none';
                                                 window.location.reload();
                                             });
                                     });
                             })
                             .catch((error) => {
+                                spinner.style.display = 'none';
                                 // console.log(error);
                             });
                     }
                     else {
+                        btn.disabled = true;
+                        spinner.style.display = 'inline-block';
                         var myNewEmail = this.myemail;
                         this.$.auth
                             .signInWithEmailAndPassword(this.email, this.password)
                             .then(function (user) {
                                 user.updateEmail(myNewEmail)
                                     .then(function () {
+                                        spinner.style.display = 'none';
                                         window.location = '';
                                     });
                             })
                             .catch((error) => {
+                                spinner.style.display = 'none';
                                 // console.log(error);
                             });
                     }
@@ -328,6 +343,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
 
             _ack() {
+                Polymer.dom(this.root).querySelector("#nextBtn").disabled = false;
                 this.validationMessage = '';
                 if (this.myconfirmpass) {
                     if (this.myconfirmpass != this.mypassword) {
@@ -366,16 +382,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _upload(e) {
                 var fileButton = Polymer.dom(this.root).querySelector("#fileButton");
                 var uploader = Polymer.dom(this.root).querySelector("#uploader");
+                var pic_name = this.guid();
 
                 fileButton.addEventListener('change', function (e) {
                     //get file
                     var file = e.target.files[0];
                     //create storage
-                    var storageRef = firebase.storage().ref('profilePicture/' + file.name);
+                    var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
                     //upload file
                     var uploadTask = storageRef.put(file);
                     //update progressbar
-                    uploader.style.display = 'block';
+                    uploader.style.display = 'inline-block';
                     uploadTask.on('state_changed',
 
                         function progress(snapshot) {
@@ -385,7 +402,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 var user = firebase.auth().currentUser;
                                 var photoUrl = user.photoURL;
                                 if (user) {
-                                    console.log(user.photoURL);
+                                    // console.log(user.photoURL);
                                     // Create a reference to the file to delete
                                     var desertRef = firebase.storage().refFromURL(user.photoURL);
                                     // Delete the file
@@ -414,7 +431,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                     );
                 });
-            }
+            },
+
+            guid: function () {
+                var uid = new ShortUniqueId();
+                return uid.randomUUID(8);
+            },
             // openDialog() {
             //     var dialog = Polymer.dom(this.root).querySelector("#dialog");
             //     this.$.dialog.open();

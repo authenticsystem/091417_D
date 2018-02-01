@@ -138,7 +138,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .avatar {
         height: 50px;
         width: 50px;
-        border-radius: 20px;
+        border-radius: 50%;
         box-sizing: border-box;
         background-color: #DDD;
       }
@@ -197,44 +197,132 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <neon-animatable>
             <div class="docu" id="printMe">
               <div class="docu-header">
-                <img class="avatar" src="../images/user.png"></img>
+                <img class="avatar" src="{{p_profile}}"></img>
               </div>
               <br>
 
               <div class="details">
                 <div style="font-weight:bold">Basic Information</div>
-                <div style="margin-left:10px;">
-                  <div>Email address: {{email}}</div>
-                  <div>Firstname: {{fname}}</div>
-                  <div>Middlename: {{mname}}</div>
-                  <div>Lastname: {{lname}}</div>
-                  <div>Birth date: {{bday}}</div>
-                  <div>Age: {{age}}</div>
-                  <div>Marital Status: {{status}}</div>
-                  <div>Sex: {{sex}}</div>
-                  <div>Contact no: {{contact}}</div>
-                  <div>Street address: {{address}}</div>
-                  <div>Occupation: {{occupation}}</div>
-                  <div>Employer: {{employer}}</div>
-                  <div>Employer phone no: {{emp_phone}}</div>
-                </div>
+
+                <table>
+                  <tr>
+                    <td>Email address</td>
+                    <td>:</td>
+                    <td>{{email}}</td>
+                  </tr>
+                  <tr>
+                    <td>Firstname</td>
+                    <td>:</td>
+                    <td>{{fname}}</td>
+                  </tr>
+                  <tr>
+                    <td>Middlename</td>
+                    <td>:</td>
+                    <td>{{mname}}</td>
+                  </tr>
+                  <tr>
+                    <td>Lastname</td>
+                    <td>:</td>
+                    <td>{{lname}}</td>
+                  </tr>
+                  <tr>
+                    <td>Birth date</td>
+                    <td>:</td>
+                    <td>{{bday}}</td>
+                  </tr>
+                  <tr>
+                    <td>Age</td>
+                    <td>:</td>
+                    <td>{{age}}</td>
+                  </tr>
+                  <tr>
+                    <td>Marital Status</td>
+                    <td>:</td>
+                    <td>{{status}}</td>
+                  </tr>
+                  <tr>
+                    <td>Sex</td>
+                    <td>:</td>
+                    <td>{{sex}}</td>
+                  </tr>
+                  <tr>
+                    <td>Contact no</td>
+                    <td>:</td>
+                    <td>{{contact}}</td>
+                  </tr>
+                  <tr>
+                    <td>Street address</td>
+                    <td>:</td>
+                    <td>{{address}}</td>
+                  </tr>
+                  <tr>
+                    <td>Occupation</td>
+                    <td>:</td>
+                    <td>{{occupation}}</td>
+                  </tr>
+                  <tr>
+                    <td>Employer</td>
+                    <td>:</td>
+                    <td>{{occupation}}</td>
+                  </tr>
+                  <tr>
+                    <td>Employer phone no</td>
+                    <td>:</td>
+                    <td>{{emp_phone}}</td>
+                  </tr>
+                </table>
+
+                <br>
                 <div style="font-weight:bold">Insurance</div>
-                <div style="margin-left:10px;">
-                  <div>ID Card no: {{card}}</div>
-                  <div>Birth date: {{bdate}}</div>
-                  <div>address: {{in_address}}</div>
-                  <div>Home phone no: {{home_phone}}</div>
-                  <div>Primary insurance: {{indicate}}</div>
-                  <div>Relationship to patient: {{p_relation}}</div>
-                </div>
+                <table>
+                  <tr>
+                    <td>ID Card no</td>
+                    <td>:</td>
+                    <td>{{card}}</td>
+                  </tr>
+                  <tr>
+                    <td>Birth date</td>
+                    <td>:</td>
+                    <td>{{bdate}}</td>
+                  </tr>
+                  <tr>
+                    <td>address</td>
+                    <td>:</td>
+                    <td>{{in_address}}</td>
+                  </tr>
+                  <tr>
+                    <td>Relationship to patient</td>
+                    <td>:</td>
+                    <td>{{p_relation}}</td>
+                  </tr>
+                </table>
+
+                <br>
                 <div style="font-weight:bold">In-case of emergency</div>
-                <div style="margin-left:10px;">
-                  <div>Name: {{name_e}}</div>
-                  <div>Relationship to patient: {{relation_e}}</div>
-                  <div>Home phone no: {{phone_e}}</div>
-                  <div>Work phone no: {{work_phone}}</div>
-                </div>
+                <table>
+                  <tr>
+                    <td>Name</td>
+                    <td>:</td>
+                    <td>{{name_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>Relationship to patient</td>
+                    <td>:</td>
+                    <td>{{relation_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>Home phone no</td>
+                    <td>:</td>
+                    <td>{{phone_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>Work phone no</td>
+                    <td>:</td>
+                    <td>{{work_phone}}</td>
+                  </tr>
+                </table>
               </div>
+
             </div>
           </neon-animatable>
 
@@ -295,6 +383,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       mypatientChanged(e) {
         if (e.length > 0) {
+          if (e[0].profile) {
+            this.p_profile = e[0].profile;
+          }
+          else {
+            this.p_profile = '../images/user.png';
+          }
           this.email = e[0].personal.email;
           this.fname = e[0].personal.firstname;
           this.mname = e[0].personal.middlename;

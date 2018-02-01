@@ -204,8 +204,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div style="height: 100%; overflow: auto;">
               <app-header fixed>
                 <app-toolbar>
-                  <iron-image hidden$="{{!user.photoURL}}"class="avatar" sizing="contain" src="{{user.photoURL}}"></iron-image>
-                  <iron-icon hidden$="{{user.photoURL}}" class="avatar" icon="my-icons:account-circle" ></iron-icon>
+                  <iron-image hidden$="{{!user.photoURL}}" class="avatar" sizing="contain" src="{{user.photoURL}}"></iron-image>
+                  <iron-icon hidden$="{{user.photoURL}}" class="avatar" icon="my-icons:account-circle"></iron-icon>
                   <div class="pad">
                     <div class="primary">Dr. Liz Grimes</div>
                     <div class="shortText">MD</div>
@@ -459,12 +459,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         drawerlayout.forceNarrow = e.detail.narrow;
       }
 
-      _mymap(){
-      window.location="/map";
-    }
+      _mymap() {
+        // window.location = "/map";
+      }
 
     }
-    
+
     window.customElements.define(MyApp.is, MyApp);
   </script>
 </dom-module>

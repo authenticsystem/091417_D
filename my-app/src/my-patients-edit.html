@@ -26,6 +26,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="short-unique-id.html">
 
 <dom-module id="my-patients-edit">
   <template>
@@ -113,6 +114,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin-right: 16px;
         }
       }
+
+      .avatar {
+        height: 50px;
+        width: 50px;
+        border-radius: 50%;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
     </style>
 
     <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -192,7 +201,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <div class="details" style="text-align:center">
 
-                <img id="profilePic" style="width:200px; height:200px; border-radius:50%;" src="../images/user.png">
+                <img id="profilePic" style="width:200px; height:200px; border-radius:50%;" src="{{p_profile}}">
                 <br>
                 <div class="upload-btn-wrapper">
                   <button class="btn">Upload profile picture</button>
@@ -304,7 +313,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <div class="details">
                 <div style="margin-bottom:10px;">Please review the following details:</div>
-                
+                <img src="{{p_profile}}" class="avatar">
+
                 <div style="font-weight:bold">Basic Information</div>
                 <table>
                   <tr>
@@ -520,6 +530,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: true
         },
+        profile: String,
         editKey: String,
         gender: String,
         stat: String,
@@ -538,6 +549,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       mypatientChanged(e) {
         if (e.length > 0) {
+          if (e[0].profile) {
+            this.p_profile = e[0].profile;
+          }
+          else {
+            this.p_profile = '../images/user.png';
+          }
           this.email = e[0].personal.email;
           this.fname = e[0].personal.firstname;
           this.mname = e[0].personal.middlename;
@@ -667,7 +684,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _changepic() {
         if (event.target.files[0]) {
+          this.profile = event.target.files[0];
           Polymer.dom(this.root).querySelector("#profilePic").src = URL.createObjectURL(event.target.files[0]);
+          this.p_profile = URL.createObjectURL(event.target.files[0]);
         }
       },
 
@@ -759,12 +778,44 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           if (parseInt(this.selectedPage) == 4) {
             //complete
-            var ref = firebase.database().ref("/sampleDoctor/patients/" + this.editKey);
-            var push = ref.update({
-              personal: this.personal,
-              insurance: this.insurance,
-              emergency: this.emergency
-            });
+            var info = this.personal, insure = this.insurance, emerg = this.emergency, key = this.editKey;
+
+            if (this.profile) {
+              var pic_name = this.guid();
+              var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+              var uploadTask = storageRef.put(this.profile);
+
+              firebase.database().ref('/sampleDoctor/patients/' + key)
+                .once('value').then(function (patient) {
+                  if (patient.val().profile) {
+                    firebase.storage().refFromURL(patient.val().profile).delete()
+                      .then(function () {
+                        uploadTask.on('state_changed',
+                          function () {
+                            var downLoadURL = uploadTask.snapshot.downloadURL;
+                            if (downLoadURL) {
+
+                              var ref = firebase.database().ref("/sampleDoctor/patients/" + key);
+                              var push = ref.update({
+                                personal: info,
+                                insurance: insure,
+                                emergency: emerg,
+                                profile: downLoadURL
+                              });
+                            }
+                          });
+                      });
+                  }
+                });
+            }
+            else {
+              var ref = firebase.database().ref("/sampleDoctor/patients/" + key);
+              var push = ref.update({
+                personal: this.personal,
+                insurance: this.insurance,
+                emergency: this.emergency
+              });
+            }
             this.saveSuccess = 'Patient successfully updated.';
           }
 
@@ -788,6 +839,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.favlefthide = true;
           this.favrighthide = false;
         }
+      },
+
+      guid: function () {
+        var uid = new ShortUniqueId();
+        return uid.randomUUID(8);
       },
     })
   </script>
