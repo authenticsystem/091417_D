@@ -401,16 +401,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             if (percentage === 100) {
                                 var user = firebase.auth().currentUser;
                                 var photoUrl = user.photoURL;
-                                if (user) {
-                                    // console.log(user.photoURL);
-                                    // Create a reference to the file to delete
-                                    var desertRef = firebase.storage().refFromURL(user.photoURL);
-                                    // Delete the file
-                                    desertRef.delete().then(function () {
-                                        // File deleted successfully
-                                    }).catch(function (error) {
-                                        // Uh-oh, an error occurred!
-                                    });
+                                if (photoUrl) {
+                                    firebase.storage().refFromURL(user.photoURL).delete();
                                 }
                             }
                         },

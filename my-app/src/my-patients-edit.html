@@ -806,6 +806,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                           });
                       });
                   }
+                  else {
+                    uploadTask.on('state_changed',
+                      function () {
+                        var downLoadURL = uploadTask.snapshot.downloadURL;
+                        if (downLoadURL) {
+
+                          var ref = firebase.database().ref("/sampleDoctor/patients/" + key);
+                          var push = ref.update({
+                            personal: info,
+                            insurance: insure,
+                            emergency: emerg,
+                            profile: downLoadURL
+                          });
+                        }
+                      });
+                  }
                 });
             }
             else {
