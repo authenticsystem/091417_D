@@ -46,7 +46,6 @@
     "mp-calendar": "mpachnis/mp-calendar#^2.0.0",
     "paper-dialog": "PolymerElements/paper-dialog#^2.0.1",
     "paper-chip": "fabbricadigitale/paper-chip#^1.0.0",
-    "chrome-tabs": "zedesk/chrome-tabs#^2.0.0",
     "pf-calendar": "PFElements/pf-calendar#^0.3.0",
     "iron-component-page": "PolymerElements/iron-component-page#^3.0.1",
     "paper-search": "Collaborne/paper-search#^2.0.9",
