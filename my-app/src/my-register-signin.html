@@ -152,34 +152,39 @@
                 // window.location.reload();
             },
 
-            emailChanged(){
+            emailChanged() {
                 Polymer.dom(this.root).querySelector("#nextSpinner").style.display = 'none';
                 Polymer.dom(this.root).querySelector("#next").disabled = false;
+                Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
             },
 
-            passwordChanged(){
+            passwordChanged() {
                 Polymer.dom(this.root).querySelector("#nextSpinner").style.display = 'none';
                 Polymer.dom(this.root).querySelector("#next").disabled = false;
+                Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
             },
 
             _registerAccount() {
-                Polymer.dom(this.root).querySelector("#nextSpinner").style.display = 'block';
-                Polymer.dom(this.root).querySelector("#next").disabled = true;
+                var spinner = Polymer.dom(this.root).querySelector("#nextSpinner");
                 if (!this.email) {
                     Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                     this.validationMessage = 'Please enter your email address.';
+                    Polymer.dom(this.root).querySelector("#next").disabled = true;
                 }
                 else if (!this.password) {
                     Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                     this.validationMessage = 'Please enter your password.';
+                    Polymer.dom(this.root).querySelector("#next").disabled = true;
                 }
                 else if (this.password.length < 6) {
                     Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                     this.validationMessage = 'Password must be greater than or equal to six.';
+                    Polymer.dom(this.root).querySelector("#next").disabled = true;
                 }
                 else if (!this.confirmPass) {
                     Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                     this.validationMessage = 'Please confirm your password.';
+                    Polymer.dom(this.root).querySelector("#next").disabled = true;
                 }
                 else {
                     var atpos = this.email.indexOf("@");
@@ -188,13 +193,16 @@
                     if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= this.email.length) {
                         Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                         this.validationMessage = 'Invalid email address.';
+                        Polymer.dom(this.root).querySelector("#next").disabled = true;
                     }
                     else {
+                        spinner.style.display = 'block';
                         this.$.auth.createUserWithEmailAndPassword(this.email, this.password)
                             .then(function (user) {
                                 app = this.document.querySelector('my-app');
                                 app.set('route.path', '/');
                                 user.sendEmailVerification().then(function () {
+                                    spinner.style.display = 'none';
                                 });
                             });
                     }

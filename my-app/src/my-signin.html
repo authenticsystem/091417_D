@@ -88,7 +88,7 @@
         <firebase-auth id="auth" user="{{user}}" provider="password" on-error="handleError"></firebase-auth>
 
         <div class="main-container">
-                
+
             <paper-toast id="toastResetP" text="" duration="5000"></paper-toast>
 
             <a style="text-decoration:none;" href="/">
@@ -133,12 +133,12 @@
         Polymer({
             is: 'my-signin',
 
-            properties:{
-                email:{
+            properties: {
+                email: {
                     type: String,
                     observer: 'emailChanged'
                 },
-                password:{
+                password: {
                     type: String,
                     observer: 'passwordChanged'
                 }
@@ -148,38 +148,45 @@
                 Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                 this.validationMessage = 'Invalid email or password.';
             },
-            
-            emailChanged(){
-                Polymer.dom(this.root).querySelector("#spinnerNext").style.display="none";
-                Polymer.dom(this.root).querySelector("#next").disabled=false;
+
+            emailChanged() {
+                Polymer.dom(this.root).querySelector("#spinnerNext").style.display = "none";
+                Polymer.dom(this.root).querySelector("#next").disabled = false;
+                Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
             },
 
-            passwordChanged(){
-                Polymer.dom(this.root).querySelector("#spinnerNext").style.display="none";
-                Polymer.dom(this.root).querySelector("#next").disabled=false;
+            passwordChanged() {
+                Polymer.dom(this.root).querySelector("#spinnerNext").style.display = "none";
+                Polymer.dom(this.root).querySelector("#next").disabled = false;
+                Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
             },
 
             _signIn() {
-                Polymer.dom(this.root).querySelector("#spinnerNext").style.display="block";
-                Polymer.dom(this.root).querySelector("#next").disabled=true;
+                var spinner = Polymer.dom(this.root).querySelector("#spinnerNext");
                 if (!this.email) {
+                    Polymer.dom(this.root).querySelector("#next").disabled = true;
                     Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                     this.validationMessage = 'Please enter your email.';
                 }
                 else if (!this.password) {
+                    Polymer.dom(this.root).querySelector("#next").disabled = true;
                     Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                     this.validationMessage = 'Please enter your password.';
                 }
                 else {
-                    var toast = Polymer.dom(this.root).querySelector("#toastResetP");
+                    Polymer.dom(this.root).querySelector("#next").disabled = true;
+                    spinner.style.display = 'block';
+                    // var toast = Polymer.dom(this.root).querySelector("#toastResetP");
                     this.$.auth.signInWithEmailAndPassword(this.email, this.password)
                         .then(function (response) {
+                            spinner.style.display = 'none';
                             app = this.document.querySelector('my-app');
                             app.set('route.path', '/');
                         })
                         .catch(function (error) {
-                        toast.opened = true;
-                        toast.text = error.message;
+                            spinner.style.display = 'none';
+                            // toast.opened = true;
+                            // toast.text = error.message;
                         });
                 }
             }

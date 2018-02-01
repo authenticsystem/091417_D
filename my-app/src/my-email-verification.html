@@ -6,6 +6,7 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="shared-styles.html">
 
@@ -141,7 +142,7 @@
                     <div class="footer">
                         <div class="action">
                             <paper-button class="default" on-tap="_reload">cancel</paper-button>
-                            <paper-button class="green" on-tap="_changeEmail">next</paper-button>
+                            <paper-button id="next" class="green" on-tap="_changeEmail">next</paper-button>
                             <!-- <paper-button class="green" on-tap="_registerAccount">next</paper-button> -->
                         </div>
                     </div>
@@ -150,20 +151,22 @@
                 <div id="reAuth" style="display:none;">
                     <div class="header">Re-authentication required
                         <br>
-                        <span style="font-size:14px; font-weight:400;">Please enter your old email and password to continue.
+                        <span style="font-size:14px; font-weight:400;">Please enter your email and password to continue.
                         </span>
                     </div>
                     <div id="errorMsgDiv1" style="display:none">
                         <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}</div>
-                    <paper-input label="Old email" value="{{oldEmail}}" always-float-label required auto-validate error-message=""></paper-input>
+                    <paper-input label="Email" value="{{oldEmail}}" always-float-label required auto-validate error-message=""></paper-input>
                     <paper-input label="Password" type="password" value="{{password}}" always-float-label required auto-validate error-message=""></paper-input>
                     </br>
                     <div class="footer">
                         <div class="action">
                             <paper-button class="default" on-tap="_reload">cancel</paper-button>
-                            <paper-button class="green" on-tap="_reChangeEmail">next</paper-button>
+                            <paper-button id="next1" class="green" on-tap="_reChangeEmail">next</paper-button>
                             <!-- <paper-button class="green" on-tap="_registerAccount">next</paper-button> -->
                         </div>
+                        <!-- <paper-spinner active style="float:right; margin-right:10px;"></paper-spinner> -->
+                        <paper-spinner id="spinnerNext1" active style="float:right; margin-right:10px;"></paper-spinner>
                     </div>
                 </div>
             </div>
@@ -177,9 +180,22 @@
         Polymer({
             is: 'my-email-verification',
 
+            observers: [
+                '_inputChanged(email,oldEmail,password)'
+            ],
+
+            _inputChanged(email, oldemail, password) {
+                Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#errorMsgDiv1").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#next").disabled = false;
+                Polymer.dom(this.root).querySelector("#next1").disabled = false;
+                Polymer.dom(this.root).querySelector("#spinnerNext1").style.display = "none";
+            },
+
             handleError() {
                 Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                 this.validationMessage = 'Invalid email or password.';
+                Polymer.dom(this.root).querySelector("#next1").disabled = true;
             },
 
             _signOut() {
@@ -209,16 +225,19 @@
                 if (!this.oldEmail) {
                     Polymer.dom(this.root).querySelector("#errorMsgDiv1").style.display = 'block';
                     this.validationMessage = 'Please enter your email.';
+                    Polymer.dom(this.root).querySelector("#next1").disabled = true;
                 }
                 else if (!this.password) {
                     Polymer.dom(this.root).querySelector("#errorMsgDiv1").style.display = 'block';
                     this.validationMessage = 'Please enter your password.';
+                    Polymer.dom(this.root).querySelector("#next1").disabled = true;
                 }
                 else {
+                    var spinner = Polymer.dom(this.root).querySelector("#spinnerNext1");
                     var newEmail = this.email;
                     var err = Polymer.dom(this.root).querySelector("#errorMsgDiv1");
                     err.style.display = 'none';
-
+                    spinner.style.display = 'block';
                     this.validationMessage = 'The email address is already in use by another account.';
 
                     this.$.auth.signInWithEmailAndPassword(this.oldEmail, this.password)
@@ -226,14 +245,17 @@
                             err.style.display = 'none';
                             user.updateEmail(newEmail)
                                 .then(function () {
+                                    spinner.style.display = 'none';
                                     window.location.reload();
                                 })
                                 .catch((error) => {
+                                    spinner.style.display = 'none';
                                     err.style.display = 'block';
                                 });
                         })
                         .catch(function (error) {
                             err.style.display = 'block';
+                            spinner.style.display = 'none';
                         });
                 }
             },
@@ -243,6 +265,7 @@
                 if (!this.email) {
                     Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                     this.validationMessage = 'Please enter your email address.';
+                    Polymer.dom(this.root).querySelector("#next").disabled = true;
                 }
                 else {
                     var atpos = this.email.indexOf("@");
@@ -251,6 +274,7 @@
                     if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= this.email.length) {
                         Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                         this.validationMessage = 'Invalid email address.';
+                        Polymer.dom(this.root).querySelector("#next").disabled = true;
                     }
                     else {
                         Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
