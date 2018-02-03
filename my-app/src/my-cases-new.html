@@ -181,21 +181,9 @@
             } */
 
             #list {
-                border: 2px solid #ddbff5;
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
                 padding: 0;
-            }
-
-            #item {
-                height: 0;
-                font-size: 15px;
-            }
-
-            paper-textarea {
-                --paper-input-container: {
-                    background-color: #ede7f1;
-                    /* margin-right: 8px; */
-                }
-
+                display: none;
             }
 
             /* app-media-video{
@@ -204,65 +192,12 @@
         </style>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
-            <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
-                <div class="mnu" role="listbox">
-                    <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
-                    <!-- on-tap="_selectPage" data-args="0" -->
-                    <paper-item id="patientInfo" on-tap="{{select(0)}}">
-                        <div class="circle-mini-first">1</div>
-                        <span>Chief Complain</span>
-                    </paper-item>
-
-                    <!-- on-tap="_selectPage" data-args="1" -->
-                    <paper-item id="prevCases" on-tap="{{select(1)}}">
-                        <div class="circle-mini">2</div>
-                        <span>History</span>
-                    </paper-item>
-
-                    <!-- on-tap="_selectPage" data-args="2" -->
-                    <paper-item id="history">
-                        <div class="circle-mini" on-tap="{{select(2)}}">3</div>
-                        <span>Diagnosis</span>
-                    </paper-item>
-
-                    <!-- on-tap="_selectPage" data-args="3" -->
-                    <paper-item id="diagnosis">
-                        <div class="circle-mini" on-tap="{{select(3)}}">4</div>
-                        <span>Treatment</span>
-                    </paper-item>
-
-                    <!-- on-tap="_selectPage" data-args="4" -->
-                    <paper-item id="healthRecords" on-tap="{{select(4)}}">
-                        <div class="circle-mini">5</div>
-                        <span>Finalize</span>
-                    </paper-item>
-
-                    <!-- on-tap="_selectPage" data-args="5" -->
-                    <paper-item id="treatment" on-tap="{{select(5)}}">
-                        <div class="circle-mini-last">6</div>
-                        <span>Complete</span>
-                    </paper-item>
-
-                    <!-- on-tap="_selectPage" data-args="6" -->
-                    <!-- <paper-item id="nextVisit" on-tap="{{select(6)}}">
-                        <div class="circle-mini">7</div>
-                        <span>Next Visit Schedule</span>
-                    </paper-item> -->
-
-                    <!-- on-tap="_selectPage" data-args="7" -->
-                    <!-- <paper-item id="billing" on-tap="{{select(7)}}">
-                        <div class="circle-mini-last">8</div>
-                        <span>Billing</span>
-                    </paper-item> -->
-                    <!-- </iron-selector> -->
-                </div>
-            </app-drawer>
 
             <app-header-layout id="appheader" has-scrolling-region>
                 <app-header fixed slot="header">
                     <app-toolbar>
                         <a href="/cases">
-                            <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
+                            <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
                         </a>
                         <div main-title>Add Case</div>
                         <!-- <paper-menu-button>
@@ -287,51 +222,78 @@
 
                 <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
                     <neon-animatable>
+
+                        <firebase-query id="query1" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name" start-at="{{filterValue}}"
+                            limit-to-first="5">
+                        </firebase-query>
+
+                        <firebase-query id="query1" path="/{{myKey}}/patients" data="{{patientInfo}}" order-by-key equal-to="{{myPatientKey}}" limit-to-last="1">
+                        </firebase-query>
+
                         <div class="docu">
 
-                            <div class="docu-header">
-                                <span>1. Complain</span>
-                            </div>
+                            <!-- <div class="docu-header">
+                                <span>Case</span>
+                            </div> -->
                             <div class="details">
-                                <paper-textarea rows="10" value="{{complain}}"></paper-textarea>
+
+                                <paper-input value="{{filterValue}}" label="Patient *" floatingLabel id="searchEmployee"></paper-input>
+                                <paper-listbox id="list">
+                                    <template is="dom-repeat" items="[[thypatients]]" filter="{{Filter(filterValue)}}">
+                                        <paper-item on-tap="_bind" id="{{item.$key}} {{item.personal.firstname}} {{item.personal.middlename}} {{item.personal.lastname}}">
+                                            <paper-item-body two-line>
+                                                <div>[[item.personal.firstname]] [[item.personal.middlename]] [[item.personal.lastname]]</div>
+                                            </paper-item-body>
+                                        </paper-item>
+                                    </template>
+                                </paper-listbox>
+
+                                <div id="info" style="display:none">
+                                    <paper-input readonly label="Birth date" value="{{bday}}"></paper-input>
+                                    <paper-input readonly label="Age" value="{{age}}"></paper-input>
+                                    <paper-input readonly label="Sex" value="{{sex}}"></paper-input>
+                                    <paper-input readonly label="Marital Status" value="{{status}}"></paper-input>
+                                    <paper-input readonly label="Occupation" value="{{occupation}}"></paper-input>
+                                    <paper-input readonly label="Employer" value="{{employer}}"></paper-input>
+                                    <paper-input readonly label="Referred to clinic by" value="{{referred}}"></paper-input>
+                                </div>
+                                <br>
+                                <div id="insure" style="display:none">
+                                    <b style="font-size:18px;">Insurance Information</b>
+                                    <paper-input readonly label="ID Card Number" value="{{card}}"></paper-input>
+                                    <paper-input readonly label="Birth date" value="{{bdate}}"></paper-input>
+                                    <paper-input readonly label="Address" value="{{address}}"></paper-input>
+                                    <paper-input readonly label="Home phone no" value="{{homephone}}"></paper-input>
+                                    <paper-input readonly label="Primary Insurance" value="{{insurance}}"></paper-input>
+                                    <paper-input readonly label="Relationship to patient" value="{{relation}}"></paper-input>
+                                </div>
+
                             </div>
 
                         </div>
                     </neon-animatable>
 
                     <neon-animatable>
-                        <!-- <firebase-query path="/buyers" order-by-child='cellphone' equal-to='{{draftdata_buyerdetails_cellphone}}' limit-to-first=1
-                            data="{{buyersList}}"></firebase-query> -->
 
                         <div class="docu">
-                            <div class="docu-header">2. History</div>
+
+                            <!-- <div class="docu-header">
+                                    <span>Case</span>
+                                </div> -->
                             <div class="details">
-                                <paper-textarea rows="10" value="{{history}}"></paper-textarea>
+
+                                <paper-textarea label="Chief complain *" value="{{complain}}"></paper-textarea>
+                                <paper-textarea label="History" value="{{history}}"></paper-textarea>
+                                <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
+                                <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
+
                             </div>
+
                         </div>
                     </neon-animatable>
 
-                    <neon-animatable>
-                        <!-- <firebase-query path="/agents" order-by-child='cellphone' equal-to='{{draftdata_agentdetails_cellphone}}' limit-to-first=1
-                            data="{{agentsList}}"></firebase-query> -->
 
-                        <div class="docu">
-                            <div class="docu-header">3. Diagnosis</div>
-                            <div class="detais">
-                                <paper-textarea rows="10" value="{{diagnosis}}"></paper-textarea>
-                            </div>
-                        </div>
-                    </neon-animatable>
-
-                    <neon-animatable>
-                        <div class="docu">
-                            <div class="docu-header">4. Treatment</div>
-                            <div class="details">
-                                <paper-textarea rows="10" value="{{treatment}}"></paper-textarea>
-                            </div>
-                        </div>
-                    </neon-animatable>
-                    <neon-animatable>
+                    <!-- <neon-animatable>
                         <div class="docu">
                             <div class="docu-header">5. Finalize</div>
                             <div class="details">
@@ -357,26 +319,26 @@
                                         <td>:</td>
                                         <td>{{treatment}}</td>
                                     </tr>
-                                </table>
+                                </table> -->
 
 
-                                <!-- <div>Complain: {{complain}}</div>
+                    <!-- <div>Complain: {{complain}}</div>
                                 <div>History: {{history}}</div>
                                 <div>Diagnosis: {{diagnosis}}</div>
                                 <div>Treatment: {{treatment}}</div> -->
 
-                            </div>
+                    <!-- </div>
                         </div>
-                    </neon-animatable>
+                    </neon-animatable> -->
                     <neon-animatable>
                         <div class="docu">
-                            <div class="docu-header">6. Completed</div>
+                            <!-- <div class="docu-header">6. Completed</div> -->
 
                             <div class="details">
                                 <paper-item>
                                     <paper-item-body>
-                                        <div id="saveSuccess" style="color: green;">{{saveSuccess}}</div>
-                                        <div id="saveFailed" style="color: red;">{{saveError}}</div>
+                                        <div id="saveSuccess" style="color: green; display:none">Case successfully added.</div>
+                                        <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving new case.</div>
                                     </paper-item-body>
                                 </paper-item>
 
@@ -410,6 +372,7 @@
                     type: Boolean,
                     notify: true
                 },
+                myKey: String,
                 selectedPage: Number,
                 entryanimation: {
                     type: String,
@@ -428,25 +391,80 @@
                     value: true
                 },
                 complain: {
-                    type: String,
-                    observer: '_onComplain'
+                    type: String
                 },
                 history: {
                     type: String,
-                    observer: '_onHistory'
+                    value: ''
                 },
                 diagnosis: {
                     type: String,
-                    observer: '_onDiagnosis'
+                    value: ''
                 },
                 treatment: {
                     type: String,
-                    observer: '_onTreatment'
-                }
-                // users:{
-                //     type: Array
-                // },
+                    value: ''
+                },
+                mykey: String
+                // thypatients: {
+                //     type: Object,
+                //     observer: 'theChanged'
+                // }
             },
+
+            // theChanged() {
+            //     if (this.thypatients.length > 0) {
+            //         console.log(this.thypatients[0]);
+            //     }
+            // },
+
+            Filter: function (val) {
+                if (!val) {
+                    Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#info").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
+                }
+                // return function (person) {
+                //     var name = person.personal.firstname + ' ' + person.personal.middlename + ' ' + person.personal.lastname;
+                //     // console.log(name);
+                //     if (!val) {
+                //         return false;
+                //     }
+                //     else {
+                //         return !name.toLowerCase().indexOf(val.toLowerCase());
+                //     }
+                // };
+            },
+
+            _bind(e) {
+                var str = Polymer.dom(e).rootTarget.getAttribute("id");
+                var name = str.slice(21);
+                var key = str.slice(0, 20);
+                if (name) {
+                    this.filterValue = name;
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                }
+
+                if (key) {
+                    Polymer.dom(this.root).querySelector("#insure").style.display = 'block';
+                    Polymer.dom(this.root).querySelector("#info").style.display = 'block';
+                    this.myPatientKey = key;
+                    this.mykey = key;
+                }
+            },
+
+            // patientListChanged(e) {
+            //     var arr;
+            //     if (e.length > 0) {
+            //         for (var i = 0; i < e.length; i++) {
+            //             arr = e[i].personal.firstname;
+            //             console.log(arr)
+            //         }
+            //     }
+            // },
 
             // _changepic() {
             //     if (event.target.files[0]) {
@@ -485,7 +503,46 @@
                 this.favlefthide = true;
             },
 
-            _onComplain(complain) {
+            observers: [
+                '_showFab(filterValue)',
+                '_showFab1(complain)',
+                '_mypatientInfoChanged(patientInfo)'
+            ],
+
+            _mypatientInfoChanged(p) {
+                if (p.length > 0) {
+                    this.bday = p[0].personal.birthday;
+                    this.age = p[0].personal.age;
+                    this.sex = p[0].personal.sex;
+                    this.occupation = p[0].personal.occupation;
+                    this.status = p[0].personal.status;
+                    this.employer = p[0].personal.employer;
+
+                    if (p[0].personal.referred == 'Dr') {
+                        this.referred = "Dr. " + p[0].personal.doctor;
+                    }
+                    else {
+                        this.referred = p[0].personal.referred;
+                    }
+
+                    this.card = p[0].insurance.card;
+                    this.bdate = p[0].insurance.birthday;
+                    this.address = p[0].insurance.address;
+                    this.homephone = p[0].insurance.home_phone;
+                    this.insurance = p[0].insurance.primary_insurance;
+                    this.relation = p[0].insurance.relationship;
+                }
+            },
+
+            _showFab(patient) {
+                if (!patient) {
+                    this.favrighthide = true;
+                } else {
+                    this.favrighthide = false;
+                }
+            },
+
+            _showFab1(complain) {
                 if (!complain) {
                     this.favrighthide = true;
                 } else {
@@ -493,48 +550,49 @@
                 }
             },
 
-            _onHistory(history) {
-                if (!history) {
-                    this.favrighthide = true;
-                } else {
-                    this.favrighthide = false;
-                }
-            },
+            // _onHistory(history) {
+            //     if (!history) {
+            //         this.favrighthide = true;
+            //     } else {
+            //         this.favrighthide = false;
+            //     }
+            // },
 
-            _onDiagnosis(diagnosis) {
-                if (!diagnosis) {
-                    this.favrighthide = true;
-                } else {
-                    this.favrighthide = false;
-                }
-            },
+            // _onDiagnosis(diagnosis) {
+            //     if (!diagnosis) {
+            //         this.favrighthide = true;
+            //     } else {
+            //         this.favrighthide = false;
+            //     }
+            // },
 
-            _onTreatment(treatment) {
-                if (!treatment) {
-                    this.favrighthide = true;
-                } else {
-                    this.favrighthide = false;
-                }
-            },
+            // _onTreatment(treatment) {
+            //     if (!treatment) {
+            //         this.favrighthide = true;
+            //     } else {
+            //         this.favrighthide = false;
+            //     }
+            // },
 
             _select1(e) {
                 this.entryanimation = "slide-from-left-animation";
                 this.exitanimation = "slide-right-animation";
 
-                if (parseInt(this.selectedPage) <= 5) {
+                if (parseInt(this.selectedPage) <= 1) {
                     if (parseInt(this.selectedPage) !== 0) {
                         this.selectedPage = (parseInt(this.selectedPage) - 1);
+
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");;
 
                         if (this.selectedPage === 0) {
                             this.favlefthide = true;
                         }
 
-                        if (this.selectedPage == 4) {
-                            this.favrighthide = true;
+                        if (this.selectedPage == 1) {
+                            this.favrighthide = false;
                         }
                         else {
-                            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
-                            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
                             this.favrighthide = false;
                         }
 
@@ -545,7 +603,7 @@
                     }
                 }
                 else {
-                    this.selectedPage = 5;
+                    this.selectedPage = 1;
                 }
 
             },
@@ -557,27 +615,71 @@
 
                     this.favlefthide = false;
 
-                    if (parseInt(this.selectedPage) == 4) {
-                        this.favlefthide = false;
-                        this.favrighthide = true;
-                        //complete
-                        var ref = firebase.database().ref("/sampleDoctor/cases");
-                        var push = ref.push({
-                            complain: this.complain,
-                            history: this.history,
-                            diagnosis: this.diagnosis,
-                            treatment: this.treatment
-                        });
-                        if (push.key) {
-                            this.saveSuccess = 'Case successfully added.';
-                        }
-                        else {
-                            this.saveError = 'Opps! Something went wrong while saving new case.';
-                        }
+                    if (parseInt(this.selectedPage) == 1) {
+
+                        var key = this.mykey, mypatient = this.filterValue,
+                            mycomplain = this.complain, myhistory = this.history,
+                            mydiagnosis = this.diagnosis, mytreatment = this.treatment;
+                        var mykey = this.myKey;
+
+                        var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+                        var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
+
+                        firebase.database().ref('/' + mykey + '/patients/' + key)
+                            .once('value').then(function (patient) {
+                                if (patient.val().profile) {
+                                    var ref = firebase.database().ref("/" + mykey + "/cases");
+                                    var push = ref.push({
+                                        patient: mypatient,
+                                        complain: mycomplain,
+                                        history: myhistory,
+                                        diagnosis: mydiagnosis,
+                                        treatment: mytreatment,
+                                        patientkey: key,
+                                        profile: patient.val().profile,
+                                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                                    });
+
+                                    if (push.key) {
+                                        saveSucc.style.display = 'block';
+                                    }
+                                    else {
+                                        saveErr.style.display = 'block';
+                                    }
+                                }
+                                else {
+                                    var ref = firebase.database().ref("/" + mykey + "/cases");
+                                    var push = ref.push({
+                                        patient: mypatient,
+                                        complain: mycomplain,
+                                        history: myhistory,
+                                        diagnosis: mydiagnosis,
+                                        treatment: mytreatment,
+                                        patientkey: key,
+                                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                                    });
+
+                                    if (push.key) {
+                                        saveSucc.style.display = 'block';
+                                    }
+                                    else {
+                                        saveErr.style.display = 'block';
+                                    }
+                                }
+                            });
+
                     }
 
+                    // if (this.selectedPage == 0) {
+                    //     if (!this.filterValue) {
+                    //         this.favrighthide = true;
+                    //     }
+                    //     else {
+                    //         this.favrighthide = false;
+                    //     }
+                    // }
                     if (this.selectedPage == 0) {
-                        if (!this.history) {
+                        if (!this.complain) {
                             this.favrighthide = true;
                         }
                         else {
@@ -586,29 +688,16 @@
                     }
 
                     if (this.selectedPage == 1) {
-                        if (!this.diagnosis) {
-                            this.favrighthide = true;
-                        }
-                        else {
-                            this.favrighthide = false;
-                        }
+                        this.favlefthide = false;
+                        this.favrighthide = true;
                     }
 
-                    if (this.selectedPage == 2) {
-                        if (!this.treatment) {
-                            this.favrighthide = true;
-                        }
-                        else {
-                            this.favrighthide = false;
-                        }
-                    }
-
-                    if (parseInt(this.selectedPage) !== 5) {
+                    if (parseInt(this.selectedPage) !== 2) {
 
                         this.selectedPage = (parseInt(this.selectedPage) + 1);
 
-                        if (parseInt(this.selectedPage) == 4) {
-
+                        if (parseInt(this.selectedPage) == 1) {
+                            // this.favrighthide = true;
                             Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
                             Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
                         }
@@ -621,6 +710,11 @@
                 }
 
             },
+
+            guid: function () {
+                var uid = new ShortUniqueId();
+                return uid.randomUUID(8);
+            }
 
         })
 

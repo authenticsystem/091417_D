@@ -84,8 +84,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             a {
-                text-decoration: none;
-                background: yellow;
+                /* text-decoration: none; */
+                /* background: yellow; */
                 padding: 2px;
                 border-radius: 3px;
                 font-weight: 500;
@@ -127,7 +127,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div class="divHolder">
                     <div class="div1">
                         <iron-icon hidden$="{{user.photoURL}}" icon="my-icons:account-circle" style=" height:180px;width:180px; max-width:180px; border-radius: 50%; object-fit: cover; object-position: center"></iron-icon>
-                        <iron-image hidden$="{{!user.photoURL}}" sizing="contain" src="{{user.photoURL}}" style=" height:180px;width:180px; max-width:180px; border-radius: 50%; object-fit: cover; object-position: center"></iron-image>
+                        <iron-image hidden$="{{!user.photoURL}}" sizing="cover" src="{{user.photoURL}}" style=" height:180px;width:180px; max-width:180px; border-radius: 50%; object-fit: cover; object-position: center"></iron-image>
                         <!-- <img $hidden="{{!user.photoURL}}" style="width:200px; border-radius:50%;" src="../images/user.png"> -->
                         <div class="upload-btn-wrapper">
                             <button class="btn">Change profile picture</button>
@@ -146,8 +146,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             </paper-menu-button>
                             <paper-input label="Name" readonly value="{{read_name}}"></paper-input>
                             <paper-input label="Email" readonly value="{{read_email}}"></paper-input>
-                            <span style="font-size:14px;">Account not activated. Activate account
-                                <a href="/account-link">now</a>.</span>
+                            <br>
+                            <span hidden$={{active}} style="font-size:14px;">Account not yet activated.
+                                <a href="/account-link">Activate your account</a>.</span>
+                            <span hidden$={{!active}} style="font-size:14px;">Account is active.</span>
                             <!-- <br> -->
                             <!-- <paper-button style="float:right;" raised on-tap="_update">Update</paper-button> -->
                         </div>
@@ -200,6 +202,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 account: {
                     type: Object,
                 },
+                active: Boolean,
                 verified: {
                     type: Boolean,
                     value: false
@@ -237,14 +240,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 if (!this.mypassword) {
                     this.msg = "Please enter your new password.";
                 }
+                else if (this.mypassword.length < 6) {
+                    this.msg = 'Password must be greater than or equal to six.';
+                }
                 else if (!this.myconfirmpass) {
                     this.msg = "Please confirm your password.";
                 }
                 else if (this.myconfirmpass != this.mypassword) {
                     this.msg = "Your password do not match.";
-                }
-                else if (this.mypassword.length < 6) {
-                    this.msg = 'Password must be greater than or equal to six.';
                 }
                 else {
                     Polymer.dom(this.root).querySelector("#reAuth").open();

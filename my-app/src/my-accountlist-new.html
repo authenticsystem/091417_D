@@ -128,14 +128,15 @@
                     <!-- <div class="docu-header">Add New Account</div> -->
                     <div class="details">
                         <paper-input readonly="true" value="{{accountkey}}" always-float-label label="Account Code"></paper-input>
-                        <div style="font-size:12px; margin-top:1em;">Prefix
+                        <!-- <div style="font-size:12px; margin-top:1em;">Prefix
                             <span id="rPrefix" style="color:red;display:none;">*</span>
                         </div>
                         <paper-radio-group style="font-size:14px;" selected="{{prefix}}">
                             <paper-radio-button name="Mr">Mr</paper-radio-button>
                             <paper-radio-button name="Ms">Ms</paper-radio-button>
                             <paper-radio-button name="Mrs">Mrs</paper-radio-button>
-                        </paper-radio-group>
+                        </paper-radio-group> -->
+                        <paper-input required auto-validate pattern="[a-zA-Z-.]*" value="{{prefix}}" always-float-label label="Designatory letters"></paper-input>
                         <paper-input required auto-validate pattern="[a-zA-Z-.]*" value="{{firstname}}" always-float-label label="First Name"></paper-input>
                         <paper-input required auto-validate="true" pattern="[a-zA-Z-.]*" value="{{middlename}}" always-float-label label="Middle Name"></paper-input>
                         <paper-input required auto-validate="true" pattern="[a-zA-Z-.]*" value="{{lastname}}" always-float-label label="Last Name"></paper-input>
@@ -255,21 +256,22 @@
             },
 
             _submit() {
-                if (!this.firstname || !this.middlename || !this.lastname) {
+                if (!this.firstname || !this.middlename || !this.lastname || !this.prefix) {
                     this.firstname = '';
                     this.middlename = '';
                     this.lastname = '';
+                    this.prefix = '';
                     this.msg = 'Please fill-up the required field.';
                 }
                 else if (!this.cellphone) {
                     this.msg = 'Please enter cellphone number.';
                 }
-                else if (!this.prefix) {
-                    this.msg = 'Please choose a prefix.';
-                    Polymer.dom(this.root).querySelector("#rPrefix").style.display = 'inline-block';
-                }
+                // else if () {
+                //     this.msg = 'Please enter your designatory letters.';
+                //     // Polymer.dom(this.root).querySelector("#rPrefix").style.display = 'inline-block';
+                // }
                 else {
-                    Polymer.dom(this.root).querySelector("#rPrefix").style.display = 'none';
+                    // Polymer.dom(this.root).querySelector("#rPrefix").style.display = 'none';
                     if (this.cellphone.length != 10) {
                         this.msg = 'Error! Invalid cellphone number.';
                     }
@@ -285,12 +287,12 @@
                             code: this.accountkey,
                             active: false,
                             name: {
-                                prefix: this.prefix,
                                 firstname: this.firstname,
                                 middlename: this.middlename,
                                 lastname: this.lastname,
                                 suffix: this.suffix
                             },
+                            designatory: this.prefix,
                             cellphone: this.cellphone,
                             uid: ''
                         });

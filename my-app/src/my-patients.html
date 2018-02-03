@@ -156,7 +156,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       #btn-menu {
         color: gray;
         position: fixed;
-        right: 40px;
+        right: 35px;
       }
 
       #btn-clear {
@@ -197,6 +197,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: var(--paper-green-500);
         color: white;
       }
+
+      .b-edit {
+        /* display: inline-block;
+        position: absolute;
+        right: 48px; */
+        color: rgb(2, 160, 68);
+        /* top: 8px; */
+      }
+
+      .b-view {
+        /* display: inline-block;
+        position: absolute;
+        right: 8px; */
+        color: rgb(2, 136, 160);
+        /* top: 8px; */
+      }
     </style>
 
     <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
@@ -220,12 +236,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <template is="dom-if" if="{{openSearch}}">
                 <app-toolbar primary id="tool2">
-                  <paper-icon-button id="btn-arrow" icon="my-icons:chevron-left" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                  <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
                   <paper-search-bar id="search" query="{{search}}" disable-filter-button></paper-search-bar>
                   <template is="dom-if" if="{{search}}">
-                    <paper-icon-button id="btn-clear" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
+                    <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
                   </template>
-                  <paper-menu-button id="btn-menu" horizontal-align="right">
+                  <!-- <paper-menu-button id="btn-menu" horizontal-align="right">
                     <paper-icon-button slot="dropdown-trigger" icon="my-icons:tune"></paper-icon-button>
                     <paper-listbox style="cursor:pointer" slot="dropdown-content" selected="{{filterBy}}">
                       <paper-item style="display:none;">Filter By</paper-item>
@@ -233,34 +249,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <paper-item>By Middlename</paper-item>
                       <paper-item>By Lastname</paper-item>
                     </paper-listbox>
-                  </paper-menu-button>
+                  </paper-menu-button> -->
                 </app-toolbar>
               </template>
             </app-header>
 
-
-
-            <firebase-query id="query" path="/sampleDoctor/patients" data="{{mypatients}}" order-by-child="{{filterChild}}" start-at="{{searchChild}}"
-              end-at="{{searchChild}}">
+            <firebase-query id="query" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}"
+              limit-to-first="25">
             </firebase-query>
 
             <iron-list items="[[mypatients]]" as="item" selection-enabled scroll-target="threshold">
               <template>
                 <div class="divSeparator">
-                  <div id="{{item.$key}}" class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                  <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
                     <iron-image style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
                     <iron-image style$="{{_hasProfile(item.profile)}}" class="avatar" sizing="cover" src="[[item.profile]]"></iron-image>
-                    <div id="{{item.$key}}" class="pad" on-tap="_selectThis">
-                      <div id="{{item.$key}}" class="primary">[[item.personal.firstname]] [[item.personal.middlename]] [[item.personal.lastname]]</div>
-                      <div id="{{item.$key}}" class="shortText">[[item.personal.address]]</div>
+                    <div class="pad">
+                      <div class="primary">[[item.personal.firstname]] [[item.personal.middlename]] [[item.personal.lastname]]</div>
+                      <div class="shortText">[[item.personal.address]]</div>
                     </div>
-                    <paper-menu-button vertical-align="bottom" horizontal-align="right">
+
+                    <a href$="{{_getEditAppLink(item.$key)}}">
+                      <paper-icon-button class="b-edit" alt="{{item.$key}}" noink on-tap="_editThis" icon="my-icons:edit" title="edit"></paper-icon-button>
+                    </a>
+
+                    <a href$="{{_getViewDetailsLink(item.$key)}}">
+                      <paper-icon-button class="b-view" alt="{{item.$key}}" noink on-tap="_selectThis" icon="my-icons:open-in-new" title="view details"></paper-icon-button>
+                    </a>
+
+                    <!-- <paper-icon-button class="b-view" on-tap="_openDelete" alt="{{item.$key}}" icon="my-icons:close" title="delete"></paper-icon-button> -->
+                    <!-- <paper-menu-button vertical-align="bottom" horizontal-align="right">
                       <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
                       <paper-listbox slot="dropdown-content">
+                          <paper-item on-tap="_editThis" id="{{item.$key}}">View</paper-item>
                         <paper-item on-tap="_editThis" id="{{item.$key}}">Edit</paper-item>
                         <paper-item on-tap="_openDelete" id="{{item.$key}}">Delete</paper-item>
                       </paper-listbox>
-                    </paper-menu-button>
+                    </paper-menu-button> -->
                   </div>
                 </div>
               </template>
@@ -278,7 +303,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div name="/new">
           <div id="patientsnew"></div>
-          <my-patients-new id="d23" path="" prev-route="{{route.prefix}}"></my-patients-new>
+          <my-patients-new id="d23" path="" prev-route="{{route.prefix}}" my-key="{{myKey}}"></my-patients-new>
         </div>
 
         <div name="view404">Not found.</div>
@@ -319,6 +344,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               return [];
             }
           },
+          myKey: String,
           narrow: {
             type: Boolean,
             notify: true
@@ -337,9 +363,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get observers() {
         return [
-          '_searchChanged(search, filterBy)',
+          '_searchChanged(search, filterBy)'
+          // '_patientChanged(mypatients)'
         ];
       }
+
+      // _patientChanged(mypatients) {
+      //   if (mypatients.length > 0) {
+      //     var PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+      //     var id = mypatients[0].$key;
+
+
+      //       id = id.substring(0, 8);
+      //       var timestamp = 0;
+      //       for (var i = 0; i < id.length; i++) {
+      //         var c = id.charAt(i);
+      //         timestamp = timestamp * 64 + PUSH_CHARS.indexOf(c);
+      //       }
+      //       // return timestamp;
+      //       console.log(timestamp);
+
+
+
+      //     // console.log(mypatients[0].$key);
+      //   }
+      // }
 
       _noProfile(e) {
         if (!e) {
@@ -430,25 +478,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _openDelete(e) {
-        var d_key = Polymer.dom(e).rootTarget.getAttribute("id");
+        var d_key = Polymer.dom(e).rootTarget.getAttribute("alt");
+
         var dialogBtn = Polymer.dom(this.root).querySelector("#dialBtn");
         dialogBtn.setAttribute('alt', d_key);
         Polymer.dom(this.root).querySelector("#deleteDialog").open();
       }
 
+      _getViewDetailsLink(e) {
+        if (e) {
+          return '/patients/detail/' + e.toString();
+        }
+      }
+
+      _getEditAppLink(e) {
+        if (e) {
+          return '/patients/edit/' + e.toString();
+        }
+      }
+
       _selectThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
         var node = Polymer.dom(this.root).querySelector("#patientsview");
         if (node) {
           var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
           if (oldDiv) {
             Polymer.dom(node.parentNode).removeChild(oldDiv);
           }
-          var newDiv = document.createElement("my-patients-edit");
+          var newDiv = document.createElement("my-patients-view");
           newDiv.setAttribute("id", "d26");
           newDiv.setAttribute("view-key", data_args);
           newDiv.setAttribute("prev-route", this.route.prefix);
-          window.location = '/patients/detail/' + data_args;
+          newDiv.setAttribute("my-key", this.myKey);
+          // window.location = '/patients/detail/' + data_args;
           //if open existing
           var currentDiv = document.getElementById("patientsview");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
@@ -456,7 +518,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _editThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
         var node = Polymer.dom(this.root).querySelector("#patientsedit");
         if (node) {
           var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
@@ -467,7 +529,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           newDiv.setAttribute("id", "d25");
           newDiv.setAttribute("edit-key", data_args);
           newDiv.setAttribute("prev-route", this.route.prefix);
-          window.location = '/patients/edit/' + data_args;
+          newDiv.setAttribute("my-key", this.myKey);
+          // window.location = '/patients/edit/' + data_args;
           //if open existing
           var currentDiv = document.getElementById("patientsedit");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
@@ -482,6 +545,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             Polymer.dom(node.parentNode).removeChild(oldDiv);
           }
           var newDiv = document.createElement("my-patients-new");
+          newDiv.setAttribute("my-key", this.myKey);
           newDiv.setAttribute("id", "d23");
           newDiv.setAttribute("prev-route", this.route.prefix);
           //if open existing

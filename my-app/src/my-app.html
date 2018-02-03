@@ -138,13 +138,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .primary {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: bold;
       }
 
       .shortText,
       .longText {
-        font-size: 14px;
+        font-size: 12px;
       }
 
       .longText {
@@ -198,6 +198,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </template>
 
       <template is="dom-if" if="{{user.emailVerified}}">
+
+        <firebase-query id="query" path="/accounts" data="{{myaccount}}" order-by-child="uid" equal-to="{{user.uid}}"></firebase-query>
+
         <app-drawer-layout has-scrolling-region fullbleed narrow="{{narrow}}" id="drawerLayout">
           <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
 
@@ -207,16 +210,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <iron-image hidden$="{{!user.photoURL}}" class="avatar" sizing="contain" src="{{user.photoURL}}"></iron-image>
                   <iron-icon hidden$="{{user.photoURL}}" class="avatar" icon="my-icons:account-circle"></iron-icon>
                   <div class="pad">
-                    <div class="primary">Dr. Liz Grimes</div>
-                    <div class="shortText">MD</div>
+                    <div hidden$="{{user.displayName}}" class="primary">{{user.email}}</div>
+                    <div hidden$="{{!user.displayName}}" class="primary">Dr. {{user.displayName}}</div>
+                    <div class="shortText">{{drTitle}}</div>
                     <div class="longText"></div>
                   </div>
                 </app-toolbar>
 
-                <app-toolbar>
+                <!-- <app-toolbar>
                   <div class="divHeaderLabelLocation">Location: (not set)</div>
-                </app-toolbar>
-                <paper-fab mini icon="my-icons:my-location" on-tap="_mymap"></paper-fab>
+                </app-toolbar> -->
+                <!-- <paper-fab mini icon="my-icons:my-location" on-tap="_mymap"></paper-fab> -->
               </app-header>
 
               <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
@@ -308,15 +312,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-drawer>
           <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <my-dashboard name="dashboard"></my-dashboard>
-            <my-account user={{user}} name="account"></my-account>
+            <my-account active={{isActive}} user={{user}} name="account"></my-account>
             <my-appointments name="appointments"></my-appointments>
             <my-billing name="billing"></my-billing>
             <my-collection name="collection"></my-collection>
             <my-account-link name="account-link"></my-account-link>
-            <my-cases name="cases" route="[[subroute]]"></my-cases>
+            <my-cases my-key="{{mykey}}" name="cases" route="[[subroute]]"></my-cases>
             <my-help name="help"></my-help>
             <my-view2 name="view2"></my-view2>
-            <my-patients name="patients" route="[[subroute]]"></my-patients>
+            <my-patients my-key="{{mykey}}" name="patients" route="[[subroute]]"></my-patients>
             <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
             <my-queue name="queue"></my-queue>
             <my-map name="map"></my-map>
@@ -351,14 +355,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           narrow: {
             type: Boolean,
             notify: true
-          }
+          },
+          isActive: {
+            type: Boolean,
+            value: false
+          },
+          mykey: String
         };
       }
 
       static get observers() {
         return [
           '_routePageChanged(routeData.page, user)',
+          '_myaccountChanged(myaccount)'
         ];
+      }
+
+      _myaccountChanged(e) {
+        if (e.length > 0) {
+          this.isActive = true;
+          this.mykey = e[0].code;
+          this.drTitle = e[0].designatory;
+        }
       }
 
       _routePageChanged(page, user) {

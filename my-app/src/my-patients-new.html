@@ -24,6 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="short-unique-id.html">
@@ -207,7 +208,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header fixed slot="header">
           <app-toolbar>
             <a href="/patients">
-              <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
+              <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
             </a>
             <div main-title>Add Patient</div>
             <!-- <paper-menu-button>
@@ -298,12 +299,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
 
               <div class="details">
-                <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
                 <div id="info">
-                  <paper-input id="fname" value="{{fname}}" label="Firstname" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input id="mname" value="{{mname}}" label="Middlename" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input id="lname" value="{{lname}}" label="Lastname" style="width:100%"></paper-input>
+                  <paper-input id="fname" value="{{fname}}" label="Firstname *" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input id="mname" value="{{mname}}" label="Middlename *" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input id="lname" value="{{lname}}" label="Lastname *" style="width:100%"></paper-input>
                 </div>
+                <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
                 <div id="info">
                   <paper-input type="date" value="{{bday}}" label="Birth date" style="width:100%; margin-right:10px"></paper-input>
                   <paper-input type="number" value="{{age}}" label="Age" style="width:100%;"></paper-input>
@@ -333,15 +334,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <paper-input value="{{emp_phone}}" type="number" label="Employer Phone no." style="width:100%"></paper-input>
                 </div>
                 <br>
-                <span>Referred to clinic by (please check one box)</span>
+                <span>Referred to clinic by (choose one)</span>
                 <div id="info">
-                  <paper-checkbox style="margin-right:10px">Dr</paper-checkbox>
-                  <paper-checkbox style="margin-right:10px">Insurance Plan</paper-checkbox>
-                  <paper-checkbox>Hospital</paper-checkbox>
+                  <paper-radio-group style="font-size:14px;" selected="{{refer}}">
+                    <paper-radio-button name="Dr">Dr</paper-radio-button>
+                    <paper-radio-button name="Insurance plan">Insurance plan</paper-radio-button>
+                    <paper-radio-button name="Hospital">Hospital</paper-radio-button>
+                  </paper-radio-group>
                 </div>
+                <paper-input style="margin-top:-15px; display:none" id="doctor" value="{{doctor}}" label="Dr."></paper-input>
               </div>
             </div>
-
+            <br>
+            <br>
+            <br>
           </neon-animatable>
 
           <neon-animatable>
@@ -391,8 +397,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div class="docu-header">5. Finalize</div>
 
               <div class="details">
-                <div style="margin-bottom:10px;">Please review the following details:</div>
-                <img src="{{p_profile}}" class="avatar">
+                <!-- <div style="margin-bottom:10px;">Please review the following details:</div> -->
+                <img id="p_profile" src="../images/user.png" class="avatar">
 
                 <div style="font-weight:bold">Basic Information</div>
 
@@ -461,6 +467,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <td>Employer phone no</td>
                     <td>:</td>
                     <td>{{emp_phone}}</td>
+                  </tr>
+                  <tr>
+                    <td>Referred to clinic by</td>
+                    <td>:</td>
+                    <td>{{referredby}}</td>
                   </tr>
                 </table>
 
@@ -592,6 +603,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           notify: true
         },
+        myKey: String,
         selectedPage: Number,
         entryanimation: {
           type: String,
@@ -609,13 +621,93 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: true
         },
-        p_profile: {
+        email: {
           type: String,
-          value: "../images/user.png"
+          value: ''
+        },
+        bday: {
+          type: String,
+          value: ''
+        },
+        age: {
+          type: String,
+          value: ''
+        },
+        contact: {
+          type: String,
+          value: ''
+        },
+        address: {
+          type: String,
+          value: ''
+        },
+        occupation: {
+          type: String,
+          value: ''
+        },
+        employer: {
+          type: String,
+          value: ''
+        },
+        emp_phone: {
+          type: String,
+          value: ''
+        },
+        gender: {
+          type: String,
+          value: ''
+        },
+        stat: {
+          type: String,
+          value: ''
+        },
+        doctor: {
+          type: String,
+          value: ''
+        },
+
+        card: {
+          type: String,
+          value: ''
+        },
+        bdate: {
+          type: String,
+          value: ''
+        },
+        in_address: {
+          type: String,
+          value: ''
+        },
+        home_phone: {
+          type: String,
+          value: ''
+        },
+        indicate: {
+          type: String,
+          value: ''
+        },
+        p_relation: {
+          type: String,
+          value: ''
+        },
+
+        name_e: {
+          type: String,
+          value: ''
+        },
+        relation_e: {
+          type: String,
+          value: ''
+        },
+        phone_e: {
+          type: String,
+          value: ''
+        },
+        work_phone: {
+          type: String,
+          value: ''
         },
         profile: String,
-        gender: String,
-        stat: String,
         personal: Object,
         insurance: Object,
         emergency: Object
@@ -626,9 +718,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       observers: [
-        'personalInfoChanged(email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
+        'personalInfoChanged(doctor,refer,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
         'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
-        'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
+        'emergencyChanged(name_e, relation_e, phone_e, work_phone)'
       ],
 
       // _selectPage(e) {
@@ -636,7 +728,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       //   this.selectedPage = select;
       // },
 
-      personalInfoChanged(email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
+      personalInfoChanged(doctor, refer, email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
+
+        if (refer) {
+          if (refer == 'Dr') {
+            Polymer.dom(this.root).querySelector("#doctor").style.display = 'block';
+            doctor = doctor;
+            this.referredby = 'Dr. ' + doctor;
+          }
+          else {
+            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+            this.doctor = '';
+            doctor = '';
+            this.referredby = refer;
+          }
+        }
+        else {
+          refer = '';
+        }
+
         if (sex == 0) {
           this.gender = 'male';
         }
@@ -659,7 +769,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.stat = 'widowed';
         }
 
-        if (!email || !fname || !mname || !lname || !bday || !age || !contact || !address || !occupation || !employer || !emp_phone || !this.gender || !this.stat) {
+        if (!fname || !mname || !lname) {
           this.favrighthide = true;
         }
         else {
@@ -677,48 +787,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             address: address,
             occupation: occupation,
             employer: employer,
-            emp_phone: emp_phone
+            emp_phone: emp_phone,
+            referred: refer,
+            doctor: doctor,
+            name: fname + ' ' + mname + ' ' + lname
           }
         }
       },
 
       insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation) {
-        if (!card || !bdate || !in_address || !home_phone || !indicate || !p_relation) {
-          this.favrighthide = true;
-        }
-        else {
-          this.favrighthide = false;
-          this.insurance = {
-            card: card,
-            birthday: bdate,
-            address: in_address,
-            home_phone: home_phone,
-            primary_insurance: indicate,
-            relationship: p_relation
-          }
+        this.insurance = {
+          card: card,
+          birthday: bdate,
+          address: in_address,
+          home_phone: home_phone,
+          primary_insurance: indicate,
+          relationship: p_relation
         }
       },
 
       emergencyChanged(name_e, relation_e, phone_e, work_phone) {
-        if (!name_e || !relation_e || !phone_e || !work_phone) {
-          this.favrighthide = true;
-        }
-        else {
-          this.favrighthide = false;
-          this.emergency = {
-            name: name_e,
-            relationship: relation_e,
-            home_phone: phone_e,
-            work_phone: work_phone
-          }
+        this.emergency = {
+          name: name_e,
+          relationship: relation_e,
+          home_phone: phone_e,
+          work_phone: work_phone
         }
       },
 
       _changepic() {
         if (event.target.files[0]) {
+          var img = Polymer.dom(this.root).querySelector("#profilePic");
+          var i = Polymer.dom(this.root).querySelector("#p_profile");
+          var reader = new FileReader();
+
+          reader.onload = function (e) {
+            img.src = e.target.result;
+            i.src = e.target.result;
+          };
+          reader.readAsDataURL(event.target.files[0]);
           this.profile = event.target.files[0];
-          Polymer.dom(this.root).querySelector("#profilePic").src = URL.createObjectURL(event.target.files[0]);
-          this.p_profile = URL.createObjectURL(event.target.files[0]);
+          // Polymer.dom(this.root).querySelector("#profilePic").src = URL.createObjectURL(event.target.files[0]);
+          // this.p_profile = URL.createObjectURL(event.target.files[0]);
         }
       },
 
@@ -780,7 +890,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (parseInt(this.selectedPage) >= 0) {
 
           if (parseInt(this.selectedPage) == 0) {
-            if (!this.email || !this.fname || !this.mname || !this.lname || !this.bday || !this.age || !this.contact || !this.address || !this.occupation || !this.employer || !this.emp_phone || !this.gender || !this.stat) {
+            if (!this.fname || !this.mname || !this.lname) {
               this.favlefthide = false;
               this.favrighthide = true;
             }
@@ -790,34 +900,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
 
-          if (parseInt(this.selectedPage) == 1) {
-            if (!this.card || !this.bdate || !this.in_address || !this.home_phone || !this.indicate || !this.p_relation) {
-              this.favlefthide = false;
-              this.favrighthide = true;
-            }
-            else {
-              this.favlefthide = false;
-              this.favrighthide = false;
-            }
-          }
+          // if (parseInt(this.selectedPage) == 1) {
+          //   if (!this.card || !this.bdate || !this.in_address || !this.home_phone || !this.indicate || !this.p_relation) {
+          //     this.favlefthide = false;
+          //     this.favrighthide = true;
+          //   }
+          //   else {
+          //     this.favlefthide = false;
+          //     this.favrighthide = false;
+          //   }
+          // }
 
-          if (parseInt(this.selectedPage) == 2) {
-            if (!this.name_e || !this.relation_e || !this.phone_e || !this.work_phone) {
-              this.favlefthide = false;
-              this.favrighthide = true;
-            }
-            else {
-              this.favlefthide = false;
-              this.favrighthide = false;
-            }
-          }
+          // if (parseInt(this.selectedPage) == 2) {
+          //   if (!this.name_e || !this.relation_e || !this.phone_e || !this.work_phone) {
+          //     this.favlefthide = false;
+          //     this.favrighthide = true;
+          //   }
+          //   else {
+          //     this.favlefthide = false;
+          //     this.favrighthide = false;
+          //   }
+          // }
 
           if (parseInt(this.selectedPage) == 4) {
             //complete
             var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
             var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
             var info = this.personal, insure = this.insurance, emerg = this.emergency;
-
+            var mykey = this.myKey;
             if (this.profile) {
               var pic_name = this.guid();
               var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
@@ -827,7 +937,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   var downLoadURL = uploadTask.snapshot.downloadURL;
                   if (downLoadURL) {
 
-                    var ref = firebase.database().ref("/sampleDoctor/patients");
+                    var ref = firebase.database().ref("/" + mykey + "/patients");
                     var push = ref.push({
                       personal: info,
                       insurance: insure,
@@ -846,7 +956,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 });
             }
             else {
-              var ref = firebase.database().ref("/sampleDoctor/patients");
+              var ref = firebase.database().ref("/" + mykey + "/patients");
               var push = ref.push({
                 personal: info,
                 insurance: insure,

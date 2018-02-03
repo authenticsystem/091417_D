@@ -171,7 +171,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header fixed slot="header">
           <app-toolbar>
             <a href="/patients">
-              <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:chevron-left"></paper-icon-button>
+              <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
             </a>
             <div main-title>View Patient</div>
             <paper-icon-button icon="my-icons:print" on-click="_print"></paper-icon-button>
@@ -189,12 +189,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </paper-tabs>
         </app-header>
 
-        <firebase-query id="query" path="/sampleDoctor/patients" order-by-key equal-to="{{viewKey}}" data="{{mypatient}}">
-        </firebase-query>
-
         <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
 
           <neon-animatable>
+
+            <firebase-query id="query" path="/{{myKey}}/patients" order-by-key equal-to="{{viewKey}}" data="{{mypatient}}">
+            </firebase-query>
+
             <div class="docu" id="printMe">
               <div class="docu-header">
                 <img class="avatar" src="{{p_profile}}"></img>
@@ -270,6 +271,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <td>:</td>
                     <td>{{emp_phone}}</td>
                   </tr>
+                  <tr>
+                    <td>Referred to clinic by</td>
+                    <td>:</td>
+                    <td>{{referredby}}</td>
+                  </tr>
                 </table>
 
                 <br>
@@ -326,18 +332,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
           </neon-animatable>
 
-          <neon-animatable>
-            <div class="docu">
-              <div class="docu-header">Cases</div>
 
-              <div class="details">
-                <paper-item>
-                  <paper-item-body>
-                    <div id="saveSuccess" style="color: green;">{{saveSuccess}}</div>
-                    <div id="saveFailed" style="color: red;">{{saveError}}</div>
-                  </paper-item-body>
-                </paper-item>
-              </div>
+
+          <neon-animatable>
+
+            <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{viewKey}}" data="{{mycases}}" limit-to-last="10">
+            </firebase-query>
+
+            <div class="docu">
+              <!-- <div class="docu-header">Cases</div> -->
+
+              <template is="dom-repeat" items="[[mycases]]">
+                <div class="details">
+                  <div style="font-weight:bold">{{_date(item.timestamp)}}</div>
+                  <div style="padding:8px;">
+                    <table>
+                      <tr>
+                        <td>Chief complain</td>
+                        <td>:</td>
+                        <td>{{item.complain}}</td>
+                      </tr>
+                      <tr>
+                        <td>History</td>
+                        <td>:</td>
+                        <td>{{item.history}}</td>
+                      </tr>
+                      <tr>
+                        <td>Diagnosis</td>
+                        <td>:</td>
+                        <td>{{item.diagnosis}}</td>
+                      </tr>
+                      <tr>
+                        <td>Treatment</td>
+                        <td>:</td>
+                        <td>{{item.treatment}}</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </template>
             </div>
           </neon-animatable>
 
@@ -363,6 +396,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           notify: true
         },
+        myKey: String,
         selectedPage: Number,
         entryanimation: {
           type: String,
@@ -373,13 +407,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: "slide-left-animation"
         },
         viewKey: String,
-        mypatient: Object
+        mypatient: Object,
+        mycases: Object
       },
 
       observers: [
         'mypatientChanged(mypatient)',
+        // 'mycaseChanged(mycases)',
         'selectedPageChanged(selectedPage)'
       ],
+
+      // mycaseChanged(c) {
+      //   if (c.length > 0) {
+      //     console.log(c);
+      //     for (var i = 0; i < c.length; i++) {
+      //       this.casekey = c[i].$key;
+      //       this.complain = c[i].complain;
+      //       this.history = c[i].history;
+      //       this.diagnosis = c[i].diagnosis;
+      //       this.treament = c[i].treament;
+      //     }
+      //   }
+      // },
+
+      _date(e) {
+        if (e) {
+          var date = new Date(e);
+          var options = {
+            weekday: "long", year: "numeric", month: "short",
+            day: "numeric", hour: "2-digit", minute: "2-digit"
+          };
+
+          return date.toLocaleTimeString("en-us", options);
+        }
+      },
 
       mypatientChanged(e) {
         if (e.length > 0) {
@@ -389,6 +450,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           else {
             this.p_profile = '../images/user.png';
           }
+
+          if (e[0].personal.referred) {
+            if (e[0].personal.referred == 'Dr') {
+              this.referredby = 'Dr. ' + e[0].personal.doctor;
+            }
+            else {
+              this.referredby = e[0].personal.referred;
+            }
+          }
+
           this.email = e[0].personal.email;
           this.fname = e[0].personal.firstname;
           this.mname = e[0].personal.middlename;

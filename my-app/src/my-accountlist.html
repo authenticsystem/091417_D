@@ -134,10 +134,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <paper-icon-button id="edit" class="edit" alt="{{keyS}}" id="{{keyS}}" data-args="{{keyS}}" icon="datatable:editable"></paper-icon-button>
                     <paper-tooltip for="edit" position="bottom">Edit</paper-tooltip>
                   </a>
-                  <paper-icon-button hidden="{{block}}" id="activate" class="delete" icon="my-icons:assignment-turned-in" no-ink on-tap="_activateSelected"></paper-icon-button>
+                  <!-- <paper-icon-button hidden="{{block}}" id="activate" class="delete" icon="my-icons:assignment-turned-in" no-ink on-tap="_activateSelected"></paper-icon-button>
                   <paper-icon-button hidden="{{!block}}" id="deactivate" class="delete" icon="my-icons:block" no-ink on-tap="_deactivateSelected"></paper-icon-button>
                   <paper-tooltip for="activate" position="bottom">Activate</paper-tooltip>
-                  <paper-tooltip for="deactivate" position="bottom">Deactivate</paper-tooltip>
+                  <paper-tooltip for="deactivate" position="bottom">Deactivate</paper-tooltip> -->
                 </div>
 
                 <!-- <paper-dialog id="deleteAccount">
@@ -171,8 +171,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <div no-results>
                     Loading or no more items...
                   </div>
-                  <paper-datatable-column header="Account Code" type="String" property="code" sortable></paper-datatable-column>
-                  <paper-datatable-column header="Name" type="Object" property="name" sortable>
+                  <paper-datatable-column header="Account Code" type="String" property="code"></paper-datatable-column>
+                  <paper-datatable-column header="Designatory letters" type="String" property="designatory"></paper-datatable-column>
+                  <paper-datatable-column header="Name" type="Object" property="name">
                     <template>
                       <span>[[value.firstname]]</span>
                       <span>[[value.middlename]]</span>
@@ -180,8 +181,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <span>[[value.suffix]]</span>
                     </template>
                   </paper-datatable-column>
-                  <paper-datatable-column header="Cellphone" type="String" property="cellphone" sortable></paper-datatable-column>
-                  <paper-datatable-column header="Active" type="Boolean" property="active" sortable></paper-datatable-column>
+                  <paper-datatable-column header="Cellphone" type="String" property="cellphone"></paper-datatable-column>
+                  <paper-datatable-column header="Active" type="Boolean" property="active"></paper-datatable-column>
                 </paper-datatable>
               </paper-datatable-card>
 
