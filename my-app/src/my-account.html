@@ -126,9 +126,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="card">
                 <div class="divHolder">
                     <div class="div1">
-                        <iron-icon hidden$="{{user.photoURL}}" icon="my-icons:account-circle" style=" height:180px;width:180px; max-width:180px; border-radius: 50%; object-fit: cover; object-position: center"></iron-icon>
-                        <iron-image hidden$="{{!user.photoURL}}" sizing="cover" src="{{user.photoURL}}" style=" height:180px;width:180px; max-width:180px; border-radius: 50%; object-fit: cover; object-position: center"></iron-image>
-                        <!-- <img $hidden="{{!user.photoURL}}" style="width:200px; border-radius:50%;" src="../images/user.png"> -->
+                        <img hidden$="{{user.photoURL}}" style="width:200px; height:200px; border-radius:50%;" src="../images/user.png">
+                        <img hidden$="{{!user.photoURL}}" style="width:200px; height:200px; border-radius:50%;" src="{{user.photoURL}}">
                         <div class="upload-btn-wrapper">
                             <button class="btn">Change profile picture</button>
                             <input type="file" name="myfile" id="fileButton" on-tap="_upload" accept="image/*" />

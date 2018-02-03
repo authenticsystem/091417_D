@@ -207,8 +207,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div style="height: 100%; overflow: auto;">
               <app-header fixed>
                 <app-toolbar>
-                  <iron-image hidden$="{{!user.photoURL}}" class="avatar" sizing="contain" src="{{user.photoURL}}"></iron-image>
-                  <iron-icon hidden$="{{user.photoURL}}" class="avatar" icon="my-icons:account-circle"></iron-icon>
+                  <iron-image style$="{{_hasprofile(user.photoURL)}}" class="avatar" sizing="cover" src="{{user.photoURL}}"></iron-image>
+                  <iron-image style$="{{_noprofile(user.photoURL)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
                   <div class="pad">
                     <div hidden$="{{user.displayName}}" class="primary">{{user.email}}</div>
                     <div hidden$="{{!user.displayName}}" class="primary">Dr. {{user.displayName}}</div>
@@ -397,6 +397,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         else {
           this.page = page || 'signin';
+        }
+      }
+
+      _hasprofile(e) {
+        if (e) {
+          return 'display:block';
+        }
+        else {
+          return 'display:none';
+        }
+      }
+
+      _noprofile(e) {
+        if (!e) {
+          return 'display:block';
+        }
+        else {
+          return 'display:none';
         }
       }
 
