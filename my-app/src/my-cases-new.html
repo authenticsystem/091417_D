@@ -199,7 +199,7 @@
                         <a href="/cases">
                             <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
                         </a>
-                        <div main-title>Add Case</div>
+                        <div main-title>Add Visit</div>
                         <!-- <paper-menu-button>
                             <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
                             <paper-listbox style="cursor:pointer" slot="dropdown-content">
@@ -239,10 +239,12 @@
 
                                 <paper-input value="{{filterValue}}" label="Patient *" floatingLabel id="searchEmployee"></paper-input>
                                 <paper-listbox id="list">
-                                    <template is="dom-repeat" items="[[thypatients]]" filter="{{Filter(filterValue)}}">
-                                        <paper-item on-tap="_bind" id="{{item.$key}} {{item.personal.firstname}} {{item.personal.middlename}} {{item.personal.lastname}}">
+                                    <template is="dom-repeat" items="[[thypatients]]">
+                                        <paper-item on-tap="_bind" id="{{item.$key}} {{item.personal.lastname}}, {{item.personal.firstname}} {{item.personal.middlename}}">
                                             <paper-item-body two-line>
-                                                <div>[[item.personal.firstname]] [[item.personal.middlename]] [[item.personal.lastname]]</div>
+                                                <div id="{{item.$key}} {{item.personal.lastname}}, {{item.personal.firstname}} {{item.personal.middlename}}">
+                                                    [[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]
+                                                </div>
                                             </paper-item-body>
                                         </paper-item>
                                     </template>
@@ -275,17 +277,55 @@
 
                     <neon-animatable>
 
+                        <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}" data="{{mycases}}"
+                            limit-to-last="1">
+                        </firebase-query>
+
                         <div class="docu">
 
                             <!-- <div class="docu-header">
                                     <span>Case</span>
                                 </div> -->
                             <div class="details">
-
-                                <paper-textarea label="Chief complain *" value="{{complain}}"></paper-textarea>
-                                <paper-textarea label="History" value="{{history}}"></paper-textarea>
-                                <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
-                                <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
+                                <div id="prev">
+                                    <b style="font-size:18px;">Last Visit</b>
+                                    <div>{{noprev}}</div>
+                                    <template is="dom-repeat" items="[[mycases]]">
+                                        <div>{{_date(item.timestamp)}}</div>
+                                        <div style="padding:5px;">
+                                            <table>
+                                                <tr>
+                                                    <td>Chief complain</td>
+                                                    <td>:</td>
+                                                    <td>{{item.complain}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>History</td>
+                                                    <td>:</td>
+                                                    <td>{{item.history}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Diagnosis</td>
+                                                    <td>:</td>
+                                                    <td>{{item.diagnosis}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Treatment</td>
+                                                    <td>:</td>
+                                                    <td>{{item.treatment}}</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </template>
+                                </div>
+                                <hr>
+                                <div id="new">
+                                    <b style="font-size:18px;">Today</b>
+                                    <paper-textarea label="Chief complain *" value="{{complain}}"></paper-textarea>
+                                    <paper-textarea label="History" value="{{history}}"></paper-textarea>
+                                    <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
+                                    <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
+                                </div>
 
                             </div>
 
@@ -418,25 +458,43 @@
             //     }
             // },
 
-            Filter: function (val) {
-                if (!val) {
-                    Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
-                    Polymer.dom(this.root).querySelector("#info").style.display = 'none';
-                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+            // Filter: function (val) {
+            //     if (!val) {
+            //         Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
+            //         Polymer.dom(this.root).querySelector("#info").style.display = 'none';
+            //         Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+            //     }
+            //     else {
+            //         var c = val.toLowerCase().replace(/\b[a-z]/g, function (letter) {
+            //             return letter.toUpperCase();
+            //         });
+            //         val = c;
+            //         this.filterValue = c;
+            //         console.log(val);
+            //         Polymer.dom(this.root).querySelector("#list").style.display = 'block';
+            //     }
+            // return function (person) {
+            //     var name = person.personal.firstname + ' ' + person.personal.middlename + ' ' + person.personal.lastname;
+            //     // console.log(name);
+            //     if (!val) {
+            //         return false;
+            //     }
+            //     else {
+            //         return !name.toLowerCase().indexOf(val.toLowerCase());
+            //     }
+            // };
+            //},
+
+            _date(e) {
+                if (e) {
+                    var date = new Date(e);
+                    var options = {
+                        weekday: "long", year: "numeric", month: "short",
+                        day: "numeric", hour: "2-digit", minute: "2-digit"
+                    };
+
+                    return date.toLocaleTimeString("en-us", options);
                 }
-                else {
-                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
-                }
-                // return function (person) {
-                //     var name = person.personal.firstname + ' ' + person.personal.middlename + ' ' + person.personal.lastname;
-                //     // console.log(name);
-                //     if (!val) {
-                //         return false;
-                //     }
-                //     else {
-                //         return !name.toLowerCase().indexOf(val.toLowerCase());
-                //     }
-                // };
             },
 
             _bind(e) {
@@ -504,10 +562,20 @@
             },
 
             observers: [
-                '_showFab(filterValue)',
+                '_patientChanged(filterValue)',
                 '_showFab1(complain)',
-                '_mypatientInfoChanged(patientInfo)'
+                '_mypatientInfoChanged(patientInfo)',
+                '_myCasesChanged(mycases)'
             ],
+
+            _myCasesChanged(e) {
+                if (e.length > 0) {
+                    this.noprev = '';
+                }
+                else {
+                    this.noprev = 'No previous case.';
+                }
+            },
 
             _mypatientInfoChanged(p) {
                 if (p.length > 0) {
@@ -534,10 +602,19 @@
                 }
             },
 
-            _showFab(patient) {
+            _patientChanged(patient) {
                 if (!patient) {
+                    Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#info").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
                     this.favrighthide = true;
                 } else {
+                    var c = patient.toLowerCase().replace(/\b[a-z]/g, function (letter) {
+                        return letter.toUpperCase();
+                    });
+                    this.filterValue = c;
+
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
                     this.favrighthide = false;
                 }
             },

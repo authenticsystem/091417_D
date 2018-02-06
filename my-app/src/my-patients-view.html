@@ -336,7 +336,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <neon-animatable>
 
-            <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{viewKey}}" data="{{mycases}}" limit-to-last="10">
+            <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{viewKey}}" data="{{mycases}}"
+              limit-to-last="10">
             </firebase-query>
 
             <div class="docu">
@@ -378,7 +379,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <paper-fab id="more-fab" class="fab-menu" icon="my-icons:add" on-tap="_showMini" title="More options"></paper-fab>
         <paper-fab id="less-fab" style="display:none" class="fab-menu" icon="my-icons:clear" on-tap="_hideMini" title="Hide options"></paper-fab>
-        <paper-fab class="fab-menu2" style="display:none" mini icon="my-icons:create-new-folder" title="Add case"></paper-fab>
+        <a href="/cases/new">
+          <paper-fab class="fab-menu2" style="display:none" mini icon="my-icons:create-new-folder" title="Add case"></paper-fab>
+        </a>
         <paper-fab class="fab-menu3" style="display:none" mini icon="my-icons:queue" title="Add to queue"></paper-fab>
 
       </app-header-layout>

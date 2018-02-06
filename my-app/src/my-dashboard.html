@@ -40,7 +40,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-header>
 
       <div class="card">
-        <p>Content soon.</p>
+        <p>Welcome to BaseEMR,<br>Dr. {{user.displayName}}</p>
       </div>
 
     </app-header-layout>
@@ -55,7 +55,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           narrow: {
             type: Boolean,
             notify: true
-          }
+          },
+          user: Object
         };
       }
 
@@ -66,13 +67,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }));
         this.$.narrow = !this.$.narrow;
-      }    
+      }
 
     }
 
 
 
-    
+
 
     window.customElements.define(MyDashboard.is, MyDashboard);
   </script>

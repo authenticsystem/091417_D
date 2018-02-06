@@ -216,7 +216,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <template is="dom-if" if="{{!openSearch}}">
                 <app-toolbar primary id="tool1">
                   <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                  <div main-title>Cases</div>
+                  <div main-title>Visits</div>
                   <!-- <div main-title hidden$="{{access}}">Opps!</div> -->
                   <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
                 </app-toolbar>
@@ -225,7 +225,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <template is="dom-if" if="{{openSearch}}">
                 <app-toolbar primary id="tool2">
                   <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                  <paper-search-bar id="search" query="{{search}}" disable-filter-button></paper-search-bar>
+                  <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
                   <template is="dom-if" if="{{search}}">
                     <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
                   </template>
@@ -347,7 +347,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get observers() {
         return [
-          '_searchChanged(search, filterBy)',
+          '_searchChanged(search)'
         ];
       }
 
@@ -381,24 +381,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _searchChanged(search, filter) {
-        if (search) {
-          if (filter) {
-            if (filter == 1) {
-              this.filterChild = 'personal/firstname';
-            }
-            if (filter == 2) {
-              this.filterChild = 'personal/middlename';
-            }
-            if (filter == 3) {
-              this.filterChild = 'personal/lastname';
-            }
-          }
-          this.searchChild = search;
-        }
-        else {
-          this.searchChild = '';
-        }
+      _searchChanged(search) {
+        var c = search.toLowerCase().replace(/\b[a-z]/g, function (letter) {
+          return letter.toUpperCase();
+        });
+        this.search = c;
       }
 
       iconForItem(item) {

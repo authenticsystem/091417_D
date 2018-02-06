@@ -11,6 +11,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -20,7 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             :host {
                 display: block;
 
-                padding: 10px;
+                /* padding: 10px; */
             }
 
             app-header {
@@ -33,19 +37,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             @media (max-width: 768px) {
-                .div1 {
+                /* .div1 {
                     text-align: center
-                }
+                } */
                 /*.div2{
                     flex:2; padding: 25px;
                 } */
-                .divHolder {
+                /* .divHolder {
                     display: block;
+                } */
+                :host {
+                    height: 100%;
                 }
+                .main-container {
+                    height: 100%;
+                    background-color: white;
+                    margin: 0 auto;
+                    padding: 40px;
+                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                }
+
             }
 
             @media (min-width: 768px) {
-                .div1 {
+                /* .div1 {
                     flex: 1;
                 }
                 .div2 {
@@ -54,6 +69,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
                 .divHolder {
                     display: flex;
+                } */
+                .main-container {
+                    height: 100%;
+                    background-color: white;
+                    max-width: 370px;
+                    margin: 16px auto;
+                    padding: 40px;
+                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
                 }
             }
 
@@ -85,61 +108,86 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             a {
                 text-decoration: none;
             }
+
+            paper-button {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                width: 80px;
+            }
+
+            .header {
+                font-size: 18px;
+                font-weight: bold;
+            }
         </style>
 
-        <app-header-layout fullbleed has-scrolling-region>
-            <app-header fixed slot="header">
+        <!-- <app-header-layout fullbleed has-scrolling-region> -->
+        <!-- <app-header fixed slot="header">
                 <app-toolbar primary>
                     <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                     <div main-title>My Account</div>
                 </app-toolbar>
-            </app-header>
+            </app-header> -->
+        <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError"></firebase-auth>
 
-            <firebase-query id="query" path="/accounts" data="{{account}}" order-by-child="code" equal-to="{{mycode}}" limit-to-last="1">
-            </firebase-query>
+        <firebase-query id="query" path="/accounts" data="{{account}}" order-by-child="code" equal-to="{{mycode}}" limit-to-last="1">
+        </firebase-query>
 
-            <div class="card">
-                <div class="divHolder">
-                    <div class="div1">
+        <paper-toast id="toastAccLink" text="" duration="5000"></paper-toast>
+
+        <div class="main-container">
+            <div class="divHolder">
+                <!-- <div class="div1">
                         <img style="width:200px;" src="../images/manifest/icon-512x512.png">
+                    </div> -->
+                <a style="text-decoration:none;" href="/">
+                    <iron-image placeholder="images/manifest/icon-512x512.png" data-src="images/manifest/icon-512x512.png" sizing="cover" preload
+                        fade style="width:128px; height:128px;"></iron-image>
+                </a>
+                <div class="div2">
+                    <!-- <div id="loadMe">
+                        <paper-spinner id="nextSpinner" active style="float:right; margin-right:10px; display:none"></paper-spinner>
+                    </div> -->
+                    <div id="accountcode">
+                        <span>
+                            Email
+                            <b>{{user.email}}</b> has been verified. Please enter your account code to continue.
+                            <!-- <br>Don't have an account code? Contact BaseEMR administrator to get one. -->
+                        </span>
+                        <paper-input label="Account code" value="{{mycode}}" on-keyup="_ack" required auto-validate></paper-input>
+                        <span style="color:red; font-size:12px">{{msg}}</span>
+                        <br>
+                        <paper-button style="float:right;" raised on-tap="_next">Next</paper-button>
+                        <paper-button style="float:right;" on-tap="_signOut">Signout</paper-button>
+                        <br>
                     </div>
-                    <div class="div2">
-                        <div id="accountcode">
-                            <span>
-                                <b style="font-size:26px;">Activate your account</b>
-                                <br>Enter your account code to continue.
-                                <!-- <br>Don't have an account code? Contact BaseEMR administrator to get one. -->
-                            </span>
-                            <paper-input label="Account code" value="{{mycode}}" on-keyup="_ack" required auto-validate></paper-input>
-                            <span style="color:red; font-size:12px">{{msg}}</span>
-                            <br>
-                            <paper-button style="float:right;" raised on-tap="_next">Next</paper-button>
-                        </div>
-                        <div id="verifyphone" style="display:none">
-                            <span>
-                                <b style="font-size:26px;">Verify if it is you</b>
-                                <br>Please enter the verification code that was sent on your mobile device,
-                                <br>With a phone number {{phone}}
-                            </span>
-                            <paper-input label="Verification code" value="{{myphonecode}}" on-keyup="_ack" required auto-validate></paper-input>
-                            <span style="color:red; font-size:12px">{{msg}}</span>
-                            <br>
-                            <paper-button style="float:right;" raised on-tap="_verify">Verify</paper-button>
-                        </div>
-                        <div id="success" style="display:none">
-                            <span>
-                                <b style="font-size:26px;">Yey! Your all set.</b>
-                                <br>Your account has been activated. Thank you for joining BaseEMR.
-                            </span>
-                            <br>
-                            <br>
-                            <paper-button on-tap="_reload" raised>OK</paper-button>
-                        </div>
+                    <div id="verifyphone" style="display:none">
+                        <span>
+                            <b style="font-size:20px;">Verify if it is you</b>
+                            <br>Please enter the verification code that was sent on your mobile device, With a phone number {{phone}}
+                        </span>
+                        <paper-input label="Verification code" value="{{myphonecode}}" on-keyup="_ack" required auto-validate></paper-input>
+                        <span style="color:red; font-size:12px">{{msg}}</span>
+                        <br>
+                        <paper-button style="float:right;" raised on-tap="_verify">Verify</paper-button>
+                        <br>
+                    </div>
+                    <div id="success" style="display:none">
+                        <span>
+                            <b style="font-size:20px;">Yey! Your all set.</b>
+                            <br>Your account has been activated. Thank you for joining BaseEMR.
+                        </span>
+                        <br>
+                        <br>
+                        <paper-button on-tap="_reload" raised>OK</paper-button>
+                        <br>
                     </div>
                 </div>
             </div>
+        </div>
 
-        </app-header-layout>
+        <!-- </app-header-layout> -->
     </template>
 
     <script>
@@ -153,7 +201,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     type: Boolean,
                     value: false
                 },
+                isActive: {
+                    type: Boolean,
+                    // observer: '_isActiveChanged'
+                }
             },
+
+            // _isActiveChanged() {
+            //     console.log(this.isActive);
+            // },
 
             _next() {
                 if (!this.mycode) {
@@ -221,6 +277,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
                 else {
                     this.msg = '';
+                    var toast = Polymer.dom(this.root).querySelector("#toastAccLink");
                     var hide = Polymer.dom(this.root).querySelector("#verifyphone");
                     var show = Polymer.dom(this.root).querySelector("#success");
                     var credential = firebase.auth.PhoneAuthProvider
@@ -237,7 +294,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         hide.style.display = 'none';
                         show.style.display = 'block';
                     }, function (error) {
-                        window.alert(error.message);
+                        toast.opened = true;
+                        toast.text = error.message;
                         // window.alert(error.message + '\nPhone number: ' + error.phoneNumber);
                     });
                 }
@@ -248,7 +306,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
 
             _reload() {
-                window.location = '/account';
+                window.location.reload();
+            },
+
+            _signOut() {
+                this.$.auth.signOut();
+                window.location.reload();
             },
 
             // _role(e) {

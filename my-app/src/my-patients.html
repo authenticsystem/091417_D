@@ -237,7 +237,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <template is="dom-if" if="{{openSearch}}">
                 <app-toolbar primary id="tool2">
                   <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                  <paper-search-bar id="search" query="{{search}}" disable-filter-button></paper-search-bar>
+                  <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
                   <template is="dom-if" if="{{search}}">
                     <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
                   </template>
@@ -265,7 +265,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <iron-image style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
                     <iron-image style$="{{_hasProfile(item.profile)}}" class="avatar" sizing="cover" src="[[item.profile]]"></iron-image>
                     <div class="pad">
-                      <div class="primary">[[item.personal.firstname]] [[item.personal.middlename]] [[item.personal.lastname]]</div>
+                      <div class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
                       <div class="shortText">[[item.personal.address]]</div>
                     </div>
 
@@ -345,6 +345,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           },
           myKey: String,
+          userUid: String,
           narrow: {
             type: Boolean,
             notify: true
@@ -363,10 +364,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get observers() {
         return [
-          '_searchChanged(search, filterBy)'
+          '_searchChanged(search)'
+          // '_searchChanged(search, filterBy)',
+          // '_myKeyChanged(myKey)'
           // '_patientChanged(mypatients)'
         ];
       }
+
+      // _myKeyChanged(e) {
+      //   if (e) {
+      //     this.myKey = e;
+      //   }
+      //   else {
+      //     this.myKey = this.userUid;
+      //   }
+      //   console.log(e);
+      // }
 
       // _patientChanged(mypatients) {
       //   if (mypatients.length > 0) {
@@ -407,25 +420,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _searchChanged(search, filter) {
-        if (search) {
-          if (filter) {
-            if (filter == 1) {
-              this.filterChild = 'personal/firstname';
-            }
-            if (filter == 2) {
-              this.filterChild = 'personal/middlename';
-            }
-            if (filter == 3) {
-              this.filterChild = 'personal/lastname';
-            }
-          }
-          this.searchChild = search;
-        }
-        else {
-          this.searchChild = '';
-        }
+      _searchChanged(search) {
+        var c = search.toLowerCase().replace(/\b[a-z]/g, function (letter) {
+          return letter.toUpperCase();
+        });
+        this.search = c;
       }
+
+      // _searchChanged(search, filter) {
+      //   if (search) {
+      //     if (filter) {
+      //       if (filter == 1) {
+      //         this.filterChild = 'personal/firstname';
+      //       }
+      //       if (filter == 2) {
+      //         this.filterChild = 'personal/middlename';
+      //       }
+      //       if (filter == 3) {
+      //         this.filterChild = 'personal/lastname';
+      //       }
+      //     }
+      //     this.searchChild = search;
+      //   }
+      //   else {
+      //     this.searchChild = '';
+      //   }
+      // }
 
       iconForItem(item) {
         return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';

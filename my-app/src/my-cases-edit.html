@@ -207,7 +207,7 @@
                         <a href="/cases">
                             <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
                         </a>
-                        <div main-title>Edit Case</div>
+                        <div main-title>Edit Visit</div>
                         <!-- <paper-menu-button>
                         <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
                         <paper-listbox style="cursor:pointer" slot="dropdown-content">
@@ -247,11 +247,12 @@
 
                                 <paper-input on-keyup="_ack" value="{{filterValue}}" label="Patient *" floatingLabel id="searchEmployee"></paper-input>
                                 <paper-listbox id="list">
-                                    <template is="dom-repeat" items="[[thypatients]]" filter="{{Filter(filterValue)}}">
+                                    <template is="dom-repeat" items="[[thypatients]]">
+                                        <!-- <template is="dom-repeat" items="[[thypatients]]" filter="{{Filter(filterValue)}}"> -->
                                         <!-- <paper-input style="display:none;" id="itemVal" value="{{item.personal.firstname}} {{item.personal.middlename}} {{item.personal.lastname}}"></paper-input> -->
-                                        <paper-item class="item" on-tap="_bind" id="{{item.$key}} {{item.personal.firstname}} {{item.personal.middlename}} {{item.personal.lastname}}">
+                                        <paper-item class="item" on-tap="_bind" id="{{item.$key}} {{item.personal.lastname}}, {{item.personal.firstname}} {{item.personal.middlename}}">
                                             <paper-item-body two-line>
-                                                <div>[[item.personal.firstname]] [[item.personal.middlename]] [[item.personal.lastname]]</div>
+                                                <div>[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
                                             </paper-item-body>
                                         </paper-item>
                                     </template>
@@ -290,7 +291,7 @@
                                     </div> -->
                             <div class="details">
 
-                                <paper-textarea  label="Chief complain *" value="{{complain}}"></paper-textarea>
+                                <paper-textarea label="Chief complain *" value="{{complain}}"></paper-textarea>
                                 <paper-textarea label="History" value="{{history}}"></paper-textarea>
                                 <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
                                 <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
@@ -452,26 +453,26 @@
                 }
             },
 
-            Filter: function (val) {
-                if (!val) {
-                    Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
-                    Polymer.dom(this.root).querySelector("#info").style.display = 'none';
-                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
-                }
-                else {
-                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
-                }
-                // return function (person) {
-                //     if (!val) {
-                //         return false;
-                //     }
-                //     else {
-                //         return !person.personal.firstname.toLowerCase().indexOf(val.toLowerCase()) ||
-                //             !person.personal.middlename.toLowerCase().indexOf(val.toLowerCase()) ||
-                //             !person.personal.lastname.toLowerCase().indexOf(val.toLowerCase());
-                //     }
-                // };
-            },
+            // Filter: function (val) {
+            //     if (!val) {
+            //         Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
+            //         Polymer.dom(this.root).querySelector("#info").style.display = 'none';
+            //         Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+            //     }
+            //     else {
+            //         Polymer.dom(this.root).querySelector("#list").style.display = 'block';
+            //     }
+            //     // return function (person) {
+            //     //     if (!val) {
+            //     //         return false;
+            //     //     }
+            //     //     else {
+            //     //         return !person.personal.firstname.toLowerCase().indexOf(val.toLowerCase()) ||
+            //     //             !person.personal.middlename.toLowerCase().indexOf(val.toLowerCase()) ||
+            //     //             !person.personal.lastname.toLowerCase().indexOf(val.toLowerCase());
+            //     //     }
+            //     // };
+            // },
 
             _bind(e) {
                 var str = Polymer.dom(e).rootTarget.getAttribute("id");
@@ -531,14 +532,23 @@
             },
 
             observers: [
-                '_showFab(filterValue)',
+                '_patientChanged(filterValue)',
                 '_showFab1(complain)',
             ],
 
-            _showFab(patient) {
+            _patientChanged(patient) {
                 if (!patient) {
+                    Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#info").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
                     this.favrighthide = true;
                 } else {
+                    var c = patient.toLowerCase().replace(/\b[a-z]/g, function (letter) {
+                        return letter.toUpperCase();
+                    });
+                    this.filterValue = c;
+
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
                     this.favrighthide = false;
                 }
             },
