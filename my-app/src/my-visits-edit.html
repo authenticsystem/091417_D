@@ -14,19 +14,16 @@
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="my-icons.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
-
 <link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html">
 <link rel="import" href="../bower_components/paper-time-input/paper-time-input.html">
-<link rel="import" href="../bower_components/app-media/app-media.html">
 
+<link rel="import" href="time-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
 <link rel="import" href="short-unique-id.html">
-<!-- <link rel="import" href="suggest.html"> -->
 
-
-<dom-module id="my-cases-edit">
+<dom-module id="my-visits-edit">
     <template>
         <style include="shared-styles">
             :host {
@@ -140,8 +137,8 @@
             }
 
             .avatar {
-                height: 40px;
-                width: 40px;
+                height: 45px;
+                width: 45px;
                 border-radius: 50%;
                 box-sizing: border-box;
                 background-color: transparent;
@@ -158,8 +155,8 @@
             }
 
             .primary {
-                font-size: 16px;
-                font-weight: bold;
+                font-size: 14px;
+                font-weight: 400;
             }
 
             .shortText,
@@ -169,16 +166,8 @@
 
             .longText {
                 color: gray;
-                display: none;
+                /* display: none; */
             }
-
-            /* #textera {
-                padding: 16px;
-                font-size: 14px;
-                font-weight: 300;
-                width: 95%;
-                font-family: Arial;
-            } */
 
             #list {
                 box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
@@ -191,10 +180,6 @@
                 height: 0;
                 font-size: 15px;
             }
-
-            /* app-media-video{
-
-            } */
         </style>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -204,7 +189,7 @@
             <app-header-layout id="appheader" has-scrolling-region>
                 <app-header fixed slot="header">
                     <app-toolbar>
-                        <a href="/cases">
+                        <a href="/visits">
                             <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
                         </a>
                         <div main-title>Edit Visit</div>
@@ -215,141 +200,57 @@
                             <paper-item>Delete</paper-item>
                         </paper-listbox>
                     </paper-menu-button> -->
-                        <span style="font-size:16px;"> {{date}}</span>
                         <!-- <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="toggleDrawer"></paper-icon-button> -->
                     </app-toolbar>
-
-                    <!-- <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3.5%;">
-                    <img class="avatar" src="../images/user.png"></img>
-                    <div class="pad">
-                        <div class="primary">Dr. Liz Grimes</div>
-                        <div class="shortText">MD</div>
-                        <div class="longText"></div>
-                    </div>
-                </app-toolbar> -->
                 </app-header>
 
-                <firebase-query id="query" path="{{orderby}}" data="{{thypatients}}" order-by-child="personal/name" start-at="{{filterValue}}"
-                    limit-to-first="5">
-                </firebase-query>
-
-                <firebase-query id="query1" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-key equal-to="{{myPatientKey}}" limit-to-last="1">
-                </firebase-query>
-
                 <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+
                     <neon-animatable>
                         <div class="docu">
-
-                            <!-- <div class="docu-header">
-                                <span>Case</span>
-                            </div> -->
-                            <div class="details">
-
-                                <paper-input on-keyup="_ack" value="{{filterValue}}" label="Patient *" floatingLabel id="searchEmployee"></paper-input>
-                                <paper-listbox id="list">
-                                    <template is="dom-repeat" items="[[thypatients]]">
-                                        <!-- <template is="dom-repeat" items="[[thypatients]]" filter="{{Filter(filterValue)}}"> -->
-                                        <!-- <paper-input style="display:none;" id="itemVal" value="{{item.personal.firstname}} {{item.personal.middlename}} {{item.personal.lastname}}"></paper-input> -->
-                                        <paper-item class="item" on-tap="_bind" id="{{item.$key}} {{item.personal.lastname}}, {{item.personal.firstname}} {{item.personal.middlename}}">
-                                            <paper-item-body two-line>
-                                                <div>[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
-                                            </paper-item-body>
-                                        </paper-item>
-                                    </template>
-                                </paper-listbox>
-
-                                <div id="info">
-                                    <paper-input readonly label="Birth date" value="{{bday}}"></paper-input>
-                                    <paper-input readonly label="Age" value="{{age}}"></paper-input>
-                                    <paper-input readonly label="Sex" value="{{sex}}"></paper-input>
-                                    <paper-input readonly label="Marital Status" value="{{status}}"></paper-input>
-                                    <paper-input readonly label="Occupation" value="{{occupation}}"></paper-input>
-                                    <paper-input readonly label="Employer" value="{{employer}}"></paper-input>
-                                    <paper-input readonly label="Referred to clinic by" value="{{referred}}"></paper-input>
-                                </div>
-                                <br>
-                                <div id="insure">
-                                    <b style="font-size:18px;">Insurance Information</b>
-                                    <paper-input readonly label="ID Card Number" value="{{card}}"></paper-input>
-                                    <paper-input readonly label="Birth date" value="{{bdate}}"></paper-input>
-                                    <paper-input readonly label="Address" value="{{address}}"></paper-input>
-                                    <paper-input readonly label="Home phone no" value="{{homephone}}"></paper-input>
-                                    <paper-input readonly label="Primary Insurance" value="{{insurance}}"></paper-input>
-                                    <paper-input readonly label="Relationship to patient" value="{{relation}}"></paper-input>
+                            <div class="details" style="display: flex;">
+                                <img class="avatar" src="{{p_profile}}"></img>
+                                <div style="margin-left:10px; font-weight:400; color:black">
+                                    <span style="font-size:11px;display:block" class="longText">{{p_num}}</span>
+                                    <span class="primary">{{filterValue}}</span>
+                                    <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}} {{sex}}</span>
+                                    <!-- <span class="longText" style="font-weight:400">{{_myAgeSex(age,sex)}}</span> -->
+                                    <span class="longText" style="font-weight:400;display:block">{{_hmo(insurance)}}</span>
                                 </div>
                             </div>
-
                         </div>
-                    </neon-animatable>
 
-                    <neon-animatable>
-
-                        <div class="docu">
-
-                            <!-- <div class="docu-header">
-                                        <span>Case</span>
-                                    </div> -->
+                        <div class="docu" style="margin-top:-16px;">
                             <div class="details">
-
-                                <paper-textarea label="Chief complain *" value="{{complain}}"></paper-textarea>
+                                <!-- <span class="primary" style="color:black; font-weight:400">Last Updated</span> -->
+                                <div style="margin-bottom:6px;">
+                                    <iron-icon icon="my-icons:watch-later"></iron-icon>
+                                    <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                                </div>
+                                <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
                                 <paper-textarea label="History" value="{{history}}"></paper-textarea>
                                 <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
                                 <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
-
+                                <!-- <div style="font-size:14px; margin-top: 6px;">Attachment</div>
+                                <input on-change="_changeAttach" type="file" id="myFile" accept="image/*,video/*" multiple> -->
                             </div>
-
                         </div>
                     </neon-animatable>
 
-                    <!-- <neon-animatable>
-                    <div class="docu">
-                        <div class="docu-header">5. Finalize</div>
-                        <div class="details">
-                            <div style="margin-bottom:10px;">Please review the following details:</div>
-                            <table>
-                                <tr>
-                                    <td>Complain</td>
-                                    <td>:</td>
-                                    <td>{{complain}}</td>
-                                </tr>
-                                <tr>
-                                    <td>History</td>
-                                    <td>:</td>
-                                    <td>{{history}}</td>
-                                </tr>
-                                <tr>
-                                    <td>Diagnosis</td>
-                                    <td>:</td>
-                                    <td>{{diagnosis}}</td>
-                                </tr>
-                                <tr>
-                                    <td>Treatment</td>
-                                    <td>:</td>
-                                    <td>{{treatment}}</td>
-                                </tr>
-                            </table> -->
-
-
-                    <!-- <div>Complain: {{complain}}</div>
-                            <div>History: {{history}}</div>
-                            <div>Diagnosis: {{diagnosis}}</div>
-                            <div>Treatment: {{treatment}}</div> -->
-
-                    <!-- </div>
-                    </div>
-                </neon-animatable> -->
                     <neon-animatable>
                         <div class="docu">
-                            <!-- <div class="docu-header">6. Completed</div> -->
-
                             <div class="details">
-                                <paper-item>
-                                    <paper-item-body>
-                                        <div id="saveSuccess" style="color: green; display:none">Case successfully saved.</div>
-                                        <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving the case.</div>
-                                    </paper-item-body>
-                                </paper-item>
+                                <div>Save changes ?</div>
+                            </div>
+                        </div>
+                    </neon-animatable>
 
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="details">
+                                <div id="saveSuccess" style="color: green; display:none">Visit successfully saved.</div>
+                                <div id="saveRunning" style="color: orange; display:none">Please wait while saving data. .</div>
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving data.</div>
                             </div>
                         </div>
                     </neon-animatable>
@@ -374,7 +275,7 @@
 
     <script>
         Polymer({
-            is: 'my-cases-edit',
+            is: 'my-visits-edit',
 
             properties: {
                 editKey: String,
@@ -383,10 +284,6 @@
                     observer: '_onMyaccessChanged'
                 },
                 myKey: String,
-                mypatients: {
-                    type: Object,
-                    observer: '_onMypatientChanged'
-                },
                 narrow: {
                     type: Boolean,
                     notify: true
@@ -424,75 +321,101 @@
                     type: String,
                     value: '',
                 },
+                attachment: {
+                    type: Object,
+                    value: ''
+                },
                 mykey: String
 
             },
 
-            _onMypatientChanged(e) {
-                if (e.length > 0) {
-                    this.bday = e[0].personal.birthday;
-                    this.age = e[0].personal.age;
-                    this.sex = e[0].personal.sex;
-                    this.occupation = e[0].personal.occupation;
-                    this.status = e[0].personal.status;
-                    this.employer = e[0].personal.employer;
-
-                    if (e[0].personal.referred == 'Dr') {
-                        this.referred = "Dr. " + e[0].personal.doctor;
-                    }
-                    else {
-                        this.referred = e[0].personal.referred;
-                    }
-
-                    this.card = e[0].insurance.card;
-                    this.bdate = e[0].insurance.birthday;
-                    this.address = e[0].insurance.address;
-                    this.homephone = e[0].insurance.home_phone;
-                    this.insurance = e[0].insurance.primary_insurance;
-                    this.relation = e[0].insurance.relationship;
-                }
-            },
-
-            // Filter: function (val) {
-            //     if (!val) {
-            //         Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
-            //         Polymer.dom(this.root).querySelector("#info").style.display = 'none';
-            //         Polymer.dom(this.root).querySelector("#list").style.display = 'none';
-            //     }
-            //     else {
-            //         Polymer.dom(this.root).querySelector("#list").style.display = 'block';
-            //     }
-            //     // return function (person) {
-            //     //     if (!val) {
-            //     //         return false;
-            //     //     }
-            //     //     else {
-            //     //         return !person.personal.firstname.toLowerCase().indexOf(val.toLowerCase()) ||
-            //     //             !person.personal.middlename.toLowerCase().indexOf(val.toLowerCase()) ||
-            //     //             !person.personal.lastname.toLowerCase().indexOf(val.toLowerCase());
-            //     //     }
-            //     // };
-            // },
-
-            _bind(e) {
-                var str = Polymer.dom(e).rootTarget.getAttribute("id");
-                var name = str.slice(21);
-                var key = str.slice(0, 20);
-                if (name) {
-                    this.filterValue = name;
-                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
-                }
-
-                if (key) {
-                    Polymer.dom(this.root).querySelector("#insure").style.display = 'block';
-                    Polymer.dom(this.root).querySelector("#info").style.display = 'block';
-                    this.myPatientKey = key;
-                    this.mykey = key;
+            _changeAttach() {
+                if (event.target.files.length > 0) {
+                    this.attachment = event.target.files;
+                    // for (var i = 0; i < event.target.files.length; i++) {
+                    // }
+                    // if (event.target.files[0].type == 'image/png' || event.target.files[0].type == 'image/jpeg') {
+                    //     Polymer.dom(this.root).querySelector("#picHolder").style.display = 'block';
+                    //     Polymer.dom(this.root).querySelector("#vidHolder").style.display = 'none';
+                    //     Polymer.dom(this.root).querySelector("#healthPic").src = URL.createObjectURL(event.target.files[0]);
+                    // }
+                    // else {
+                    //     Polymer.dom(this.root).querySelector("#picHolder").style.display = 'none';
+                    //     Polymer.dom(this.root).querySelector("#vidHolder").style.display = 'block';
+                    //     Polymer.dom(this.root).querySelector("#healthVid").src = URL.createObjectURL(event.target.files[0]);
+                    // }
                 }
             },
 
             _onMyaccessChanged() {
                 if (this.mycases.length > 0) {
+
+                    if (this.mycases[0].patientinfo) {
+          
+                        this.insurance = this.mycases[0].patientinfo.hmo;
+                        this.sex = this.mycases[0].patientinfo.gender;
+                        this.p_num = this.mycases[0].patientinfo.num;
+
+                        if (this.mycases[0].patientinfo.birthday) {
+
+                            var today = new Date();
+                            var birthday = new Date(this.mycases[0].patientinfo.birthday);
+
+                            var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+                            var year_age = Math.floor(differenceInMilisecond / 31536000000);
+                            var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+                            var month_age = Math.floor(day_age / 30);
+
+                            day_age = day_age % 30;
+
+                            if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+                                console.log('err');
+                                // $("#exact_age").text("Invalid birthday - Please try again!");
+                            }
+                            else {
+                                if (year_age > 0) {
+                                    if (year_age == 1) {
+                                        this.age = year_age + " year old";
+                                    }
+                                    else {
+                                        this.age = year_age + " years old";
+                                    }
+                                }
+                                else if (year_age == 0 && month_age > 0) {
+                                    if (month_age == 1) {
+                                        this.age = month_age + " month old";
+                                    }
+                                    else {
+                                        this.age = month_age + " months old";
+                                    }
+                                }
+                                else if (year_age == 0 && month_age == 0 && day_age > 0) {
+                                    if (day_age == 1) {
+                                        this.age = day_age + " day old";
+                                    }
+                                    else {
+                                        this.age = day_age + " days old";
+                                    }
+                                }
+                                else {
+                                    this.age = year_age + " years " + month_age + " months " + day_age + " days old";
+                                }
+                            }
+                        }
+                        else {
+                            this.age = '';
+                        }
+                    }
+
+                    if (this.mycases[0].profile) {
+                        this.p_profile = this.mycases[0].profile;
+                    }
+                    else {
+                        this.p_profile = '../images/user.png';
+                    }
+
                     this.filterValue = this.mycases[0].patient;
                     this.complain = this.mycases[0].complain;
                     this.diagnosis = this.mycases[0].diagnosis;
@@ -500,6 +423,8 @@
                     this.treatment = this.mycases[0].treatment;
                     this.mykey = this.mycases[0].patientkey;
                     this.myPatientKey = this.mycases[0].patientkey;
+                    this.timestamp = this.mycases[0].timestamp;
+                    // console.log(this.mycases[0].attachment);
 
                     var date = new Date(this.mycases[0].timestamp);
                     var options = {
@@ -509,49 +434,32 @@
 
                     this.date = date.toLocaleTimeString("en-us", options);
                 }
-                // console.log(this.mycases);
             },
 
             _ack() {
                 this.orderby = '/' + this.myKey + '/patients';
             },
 
-            toggleDrawer() {
-                // this.dispatchEvent(new CustomEvent('toggleDrawer', {
-                //     bubbles: true, composed: true, detail: {
-                //         narrow: this.$.narrow
-                //     }
-                // }));
-                // this.$.narrow = !this.$.narrow;
-                // Polymer.dom(this.parentNode).removeChild(this);
+            _comma(e) {
+                if (e) {
+                    return ',';
+                }
             },
+
+            _hmo(e) {
+                if (e) {
+                    return 'HMO: ' + e;
+                }
+            },
+
             ready() {
                 this.selectedPage = 0;
                 this.favlefthide = true;
-                // this.favlefthide = false;
             },
 
             observers: [
-                '_patientChanged(filterValue)',
-                '_showFab1(complain)',
+                '_showFab1(complain)'
             ],
-
-            _patientChanged(patient) {
-                if (!patient) {
-                    Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
-                    Polymer.dom(this.root).querySelector("#info").style.display = 'none';
-                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
-                    this.favrighthide = true;
-                } else {
-                    var c = patient.toLowerCase().replace(/\b[a-z]/g, function (letter) {
-                        return letter.toUpperCase();
-                    });
-                    this.filterValue = c;
-
-                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
-                    this.favrighthide = false;
-                }
-            },
 
             _showFab1(complain) {
                 if (!complain) {
@@ -561,42 +469,6 @@
                 }
             },
 
-            // _onComplain(complain) {
-            //     if (!complain) {
-            //         this.favrighthide = true;
-            //         // this.favlefthide = true;
-            //     } else {
-            //         this.favrighthide = false;
-            //         this.favlefthide = true;
-            //     }
-            // },
-            // _onHistory(history) {
-            //     if (!history) {
-            //         this.favrighthide = true;
-            //         this.favlefthide = false;
-            //     } else {
-            //         this.favlefthide = true;
-            //         this.favrighthide = false;
-            //     }
-            // },
-            // _onDiagnosis(diagnosis) {
-            //     if (!diagnosis) {
-            //         this.favrighthide = true;
-            //         this.favlefthide = false;
-            //     } else {
-            //         this.favlefthide = true;
-            //         this.favrighthide = false;
-            //     }
-            // },
-            // _onTreatment(treatment) {
-            //     if (!treatment) {
-            //         this.favrighthide = true;
-            //         this.favlefthide = false;
-            //     } else {
-            //         this.favlefthide = true;
-            //         this.favrighthide = false;
-            //     }
-            // },
             _select1(e) {
                 this.entryanimation = "slide-from-left-animation";
                 this.exitanimation = "slide-right-animation";
@@ -643,8 +515,11 @@
                             mydiagnosis = this.diagnosis, mytreatment = this.treatment,
                             editkey = this.editKey;
                         var mykey = this.myKey;
+                        var myattachment = this.attachment;
+                        var attachName = this.guid();
 
                         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+                        var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
                         var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
 
                         this.favlefthide = false;
@@ -663,15 +538,55 @@
                                         treatment: mytreatment,
                                         patientkey: key,
                                         profile: patient.val().profile,
-                                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                                        timestamp: firebase.database.ServerValue.TIMESTAMP,
+                                        order: firebase.database.ServerValue.TIMESTAMP,
+                                        patientinfo: {
+                                            num: patient.val().no,
+                                            birthday: patient.val().personal.birthday,
+                                            gender: patient.val().personal.sex,
+                                            hmo: patient.val().insurance.primary_insurance
+                                        }
                                     })
                                         .then(function () {
-                                            saveSucc.style.display = 'block';
+                                            var postRef = firebase.database().ref('/' + mykey + '/cases/' + editkey);
+                                            postRef.once('value').then(function (snapshot) {
+                                                order = snapshot.val().order * -1;
+                                                postRef.update({ order });
+                                            });
+
+                                            if (myattachment) {
+                                                saveRun.style.display = 'block';
+                                                for (var i = 0; i < myattachment.length; i++) {
+                                                    var attachFile = myattachment[i];
+                                                    var name = attachName + i;
+                                                    var myURL = "/" + mykey + "/cases/" + editkey + "/attachment";
+
+                                                    var storageRef = firebase.storage().ref('attachment/' + name);
+                                                    storageRef.put(attachFile).then(function (snapshot) {
+                                                        saveRun.style.display = 'none';
+                                                        saveSucc.style.display = 'block';
+
+                                                        var type = snapshot.metadata.contentType.slice(0, 5);
+                                                        var name = snapshot.metadata.name + '.' + snapshot.metadata.contentType.substring(6);
+                                                        var ref = firebase.database().ref(myURL);
+
+                                                        ref.push({
+                                                            url: snapshot.downloadURL,
+                                                            type: type,
+                                                            name: name
+                                                        });
+                                                    });
+                                                }
+                                            }
+                                            else {
+                                                saveRun.style.display = 'none';
+                                                saveSucc.style.display = 'block';
+                                            }
                                         });
                                 }
                                 else {
                                     var ref = firebase.database().ref("/" + mykey + "/cases/" + editkey);
-                                    var push = ref.update({
+                                    ref.update({
                                         patient: mypatient,
                                         complain: mycomplain,
                                         history: myhistory,
@@ -679,26 +594,54 @@
                                         treatment: mytreatment,
                                         patientkey: key,
                                         profile: '',
-                                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                                        timestamp: firebase.database.ServerValue.TIMESTAMP,
+                                        order: firebase.database.ServerValue.TIMESTAMP,
+                                        patientinfo: {
+                                            num: patient.val().no,
+                                            birthday: patient.val().personal.birthday,
+                                            gender: patient.val().personal.sex,
+                                            hmo: patient.val().insurance.primary_insurance
+                                        }
                                     })
                                         .then(function () {
-                                            saveSucc.style.display = 'block';
+                                            var postRef = firebase.database().ref('/' + mykey + '/cases/' + editkey);
+                                            postRef.once('value').then(function (snapshot) {
+                                                order = snapshot.val().order * -1;
+                                                postRef.update({ order });
+                                            });
+
+                                            if (myattachment) {
+                                                saveRun.style.display = 'block';
+                                                for (var i = 0; i < myattachment.length; i++) {
+                                                    var attachFile = myattachment[i];
+                                                    var name = attachName + i;
+                                                    var myURL = "/" + mykey + "/cases/" + editkey + "/attachment";
+
+                                                    var storageRef = firebase.storage().ref('attachment/' + name);
+                                                    storageRef.put(attachFile).then(function (snapshot) {
+                                                        saveRun.style.display = 'none';
+                                                        saveSucc.style.display = 'block';
+
+                                                        var type = snapshot.metadata.contentType.slice(0, 5);
+                                                        var name = snapshot.metadata.name + '.' + snapshot.metadata.contentType.substring(6);
+                                                        var ref = firebase.database().ref(myURL);
+
+                                                        ref.push({
+                                                            url: snapshot.downloadURL,
+                                                            type: type,
+                                                            name: name
+                                                        });
+                                                    });
+                                                }
+                                            }
+                                            else {
+                                                saveRun.style.display = 'none';
+                                                saveSucc.style.display = 'block';
+                                            }
                                         });
                                 }
                             });
-
-                        // var ref = firebase.database().ref("/sampleDoctor/cases/" + this.editKey);
-                        // var push = ref.update({
-                        //     patient: this.filterValue,
-                        //     complain: this.complain,
-                        //     history: this.history,
-                        //     diagnosis: this.diagnosis,
-                        //     treatment: this.treatment,
-                        //     patientkey: this.mykey
-                        // });
-                        // this.saveSuccess = 'Case successfully updated.';
                     }
-
 
                 }
                 if (parseInt(this.selectedPage) !== 2) {
@@ -710,15 +653,6 @@
                         Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
                         Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
                     }
-
-                    // if (parseInt(this.selectedPage) == 4) {
-                    //     this.favlefthide = false;
-                    //     this.favrighthide = false;
-                    // }
-                    // else if (parseInt(this.selectedPage) == 5) {
-                    //     this.favlefthide = true;
-                    //     this.favrighthide = true;
-                    // }
                 }
 
                 else {
@@ -727,6 +661,15 @@
                     this.favrighthide = true;
                 }
             },
+
+            guid: function () {
+                var uid = new ShortUniqueId();
+                return uid.randomUUID(8);
+            },
+
+            _timeStampToDateTime(ts) {
+                return new Date(ts);
+            }
 
         })
 

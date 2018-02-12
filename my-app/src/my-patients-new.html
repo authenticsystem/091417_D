@@ -153,6 +153,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         box-sizing: border-box;
         background-color: #DDD;
       }
+
+      .shortText,
+      .longText {
+        font-size: 14px;
+      }
+
+      .longText {
+        color: gray;
+        /* display: none; */
+      }
     </style>
 
     <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -222,6 +232,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle></paper-icon-button>
           </app-toolbar>
         </app-header>
+
+        <firebase-query id="query" path="/{{myKey}}/patients" data="{{patientsLength}}">
+        </firebase-query>
 
         <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
 
@@ -306,8 +319,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
                 <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
                 <div id="info">
-                  <paper-input type="date" value="{{bday}}" label="Birth date" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input type="number" value="{{age}}" label="Age" style="width:100%;"></paper-input>
+                  <paper-input placeholder="mm/dd/yyyy" pattern="^([0-2]{2})[\/\-]([0-9]{2})[\/\-]([0-9]{4})$" auto-validate error-message="Invalid date format!"
+                    value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
+                  <paper-input value="{{age}}" label="Age" style="width:100%;"></paper-input>
+                  <!-- <span>Age: {{age}}</span> -->
                 </div>
                 <div id="info">
                   <paper-dropdown-menu-light label="Marital Status" style="width:100%; margin-right:10px">
@@ -319,7 +334,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <paper-item id="item">Widowed</paper-item>
                     </paper-listbox>
                   </paper-dropdown-menu-light>
-                  <paper-dropdown-menu-light label="Sex" style="width:100%; margin-right:10px">
+                  <paper-dropdown-menu-light label="Gender" style="width:100%; margin-right:10px">
                     <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{sex}}" class="dropdown-content">
                       <paper-item id="item">Male</paper-item>
                       <paper-item id="item">Female</paper-item>
@@ -360,7 +375,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div class="details">
                 <div id="info">
                   <paper-input value="{{card}}" Label="ID Card Number" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input value="{{bdate}}" type="date" Label="Birth date" style="width:100%;"></paper-input>
+                  <paper-input value="{{bdate}}" placeholder="mm/dd/yyyy" pattern="^([0-2]{2})[\/\-]([0-9]{2})[\/\-]([0-9]{4})$" auto-validate
+                    error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
                 </div>
                 <paper-input value="{{in_address}}" Label="Address (If different)"></paper-input>
                 <paper-input value="{{home_phone}}" type="number" Label="Home phone no."></paper-input>
@@ -400,130 +416,211 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <!-- <div style="margin-bottom:10px;">Please review the following details:</div> -->
                 <img id="p_profile" src="../images/user.png" class="avatar">
 
-                <div style="font-weight:bold">Basic Information</div>
+                <!-- <div style="font-weight:bold">Basic Information</div> -->
 
-                <table>
+                <table style="margin-bottom:6px;">
                   <tr>
-                    <td>Email address</td>
-                    <td>:</td>
-                    <td>{{email}}</td>
+                    <td>
+                      <span class="longText">Firstname</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{fname}}</td>
                   </tr>
                   <tr>
-                    <td>Firstname</td>
-                    <td>:</td>
-                    <td>{{fname}}</td>
+                    <td>
+                      <span class="longText">Middlename</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{mname}}</td>
                   </tr>
                   <tr>
-                    <td>Middlename</td>
-                    <td>:</td>
-                    <td>{{mname}}</td>
+                    <td>
+                      <span class="longText">Lastname</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{lname}}</td>
                   </tr>
                   <tr>
-                    <td>Lastname</td>
-                    <td>:</td>
-                    <td>{{lname}}</td>
+                    <td>
+                      <span class="longText">Email address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{email}}</td>
                   </tr>
                   <tr>
-                    <td>Birth date</td>
-                    <td>:</td>
-                    <td>{{bday}}</td>
+                    <td>
+                      <span class="longText">Birth date</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{bday}}</td>
                   </tr>
                   <tr>
-                    <td>Age</td>
-                    <td>:</td>
-                    <td>{{age}}</td>
+                    <td>
+                      <span class="longText">Age</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{age}}</td>
                   </tr>
                   <tr>
-                    <td>Marital Status</td>
-                    <td>:</td>
-                    <td>{{stat}}</td>
+                    <td>
+                      <span class="longText">Marital Status</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{stat}}</td>
                   </tr>
                   <tr>
-                    <td>Sex</td>
-                    <td>:</td>
-                    <td>{{gender}}</td>
+                    <td>
+                      <span class="longText">Gender</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{gender}}</td>
                   </tr>
                   <tr>
-                    <td>Contact no</td>
-                    <td>:</td>
-                    <td>{{contact}}</td>
+                    <td>
+                      <span class="longText">Contact no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{contact}}</td>
                   </tr>
                   <tr>
-                    <td>Street address</td>
-                    <td>:</td>
-                    <td>{{address}}</td>
+                    <td>
+                      <span class="longText">Street address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{address}}</td>
                   </tr>
                   <tr>
-                    <td>Occupation</td>
-                    <td>:</td>
-                    <td>{{occupation}}</td>
+                    <td>
+                      <span class="longText">Occupation</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{occupation}}</td>
                   </tr>
                   <tr>
-                    <td>Employer</td>
-                    <td>:</td>
-                    <td>{{occupation}}</td>
+                    <td>
+                      <span class="longText">Employer</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{occupation}}</td>
                   </tr>
                   <tr>
-                    <td>Employer phone no</td>
-                    <td>:</td>
-                    <td>{{emp_phone}}</td>
+                    <td>
+                      <span class="longText">Employer phone no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{emp_phone}}</td>
                   </tr>
                   <tr>
-                    <td>Referred to clinic by</td>
-                    <td>:</td>
-                    <td>{{referredby}}</td>
+                    <td>
+                      <span class="longText">Referred to clinic by</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{referredby}}</td>
                   </tr>
                 </table>
 
-                <br>
-                <div style="font-weight:bold">Insurance</div>
-                <table>
+                <div style="font-weight:bold; padding:5px; background:rgb(236, 235, 235)">Insurance</div>
+                <table style="padding:6px">
                   <tr>
-                    <td>ID Card no</td>
-                    <td>:</td>
-                    <td>{{card}}</td>
+                    <td>
+                      <span class="longText">ID Card no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{card}}</td>
                   </tr>
                   <tr>
-                    <td>Birth date</td>
-                    <td>:</td>
-                    <td>{{bdate}}</td>
+                    <td>
+                      <span class="longText">Birth date</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{bdate}}</td>
                   </tr>
                   <tr>
-                    <td>address</td>
-                    <td>:</td>
-                    <td>{{in_address}}</td>
+                    <td>
+                      <span class="longText">address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{in_address}}</td>
                   </tr>
                   <tr>
-                    <td>Relationship to patient</td>
-                    <td>:</td>
-                    <td>{{p_relation}}</td>
+                    <td>
+                      <span class="longText">Home phone no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{home_phone}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Primary Insurance</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{indicate}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Relationship to patient</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{p_relation}}</td>
                   </tr>
                 </table>
 
-                <br>
-                <div style="font-weight:bold">In-case of emergency</div>
-                <table>
+                <div style="font-weight:bold; padding:5px; background:rgb(236, 235, 235)">In-case of emergency</div>
+                <table style="padding:6px">
                   <tr>
-                    <td>Name</td>
-                    <td>:</td>
-                    <td>{{name_e}}</td>
+                    <td>
+                      <span class="longText">Name</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{name_e}}</td>
                   </tr>
                   <tr>
-                    <td>Relationship to patient</td>
-                    <td>:</td>
-                    <td>{{relation_e}}</td>
+                    <td>
+                      <span class="longText">Relationship to patient</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{relation_e}}</td>
                   </tr>
                   <tr>
-                    <td>Home phone no</td>
-                    <td>:</td>
-                    <td>{{phone_e}}</td>
+                    <td>
+                      <span class="longText">Home phone no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{phone_e}}</td>
                   </tr>
                   <tr>
-                    <td>Work phone no</td>
-                    <td>:</td>
-                    <td>{{work_phone}}</td>
+                    <td>
+                      <span class="longText">Work phone no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{work_phone}}</td>
                   </tr>
                 </table>
+
 
 
                 <!-- <div style="margin-left:10px;">
@@ -566,13 +663,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div class="docu-header">6. Completed</div>
 
               <div class="details">
-                <paper-item>
-                  <paper-item-body>
-                    <div id="saveSuccess" style="color: green; display:none;">Patient successfully added.</div>
-                    <div id="saveFailed" style="color: red; display:none;">Opps! Something went wrong while saving patient.</div>
-                  </paper-item-body>
-                </paper-item>
-
+                <div id="saveSuccess" style="color: green; display:none;">Patient successfully saved.
+                  <br> Patient no
+                  <b style="color:blue">{{no}}</b>
+                </div>
+                <div id="saveFailed" style="color: red; display:none;">Opps! Something went wrong while saving patient.</div>
               </div>
             </div>
           </neon-animatable>
@@ -620,6 +715,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         favrighthide: {
           type: Boolean,
           value: true
+        },
+        mname: {
+          type: String,
+          value: ''
         },
         email: {
           type: String,
@@ -710,7 +809,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         profile: String,
         personal: Object,
         insurance: Object,
-        emergency: Object
+        emergency: Object,
+        length: {
+          type: Number,
+          value: 0
+        }
         // canvas: String,
         // context: String,
         // video: String,
@@ -720,8 +823,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       observers: [
         'personalInfoChanged(doctor,refer,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
         'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
-        'emergencyChanged(name_e, relation_e, phone_e, work_phone)'
+        'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
+        'patientsLengthChanged(patientsLength)'
       ],
+      patientsLengthChanged(e) {
+        if (e.length > 0) {
+          this.length = e.length;
+        }
+      },
 
       // _selectPage(e) {
       //   var select = Polymer.dom(e).rootTarget.getAttribute("id");
@@ -730,60 +839,64 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       personalInfoChanged(doctor, refer, email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
         if (fname) {
-          var c = fname.toLowerCase().replace(/\b[a-z]/g, function (letter) {
-            return letter.toUpperCase();
-          });
-          this.fname = c;
-          fname = c;
+          this.fname = fname.toUpperCase();
+          fname = fname.toUpperCase();
         }
 
         if (mname) {
-          var c = mname.toLowerCase().replace(/\b[a-z]/g, function (letter) {
-            return letter.toUpperCase();
-          });
-          this.mname = c;
-          mname = c;
+          this.mname = mname.toUpperCase();
+          mname = mname.toUpperCase();
         }
 
         if (lname) {
-          var c = lname.toLowerCase().replace(/\b[a-z]/g, function (letter) {
-            return letter.toUpperCase();
-          });
-          this.lname = c;
-          lname = c;
+          this.lname = lname.toUpperCase();
+          lname = lname.toUpperCase();
         }
 
         if (bday) {
-          var mdate = bday.toString();
-          var yearThen = parseInt(mdate.substring(0, 4), 10);
-          var monthThen = parseInt(mdate.substring(5, 7), 10);
-          var dayThen = parseInt(mdate.substring(8, 10), 10);
+          var dateformat = /^([0-2]{2})[\/\-]([0-9]{2})[\/\-]([0-9]{4})$/;
+          if (bday.match(dateformat)) {
 
-          var today = new Date();
-          var birthday = new Date(yearThen, monthThen - 1, dayThen);
+            var mdate = bday.toString();
 
-          var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+            var monthThen = parseInt(mdate.substring(0, 2), 10);
+            var dayThen = parseInt(mdate.substring(3, 5), 10);
+            var yearThen = parseInt(mdate.substring(6, 10), 10);
 
-          var year_age = Math.floor(differenceInMilisecond / 31536000000);
-          var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+            // yyyy-mm-dd
+            bday = yearThen + '-' + monthThen + '-' + dayThen;
 
-          if ((today.getMonth() == birthday.getMonth()) && (today.getDate() == birthday.getDate())) {
-            // alert("Happy B'day!!!");
-          }
+            // bday = new Date(mydate);
 
-          var month_age = Math.floor(day_age / 30);
+            var daysBetweenDates;
+            daysBetweenDates = function (d1, d2) {
+              var diffDays, oneDay;
+              oneDay = 24 * 60 * 60 * 1000;
+              diffDays = (d2 - Date.parse(d1)) / oneDay;
+              return diffDays;
+            };
 
-          day_age = day_age % 30;
+            var ageNum = daysBetweenDates(bday, new Date()) / 365;
 
-          if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
-            // $("#exact_age").text("Invalid birthday - Please try again!");
+            function N(num, places) {
+              return +(Math.round(num + "e+" + places) + "e-" + places);
+            }
+
+            var x = N(ageNum, 3);
+
+            if (x <= 0) {
+              this.age = 0;
+            }
+            else {
+              this.age = x;
+            }
           }
           else {
-            this.age = year_age;
+            this.age = '';
           }
         }
         else {
-          this.age = age;
+          this.age = '';
         }
 
         if (refer) {
@@ -804,31 +917,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         if (sex == 0) {
-          this.gender = 'male';
+          this.gender = 'Male';
         }
         if (sex == 1) {
-          this.gender = 'female';
+          this.gender = 'Female';
         }
         if (status == 0) {
-          this.stat = 'single';
+          this.stat = 'Single';
         }
         if (status == 1) {
-          this.stat = 'married';
+          this.stat = 'Married';
         }
         if (status == 2) {
-          this.stat = 'divorced'
+          this.stat = 'Divorced'
         }
         if (status == 3) {
-          this.stat = 'separated';
+          this.stat = 'Separated';
         }
         if (status == 4) {
-          this.stat = 'widowed';
+          this.stat = 'Widowed';
         }
 
-        if (!fname || !mname || !lname) {
+        if (!fname || !lname) {
           this.favrighthide = true;
         }
         else {
+          // console.log(bday);
           this.favrighthide = false;
           this.personal = {
             email: email,
@@ -836,7 +950,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             middlename: mname,
             lastname: lname,
             birthday: bday,
-            age: age,
             status: this.stat,
             sex: this.gender,
             contact: contact,
@@ -846,12 +959,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             emp_phone: emp_phone,
             referred: refer,
             doctor: doctor,
-            name: lname + ' ' + fname + ' ' + mname
+            name: lname + ', ' + fname + ' ' + mname
           }
         }
       },
 
       insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation) {
+        var date = '';
+        if (bdate) {
+          var dateformat = /^([0-2]{2})[\/\-]([0-9]{2})[\/\-]([0-9]{4})$/;
+          if (bdate.match(dateformat)) {
+            this.ibd = bdate;
+            date = bdate;
+          }
+          else {
+            this.ibd = '';
+            date = '';
+          }
+        }
+        else {
+          this.ibd = '';
+          date = '';
+        }
+
         this.insurance = {
           card: card,
           birthday: bdate,
@@ -946,7 +1076,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (parseInt(this.selectedPage) >= 0) {
 
           if (parseInt(this.selectedPage) == 0) {
-            if (!this.fname || !this.mname || !this.lname) {
+            if (!this.fname || !this.lname) {
               this.favlefthide = false;
               this.favrighthide = true;
             }
@@ -984,6 +1114,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
             var info = this.personal, insure = this.insurance, emerg = this.emergency;
             var mykey = this.myKey;
+            var num = this.length + 1;
+            if (num > 0 && num < 10) {
+              num = '000' + num;
+            }
+            else if (num > 9 && num < 100) {
+              num = '00' + num;
+            }
+            else if (num > 99 && num < 1000) {
+              num = '0' + num;
+            }
+            else if (num > 999) {
+              num = num;
+            }
+            else {
+              num = '0000';
+            }
+
             if (this.profile) {
               var pic_name = this.guid();
               var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
@@ -998,10 +1145,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       personal: info,
                       insurance: insure,
                       emergency: emerg,
-                      profile: downLoadURL
+                      profile: downLoadURL,
+                      no: num
                     });
 
                     if (push.key) {
+                      this.no = num;
                       saveSucc.style.display = 'block';
                     }
                     else {
@@ -1016,10 +1165,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               var push = ref.push({
                 personal: info,
                 insurance: insure,
-                emergency: emerg
+                emergency: emerg,
+                no: num
               });
 
               if (push.key) {
+                this.no = num;
                 saveSucc.style.display = 'block';
               }
               else {

@@ -136,7 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <paper-toast id="toastAccLink" text="" duration="5000"></paper-toast>
 
-        <div class="main-container">
+        <div class="main-container" id="myContain" style="display:none">
             <div class="divHolder">
                 <!-- <div class="div1">
                         <img style="width:200px;" src="../images/manifest/icon-512x512.png">
@@ -160,6 +160,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <br>
                         <paper-button style="float:right;" raised on-tap="_next">Next</paper-button>
                         <paper-button style="float:right;" on-tap="_signOut">Signout</paper-button>
+                        <paper-spinner id="nextSpinner" active style="float:right; margin-right:10px; display:none"></paper-spinner>
                         <br>
                     </div>
                     <div id="verifyphone" style="display:none">
@@ -171,6 +172,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <span style="color:red; font-size:12px">{{msg}}</span>
                         <br>
                         <paper-button style="float:right;" raised on-tap="_verify">Verify</paper-button>
+                        <paper-spinner id="verifySpinner" active style="float:right; margin-right:10px; display:none"></paper-spinner>
                         <br>
                     </div>
                     <div id="success" style="display:none">
@@ -203,13 +205,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 },
                 isActive: {
                     type: Boolean,
-                    // observer: '_isActiveChanged'
+                    observer: '_isActiveChanged'
                 }
             },
 
-            // _isActiveChanged() {
-            //     console.log(this.isActive);
-            // },
+            _isActiveChanged() {
+                var container = Polymer.dom(this.root).querySelector("#myContain");
+                var toast = Polymer.dom(this.root).querySelector("#toastAccLink");
+
+                if (this.isActive == false) {
+                    toast.opened = true;
+                    toast.text = 'Checking user account ...';
+                    setTimeout((e) => {
+                        toast.opened = false;
+                        container.style.display = 'block';
+                    }, 2000);
+                }
+                else {
+                    toast.opened = false;
+                }
+            },
 
             _next() {
                 if (!this.mycode) {
@@ -225,12 +240,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         this.phone = str.substring(0, 4) + "......" + str.substring(10, 13);
                     }
                     else {
-                        this.msg = 'Invalid account number.';
+                        this.msg = 'Invalid account code.';
                     }
                 }
             },
 
             signInWithPhone() {
+                var nextSpin = Polymer.dom(this.root).querySelector("#nextSpinner");
+                nextSpin.style.display = 'block';
                 this._removeRecaptcha();
                 const recaptchaContainer = document.createElement('div');
                 recaptchaContainer.id = 'recaptchaContainer';
@@ -257,6 +274,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                          */
                         Polymer.dom(this.root).querySelector("#accountcode").setAttribute("style", "display: none;");
                         Polymer.dom(this.root).querySelector("#verifyphone").setAttribute("style", "display: block;");
+                        nextSpin.style.display = 'none';
                         this.confirmationResult = confirmationResult;
                         this._removeRecaptcha();
                     })
@@ -276,6 +294,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     this.msg = "Please enter verification code.";
                 }
                 else {
+                    var verifySpin = Polymer.dom(this.root).querySelector("#verifySpinner");
+                    verifySpin.style.display = 'block';
                     this.msg = '';
                     var toast = Polymer.dom(this.root).querySelector("#toastAccLink");
                     var hide = Polymer.dom(this.root).querySelector("#verifyphone");
@@ -293,7 +313,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         fbDB.child('accounts/' + accountKey + '/active').set(true);
                         hide.style.display = 'none';
                         show.style.display = 'block';
+                        verifySpin.style.display = 'none';
                     }, function (error) {
+                        verifySpin.style.display = 'none';
                         toast.opened = true;
                         toast.text = error.message;
                         // window.alert(error.message + '\nPhone number: ' + error.phoneNumber);

@@ -46,34 +46,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .item {
         @apply --layout-horizontal;
-        padding: 20px;
+        padding: 15px;
         background-color: white;
         border-bottom: 1px solid #ddd;
         cursor: pointer;
-        /* margin-bottom: 10px; */
+        /* margin-bottom: 5px; */
       }
 
       .item:hover {
-        background: rgb(240, 240, 240);
+        box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
       }
 
       .avatar {
-        height: 40px;
-        width: 40px;
+        height: 45px;
+        width: 45px;
         border-radius: 20px;
         box-sizing: border-box;
         background-color: #DDD;
       }
 
       .pad {
-        padding: 0 16px;
+        /* border-left: 6px solid rgb(208, 137, 236); */
+        margin-left: 10px;
+        /* padding: 10px; */
         @apply --layout-flex;
         @apply --layout-vertical;
       }
 
       .primary {
-        font-size: 16px;
-        font-weight: bold;
+        font-size: 14px;
+        font-weight: 400;
       }
 
       .shortText,
@@ -83,7 +85,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .longText {
         color: gray;
-        display: none;
+        /* display: none; */
       }
 
       /* .item:hover .shortText::after {
@@ -91,13 +93,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: gray;
       } */
 
-      .item.expanded:hover .shortText::after {
+      /* .item.expanded:hover .shortText::after {
         content: '';
       }
 
       .item.expanded .longText {
         display: block;
-      }
+      } */
 
       /* .item.expanded:hover .longText::after {
         content: ' [–]';
@@ -114,7 +116,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           display: flex;
           /* height: 100vh; */
           flex-direction: column;
-          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
         paper-search-bar {
           margin-left: 80px;
@@ -129,7 +131,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 16px auto;
           /* margin-top: 0px; */
           /* height: 100vh; */
-          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
         paper-search-bar {
           margin-left: 50px;
@@ -213,6 +215,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: rgb(2, 136, 160);
         /* top: 8px; */
       }
+
+      .item-header {
+        padding: 50px;
+        background: rgb(2, 136, 160);
+      }
+
+      .star {
+        display: inline-block;
+        position: absolute;
+        right: 10px;
+        color: #673AB7;
+        top: 8px;
+      }
+
+      .star:hover {
+        color: rgb(40, 0, 109);
+      }
     </style>
 
     <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
@@ -254,29 +273,44 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
             </app-header>
 
-            <firebase-query id="query" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}"
-              limit-to-first="25">
+            <firebase-query id="query" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}">
             </firebase-query>
 
             <iron-list items="[[mypatients]]" as="item" selection-enabled scroll-target="threshold">
               <template>
                 <div class="divSeparator">
                   <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                    <!-- <div style="background:#009688; padding:10px;"> -->
                     <iron-image style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
                     <iron-image style$="{{_hasProfile(item.profile)}}" class="avatar" sizing="cover" src="[[item.profile]]"></iron-image>
-                    <div class="pad">
-                      <div class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
-                      <div class="shortText">[[item.personal.address]]</div>
+                    <!-- </div> -->
+
+                    <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
+                      <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
+                      <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
+                      <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div>
+                      <div id="{{item.$key}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
+                      <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
+                      <!-- <div class="shortText">[[item.personal.address]]</div> -->
+                      <!-- <div class="shortText">Contact: [[item.personal.contact]]</div> -->
                     </div>
 
+                    <div style="padding:10px"> </div>
+
+                    <a id="open" href$="{{_getViewDetailsLink(item.$key)}}"></a>
+
+                    <!-- <paper-icon-button class="star" noink on-tap="_starMe" icon="my-icons:star-border" alt="star{{item.$key}}" id="star{{item.$key}}"
+                      title="Pin me">
+                    </paper-icon-button> -->
+
                     <a href$="{{_getEditAppLink(item.$key)}}">
-                      <paper-icon-button class="b-edit" alt="{{item.$key}}" noink on-tap="_editThis" icon="my-icons:edit" title="edit"></paper-icon-button>
+                      <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="Edit" style="display:inline-block;position: absolute;  right: 10px; color: #673AB7; top:8px;">
+                      </paper-icon-button>
                     </a>
-
-                    <a href$="{{_getViewDetailsLink(item.$key)}}">
-                      <paper-icon-button class="b-view" alt="{{item.$key}}" noink on-tap="_selectThis" icon="my-icons:open-in-new" title="view details"></paper-icon-button>
-                    </a>
-
+                    <!-- <a href$="{{_getViewDetailsLink(item.$key)}}">
+                      <paper-icon-button noink on-tap="_selectThis" icon="my-icons:local-offer" alt="{{item.$key}}" title="view details" style="display:inline-block;position: absolute;  right: 10px; color: #009687f3; top:8px;">
+                      </paper-icon-button>
+                    </a> -->
                     <!-- <paper-icon-button class="b-view" on-tap="_openDelete" alt="{{item.$key}}" icon="my-icons:close" title="delete"></paper-icon-button> -->
                     <!-- <paper-menu-button vertical-align="bottom" horizontal-align="right">
                       <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
@@ -291,7 +325,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
             </iron-list>
 
-            <iron-scroll-threshold id="threshold">
+            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
             </iron-scroll-threshold>
 
           </app-header-layout>
@@ -312,12 +346,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div hidden$="{{!editActive}}">
       <div id="patientsedit"></div>
-      <my-patients-edit id="d25" edit-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-patients-edit>
+      <my-patients-edit id="d25" my-key='{{myKey}}' edit-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-patients-edit>
     </div>
 
     <div hidden$="{{!detailActive}}">
       <div id="patientsview"></div>
-      <my-patients-view id="d26" view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-patients-view>
+      <my-patients-view id="d26" my-key='{{myKey}}' view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-patients-view>
     </div>
 
     <paper-dialog id="deleteDialog" confirm-button="Done">
@@ -360,6 +394,81 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: 1
           }
         };
+      }
+
+      loadMoreData() {
+        // load async stuff. e.g. XHR
+
+        this.$.threshold.clearTriggers();
+
+      }
+
+      _ageCal(bday) {
+        if (bday) {
+
+          var today = new Date();
+          var birthday = new Date(bday);
+
+          var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+          var year_age = Math.floor(differenceInMilisecond / 31536000000);
+          var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+          var month_age = Math.floor(day_age / 30);
+
+          day_age = day_age % 30;
+
+          if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+            console.log('err');
+            // $("#exact_age").text("Invalid birthday - Please try again!");
+          }
+          else {
+            if (year_age > 0) {
+              if (year_age == 1) {
+                return year_age + " year old";
+              }
+              else {
+                return year_age + " years old";
+              }
+            }
+            else if (year_age == 0 && month_age > 0) {
+              if (month_age == 1) {
+                return month_age + " month old";
+              }
+              else {
+                return month_age + " months old";
+              }
+            }
+            else if (year_age == 0 && month_age == 0 && day_age > 0) {
+              if (day_age == 1) {
+                return day_age + " day old";
+              }
+              else {
+                return day_age + " days old";
+              }
+            }
+            else {
+              return year_age + " years " + month_age + " months " + day_age + " days old";
+            }
+          }
+        }
+        else {
+          return '';
+        }
+      }
+
+      _starMe(e) {
+        var id = Polymer.dom(e).rootTarget.getAttribute("alt");
+        // console.log(id);
+        var star = Polymer.dom(this.root).querySelector('#' + id);
+        if (star) {
+          if (star.icon == 'my-icons:star') {
+            star.icon = 'my-icons:star-border';
+          }
+          else {
+            star.icon = 'my-icons:star';
+          }
+        }
       }
 
       static get observers() {
@@ -421,10 +530,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _searchChanged(search) {
-        var c = search.toLowerCase().replace(/\b[a-z]/g, function (letter) {
-          return letter.toUpperCase();
-        });
-        this.search = c;
+        // var c = search.toLowerCase().replace(/\b[a-z]/g, function (letter) {
+        //   return letter.toUpperCase();
+        // });
+        this.search = search.toUpperCase();
       }
 
       // _searchChanged(search, filter) {
@@ -447,9 +556,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       //   }
       // }
 
-      iconForItem(item) {
-        return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';
-      }
+      // iconForItem(item) {
+      //   return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';
+      // }
 
       getClassForItem(item, selected) {
         return selected ? 'item expanded' : 'item';
@@ -518,7 +627,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _selectThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
         var node = Polymer.dom(this.root).querySelector("#patientsview");
         if (node) {
           var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
@@ -530,7 +639,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           newDiv.setAttribute("view-key", data_args);
           newDiv.setAttribute("prev-route", this.route.prefix);
           newDiv.setAttribute("my-key", this.myKey);
-          // window.location = '/patients/detail/' + data_args;
+          Polymer.dom(this.root).querySelector("#open").click();
           //if open existing
           var currentDiv = document.getElementById("patientsview");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
@@ -571,6 +680,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           //if open existing
           var currentDiv = document.getElementById("patientsnew");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
+      }
+
+      _comma(e) {
+        if (e) {
+          return ',';
+        }
+      }
+
+      _hmo(e) {
+        if (e) {
+          return 'HMO: ' + e;
         }
       }
 

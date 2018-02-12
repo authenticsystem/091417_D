@@ -29,6 +29,68 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-icon-button.menu {
         margin-right: 16px;
       }
+
+      .customMe {
+        border: #673AB7 2px solid;
+        padding: 16px;
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+      }
+
+      /* .pad {
+        padding: 0 16px;
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      } */
+
+      /* b {
+        margin-top: -150px;
+      } */
+
+       .css-typing {
+        font-size: 26px;
+        font-weight: 600;
+        width: 30em;
+        white-space: nowrap;
+        overflow: hidden;
+        -webkit-animation: type 5s steps(50, end);
+        animation: type 5s steps(50, end);
+      }
+
+      @keyframes type {
+        from {
+          width: 0;
+        }
+      }
+
+      @-webkit-keyframes type {
+        from {
+          width: 0;
+        }
+      }
+
+      /* img {
+        animation: blink 3s infinite;
+      }
+
+      @keyframes blink {
+        to {
+          opacity: .0;
+        }
+      }  */
+
+      /* .hit-the-floor {
+        color: #fff;
+        font-size:3em;
+        font-weight: bold;
+        font-family: Helvetica;
+        text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0, 0, 0, .1), 0 0 5px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .3), 0 3px 5px rgba(0, 0, 0, .2), 0 5px 10px rgba(0, 0, 0, .25), 0 10px 10px rgba(0, 0, 0, .2), 0 20px 20px rgba(0, 0, 0, .15);
+      } */
+
+      /* .hit-the-floor {
+        text-align: center;
+      } */
     </style>
 
     <app-header-layout fullbleed has-scrolling-region>
@@ -40,7 +102,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-header>
 
       <div class="card">
-        <p>Welcome to BaseEMR,<br>Dr. {{user.displayName}}</p>
+        <!-- <img width="200" src="../images/manifest/icon-512x512.png"></img> -->
+        <p class="css-typing">WELCOME Dr. {{lastname}}</p>
+        <!-- <div class="pad"> -->
+        <!-- <div class="customMe"></div> -->
+        <!-- <p class="css-typing"><span>[</span> HELLO Dr. {{lastname}} <span>]</span></p> -->
+        <!-- <p class="css-typing">Hello 
+        </p> -->
+        <!-- </div> -->
       </div>
 
     </app-header-layout>
@@ -56,9 +125,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             notify: true
           },
-          user: Object
+          lastname: String,
+          user: {
+            type: Object,
+            // observer: '_userChanged'
+          }
         };
       }
+
+      // _userChanged(){
+      //   if(this.user){
+
+      //   }
+      // }
 
       toggleDrawer() {
         this.dispatchEvent(new CustomEvent('toggleDrawer', {

@@ -118,7 +118,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header-layout fullbleed has-scrolling-region>
             <app-header fixed slot="header">
                 <app-toolbar primary>
-                    <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                    <a href="/settings">
+                        <paper-icon-button style="color:white" class="menu" icon="my-icons:arrow-back"></paper-icon-button>
+                    </a>
+                    <!-- <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button> -->
                     <div main-title>My Account</div>
                 </app-toolbar>
             </app-header>

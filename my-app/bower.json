@@ -33,7 +33,6 @@
     "titanium-date-input": "LssPolymerElements/titanium-date-input#^1.0.25",
     "paper-time-input": "ryanburns23/paper-time-input#^2.0.4",
     "short-unique-id": "hectorsantillan/short-unique-id#1.0.0",
-    "app-media": "PolymerElements/app-media#^0.9.0",
     "neon-animation": "PolymerElements/neon-animation#^2.1.0",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.1",
     "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
@@ -53,7 +52,8 @@
     "paper-radio-button": "PolymerElements/paper-radio-button#^2.0.0",
     "paper-toolbar": "PolymerElements/paper-toolbar#^2.0.0",
     "geo-location": "ebidel/geo-location#^2.0.1",
-    "google-map": "GoogleWebComponents/google-map#^2.0.3"
+    "google-map": "GoogleWebComponents/google-map#^2.0.3",
+    "time-elements": "github/time-elements#0.6.1"
   },
   "resolutions": {
     "polymer": "^2.0.0",

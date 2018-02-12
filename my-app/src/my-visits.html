@@ -26,14 +26,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="time-element.html">
 
 <link rel="import" href="search-bar.html">
-<link rel="import" href="my-cases-new.html">
-<link rel="import" href="my-cases-view.html">
-<link rel="import" href="my-cases-edit.html">
+<link rel="import" href="my-visits-new.html">
+<link rel="import" href="my-visits-view.html">
+<link rel="import" href="my-visits-edit.html">
 <!-- <link rel="import" href="shared-styles.html"> -->
 
-<dom-module id="my-cases">
+<dom-module id="my-visits">
   <template>
     <style include="shared-styles">
       :host {
@@ -46,20 +47,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .item {
         @apply --layout-horizontal;
-        padding: 20px;
+        /* padding: 20px; */
         background-color: white;
         border-bottom: 1px solid #ddd;
         cursor: pointer;
-        /* margin-bottom: 10px; */
+        margin-bottom: 10px;
       }
 
       .item:hover {
-        background: rgb(240, 240, 240);
+        box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
       }
 
       .avatar {
-        height: 40px;
-        width: 40px;
+        height: 45px;
+        width: 45px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+
+      .avatar2 {
+        height: 45px;
+        width: 45px;
+        border: 2px solid white;
         border-radius: 20px;
         box-sizing: border-box;
         background-color: #DDD;
@@ -72,8 +82,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .primary {
-        font-size: 16px;
-        font-weight: bold;
+        font-size: 14px;
+        font-weight: 400;
       }
 
       .shortText,
@@ -83,7 +93,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .longText {
         color: gray;
-        display: none;
+        /* display: none; */
       }
 
       /* .item:hover .shortText::after {
@@ -91,13 +101,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: gray;
       } */
 
-      .item.expanded:hover .shortText::after {
+      /* .item.expanded:hover .shortText::after {
         content: '';
-      }
+      } */
 
-      .item.expanded .longText {
+      /* .item.expanded .longText {
         display: block;
-      }
+      } */
 
       /* .item.expanded:hover .longText::after {
         content: ' [–]';
@@ -114,7 +124,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           display: flex;
           /* height: 100vh; */
           flex-direction: column;
-          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
         paper-search-bar {
           margin-left: 80px;
@@ -129,7 +139,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 16px auto;
           /* margin-top: 0px; */
           /* height: 100vh; */
-          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
         paper-search-bar {
           margin-left: 50px;
@@ -242,27 +252,69 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
             </app-header>
 
-            <firebase-query id="query" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="patient" start-at="{{search}}">
+            <firebase-query id="query" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="{{order}}" start-at="{{search}}">
             </firebase-query>
 
             <iron-list items="[[mycases]]" as="item" selection-enabled scroll-target="threshold">
               <template>
                 <div class="divSeparator">
                   <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-                    <iron-image style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
-                    <iron-image style$="{{_hasProfile(item.profile)}}" class="avatar" sizing="cover" src="[[item.profile]]"></iron-image>
-                    <div class="pad">
-                      <div class="primary">[[item.patient]]</div>
-                      <div class="shortText">[[item.complain]]</div>
+
+                    <div class="card-content" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
+                      <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
+                        <iron-icon icon="my-icons:watch-later"></iron-icon>
+                        <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                      </div>
+                      <div id="{{item.$key}}" style=" padding: 16px; display:flex">
+
+                        <iron-image style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
+                        <iron-image style$="{{_hasProfile(item.profile)}}" class="avatar2" sizing="cover" src="[[item.profile]]"></iron-image>
+
+                        <div id="{{item.$key}}" style=" margin-left:10px;">
+                          <!-- <div style="font-size:11px" class="longText">[[item.no]]</div> -->
+                          <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
+                          <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
+                          <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}} [[item.patientinfo.gender]]</div>
+                          <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
+                          <!-- <div class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div> -->
+                          <!-- <div class="longText">[[_hmo(item.insurance.primary_insurance)]]</div> -->
+
+                          <!-- <div style="padding:16px;"> -->
+                          <!-- <div class="primary">[[item.patient]]</div> -->
+                          <!-- <div class="shortText">{{_date(item.timestamp)}}</div> -->
+                          <div id="{{item.$key}}" style="margin-top:16px;">
+                            <span id="{{item.$key}}" class="longText">Chief Complaint</span>
+                            <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                            <!-- <div hidden$="{{!item.history}}">
+                            <span class="longText">History</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.history}}</div>
+                          </div> -->
+                            <!-- <hr> -->
+                            <!-- <div hidden$="{{!item.diagnosis}}">
+                            <span class="longText">Diagnosis</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.diagnosis}}</div>
+                          </div> -->
+                            <!-- <hr> -->
+                            <!-- <div hidden$="{{!item.treatment}}">
+                            <span class="longText">Treatment</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.treatment}}</div>
+                          </div> -->
+                          </div>
+
+                        </div>
+                      </div>
+                      <!-- </div> -->
+
                     </div>
 
                     <a href$="{{_getEditAppLink(item.$key)}}">
-                      <paper-icon-button class="b-edit" alt="{{item.$key}}" noink on-tap="_editThis" icon="my-icons:edit" title="edit"></paper-icon-button>
+                      <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
+                      </paper-icon-button>
                     </a>
 
-                    <a href$="{{_getViewDetailsLink(item.$key)}}">
-                      <paper-icon-button class="b-view" alt="{{item.$key}}" noink on-tap="_selectThis" icon="my-icons:open-in-new" title="view details"></paper-icon-button>
-                    </a>
+                    <!-- <paper-icon-button noink on-tap="_selectThis" icon="my-icons:open-in-new" alt="{{item.$key}}" title="view details" style="display:inline-block;position: absolute; color: #673AB7; right: 10px; top:8px;">
+                      </paper-icon-button> -->
+                    <a id="open" href$="{{_getViewDetailsLink(item.$key)}}"></a>
                     <!-- <paper-menu-button vertical-align="bottom" horizontal-align="right">
                       <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
                       <paper-listbox slot="dropdown-content">
@@ -275,19 +327,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
             </iron-list>
 
-            <iron-scroll-threshold id="threshold">
+            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
             </iron-scroll-threshold>
 
           </app-header-layout>
 
-          <a href="/cases/new" style="text-decoration: none;">
+          <a href="/visits/new" style="text-decoration: none;">
             <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_caseNew"></paper-fab>
           </a>
         </div>
 
         <div name="/new">
           <div id="newcase"></div>
-          <my-cases-new id="d23" path="" prev-route="{{route.prefix}}"></my-cases-new>
+          <my-visits-new id="d23" my-key='{{myKey}}' path="" prev-route="{{route.prefix}}"></my-visits-new>
         </div>
 
         <div name="view404">Not found.</div>
@@ -296,12 +348,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div hidden$="{{!editActive}}">
       <div id="caseedit"></div>
-      <my-cases-edit id="d25" edit-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-cases-edit>
+      <my-visits-edit id="d25" my-key='{{myKey}}' edit-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-visits-edit>
     </div>
 
     <div hidden$="{{!detailActive}}">
       <div id="casesview"></div>
-      <my-cases-view id="d26" view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-cases-view>
+      <my-visits-view id="d26" my-key='{{myKey}}' view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-visits-view>
     </div>
 
     <paper-dialog id="deleteDialog" confirm-button="Done">
@@ -317,8 +369,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyCases extends Polymer.Element {
-      static get is() { return 'my-cases'; }
+    class MyVisits extends Polymer.Element {
+      static get is() { return 'my-visits'; }
 
       static get properties() {
         return {
@@ -341,8 +393,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           filterBy: {
             type: Number,
             value: 1
+          },
+          order: {
+            type: String,
+            value: 'order'
           }
         };
+      }
+
+      _timeStampToDateTime(ts) {
+        return new Date(ts);
+      }
+
+      loadMoreData() {
+        // load async stuff. e.g. XHR
+
+        this.$.threshold.clearTriggers();
+
       }
 
       static get observers() {
@@ -353,7 +420,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _getViewDetailsLink(e) {
         if (e) {
-          return '/cases/detail/' + e.toString();
+          return '/visits/detail/' + e.toString();
         }
       }
 
@@ -363,6 +430,84 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         else {
           return 'display:none';
+        }
+      }
+
+      _ageCal(bday) {
+        if (bday) {
+
+          var today = new Date();
+          var birthday = new Date(bday);
+
+          var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+          var year_age = Math.floor(differenceInMilisecond / 31536000000);
+          var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+          var month_age = Math.floor(day_age / 30);
+
+          day_age = day_age % 30;
+
+          if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+            console.log('err');
+            // $("#exact_age").text("Invalid birthday - Please try again!");
+          }
+          else {
+            if (year_age > 0) {
+              if (year_age == 1) {
+                return year_age + " year old";
+              }
+              else {
+                return year_age + " years old";
+              }
+            }
+            else if (year_age == 0 && month_age > 0) {
+              if (month_age == 1) {
+                return month_age + " month old";
+              }
+              else {
+                return month_age + " months old";
+              }
+            }
+            else if (year_age == 0 && month_age == 0 && day_age > 0) {
+              if (day_age == 1) {
+                return day_age + " day old";
+              }
+              else {
+                return day_age + " days old";
+              }
+            }
+            else {
+              return year_age + " years " + month_age + " months " + day_age + " days old";
+            }
+          }
+        }
+        else {
+          return '';
+        }
+      }
+
+      _comma(e) {
+        if (e) {
+          return ',';
+        }
+      }
+
+      _hmo(e) {
+        if (e) {
+          return 'HMO: ' + e;
+        }
+      }
+
+      _date(e) {
+        if (e) {
+          var date = new Date(e);
+          var options = {
+            weekday: "long", year: "numeric", month: "short",
+            day: "numeric", hour: "2-digit", minute: "2-digit"
+          };
+
+          return date.toLocaleTimeString("en-us", options);
         }
       }
 
@@ -377,15 +522,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _getEditAppLink(e) {
         if (e) {
-          return '/cases/edit/' + e.toString();
+          return '/visits/edit/' + e.toString();
         }
       }
 
       _searchChanged(search) {
-        var c = search.toLowerCase().replace(/\b[a-z]/g, function (letter) {
-          return letter.toUpperCase();
-        });
-        this.search = c;
+        if (search) {
+          this.order = 'patient';
+          this.search = search.toUpperCase();
+        }
+        else {
+          this.order = 'order';
+        }
       }
 
       iconForItem(item) {
@@ -419,23 +567,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _selectThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
         var node = Polymer.dom(this.root).querySelector("#casesview");
-        if (node) {
-          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
-          if (oldDiv) {
-            Polymer.dom(node.parentNode).removeChild(oldDiv);
-          }
-          var newDiv = document.createElement("my-cases-view");
-          newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("id", "d26");
-          newDiv.setAttribute("view-key", data_args);
-          newDiv.setAttribute("prev-route", this.route.prefix);
-          // window.location = '/cases/detail/' + data_args;
-          //if open existing
-          var currentDiv = document.getElementById("casesview");
-          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
+        if (oldDiv) {
+          Polymer.dom(node.parentNode).removeChild(oldDiv);
         }
+        var newDiv = document.createElement("my-visits-view");
+        newDiv.setAttribute("my-key", this.myKey);
+        newDiv.setAttribute("id", "d26");
+        newDiv.setAttribute("view-key", data_args);
+        newDiv.setAttribute("prev-route", this.route.prefix);
+        Polymer.dom(this.root).querySelector("#open").click();
+
+        var currentDiv = document.getElementById("casesview");
+        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
       }
 
       _editThis(e) {
@@ -446,7 +592,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if (oldDiv) {
             Polymer.dom(node.parentNode).removeChild(oldDiv);
           }
-          var newDiv = document.createElement("my-cases-edit");
+          var newDiv = document.createElement("my-visits-edit");
           newDiv.setAttribute("my-key", this.myKey);
           newDiv.setAttribute("id", "d25");
           newDiv.setAttribute("edit-key", data_args);
@@ -465,7 +611,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if (oldDiv) {
             Polymer.dom(node.parentNode).removeChild(oldDiv);
           }
-          var newDiv = document.createElement("my-cases-new");
+          var newDiv = document.createElement("my-visits-new");
           newDiv.setAttribute("my-key", this.myKey);
           newDiv.setAttribute("id", "d23");
           newDiv.setAttribute("prev-route", this.route.prefix);
@@ -492,6 +638,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    window.customElements.define(MyCases.is, MyCases);
+    window.customElements.define(MyVisits.is, MyVisits);
   </script>
 </dom-module>

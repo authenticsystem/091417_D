@@ -3,6 +3,10 @@
   "shell": "src/my-app.html",
   "fragments": [
     "src/my-dashboard.html",
+    "src/my-patients.html",
+    "src/my-visits.html",
+    "src/my-account.html",
+    "src/time-element.html",
     "src/my-view2.html",
     "src/my-view404.html"
   ],

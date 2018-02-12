@@ -29,6 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="time-element.html">
 
 <dom-module id="my-patients-view">
   <template>
@@ -114,6 +115,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         #info {
           display: flex;
         }
+
+        .docu1 {
+          margin-bottom: -16px;
+        }
+
+        .docu {
+          padding: 0;
+        }
       }
 
       @media (max-width: 800px) {
@@ -130,14 +139,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         .docu {
-          margin-left: 16px;
+          padding: 0;
+          margin-top: 0;
+          margin-bottom: 0;
+          width: 100%;
+          margin-right: 0;
+          overflow-x: hidden;
+          /* margin-left: 16px;
+          margin-right: 16px; */
+        }
+
+        .docu1 {
+          overflow-x: hidden;
           margin-right: 16px;
+          margin-left: 16px;
+          margin-top: 16px;
+          margin-bottom: 16px;
         }
       }
 
+
+
       .avatar {
-        height: 50px;
-        width: 50px;
+        height: 70px;
+        width: 70px;
         border-radius: 50%;
         box-sizing: border-box;
         background-color: #DDD;
@@ -161,7 +186,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .longText {
         color: gray;
-        display: none;
+        /* display: none; */
       }
     </style>
 
@@ -173,7 +198,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <a href="/patients">
               <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
             </a>
-            <div main-title>View Patient</div>
+            <div main-title>{{no}}</div>
             <paper-icon-button icon="my-icons:print" on-click="_print"></paper-icon-button>
             <!-- <paper-menu-button>
               <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
@@ -185,7 +210,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-toolbar>
           <paper-tabs selected="{{selectedPage}}" scrollable fit-container>
             <paper-tab>Patient Info</paper-tab>
-            <paper-tab>Cases</paper-tab>
+            <paper-tab>Visits</paper-tab>
           </paper-tabs>
         </app-header>
 
@@ -197,21 +222,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </firebase-query>
 
             <div class="docu" id="printMe">
-              <div class="docu-header">
+              <!-- <div style="background:url({{p_profile}}); padding: 80px; background-repeat: no-repeat; 
+               background-position: center; background-size: cover;"></div> -->
+              <div class="docu-header" style="padding:16px; display: flex; margin-bottom:3px;">
                 <img class="avatar" src="{{p_profile}}"></img>
+                <div style="margin-left:10px; padding:8px; font-weight:400; color:black">
+                  {{name}}
+                  <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}} {{sex}}</span>
+                  <!-- <span class="longText" style="font-weight:400">{{_myAgeSex(age,sex)}}</span> -->
+                  <span class="longText" style="font-weight:400;display:block">[[_hmo(indicate)]]</span>
+                </div>
               </div>
-              <br>
 
-              <div class="details">
-                <div style="font-weight:bold">Basic Information</div>
 
-                <table>
+              <div class="details" style="padding:18px">
+                <!-- <div >Basic Information</div> -->
+                <div style="font-weight:bold; margin-top:16px; padding:5px; background:rgb(236, 235, 235)">Basic Information</div>
+                <table style="margin-bottom:6px; padding:6px;">
                   <tr>
-                    <td>Email address</td>
-                    <td>:</td>
-                    <td>{{email}}</td>
+                    <td>
+                      <span class="longText">Email address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{email}}</td>
                   </tr>
-                  <tr>
+                  <!-- <tr>
                     <td>Firstname</td>
                     <td>:</td>
                     <td>{{fname}}</td>
@@ -225,162 +261,265 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <td>Lastname</td>
                     <td>:</td>
                     <td>{{lname}}</td>
-                  </tr>
+                  </tr> -->
                   <tr>
-                    <td>Birth date</td>
-                    <td>:</td>
-                    <td>{{bday}}</td>
+                    <td>
+                      <span class="longText">Birth date</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{bday}}</td>
                   </tr>
-                  <tr>
-                    <td>Age</td>
-                    <td>:</td>
+                  <!-- <tr>
+                    <td>
+                      <span class="longText">Age</span>
+                    </td>
+                    <td></td>
+                    <td></td>
                     <td>{{age}}</td>
-                  </tr>
+                  </tr> -->
                   <tr>
-                    <td>Marital Status</td>
-                    <td>:</td>
-                    <td>{{status}}</td>
+                    <td>
+                      <span class="longText">Marital Status</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{status}}</td>
                   </tr>
-                  <tr>
-                    <td>Sex</td>
-                    <td>:</td>
+                  <!-- <tr>
+                    <td>
+                      <span class="longText">Gender</span>
+                    </td>
+                    <td></td>
+                    <td></td>
                     <td>{{sex}}</td>
+                  </tr> -->
+                  <tr>
+                    <td>
+                      <span class="longText">Contact no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{contact}}</td>
                   </tr>
                   <tr>
-                    <td>Contact no</td>
-                    <td>:</td>
-                    <td>{{contact}}</td>
+                    <td>
+                      <span class="longText">Street address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{address}}</td>
                   </tr>
                   <tr>
-                    <td>Street address</td>
-                    <td>:</td>
-                    <td>{{address}}</td>
+                    <td>
+                      <span class="longText">Occupation</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{occupation}}</td>
                   </tr>
                   <tr>
-                    <td>Occupation</td>
-                    <td>:</td>
-                    <td>{{occupation}}</td>
+                    <td>
+                      <span class="longText">Employer</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{employer}}</td>
                   </tr>
                   <tr>
-                    <td>Employer</td>
-                    <td>:</td>
-                    <td>{{occupation}}</td>
+                    <td>
+                      <span class="longText">Employer phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{emp_phone}}</td>
                   </tr>
                   <tr>
-                    <td>Employer phone no</td>
-                    <td>:</td>
-                    <td>{{emp_phone}}</td>
-                  </tr>
-                  <tr>
-                    <td>Referred to clinic by</td>
-                    <td>:</td>
-                    <td>{{referredby}}</td>
+                    <td>
+                      <span class="longText">Referred to clinic by</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{referredby}}</td>
                   </tr>
                 </table>
 
-                <br>
-                <div style="font-weight:bold">Insurance</div>
-                <table>
+                <div style="font-weight:bold;  margin-top:16px;  padding:5px; background:rgb(236, 235, 235)">Insurance</div>
+                <table style="padding:6px">
                   <tr>
-                    <td>ID Card no</td>
-                    <td>:</td>
-                    <td>{{card}}</td>
+                    <td>
+                      <span class="longText">ID Card no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{card}}</td>
                   </tr>
                   <tr>
-                    <td>Birth date</td>
-                    <td>:</td>
-                    <td>{{bdate}}</td>
+                    <td>
+                      <span class="longText">Birth date</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{bdate}}</td>
                   </tr>
                   <tr>
-                    <td>address</td>
-                    <td>:</td>
-                    <td>{{in_address}}</td>
+                    <td>
+                      <span class="longText">Address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{in_address}}</td>
                   </tr>
                   <tr>
-                    <td>Relationship to patient</td>
-                    <td>:</td>
-                    <td>{{p_relation}}</td>
+                    <td>
+                      <span class="longText">Home phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{home_phone}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Primary Insurance</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{indicate}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Relationship to patient</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{p_relation}}</td>
                   </tr>
                 </table>
 
-                <br>
-                <div style="font-weight:bold">In-case of emergency</div>
-                <table>
+                <div style="font-weight:bold; margin-top:16px;  padding:5px; background:rgb(236, 235, 235)">In-case of emergency</div>
+                <table style="padding:6px">
                   <tr>
-                    <td>Name</td>
-                    <td>:</td>
-                    <td>{{name_e}}</td>
+                    <td>
+                      <span class="longText">Name</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{name_e}}</td>
                   </tr>
                   <tr>
-                    <td>Relationship to patient</td>
-                    <td>:</td>
-                    <td>{{relation_e}}</td>
+                    <td>
+                      <span class="longText">Relationship to patient</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{relation_e}}</td>
                   </tr>
                   <tr>
-                    <td>Home phone no</td>
-                    <td>:</td>
-                    <td>{{phone_e}}</td>
+                    <td>
+                      <span class="longText">Home phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{phone_e}}</td>
                   </tr>
                   <tr>
-                    <td>Work phone no</td>
-                    <td>:</td>
-                    <td>{{work_phone}}</td>
+                    <td>
+                      <span class="longText">Work phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{work_phone}}</td>
                   </tr>
                 </table>
+                <br>
               </div>
 
             </div>
           </neon-animatable>
 
-
-
           <neon-animatable>
 
-            <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{viewKey}}" data="{{mycases}}"
-              limit-to-last="10">
+            <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{viewKey}}" data="{{mycases}}">
             </firebase-query>
 
-            <div class="docu">
-              <!-- <div class="docu-header">Cases</div> -->
+            <div style="margin-bottom: 26px">
+              <template is="dom-repeat" items="{{_descending(mycases)}}">
 
-              <template is="dom-repeat" items="[[mycases]]">
-                <div class="details">
-                  <div style="font-weight:bold">{{_date(item.timestamp)}}</div>
-                  <div style="padding:8px;">
-                    <table>
-                      <tr>
-                        <td>Chief complain</td>
-                        <td>:</td>
-                        <td>{{item.complain}}</td>
-                      </tr>
-                      <tr>
-                        <td>History</td>
-                        <td>:</td>
-                        <td>{{item.history}}</td>
-                      </tr>
-                      <tr>
-                        <td>Diagnosis</td>
-                        <td>:</td>
-                        <td>{{item.diagnosis}}</td>
-                      </tr>
-                      <tr>
-                        <td>Treatment</td>
-                        <td>:</td>
-                        <td>{{item.treatment}}</td>
-                      </tr>
-                    </table>
+                <div class="docu1" style="padding:16px;" id="printMe">
+                  <!-- <div class="docu-header">Cases</div> -->
+                  <div class="details">
+                    <!-- <div style="font-weight:bold">{{_date(item.timestamp)}}</div> -->
+                    <iron-icon icon="my-icons:watch-later"></iron-icon>
+                    <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                    <br>
+                    <br>
+                    <span class="longText">Chief Complaint</span>
+                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                    <!-- <hr> -->
+                    <div hidden$="{{!item.history}}">
+                      <span class="longText">History</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.history}}</div>
+                    </div>
+                    <!-- <hr> -->
+                    <div hidden$="{{!item.diagnosis}}">
+                      <span class="longText">Diagnosis</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.diagnosis}}</div>
+                    </div>
+                    <!-- <hr> -->
+                    <div hidden$="{{!item.treatment}}">
+                      <span class="longText">Treatment</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.treatment}}</div>
+                    </div>
                   </div>
                 </div>
               </template>
             </div>
+            <!-- <br>
+            <br>
+            <br> -->
+            <!-- <hr>
+                  <table style="padding:8px;">
+                    <tr>
+                      <td>
+                        <span class="longText">Chief complaint</span>
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td>{{item.complain}}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="longText">History</span>
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td>{{item.history}}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="longText">Diagnosis</span>
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td>{{item.diagnosis}}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="longText">Treatment</span>
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td>{{item.treatment}}</td>
+                    </tr>
+                  </table> -->
           </neon-animatable>
 
         </neon-animated-pages>
 
-        <paper-fab id="more-fab" class="fab-menu" icon="my-icons:add" on-tap="_showMini" title="More options"></paper-fab>
+        <!-- <paper-fab id="more-fab" class="fab-menu" icon="my-icons:add" on-tap="_showMini" title="More options"></paper-fab> -->
         <paper-fab id="less-fab" style="display:none" class="fab-menu" icon="my-icons:clear" on-tap="_hideMini" title="Hide options"></paper-fab>
-        <a href="/cases/new">
-          <paper-fab class="fab-menu2" style="display:none" mini icon="my-icons:create-new-folder" title="Add case"></paper-fab>
+        <a href="/visits/new">
+          <paper-fab class="fab-menu2" style="display:none" mini icon="my-icons:create-new-folder" title="Add visit"></paper-fab>
         </a>
         <paper-fab class="fab-menu3" style="display:none" mini icon="my-icons:queue" title="Add to queue"></paper-fab>
 
@@ -420,18 +559,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'selectedPageChanged(selectedPage)'
       ],
 
+      _descending(data) {
+        return data.reverse();
+      },
+
       // mycaseChanged(c) {
       //   if (c.length > 0) {
       //     console.log(c);
-      //     for (var i = 0; i < c.length; i++) {
-      //       this.casekey = c[i].$key;
-      //       this.complain = c[i].complain;
-      //       this.history = c[i].history;
-      //       this.diagnosis = c[i].diagnosis;
-      //       this.treament = c[i].treament;
-      //     }
       //   }
       // },
+
+      _timeStampToDateTime(ts) {
+        return new Date(ts);
+      },
 
       _date(e) {
         if (e) {
@@ -463,12 +603,72 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
 
+          if (e[0].personal.birthday) {
+
+            Date.shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            var today = new Date();
+            var birthday = new Date(e[0].personal.birthday);
+            var mdate = e[0].personal.birthday.toString();
+
+            var yearThen = parseInt(mdate.substring(0, 4), 10);
+            var monthThen = Date.shortMonths[birthday.getMonth()];
+            var dayThen = parseInt(mdate.substring(8, 10), 10);
+
+            this.bday = dayThen + '-' + monthThen + '-' + yearThen;
+
+            var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+            var year_age = Math.floor(differenceInMilisecond / 31536000000);
+            var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+            var month_age = Math.floor(day_age / 30);
+
+            day_age = day_age % 30;
+
+            if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+              console.log('err');
+              // $("#exact_age").text("Invalid birthday - Please try again!");
+            }
+            else {
+              if (year_age > 0) {
+                if (year_age == 1) {
+                  this.age = year_age + " year old";
+                }
+                else {
+                  this.age = year_age + " years old";
+                }
+              }
+              else if (year_age == 0 && month_age > 0) {
+                if (month_age == 1) {
+                  this.age = month_age + " month old";
+                }
+                else {
+                  this.age = month_age + " months old";
+                }
+              }
+              else if (year_age == 0 && month_age == 0 && day_age > 0) {
+                if (day_age == 1) {
+                  this.age = day_age + " day old";
+                }
+                else {
+                  this.age = day_age + " days old";
+                }
+              }
+              else {
+                this.age = year_age + " years " + month_age + " months " + day_age + " days old";
+              }
+            }
+          }
+          else {
+            this.age = '';
+          }
+
           this.email = e[0].personal.email;
           this.fname = e[0].personal.firstname;
           this.mname = e[0].personal.middlename;
           this.lname = e[0].personal.lastname;
-          this.bday = e[0].personal.birthday;
-          this.age = e[0].personal.age;
+          // this.bday = e[0].personal.birthday;
           this.contact = e[0].personal.contact;
           this.address = e[0].personal.address;
           this.occupation = e[0].personal.occupation;
@@ -476,6 +676,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.emp_phone = e[0].personal.emp_phone;
           this.sex = e[0].personal.sex;
           this.status = e[0].personal.status;
+          this.name = e[0].personal.lastname + ', ' + e[0].personal.firstname + ' ' + e[0].personal.middlename;
+          this.no = e[0].no;
 
           this.card = e[0].insurance.card;
           this.bdate = e[0].insurance.birthday;
@@ -529,6 +731,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         this.selectedPage = 0;
+      },
+
+      _comma(e) {
+        if (e) {
+          return ',';
+        }
+      },
+
+      _hmo(e) {
+        if (e) {
+          return 'HMO: ' + e;
+        }
       },
 
       selectedPageChanged(e) {

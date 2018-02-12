@@ -1,0 +1,216 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="short-unique-id.html">
+
+<link rel="import" href="my-account.html">
+<link rel="import" href="my-secretary.html">
+
+<dom-module id="my-settings">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+
+                padding: 10px;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            @media (max-width: 768px) {
+                .div1 {
+                    text-align: center
+                }
+                /*.div2{
+                    flex:2; padding: 25px;
+                } */
+                .divHolder {
+                    display: block;
+                }
+
+                paper-menu-button {
+                    float: right;
+                    bottom: 16px;
+                }
+            }
+
+            @media (min-width: 768px) {
+                .div1 {
+                    flex: 1;
+                }
+                .div2 {
+                    flex: 2;
+                    padding: 25px;
+                }
+                .divHolder {
+                    display: flex;
+                }
+
+                paper-menu-button {
+                    float: right;
+                    bottom: 26px;
+                }
+            }
+
+            a {
+                text-decoration: none;
+                /* background: yellow; */
+                /* padding: 2px;
+                border-radius: 3px;
+                font-weight: 500; */
+            }
+
+            #uploader {
+                -webkit-appearance: none;
+                /* appearance: none; */
+                width: 55%;
+                margin-left: 10px;
+                height: 5px;
+                display: none;
+            }
+
+            paper-button {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                width: 80px;
+            }
+
+            .green {
+                background: green;
+                color: white
+            }
+
+            .card:hover {
+                box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
+                cursor: pointer;
+            }
+        </style>
+
+        <firebase-auth id="auth" user="{{user}}" provider="google" on-error="showError"></firebase-auth>
+
+        <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+            <div name="">
+                <app-header-layout fullbleed has-scrolling-region>
+                    <app-header fixed slot="header">
+                        <app-toolbar primary>
+                            <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                            <div main-title>Settings</div>
+                        </app-toolbar>
+                    </app-header>
+
+                    <div class="divHolder">
+                        <div class="div1" align="center">
+                            <a href="/settings/account">
+                                <div class="card">
+                                    <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
+                                    <h3>My Account</h3>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="div1" align="center">
+                            <a href="/settings/secretary">
+                                <div class="card">
+                                    <img style="width:150px; height:150px;" src="../images/secretary.png">
+                                    <h3>My Secretary</h3>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                </app-header-layout>
+            </div>
+
+            <div name="/account">
+                <my-account active={{isActive}} user={{user}} name="account"></my-account>
+            </div>
+
+            <div name="/secretary">
+                <my-secretary active={{isActive}} user={{user}} name="account"></my-secretary>
+            </div>
+
+            <div name="view404">Not found.</div>
+        </iron-pages>
+
+        <!-- <paper-dialog id="reAuth" confirm-button="Done">
+            <h3 style="margin-bottom:-1em;">Re-authentication required</h3>
+            <div style="color:red; font-size:13px;margin-bottom:-1em;">{{validationMessage}}</div>
+            <paper-input on-keyup="_ack" style="margin-bottom:-1em;" label="Email" value="{{email}}" always-float-label id="email"></paper-input>
+            <paper-input on-keyup="_ack" label="Password" always-float-label type="password" value={{password}} id="email"></paper-input>
+            <div class="buttons" style="text-align:center">
+                <div class="action">
+                    <paper-spinner id="nextSpinner" active style="top:7px; display:none;"></paper-spinner> -->
+        <!-- <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>Cancel</paper-button> 
+                    <paper-button id="nextBtn" on-tap="_update" style="background:rgb(207, 206, 206);">Submit</paper-button>
+                </div>
+            </div>
+        </paper-dialog>-->
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-settings',
+            properties: {
+                account: {
+                    type: Object,
+                },
+                active: Boolean,
+                verified: {
+                    type: Boolean,
+                    value: false
+                },
+                user: {
+                    type: Object,
+                    // observer: 'userChanged'
+                }
+            },
+
+            toggleDrawer() {
+                this.dispatchEvent(new CustomEvent('toggleDrawer', {
+                    bubbles: true, composed: true, detail: {
+                        narrow: this.$.narrow
+                    }
+                }));
+                this.$.narrow = !this.$.narrow;
+            }
+
+        })
+
+
+    </script>
+</dom-module>

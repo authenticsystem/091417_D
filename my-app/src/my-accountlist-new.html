@@ -136,21 +136,22 @@
                             <paper-radio-button name="Ms">Ms</paper-radio-button>
                             <paper-radio-button name="Mrs">Mrs</paper-radio-button>
                         </paper-radio-group> -->
-                        <paper-input required auto-validate pattern="[a-zA-Z-.-/]*" value="{{prefix}}" always-float-label label="Designatory letters"></paper-input>
-                        <paper-input required auto-validate pattern="[a-zA-Z-.]*" value="{{firstname}}" always-float-label label="First Name"></paper-input>
-                        <paper-input required auto-validate="true" pattern="[a-zA-Z-.]*" value="{{middlename}}" always-float-label label="Middle Name"></paper-input>
-                        <paper-input required auto-validate="true" pattern="[a-zA-Z-.]*" value="{{lastname}}" always-float-label label="Last Name"></paper-input>
-                        <paper-input auto-validate="true" pattern="[a-zA-Z-.]*" value="{{suffix}}" always-float-label label="Suffix"></paper-input>
+                        <paper-input required auto-validate pattern="[a-zA-Z-.-/ ]*" value="{{prefix}}" always-float-label label="Designatory letters"></paper-input>
+                        <paper-input required auto-validate pattern="[a-zA-Z-. ]*" value="{{firstname}}" always-float-label label="First Name"></paper-input>
+                        <paper-input auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{middlename}}" always-float-label label="Middle Name"></paper-input>
+                        <paper-input required auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{lastname}}" always-float-label label="Last Name"></paper-input>
+                        <paper-input auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{suffix}}" always-float-label label="Suffix"></paper-input>
                         <paper-input required allowed-pattern="[\d]" prevent-invalid-input char-counter maxlength="10" value="{{cellphone}}" always-float-label
                             label="Cellphone">
                             <div slot="prefix">+63</div>
                         </paper-input>
-                        <!-- <paper-dropdown-menu style="cursor:pointer" label="Role">
-                            <paper-listbox slot="dropdown-content" class="dropdown-content" selected="{{roleAdd}}">
-                                <paper-item>Manager</paper-item>
-                                <paper-item>Sales Agent</paper-item>
+                        <paper-dropdown-menu vertical-align="bottom" style="cursor:pointer; width:100%" label="Role">
+                            <paper-listbox slot="dropdown-content" class="dropdown-content" selected="{{roleSelect}}">
+                                <paper-item>Doctor</paper-item>
+                                <paper-item>Secretary</paper-item>
+                                <paper-item>System Admin</paper-item>
                             </paper-listbox>
-                        </paper-dropdown-menu> -->
+                        </paper-dropdown-menu>
                         <!-- <br>
                         <div style="font-size:12px; margin-top:1em;">Access</div>
                         <paper-checkbox id="dash">Dashboard</paper-checkbox>
@@ -222,21 +223,31 @@
                     type: String,
                     value: ''
                 },
+                roleSelect: {
+                    type: Number,
+                    observer: 'roleSelectChanged'
+                },
+                role: String
             },
-            // roleAddChanged() {
-            //     if (this.roleAdd == 0) {
-            //         this.role = 'Manager';
-            //         Polymer.dom(this.root).querySelector("#dash").checked = true;
-            //         Polymer.dom(this.root).querySelector("#app").checked = true;
-            //         Polymer.dom(this.root).querySelector("#acc").checked = true;
-            //     }
-            //     else {
-            //         this.role = 'Sales Agent';
-            //         Polymer.dom(this.root).querySelector("#dash").checked = false;
-            //         Polymer.dom(this.root).querySelector("#app").checked = true;
-            //         Polymer.dom(this.root).querySelector("#acc").checked = false;
-            //     }
-            // },
+
+            roleSelectChanged() {
+                if (this.roleSelect == 0) {
+                    this.role = 'Doctor';
+                    // Polymer.dom(this.root).querySelector("#dash").checked = true;
+                    // Polymer.dom(this.root).querySelector("#app").checked = true;
+                    // Polymer.dom(this.root).querySelector("#acc").checked = true;
+                }
+                else if (this.roleSelect == 1) {
+                    this.role = 'Secretary';
+                    // Polymer.dom(this.root).querySelector("#dash").checked = false;
+                    // Polymer.dom(this.root).querySelector("#app").checked = true;
+                    // Polymer.dom(this.root).querySelector("#acc").checked = false;
+                }
+                else {
+                    this.role = 'System Admin';
+                }
+            },
+
             _print() {
                 var content = Polymer.dom(this.root).querySelector("#printMe").innerHTML;
                 var mywindow = window.open('', 'Print', 'height=600,width=800');
@@ -256,15 +267,17 @@
             },
 
             _submit() {
-                if (!this.firstname || !this.middlename || !this.lastname || !this.prefix) {
+                if (!this.firstname || !this.lastname || !this.prefix) {
                     this.firstname = '';
-                    this.middlename = '';
                     this.lastname = '';
                     this.prefix = '';
                     this.msg = 'Please fill-up the required field.';
                 }
                 else if (!this.cellphone) {
                     this.msg = 'Please enter cellphone number.';
+                }
+                else if (!this.role) {
+                    this.msg = 'Please select a role.';
                 }
                 // else if () {
                 //     this.msg = 'Please enter your designatory letters.';
@@ -282,6 +295,10 @@
                             this.suffix = '';
                         }
 
+                        if (!this.middlename) {
+                            this.middlename = '';
+                        }
+
                         var ref = firebase.database().ref("/accounts");
                         var push = ref.push({
                             code: this.accountkey,
@@ -292,15 +309,25 @@
                                 lastname: this.lastname,
                                 suffix: this.suffix
                             },
+                            role: this.role,
                             designatory: this.prefix,
                             cellphone: this.cellphone,
                             uid: ''
                         });
-                        // Polymer.dom(this.root).querySelector("#toast").open();
-                        // this.txt = "Account successfully added.";
-                        this.finalstepHide = false;
-                        this.firstStep = true;
-                        // window.location = "/accountlist"
+
+                        if (push.key) {
+                            if (this.role == 'Secretary') {
+                                var sec = firebase.database().ref("/secretary");
+                                var push = sec.push({
+                                    name: this.lastname + ' ' + this.firstname + '' + this.middlename,
+                                    code: this.accountkey,
+                                    key: push.key
+                                });
+                            }
+
+                            this.finalstepHide = false;
+                            this.firstStep = true;
+                        }
                     }
                 }
             },
