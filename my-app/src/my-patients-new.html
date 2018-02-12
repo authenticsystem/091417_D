@@ -319,8 +319,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
                 <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
                 <div id="info">
-                  <paper-input placeholder="mm/dd/yyyy" pattern="^([0-2]{2})[\/\-]([0-9]{2})[\/\-]([0-9]{4})$" auto-validate error-message="Invalid date format!"
-                    value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
+                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$" auto-validate
+                    error-message="Invalid date format!" value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
                   <paper-input value="{{age}}" label="Age" style="width:100%;"></paper-input>
                   <!-- <span>Age: {{age}}</span> -->
                 </div>
@@ -375,8 +375,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div class="details">
                 <div id="info">
                   <paper-input value="{{card}}" Label="ID Card Number" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input value="{{bdate}}" placeholder="mm/dd/yyyy" pattern="^([0-2]{2})[\/\-]([0-9]{2})[\/\-]([0-9]{4})$" auto-validate
-                    error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
+                  <paper-input value="{{bdate}}" placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$"
+                    auto-validate error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
                 </div>
                 <paper-input value="{{in_address}}" Label="Address (If different)"></paper-input>
                 <paper-input value="{{home_phone}}" type="number" Label="Home phone no."></paper-input>
@@ -854,7 +854,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         if (bday) {
-          var dateformat = /^([0-2]{2})[\/\-]([0-9]{2})[\/\-]([0-9]{4})$/;
+          var dateformat = /^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$/;
           if (bday.match(dateformat)) {
 
             var mdate = bday.toString();
@@ -967,7 +967,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation) {
         var date = '';
         if (bdate) {
-          var dateformat = /^([0-2]{2})[\/\-]([0-9]{2})[\/\-]([0-9]{4})$/;
+          var dateformat = /^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$/;
           if (bdate.match(dateformat)) {
             this.ibd = bdate;
             date = bdate;

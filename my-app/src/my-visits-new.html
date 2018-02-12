@@ -286,7 +286,7 @@
                                     <div>{{noprev}}</div>
                                     <template is="dom-repeat" items="[[mycases]]">
                                         <div style="margin-bottom:16px;">
-                                            <span class="primary" style="color:black; font-weight:400">Last Visit</span>
+                                            <span class="primary" style="color:black; font-weight:400; margin-right:2px;">Last Visit</span>
                                             <iron-icon icon="my-icons:watch-later"></iron-icon>
                                             <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
                                         </div>

@@ -267,9 +267,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       </div>
                       <div id="{{item.$key}}" style=" padding: 16px; display:flex">
 
-                        <iron-image style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
-                        <iron-image style$="{{_hasProfile(item.profile)}}" class="avatar2" sizing="cover" src="[[item.profile]]"></iron-image>
-
+                        <div>
+                          <iron-image style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
+                          <iron-image style$="{{_hasProfile(item.profile)}}" class="avatar2" sizing="cover" src="[[item.profile]]"></iron-image>
+                        </div>
                         <div id="{{item.$key}}" style=" margin-left:10px;">
                           <!-- <div style="font-size:11px" class="longText">[[item.no]]</div> -->
                           <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>

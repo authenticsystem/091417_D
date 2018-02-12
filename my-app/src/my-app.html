@@ -448,7 +448,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _signOut() {
         this.$.auth.signOut();
-        window.location.reload();
+        window.location.reload()
+        this.set("route.path", "");
       }
 
       _needToSignIn(e, f) {
