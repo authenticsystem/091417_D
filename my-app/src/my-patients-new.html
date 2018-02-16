@@ -25,9 +25,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="short-unique-id.html">
+<link rel="import" href="image-resize.html">
 
 <dom-module id="my-patients-new">
   <template>
@@ -261,12 +263,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <div class="details" style="text-align:center">
 
+                <!-- <canvas style="border-radius:50%; display:none" id="myCanvass"></canvas> -->
                 <img id="profilePic" style="width:200px; height:200px; border-radius:50%;" src="../images/user.png">
                 <br>
                 <div class="upload-btn-wrapper">
                   <button class="btn">Upload profile picture</button>
-                  <input on-change="_changepic" type="file" name="myfile" accept="image/*" />
+                  <input on-change="_changepic" id="myfile" type="file" name="myfile" accept="image/*" />
                 </div>
+                <br>
+                <!-- <span id="err" style="display:none; font-size:6px;">No file chosen</span> -->
                 <!-- <div id="select"> -->
                 <!-- <div style="margin-top:8px;">
                     <div class="upload-btn-wrapper">
@@ -667,6 +672,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <br> Patient no
                   <b style="color:blue">{{no}}</b>
                 </div>
+                <div id="saveLoad" style="color: orange; display:none;">Saving patient info.</div>
                 <div id="saveFailed" style="color: red; display:none;">Opps! Something went wrong while saving patient.</div>
               </div>
             </div>
@@ -1001,20 +1007,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _changepic() {
-        if (event.target.files[0]) {
+      _changepic(e) {
+        if (e.target.files.length > 0) {
+          // Polymer.dom(this.root).querySelector("#err").style.display = 'none';
           var img = Polymer.dom(this.root).querySelector("#profilePic");
           var i = Polymer.dom(this.root).querySelector("#p_profile");
-          var reader = new FileReader();
 
+          this.profile = e.target.files[0];
+
+          var reader = new FileReader();
           reader.onload = function (e) {
             img.src = e.target.result;
             i.src = e.target.result;
           };
-          reader.readAsDataURL(event.target.files[0]);
-          this.profile = event.target.files[0];
-          // Polymer.dom(this.root).querySelector("#profilePic").src = URL.createObjectURL(event.target.files[0]);
-          // this.p_profile = URL.createObjectURL(event.target.files[0]);
+          reader.readAsDataURL(e.target.files[0]);
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#profilePic").src = '../images/user.png';
+          Polymer.dom(this.root).querySelector("#p_profile").src = '../images/user.png';
+          // Polymer.dom(this.root).querySelector("#err").style.display = 'inline-block';
         }
       },
 
@@ -1110,11 +1121,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           if (parseInt(this.selectedPage) == 4) {
             //complete
+            var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
             var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
             var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
+
             var info = this.personal, insure = this.insurance, emerg = this.emergency;
             var mykey = this.myKey;
             var num = this.length + 1;
+
             if (num > 0 && num < 10) {
               num = '000' + num;
             }
@@ -1132,33 +1146,63 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             if (this.profile) {
-              var pic_name = this.guid();
-              var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
-              var uploadTask = storageRef.put(this.profile);
-              uploadTask.on('state_changed',
-                function () {
-                  var downLoadURL = uploadTask.snapshot.downloadURL;
-                  if (downLoadURL) {
+              this.no = num;
+              saveLoad.style.display = 'block';
 
+              var ext = this.profile.type.substring(6);
+              var pic_name = this.guid() + '.' + ext;
+
+              if (this.profile.size > 9999) {
+
+                ImageTools.resize(this.profile, {
+                  width: 200, // maximum width
+                  height: 200 // maximum height
+                }, function (blob, didItResize) {
+
+                  var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+                  storageRef.put(blob).then(function (snapshot) {
                     var ref = firebase.database().ref("/" + mykey + "/patients");
                     var push = ref.push({
                       personal: info,
                       insurance: insure,
                       emergency: emerg,
-                      profile: downLoadURL,
+                      profile: snapshot.downloadURL,
                       no: num
                     });
 
                     if (push.key) {
-                      this.no = num;
+                      saveLoad.style.display = 'none';
                       saveSucc.style.display = 'block';
                     }
                     else {
                       saveErr.style.display = 'block';
                     }
+                  });
 
+                });
+              } else {
+
+                var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+                storageRef.put(this.profile).then(function (snapshot) {
+                  var ref = firebase.database().ref("/" + mykey + "/patients");
+                  var push = ref.push({
+                    personal: info,
+                    insurance: insure,
+                    emergency: emerg,
+                    profile: snapshot.downloadURL,
+                    no: num
+                  });
+
+                  if (push.key) {
+                    saveLoad.style.display = 'none';
+                    saveSucc.style.display = 'block';
+                  }
+                  else {
+                    saveErr.style.display = 'block';
                   }
                 });
+              }
+
             }
             else {
               var ref = firebase.database().ref("/" + mykey + "/patients");

@@ -2,6 +2,7 @@
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
@@ -17,11 +18,13 @@
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html">
 <link rel="import" href="../bower_components/paper-time-input/paper-time-input.html">
+<link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
 
 <link rel="import" href="time-element.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="short-unique-id.html">
+<link rel="import" href="image-resize.html">
 
 <dom-module id="my-visits-edit">
     <template>
@@ -90,6 +93,10 @@
                     bottom: 48px;
                 }
 
+                .vid-6 {
+                    width: 30%;
+                }
+
             }
 
             @media (max-width: 800px) {
@@ -110,6 +117,9 @@
                     margin-right: 16px;
                 }
 
+                .vid-s-9 {
+                    width: 90%;
+                }
             }
 
 
@@ -180,6 +190,62 @@
                 height: 0;
                 font-size: 15px;
             }
+
+            .attachment-icon {
+                float: right;
+                cursor: pointer;
+                bottom: 16px;
+                left: 10px;
+            }
+
+            .attachment-icon:hover {
+                color: dimgray;
+            }
+
+            .imgh {
+                margin-right: 3px;
+                padding: 6px;
+                display: inline;
+            }
+
+            .imgh:hover {
+                box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
+                cursor: pointer;
+            }
+
+            .toggle {
+                --paper-toggle-button-checked-bar-color: var(--paper-pink-500);
+                --paper-toggle-button-checked-button-color: var(--paper-pink-500);
+                --paper-toggle-button-checked-ink-color: var(--paper-pink-500);
+            }
+
+            .image-grid {
+                display: -ms-flexbox;
+                display: -webkit-flex;
+                display: flex;
+
+                -ms-flex-direction: row;
+                -webkit-flex-direction: row;
+                flex-direction: row;
+
+                -ms-flex-wrap: wrap;
+                -webkit-flex-wrap: wrap;
+                flex-wrap: wrap;
+
+                padding-top: var(--sl-gallery-gutter, 0px);
+                padding-left: var(--sl-gallery-gutter, 0px);
+                box-sizing: border-box;
+
+                /* @override, hide gutter around grid */
+                padding: 0;
+                margin: 0 calc(-1 * var(--sl-gallery-gutter, 0px)) calc(-1 * var(--sl-gallery-gutter, 0px)) 0;
+            }
+
+            /* .imageS {
+                columns: 4;
+                --sl-gallery-gutter: 8px;
+                height: 75%;
+            } */
         </style>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -220,21 +286,67 @@
                             </div>
                         </div>
 
-                        <div class="docu" style="margin-top:-16px;">
+
+                        <div class="docu" id="showed" style="margin-top:-16px;">
                             <div class="details">
                                 <!-- <span class="primary" style="color:black; font-weight:400">Last Updated</span> -->
                                 <div style="margin-bottom:6px;">
                                     <iron-icon icon="my-icons:watch-later"></iron-icon>
                                     <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                                    <paper-icon-button on-tap="_showAttach" class="attachment-icon" icon="my-icons:attachment" title="attacments"></paper-icon-button>
                                 </div>
                                 <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
                                 <paper-textarea label="History" value="{{history}}"></paper-textarea>
                                 <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
                                 <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
-                                <!-- <div style="font-size:14px; margin-top: 6px;">Attachment</div>
-                                <input on-change="_changeAttach" type="file" id="myFile" accept="image/*,video/*" multiple> -->
+                                <div style="font-size:16px; margin-top:16px;">Health Records</div>
+                                <div style="border:1px solid gray; padding:6px;">
+                                    <input on-change="_changeAttach" type="file" id="myFile" accept="image/*,video/*" multiple="multiple" />
+                                    <output style="font-size:14px;" id="fileList"></output>
+                                </div>
                             </div>
                         </div>
+
+                        <div class="docu" id="show" style="margin-top:-16px; display:none">
+                            <div class="details">
+                                <div>
+                                    <paper-icon-button on-tap="_hideAttach" style="bottom:16px; right:16px" icon="my-icons:close" title="close"></paper-icon-button>
+                                    <!-- <paper-toggle-button on-tap="_checkDelete" class="toggle attachment-icon">{{dleteTxt}}</paper-toggle-button> -->
+                                </div>
+
+                                <firebase-query id="query" path="/{{myKey}}/cases/{{editKey}}/attachment" data="{{myimage}}" order-by-child="type" equal-to="image">
+                                </firebase-query>
+                                Images
+                                <div style="padding:16px; text-align:center; border: 1px solid gray">
+                                    {{imageTxt}}
+                                    <sl-gallery>
+                                        <template is="dom-repeat" items="{{myimage}}">
+                                            <sl-gallery-image src="[[item.url]]" small="[[item.url]]"></sl-gallery-image>
+                                        </template>
+                                    </sl-gallery>
+
+                                    <!-- <div class="image-grid">
+                                        <template is="dom-repeat" items="{{myimage}}">
+                                            <img class="imageS" src="[[item.url]]"></img>
+                                        </template>
+                                    </div> -->
+                                </div>
+                                <br>
+
+                                <firebase-query id="query" path="/{{myKey}}/cases/{{editKey}}/attachment" data="{{myvideo}}" order-by-child="type" equal-to="video">
+                                </firebase-query>
+                                Videos
+                                <div style="padding:16px; text-align:center; border: 1px solid gray">
+                                    {{videoTxt}}
+                                    <template is="dom-repeat" items="{{myvideo}}">
+                                        <div>
+                                            <video on-tap="_remove" class="imgh vid-6 vid-s-9" controls preload="auto" id="[[item.$key]]" src="[[item.url]]"></video>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
                     </neon-animatable>
 
                     <neon-animatable>
@@ -249,7 +361,7 @@
                         <div class="docu">
                             <div class="details">
                                 <div id="saveSuccess" style="color: green; display:none">Visit successfully saved.</div>
-                                <div id="saveRunning" style="color: orange; display:none">Please wait while saving data. .</div>
+                                <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
                                 <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving data.</div>
                             </div>
                         </div>
@@ -325,25 +437,114 @@
                     type: Object,
                     value: ''
                 },
-                mykey: String
+                mykey: String,
+                myimage: {
+                    type: Object,
+                    observer: '_myimageChanged'
+                },
+                myvideo: {
+                    type: Object,
+                    observer: '_myvideoChanged'
+                },
+                remove: {
+                    type: Array,
+                    value: function () {
+                        return [];
+                    }
+                }
+            },
+
+            // _removeChanged(e) {
+
+            //     console.log(e);
+
+            // },
+
+            _checkDelete() {
 
             },
 
-            _changeAttach() {
-                if (event.target.files.length > 0) {
-                    this.attachment = event.target.files;
-                    // for (var i = 0; i < event.target.files.length; i++) {
-                    // }
-                    // if (event.target.files[0].type == 'image/png' || event.target.files[0].type == 'image/jpeg') {
-                    //     Polymer.dom(this.root).querySelector("#picHolder").style.display = 'block';
-                    //     Polymer.dom(this.root).querySelector("#vidHolder").style.display = 'none';
-                    //     Polymer.dom(this.root).querySelector("#healthPic").src = URL.createObjectURL(event.target.files[0]);
-                    // }
-                    // else {
-                    //     Polymer.dom(this.root).querySelector("#picHolder").style.display = 'none';
-                    //     Polymer.dom(this.root).querySelector("#vidHolder").style.display = 'block';
-                    //     Polymer.dom(this.root).querySelector("#healthVid").src = URL.createObjectURL(event.target.files[0]);
-                    // }
+            _remove(e) {
+                var id = Polymer.dom(e).rootTarget.getAttribute("id");
+
+                if (Polymer.dom(this.root).querySelector("#" + id).style.display == 'inline') {
+                    Polymer.dom(this.root).querySelector("#" + id).style.display = 'inline-block';
+                    Polymer.dom(this.root).querySelector("#" + id).style.background = 'none';
+
+                    if (this.remove.length > 0) {
+                        for (var i = 0; i < this.remove.length; i++) {
+                            if (this.remove[i] == id) {
+                                var index = this.remove.indexOf(this.remove[i]);
+                            }
+                        }
+                        if (index > -1) {
+                            this.remove.splice(index, 1);
+                        }
+                    }
+                    console.log(this.remove);
+
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#" + id).style.display = 'inline';
+                    Polymer.dom(this.root).querySelector("#" + id).style.background = 'rgba(255, 0, 0, 0.527)';
+                    this.remove.push(id);
+                    console.log(this.remove);
+                }
+            },
+
+            _showAttach() {
+                Polymer.dom(this.root).querySelector("#showed").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#show").style.display = 'block';
+            },
+
+            _hideAttach() {
+                Polymer.dom(this.root).querySelector("#showed").style.display = 'block';
+                Polymer.dom(this.root).querySelector("#show").style.display = 'none';
+            },
+
+            _myvideoChanged(e) {
+                if (e.length > 0) {
+                    this.videoTxt = '';
+                }
+                else {
+                    this.videoTxt = 'No Videos Attach';
+                }
+            },
+
+            _myimageChanged(e) {
+                if (e.length > 0) {
+                    this.imageTxt = '';
+                }
+                else {
+                    this.imageTxt = 'No Images Attach';
+                }
+            },
+
+            _changeAttach(e) {
+                var list = Polymer.dom(this.root).querySelector("#fileList");
+                if (e.target.files.length > 0) {
+
+                    var files = e.target.files;
+                    this.attachment = files;
+
+                    if (e.target.files.length > 1) {
+                        var output = [];
+                        for (var i = 0, f; f = files[i]; i++) {
+                            output.push('<li>', escape(f.name), '</li>');
+                            // output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ')</li>');
+                            // output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                            //     f.size, ' bytes, last modified: ',
+                            //     f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                            //     '</li>');
+                        }
+                        list.innerHTML = '<ul>' + output.join('') + '</ul>';
+                    }
+                    else {
+                        list.innerHTML = '';
+                    }
+                }
+                else {
+                    list.innerHTML = '';
                 }
             },
 
@@ -351,7 +552,7 @@
                 if (this.mycases.length > 0) {
 
                     if (this.mycases[0].patientinfo) {
-          
+
                         this.insurance = this.mycases[0].patientinfo.hmo;
                         this.sex = this.mycases[0].patientinfo.gender;
                         this.p_num = this.mycases[0].patientinfo.num;
@@ -557,25 +758,56 @@
                                             if (myattachment) {
                                                 saveRun.style.display = 'block';
                                                 for (var i = 0; i < myattachment.length; i++) {
+
                                                     var attachFile = myattachment[i];
-                                                    var name = attachName + i;
+                                                    var ext = attachFile.type.substring(6);
+                                                    var name = attachName + i + '.' + ext;
                                                     var myURL = "/" + mykey + "/cases/" + editkey + "/attachment";
 
-                                                    var storageRef = firebase.storage().ref('attachment/' + name);
-                                                    storageRef.put(attachFile).then(function (snapshot) {
-                                                        saveRun.style.display = 'none';
-                                                        saveSucc.style.display = 'block';
+                                                    if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
+                                                        ImageTools.resize(attachFile, {
+                                                            width: 200, // maximum width
+                                                            height: 200 // maximum height
+                                                        }, function (blob, didItResize) {
 
-                                                        var type = snapshot.metadata.contentType.slice(0, 5);
-                                                        var name = snapshot.metadata.name + '.' + snapshot.metadata.contentType.substring(6);
-                                                        var ref = firebase.database().ref(myURL);
+                                                            var ext = blob.type.substring(6);
+                                                            var rand = Math.random().toString(36).slice(-8);
+                                                            var newName = rand + '.' + ext;
 
-                                                        ref.push({
-                                                            url: snapshot.downloadURL,
-                                                            type: type,
-                                                            name: name
+                                                            var storageRef = firebase.storage().ref('attachment/' + newName);
+                                                            storageRef.put(blob).then(function (snapshot) {
+                                                                saveRun.style.display = 'none';
+                                                                saveSucc.style.display = 'block';
+
+                                                                var type = snapshot.metadata.contentType.slice(0, 5);
+                                                                var name = snapshot.metadata.name;
+                                                                var ref = firebase.database().ref(myURL);
+
+                                                                ref.push({
+                                                                    url: snapshot.downloadURL,
+                                                                    type: type,
+                                                                    name: name
+                                                                });
+                                                            });
                                                         });
-                                                    });
+                                                    }
+                                                    else {
+                                                        var storageRef = firebase.storage().ref('attachment/' + name);
+                                                        storageRef.put(attachFile).then(function (snapshot) {
+                                                            saveRun.style.display = 'none';
+                                                            saveSucc.style.display = 'block';
+
+                                                            var type = snapshot.metadata.contentType.slice(0, 5);
+                                                            var name = snapshot.metadata.name;
+                                                            var ref = firebase.database().ref(myURL);
+
+                                                            ref.push({
+                                                                url: snapshot.downloadURL,
+                                                                type: type,
+                                                                name: name
+                                                            });
+                                                        });
+                                                    }
                                                 }
                                             }
                                             else {
@@ -613,25 +845,56 @@
                                             if (myattachment) {
                                                 saveRun.style.display = 'block';
                                                 for (var i = 0; i < myattachment.length; i++) {
+
                                                     var attachFile = myattachment[i];
-                                                    var name = attachName + i;
+                                                    var ext = attachFile.type.substring(6);
+                                                    var name = attachName + i + '.' + ext;
                                                     var myURL = "/" + mykey + "/cases/" + editkey + "/attachment";
 
-                                                    var storageRef = firebase.storage().ref('attachment/' + name);
-                                                    storageRef.put(attachFile).then(function (snapshot) {
-                                                        saveRun.style.display = 'none';
-                                                        saveSucc.style.display = 'block';
+                                                    if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
+                                                        ImageTools.resize(attachFile, {
+                                                            width: 200, // maximum width
+                                                            height: 200 // maximum height
+                                                        }, function (blob, didItResize) {
 
-                                                        var type = snapshot.metadata.contentType.slice(0, 5);
-                                                        var name = snapshot.metadata.name + '.' + snapshot.metadata.contentType.substring(6);
-                                                        var ref = firebase.database().ref(myURL);
+                                                            var ext = blob.type.substring(6);
+                                                            var rand = Math.random().toString(36).slice(-8);
+                                                            var newName = rand + '.' + ext;
 
-                                                        ref.push({
-                                                            url: snapshot.downloadURL,
-                                                            type: type,
-                                                            name: name
+                                                            var storageRef = firebase.storage().ref('attachment/' + newName);
+                                                            storageRef.put(blob).then(function (snapshot) {
+                                                                saveRun.style.display = 'none';
+                                                                saveSucc.style.display = 'block';
+
+                                                                var type = snapshot.metadata.contentType.slice(0, 5);
+                                                                var name = snapshot.metadata.name;
+                                                                var ref = firebase.database().ref(myURL);
+
+                                                                ref.push({
+                                                                    url: snapshot.downloadURL,
+                                                                    type: type,
+                                                                    name: name
+                                                                });
+                                                            });
                                                         });
-                                                    });
+                                                    }
+                                                    else {
+                                                        var storageRef = firebase.storage().ref('attachment/' + name);
+                                                        storageRef.put(attachFile).then(function (snapshot) {
+                                                            saveRun.style.display = 'none';
+                                                            saveSucc.style.display = 'block';
+
+                                                            var type = snapshot.metadata.contentType.slice(0, 5);
+                                                            var name = snapshot.metadata.name;
+                                                            var ref = firebase.database().ref(myURL);
+
+                                                            ref.push({
+                                                                url: snapshot.downloadURL,
+                                                                type: type,
+                                                                name: name
+                                                            });
+                                                        });
+                                                    }
                                                 }
                                             }
                                             else {

@@ -392,8 +392,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 fileButton.addEventListener('change', function (e) {
                     //get file
                     var file = e.target.files[0];
+                    //get extension
+                    var ext = e.target.files[0].type.substring(6);
+                    var name = pic_name + '.' + ext;
                     //create storage
-                    var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+                    var storageRef = firebase.storage().ref('profilePicture/' + name);
                     //upload file
                     var uploadTask = storageRef.put(file);
                     //update progressbar

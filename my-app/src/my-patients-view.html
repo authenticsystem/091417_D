@@ -27,6 +27,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tab.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="time-element.html">
@@ -123,6 +125,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         .docu {
           padding: 0;
         }
+
+        .vid-6 {
+          width: 30%;
+        }
       }
 
       @media (max-width: 800px) {
@@ -156,6 +162,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin-top: 16px;
           margin-bottom: 16px;
         }
+
+        .vid-s-9 {
+          width: 90%;
+        }
       }
 
 
@@ -187,6 +197,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .longText {
         color: gray;
         /* display: none; */
+      }
+
+      .attachment-icon {
+        float: right;
+        cursor: pointer;
+        bottom: 16px;
+        left: 10px;
+      }
+
+      .attachment-icon:hover {
+        color: dimgray;
+      }
+
+      .imgh {
+        margin-right: 3px;
+        padding: 6px;
+      }
+
+      .imgh:hover {
+        box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
+        cursor: pointer;
       }
     </style>
 
@@ -442,7 +473,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{viewKey}}" data="{{mycases}}">
             </firebase-query>
 
-            <div style="margin-bottom: 26px">
+            <div id="noRecord" class="docu1" style="padding:16px;">
+              <div class="details">
+                No record found.
+              </div>
+            </div>
+
+            <div style="margin-bottom: 26px;">
               <template is="dom-repeat" items="{{_descending(mycases)}}">
 
                 <div class="docu1" style="padding:16px;" id="printMe">
@@ -451,6 +488,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <!-- <div style="font-weight:bold">{{_date(item.timestamp)}}</div> -->
                     <iron-icon icon="my-icons:watch-later"></iron-icon>
                     <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                    <!-- <paper-icon-button alt="{{item.$key}}" on-tap="_showAttach" class="attachment-icon" icon="my-icons:attachment" title="attacments"></paper-icon-button> -->
                     <br>
                     <br>
                     <span class="longText">Chief Complaint</span>
@@ -551,23 +589,63 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         viewKey: String,
         mypatient: Object,
         mycases: Object
+        // myimage: Object,
+        // myvideo: Object,
       },
 
       observers: [
         'mypatientChanged(mypatient)',
-        // 'mycaseChanged(mycases)',
-        'selectedPageChanged(selectedPage)'
+        'mycaseChanged(mycases)',
+        'selectedPageChanged(selectedPage)',
+        // '_myimageChanged(myimage)',
+        // '_myvideoChanged(myvideo)'
       ],
+
+      // _show(e) {
+      //   if (e) {
+      //     return 'show' + e;
+      //   }
+      // },
+
+      // _showed(e) {
+      //   if (e) {
+      //     return 'showed' + e;
+      //   }
+      // },
+
+      // _showAttach(e) {
+      //   var id = Polymer.dom(e).rootTarget.getAttribute("alt");
+      //   Polymer.dom(this.root).querySelector("#showed" + id).style.display = 'none';
+      //   Polymer.dom(this.root).querySelector("#show" + id).style.display = 'block';
+      // },
+
+      // _hideAttach(e) {
+      //   var id = Polymer.dom(e).rootTarget.getAttribute("alt");
+      //   Polymer.dom(this.root).querySelector("#showed" + id).style.display = 'block';
+      //   Polymer.dom(this.root).querySelector("#show" + id).style.display = 'none';
+      // },
+
+      // _myvideoChanged(e) {
+      //   if (e.length > 0) {
+      //     Polymer.dom(this.root).querySelector("#videoTxt").style.display = 'none';
+      //   }
+      // },
+
+      // _myimageChanged(e) {
+      //   if (e.length > 0) {
+      //     Polymer.dom(this.root).querySelector("#imageTxt").style.display = 'none';
+      //   }
+      // },
 
       _descending(data) {
         return data.reverse();
       },
 
-      // mycaseChanged(c) {
-      //   if (c.length > 0) {
-      //     console.log(c);
-      //   }
-      // },
+      mycaseChanged(c) {
+        if (c.length > 0) {
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+        }
+      },
 
       _timeStampToDateTime(ts) {
         return new Date(ts);

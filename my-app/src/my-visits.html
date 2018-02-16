@@ -61,7 +61,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .avatar {
         height: 45px;
         width: 45px;
-        border-radius: 20px;
+        border-radius: 50%;
         box-sizing: border-box;
         background-color: #DDD;
       }
@@ -70,7 +70,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 45px;
         width: 45px;
         border: 2px solid white;
-        border-radius: 20px;
+        border-radius: 50%;
         box-sizing: border-box;
         background-color: #DDD;
       }
@@ -315,7 +315,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                     <!-- <paper-icon-button noink on-tap="_selectThis" icon="my-icons:open-in-new" alt="{{item.$key}}" title="view details" style="display:inline-block;position: absolute; color: #673AB7; right: 10px; top:8px;">
                       </paper-icon-button> -->
-                    <a id="open" href$="{{_getViewDetailsLink(item.$key)}}"></a>
+                    <a id="open" href$="{{_getViewDetailsLink(e)}}"></a>
                     <!-- <paper-menu-button vertical-align="bottom" horizontal-align="right">
                       <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
                       <paper-listbox slot="dropdown-content">
@@ -570,6 +570,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _selectThis(e) {
         var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
         var node = Polymer.dom(this.root).querySelector("#casesview");
+        this.e = data_args;
         var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
         if (oldDiv) {
           Polymer.dom(node.parentNode).removeChild(oldDiv);

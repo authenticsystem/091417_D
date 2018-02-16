@@ -28,6 +28,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="short-unique-id.html">
+<link rel="import" href="image-resize.html">
 
 <dom-module id="my-patients-edit">
   <template>
@@ -237,8 +238,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
                 <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
                 <div id="info">
-                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$" auto-validate error-message="Invalid date format!"
-                    value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
+                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$" auto-validate
+                    error-message="Invalid date format!" value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
                   <paper-input value="{{age}}" label="Age" style="width:100%;"></paper-input>
                 </div>
                 <div id="info">
@@ -292,8 +293,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div class="details">
                 <div id="info">
                   <paper-input value="{{card}}" Label="ID Card Number" style="width:100%; margin-right:10px"></paper-input>
-                  <paper-input value="{{bdate}}" placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$" auto-validate
-                    error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
+                  <paper-input value="{{bdate}}" placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$"
+                    auto-validate error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
                 </div>
                 <paper-input value="{{in_address}}" Label="Address (If different)"></paper-input>
                 <paper-input value="{{home_phone}}" type="number" Label="Home phone no."></paper-input>
@@ -331,7 +332,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <div class="details">
                 <!-- <div style="margin-bottom:10px;">Please review the following details:</div> -->
-                <img src="{{p_profile}}" class="avatar">
+                <img id="p_profile" src="{{p_profile}}" class="avatar">
 
                 <!-- <div style="font-weight:bold">Basic Information</div> -->
                 <table style="margin-bottom:6px;">
@@ -581,8 +582,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div class="docu-header">6. Completed</div>
 
               <div class="details">
-                <div id="saveSuccess" style="color: green;">{{saveSuccess}}</div>
-                <div id="saveFailed" style="color: red;">{{saveError}}</div>
+                <div id="saveSuccess" style="color: green; display:none">Patient successfully updated.</div>
+                <div id="saveLoad" style="color: orange; display:none">Updating patient info.</div>
               </div>
             </div>
           </neon-animatable>
@@ -979,11 +980,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _changepic() {
-        if (event.target.files[0]) {
-          this.profile = event.target.files[0];
-          Polymer.dom(this.root).querySelector("#profilePic").src = URL.createObjectURL(event.target.files[0]);
-          this.p_profile = URL.createObjectURL(event.target.files[0]);
+      _changepic(e) {
+        if (e.target.files.length > 0) {
+          // Polymer.dom(this.root).querySelector("#err").style.display = 'none';
+          var img = Polymer.dom(this.root).querySelector("#profilePic");
+          var i = Polymer.dom(this.root).querySelector("#p_profile");
+
+          this.profile = e.target.files[0];
+
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            img.src = e.target.result;
+            i.src = e.target.result;
+          };
+          reader.readAsDataURL(e.target.files[0]);
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#profilePic").src = this.p_profile;
+          Polymer.dom(this.root).querySelector("#p_profile").src = this.p_profile;
+          // Polymer.dom(this.root).querySelector("#err").style.display = 'inline-block';
         }
       },
 
@@ -1077,16 +1092,52 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             //complete
             var info = this.personal, insure = this.insurance, emerg = this.emergency, key = this.editKey;
             var mykey = this.myKey;
-            if (this.profile) {
-              var pic_name = this.guid();
-              var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
-              var uploadTask = storageRef.put(this.profile);
 
-              firebase.database().ref('/' + mykey + '/patients/' + key)
-                .once('value').then(function (patient) {
-                  if (patient.val().profile) {
-                    firebase.storage().refFromURL(patient.val().profile).delete()
-                      .then(function () {
+            var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
+            var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+
+            if (this.profile) {
+              saveLoad.style.display = 'block';
+
+              var ext = this.profile.type.substring(6);
+              var pic_name = this.guid() + '.' + ext;
+
+              var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+
+              if (this.profile.size > 9999) {
+
+                ImageTools.resize(this.profile, {
+                  width: 200, // maximum width
+                  height: 200 // maximum height
+                }, function (blob, didItResize) {
+
+                  var uploadTask = storageRef.put(blob);
+                  firebase.database().ref('/' + mykey + '/patients/' + key)
+                    .once('value').then(function (patient) {
+                      if (patient.val().profile) {
+                        firebase.storage().refFromURL(patient.val().profile).delete()
+                          .then(function () {
+                            uploadTask.on('state_changed',
+                              function () {
+                                var downLoadURL = uploadTask.snapshot.downloadURL;
+                                if (downLoadURL) {
+
+                                  var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
+                                  var push = ref.update({
+                                    personal: info,
+                                    insurance: insure,
+                                    emergency: emerg,
+                                    profile: downLoadURL
+                                  }).then(function () {
+                                    saveLoad.style.display = 'none';
+                                    saveSucc.style.display = 'block';
+                                  });
+                                }
+                              });
+                          });
+
+                      }
+                      else {
                         uploadTask.on('state_changed',
                           function () {
                             var downLoadURL = uploadTask.snapshot.downloadURL;
@@ -1098,38 +1149,77 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 insurance: insure,
                                 emergency: emerg,
                                 profile: downLoadURL
+                              }).then(function () {
+                                saveLoad.style.display = 'none';
+                                saveSucc.style.display = 'block';
                               });
                             }
                           });
-                      });
-                  }
-                  else {
-                    uploadTask.on('state_changed',
-                      function () {
-                        var downLoadURL = uploadTask.snapshot.downloadURL;
-                        if (downLoadURL) {
-
-                          var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-                          var push = ref.update({
-                            personal: info,
-                            insurance: insure,
-                            emergency: emerg,
-                            profile: downLoadURL
-                          });
-                        }
-                      });
-                  }
+                      }
+                    });
                 });
+
+              }
+              else {
+                var uploadTask = storageRef.put(this.profile);
+                firebase.database().ref('/' + mykey + '/patients/' + key)
+                  .once('value').then(function (patient) {
+                    if (patient.val().profile) {
+                      firebase.storage().refFromURL(patient.val().profile).delete()
+                        .then(function () {
+                          uploadTask.on('state_changed',
+                            function () {
+                              var downLoadURL = uploadTask.snapshot.downloadURL;
+                              if (downLoadURL) {
+
+                                var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
+                                var push = ref.update({
+                                  personal: info,
+                                  insurance: insure,
+                                  emergency: emerg,
+                                  profile: downLoadURL
+                                }).then(function () {
+                                  saveLoad.style.display = 'none';
+                                  saveSucc.style.display = 'block';
+                                });
+                              }
+                            });
+                        });
+                    }
+                    else {
+                      uploadTask.on('state_changed',
+                        function () {
+                          var downLoadURL = uploadTask.snapshot.downloadURL;
+                          if (downLoadURL) {
+
+                            var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
+                            var push = ref.update({
+                              personal: info,
+                              insurance: insure,
+                              emergency: emerg,
+                              profile: downLoadURL
+                            }).then(function () {
+                              saveLoad.style.display = 'none';
+                              saveSucc.style.display = 'block';
+                            });
+                          }
+                        });
+                    }
+                  });
+              }
             }
             else {
+              saveLoad.style.display = 'block';
               var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
               var push = ref.update({
                 personal: this.personal,
                 insurance: this.insurance,
                 emergency: this.emergency
+              }).then(function () {
+                saveLoad.style.display = 'none';
+                saveSucc.style.display = 'block';
               });
             }
-            this.saveSuccess = 'Patient successfully updated.';
           }
 
           if (parseInt(this.selectedPage) !== 5) {

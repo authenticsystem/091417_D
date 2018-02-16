@@ -60,7 +60,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .avatar {
         height: 45px;
         width: 45px;
-        border-radius: 20px;
+        border-radius: 50%;
         box-sizing: border-box;
         background-color: #DDD;
       }
@@ -298,7 +298,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                     <div style="padding:10px"> </div>
 
-                    <a id="open" href$="{{_getViewDetailsLink(item.$key)}}"></a>
+                    <a id="open" href$="{{_getViewDetailsLink(e)}}"></a>
 
                     <!-- <paper-icon-button class="star" noink on-tap="_starMe" icon="my-icons:star-border" alt="star{{item.$key}}" id="star{{item.$key}}"
                       title="Pin me">
@@ -630,6 +630,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _selectThis(e) {
         var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
         var node = Polymer.dom(this.root).querySelector("#patientsview");
+        this.e = data_args;
         if (node) {
           var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
           if (oldDiv) {
