@@ -21,7 +21,8 @@
 <link rel="import" href="time-element.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
-<link rel="import" href="short-unique-id.html">
+<link rel="import" href="image-resize.html">
+<!-- <link rel="import" href="short-unique-id.html"> -->
 
 <dom-module id="my-visits-new">
     <template>
@@ -794,7 +795,7 @@
                             mydiagnosis = this.diagnosis, mytreatment = this.treatment;
                         var mykey = this.myKey;
                         var myattachment = this.attachment;
-                        var attachName = this.guid();
+                        var attachName = this.randomString(8);
 
                         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
                         var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
@@ -1031,10 +1032,16 @@
 
             },
 
-            guid: function () {
-                var uid = new ShortUniqueId();
-                return uid.randomUUID(8);
+            randomString(n) {
+                var r = "";
+                while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+                return r;
             },
+
+            // guid: function () {
+            //     var uid = new ShortUniqueId();
+            //     return uid.randomUUID(8);
+            // },
 
             _comma(e) {
                 if (e) {

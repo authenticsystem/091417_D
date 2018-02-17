@@ -6,20 +6,27 @@
     "src/my-patients.html",
     "src/my-visits.html",
     "src/my-account.html",
+    "src/search-bar.html",
     "src/time-element.html",
+    "src/image-resize.html",
+    "dist/image-resize.js",
     "src/my-view2.html",
     "src/my-view404.html"
   ],
   "sources": [
     "src/**/*",
-    "images/**/*"
+    "images/**/*",
+    "dist/*.js",
+    "dist/*.json"
   ],
   "extraDependencies": [
     "manifest.json",
     "bower_components/webcomponentsjs/*.js"
   ],
   "lint": {
-    "rules": ["polymer-2"]
+    "rules": [
+      "polymer-2"
+    ]
   },
   "builds": [
     {
