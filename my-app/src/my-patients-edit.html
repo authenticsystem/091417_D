@@ -29,7 +29,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="image-resize.html">
-<link rel="import" href="short-unique-id.html">
 
 <dom-module id="my-patients-edit">
   <template>
@@ -1101,7 +1100,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               saveLoad.style.display = 'block';
 
               var ext = this.profile.type.substring(6);
-              var pic_name = this.guid() + '.' + ext;
+              var pic_name = this.randomString(8) + '.' + ext;
 
               var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
 
@@ -1245,10 +1244,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      guid: function () {
-        var uid = new ShortUniqueId();
-        return uid.randomUUID(8);
-      },
+      randomString(n) {
+        var r = "";
+        while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+        return r;
+      }
+
     })
   </script>
 </dom-module>

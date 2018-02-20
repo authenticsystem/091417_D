@@ -29,7 +29,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="image-resize.html">
-<link rel="import" href="short-unique-id.html">
 
 <dom-module id="my-patients-new">
   <template>
@@ -819,7 +818,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         length: {
           type: Number,
           value: 0
-        }
+        },
+        todayDate: String
         // canvas: String,
         // context: String,
         // video: String,
@@ -1038,9 +1038,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.narrow = !this.$.narrow;
       },
 
+      formatTodayDate(date) {
+        var monthNames = [
+          "01", "02", "03",
+          "04", "05", "06", "07",
+          "08", "09", "10",
+          "11", "12"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return year + '-' + monthNames[monthIndex] + '-' + day;
+      },
+
       ready() {
         this.selectedPage = 0;
         this.favrighthide = false;
+        this.todayDate = this.formatTodayDate(new Date());
         // this.canvas = Polymer.dom(this.root).querySelector("#canvas");
         // this.context = this.canvas.getContext('2d');
         // this.video = Polymer.dom(this.root).querySelector("#video");
@@ -1128,6 +1144,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var info = this.personal, insure = this.insurance, emerg = this.emergency;
             var mykey = this.myKey;
             var num = this.length + 1;
+            var today = this.todayDate;
 
             if (num > 0 && num < 10) {
               num = '000' + num;
@@ -1150,7 +1167,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               saveLoad.style.display = 'block';
 
               var ext = this.profile.type.substring(6);
-              var pic_name = this.guid() + '.' + ext;
+              var pic_name = this.randomString(8) + '.' + ext;
 
               if (this.profile.size > 9999) {
 
@@ -1167,10 +1184,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       insurance: insure,
                       emergency: emerg,
                       profile: snapshot.downloadURL,
-                      no: num
+                      no: num,
+                      created: today
                     });
 
                     if (push.key) {
+
+                      var postRef = firebase.database().ref('/' + mykey + '/patients');
+                      postRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
+                        if (snapshot.hasChildren()) {
+                          var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
+                          ref.set(snapshot.numChildren());
+                        }
+                      });
+
                       saveLoad.style.display = 'none';
                       saveSucc.style.display = 'block';
                     }
@@ -1190,10 +1217,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     insurance: insure,
                     emergency: emerg,
                     profile: snapshot.downloadURL,
-                    no: num
+                    no: num,
+                    created: today
                   });
 
                   if (push.key) {
+
+                    var postRef = firebase.database().ref('/' + mykey + '/patients');
+                    postRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
+                      if (snapshot.hasChildren()) {
+                        var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
+                        ref.set(snapshot.numChildren());
+                      }
+                    });
+
                     saveLoad.style.display = 'none';
                     saveSucc.style.display = 'block';
                   }
@@ -1210,10 +1247,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 personal: info,
                 insurance: insure,
                 emergency: emerg,
-                no: num
+                no: num,
+                created: today
               });
 
               if (push.key) {
+
+                var postRef = firebase.database().ref('/' + mykey + '/patients');
+                postRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
+                  if (snapshot.hasChildren()) {
+                    var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
+                    ref.set(snapshot.numChildren());
+                  }
+                });
+
                 this.no = num;
                 saveSucc.style.display = 'block';
               }
@@ -1245,10 +1292,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      guid: function () {
-        var uid = new ShortUniqueId();
-        return uid.randomUUID(8);
-      },
+      randomString(n) {
+        var r = "";
+        while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+        return r;
+      }
 
       // _select2(e) {
       //   this.entryanimation = "slide-from-right-animation";

@@ -55,7 +55,9 @@
     "google-map": "GoogleWebComponents/google-map#^2.0.3",
     "time-elements": "github/time-elements#0.6.1",
     "sl-gallery": "jsilvermist/sl-gallery#^1.0.1",
-    "paper-toggle-button": "PolymerElements/paper-toggle-button#^2.0.0"
+    "paper-toggle-button": "PolymerElements/paper-toggle-button#^2.0.0",
+    "chart.js": "^2.7.1",
+    "chartjs-plugin-datalabels": "^0.2.0"
   },
   "resolutions": {
     "polymer": "^2.0.0",

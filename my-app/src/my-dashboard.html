@@ -9,9 +9,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
+<script src="../bower_components/chart.js/dist/Chart.min.js"></script>
+<script src="../bower_components/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.min.js"></script>
 <dom-module id="my-dashboard">
   <template>
     <style include="shared-styles">
@@ -28,6 +33,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       paper-icon-button.menu {
         margin-right: 16px;
+      }
+
+      canvas {
+        width: 100% !important;
+        max-width: 900px;
+        height: auto !important;
+        margin: auto;
       }
 
       .customMe {
@@ -48,7 +60,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-top: -150px;
       } */
 
-       .css-typing {
+      .css-typing {
         font-size: 26px;
         font-weight: 600;
         width: 30em;
@@ -91,6 +103,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       /* .hit-the-floor {
         text-align: center;
       } */
+
+      .card {
+        text-align: center;
+      }
     </style>
 
     <app-header-layout fullbleed has-scrolling-region>
@@ -102,14 +118,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-header>
 
       <div class="card">
+
+        <!-- <h4>No. of patients in the last 7 days</h4> -->
+        <canvas id="myChart"></canvas>
+
         <!-- <img width="200" src="../images/manifest/icon-512x512.png"></img> -->
-        <p class="css-typing">WELCOME Dr. {{lastname}}</p>
+        <!-- <p class="css-typing">WELCOME Dr. {{lastname}}</p> -->
         <!-- <div class="pad"> -->
         <!-- <div class="customMe"></div> -->
         <!-- <p class="css-typing"><span>[</span> HELLO Dr. {{lastname}} <span>]</span></p> -->
         <!-- <p class="css-typing">Hello 
         </p> -->
         <!-- </div> -->
+
       </div>
 
     </app-header-layout>
@@ -125,19 +146,87 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             notify: true
           },
+          myKey: String,
           lastname: String,
-          user: {
-            type: Object,
-            // observer: '_userChanged'
-          }
+          user: Object,
+          todayDate: String
         };
       }
 
-      // _userChanged(){
-      //   if(this.user){
+      formatTodayDate(date) {
+        var monthNames = [
+          "01", "02", "03",
+          "04", "05", "06", "07",
+          "08", "09", "10",
+          "11", "12"
+        ];
 
-      //   }
-      // }
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return year + '-' + monthNames[monthIndex] + '-' + day;
+      }
+
+      ready() {
+        super.ready();
+        this.todayDate = this.formatTodayDate(new Date());
+
+        var day = this.todayDate.substring(8) - 6;
+        var lastWeek = this.todayDate.substring(0, 4) + '-' + this.todayDate.substring(5, 7) + '-' + day;
+        var ctx = Polymer.dom(this.root).querySelector("#myChart");
+
+        var myChart = new Chart(ctx, {
+          type: 'line',
+          options: {
+            plugins: {
+              datalabels: {
+                anchor: 'end',
+                align: 'right'
+              }
+            },
+            responsive: true,
+            title: {
+              display: true,
+              text: 'No. of patients in the last 7 days'
+            }
+          }
+        });
+
+        var ref = firebase.database().ref("/" + this.myKey + "/reports/daily");
+        ref.orderByKey().startAt(lastWeek).limitToFirst(7).on("value", function (snapshot) {
+
+          var returnArr = [];
+          var labelDate = [];
+
+          snapshot.forEach(element => {
+            var date = new Date(element.key);
+            var options = {
+              weekday: "short", year: "numeric", month: "short",
+              day: "numeric"
+            };
+            var week = date.toLocaleTimeString("en-us", options).substring(5, 11);
+
+            returnArr.push(element.val().patients);
+            labelDate.push(week);
+          });
+
+          var data = {
+            labels: labelDate,
+            datasets: [{
+              label: 'No. of Patients',
+              data: returnArr,
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1
+            }],
+          };
+
+          myChart.data = data;
+          myChart.update();
+
+        });
+      }
 
       toggleDrawer() {
         this.dispatchEvent(new CustomEvent('toggleDrawer', {
@@ -149,10 +238,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
     }
-
-
-
-
 
     window.customElements.define(MyDashboard.is, MyDashboard);
   </script>

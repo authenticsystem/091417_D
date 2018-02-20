@@ -208,6 +208,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <template is="dom-if" if="{{!isActive}}">
           <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <my-account-link is-active="{{isActive}}" name="account-link"></my-account-link>
+            <!-- <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist> -->
             <my-view404 name="view404"></my-view404>
           </iron-pages>
         </template>
@@ -326,7 +327,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
             </app-drawer>
             <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-              <my-dashboard lastname="{{lastname}}" user="{{user}}" name="dashboard"></my-dashboard>
+              <my-dashboard my-key="{{mykey}}" lastname="{{lastname}}" user="{{user}}" name="dashboard"></my-dashboard>
               <!-- <my-account active={{isActive}} user={{user}} name="account"></my-account> -->
               <my-settings route="[[subroute]]" active={{isActive}} user={{user}} name="settings"></my-settings>
               <my-appointments name="appointments"></my-appointments>
