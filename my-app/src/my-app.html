@@ -24,8 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
@@ -165,7 +164,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply --layout-flex;
         @apply --layout-vertical;
       }
+
+      #overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
     </style>
+
+    <div id="overlay">
+      <paper-spinner id="spinner" active></paper-spinner>
+    </div>
 
     <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
     </app-location>
@@ -220,7 +235,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div style="height: 100%; overflow: auto;">
                 <app-header fixed>
                   <app-toolbar>
-                    <iron-image style$="{{_hasprofile(user.photoURL)}}" class="avatar" sizing="cover" src="{{user.photoURL}}"></iron-image>
+                    <iron-image preload fade style$="{{_hasprofile(user.photoURL)}}" class="avatar" sizing="cover" src="{{user.photoURL}}"></iron-image>
                     <iron-image style$="{{_noprofile(user.photoURL)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
                     <div class="pad">
                       <div hidden$="{{user.displayName}}" class="primary">{{user.email}}</div>
@@ -404,6 +419,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _routePageChanged(page, user, key) {
+        Polymer.dom(this.root).querySelector("#overlay").style.display = 'flex';
+        Polymer.dom(this.root).querySelector("#spinner").active = true;
         if (user) {
           if (user.emailVerified) {
             if (key) {
@@ -473,10 +490,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _pageChanged(page) {
         // Load page import on demand. Show 404 page if fails
+        var loader = Polymer.dom(this.root).querySelector("#overlay");
+        var spinner = Polymer.dom(this.root).querySelector("#spinner");
         var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
         Polymer.importHref(
           resolvedPageUrl,
-          null,
+          function () {
+            loader.style.display = 'none';
+            spinner.active = false;
+          },
           this._showPage404.bind(this),
           true);
 

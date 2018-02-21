@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="shared-styles.html">
@@ -48,6 +49,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         border-radius: 50%;
         width: 100px;
         height: 100px;
+      }
+
+      @media (max-width: 800px) {
+
+        #card1 {
+          margin-top: -10px;
+        }
+
+        #card2 {
+          margin-top: -10px;
+        }
+
+        .card {
+          margin-left: 10px;
+          margin-right: 10px;
+        }
+      }
+
+      #card1 {
+        margin-top: -10px;
       }
 
       /* .pad {
@@ -117,8 +138,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </app-toolbar>
       </app-header>
 
-      <div class="card">
+      <div style="padding:26px; margin-top:-30px">
+        <div style="float:right;">
+          <div style="display:flex;">
+            <iron-icon style="margin-top:30px; margin-right:10px" icon="my-icons:event"></iron-icon>
+            <paper-dropdown-menu style="cursor:pointer">
+              <paper-listbox slot="dropdown-content" selected="{{sectedRange}}">
+                <paper-item>Last 7 days</paper-item>
+                <paper-item>Last 7 months</paper-item>
+                <paper-item>Last 7 years</paper-item>
+              </paper-listbox>
+            </paper-dropdown-menu>
+          </div>
+          <div style="margin-left:34px;margin-top:-10px;">
+            <span style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+          </div>
+        </div>
+      </div>
 
+      <div class="card" id="card1">
         <!-- <h4>No. of patients in the last 7 days</h4> -->
         <canvas id="myChart"></canvas>
 
@@ -130,7 +168,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <!-- <p class="css-typing">Hello 
         </p> -->
         <!-- </div> -->
+      </div>
 
+      <div class="card" id="card2">
+        <canvas id="myChart2"></canvas>
       </div>
 
     </app-header-layout>
@@ -149,32 +190,68 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           myKey: String,
           lastname: String,
           user: Object,
-          todayDate: String
+          sectedRange: {
+            type: Number,
+            value: 0,
+            observer: '_selectedRangeChanged'
+          }
         };
       }
 
-      formatTodayDate(date) {
+      _selectedRangeChanged() {
+
+        var last, range, text;
+        var date = new Date();
+        var today = this.formatTodayDate(date);
+
         var monthNames = [
-          "01", "02", "03",
-          "04", "05", "06", "07",
-          "08", "09", "10",
-          "11", "12"
+          "Jan", "Feb", "Mar",
+          "Apr", "May", "Jun", "Jul",
+          "Aug", "Sep", "Oct",
+          "Nov", "Dec"
         ];
 
-        var day = date.getDate();
-        var monthIndex = date.getMonth();
-        var year = date.getFullYear();
+        if (this.sectedRange == 0) {
+          date.setDate(date.getDate() - 6);
 
-        return year + '-' + monthNames[monthIndex] + '-' + day;
-      }
+          var MM = date.getMonth();
+          var day = date.getDate();
+          var month = date.getMonth() + 1;
+          if (month < 10) { month = '0' + month };
+          if (day < 10) { day = '0' + day };
 
-      ready() {
-        super.ready();
-        this.todayDate = this.formatTodayDate(new Date());
+          this.text = monthNames[MM] + ' ' + day + ' - ' + today;
+          last = date.getFullYear() + '-' + month + '-' + day;
+          range = 'daily';
+          text = 'last 7 days';
+        }
 
-        var day = this.todayDate.substring(8) - 6;
-        var lastWeek = this.todayDate.substring(0, 4) + '-' + this.todayDate.substring(5, 7) + '-' + day;
+        if (this.sectedRange == 1) {
+          date.setMonth(date.getMonth() - 6);
+
+          var MM = date.getMonth();
+          var month = date.getMonth() + 1;
+          if (month < 10) { month = '0' + month };
+
+          this.text = monthNames[MM] + ' ' + date.getFullYear() + ' - ' + today;
+          last = date.getFullYear() + '-' + month;
+          range = 'monthly';
+          text = 'last 7 months';
+        }
+
+        if (this.sectedRange == 2) {
+          date.setFullYear(date.getFullYear() - 6);
+
+          var year = date.getFullYear();
+
+          this.text = year + ' - ' + today;
+          last = year.toString();
+          range = 'yearly';
+          text = 'last 7 years';
+        }
+
         var ctx = Polymer.dom(this.root).querySelector("#myChart");
+        var ctx2 = Polymer.dom(this.root).querySelector("#myChart2");
 
         var myChart = new Chart(ctx, {
           type: 'line',
@@ -188,27 +265,58 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             responsive: true,
             title: {
               display: true,
-              text: 'No. of patients in the last 7 days'
+              text: 'No. of patients in the ' + text
             }
           }
         });
 
-        var ref = firebase.database().ref("/" + this.myKey + "/reports/daily");
-        ref.orderByKey().startAt(lastWeek).limitToFirst(7).on("value", function (snapshot) {
+        var myChart2 = new Chart(ctx2, {
+          type: 'line',
+          options: {
+            elements: {
+              line: {
+                tension: 0, // disables bezier curves
+              }
+            },
+            plugins: {
+              datalabels: {
+                anchor: 'end',
+                align: 'right'
+              }
+            },
+            responsive: true,
+            title: {
+              display: true,
+              text: 'No. of visits in the ' + text
+            }
+          }
+        });
+
+        var ref = firebase.database().ref("/" + this.myKey + "/reports/" + range);
+        ref.orderByKey().startAt(last).limitToFirst(7).on("value", function (snapshot) {
 
           var returnArr = [];
+          var returnArr2 = [];
           var labelDate = [];
 
           snapshot.forEach(element => {
-            var date = new Date(element.key);
-            var options = {
-              weekday: "short", year: "numeric", month: "short",
-              day: "numeric"
-            };
-            var week = date.toLocaleTimeString("en-us", options).substring(5, 11);
 
             returnArr.push(element.val().patients);
-            labelDate.push(week);
+            returnArr2.push(element.val().visits);
+
+            if (range == 'daily') {
+              var month = new Date(element.key).getMonth();
+              labelDate.push(monthNames[month] + ' ' + element.key.substring(8, 10));
+            }
+
+            if (range == 'monthly') {
+              var month = new Date(element.key).getMonth();
+              labelDate.push(monthNames[month] + ' ' + element.key.substring(0, 4));
+            }
+
+            if (range == 'yearly') {
+              labelDate.push(element.key.substring(0, 4));
+            }
           });
 
           var data = {
@@ -222,10 +330,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }],
           };
 
+          var data2 = {
+            labels: labelDate,
+            datasets: [{
+              label: 'No. of Visits',
+              data: returnArr2,
+              backgroundColor: 'rgba(54, 162, 235, 0.2)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }],
+          };
+
           myChart.data = data;
           myChart.update();
 
+          myChart2.data = data2;
+          myChart2.update();
+
         });
+      }
+
+      formatTodayDate(date) {
+        var monthNames = [
+          "Jan", "Feb", "Mar",
+          "Apr", "May", "Jun", "Jul",
+          "Aug", "Sep", "Oct",
+          "Nov", "Dec"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return monthNames[monthIndex] + ' ' + day + ', ' + year;
       }
 
       toggleDrawer() {

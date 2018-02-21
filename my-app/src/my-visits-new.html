@@ -487,6 +487,7 @@
                     type: Object,
                     observer: '_myvideoChanged'
                 },
+                todayDate: String
             },
 
             _showAttach() {
@@ -608,6 +609,23 @@
                 this.selectedPage = 0;
                 this.favrighthide = true;
                 this.favlefthide = true;
+                this.todayDate = this.formatTodayDate(new Date());
+            },
+
+            formatTodayDate(date) {
+                var monthNames = [
+                    "01", "02", "03",
+                    "04", "05", "06", "07",
+                    "08", "09", "10",
+                    "11", "12"
+                ];
+
+                var day = date.getDate();
+                if (day < 10) { day = '0' + day };
+                var monthIndex = date.getMonth();
+                var year = date.getFullYear();
+
+                return year + '-' + monthNames[monthIndex] + '-' + day;
             },
 
             observers: [
@@ -795,6 +813,7 @@
                         var mykey = this.myKey;
                         var myattachment = this.attachment;
                         var attachName = this.randomString(8);
+                        var today = this.todayDate;
 
                         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
                         var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
@@ -813,10 +832,34 @@
                                         patientkey: key,
                                         profile: patient.val().profile,
                                         timestamp: firebase.database.ServerValue.TIMESTAMP,
-                                        order: firebase.database.ServerValue.TIMESTAMP
+                                        order: firebase.database.ServerValue.TIMESTAMP,
+                                        created: today
                                     });
 
                                     if (push.key) {
+
+                                        var dateRef = firebase.database().ref('/' + mykey + '/cases');
+                                        dateRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
+                                            if (snapshot.hasChildren()) {
+
+                                                var mm = today.substring(0, 7);
+                                                var yy = today.substring(0, 4);
+
+                                                var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
+                                                yearRef.once('value').then(function (snapshot) {
+                                                    yearRef.set(snapshot.val() + 1);
+                                                });
+
+                                                var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
+                                                monthRef.once('value').then(function (snapshot) {
+                                                    monthRef.set(snapshot.val() + 1);
+                                                });
+
+                                                var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
+                                                ref.set(snapshot.numChildren());
+
+                                            }
+                                        });
 
                                         var postRef = firebase.database().ref('/' + mykey + '/cases/' + push.key);
                                         postRef.once('value').then(function (snapshot) {
@@ -908,10 +951,34 @@
                                         treatment: mytreatment,
                                         patientkey: key,
                                         timestamp: firebase.database.ServerValue.TIMESTAMP,
-                                        order: firebase.database.ServerValue.TIMESTAMP
+                                        order: firebase.database.ServerValue.TIMESTAMP,
+                                        created: today
                                     });
 
                                     if (push.key) {
+
+                                        var dateRef = firebase.database().ref('/' + mykey + '/cases');
+                                        dateRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
+                                            if (snapshot.hasChildren()) {
+
+                                                var mm = today.substring(0, 7);
+                                                var yy = today.substring(0, 4);
+
+                                                var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
+                                                yearRef.once('value').then(function (snapshot) {
+                                                    yearRef.set(snapshot.val() + 1);
+                                                });
+
+                                                var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
+                                                monthRef.once('value').then(function (snapshot) {
+                                                    monthRef.set(snapshot.val() + 1);
+                                                });
+
+                                                var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
+                                                ref.set(snapshot.numChildren());
+
+                                            }
+                                        });
 
                                         var postRef = firebase.database().ref('/' + mykey + '/cases/' + push.key);
                                         postRef.once('value').then(function (snapshot) {

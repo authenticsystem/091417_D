@@ -1047,6 +1047,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ];
 
         var day = date.getDate();
+        if (day < 10) { day = '0' + day };
         var monthIndex = date.getMonth();
         var year = date.getFullYear();
 
@@ -1193,8 +1194,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       var postRef = firebase.database().ref('/' + mykey + '/patients');
                       postRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
                         if (snapshot.hasChildren()) {
+
+                          var mm = today.substring(0, 7);
+                          var yy = today.substring(0, 4);
+
+                          var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
+                          yearRef.once('value').then(function (snapshot) {
+                            yearRef.set(snapshot.val() + 1);
+                          });
+
+                          var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
+                          monthRef.once('value').then(function (snapshot) {
+                            monthRef.set(snapshot.val() + 1);
+                          });
+
                           var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
                           ref.set(snapshot.numChildren());
+
                         }
                       });
 
@@ -1226,8 +1242,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     var postRef = firebase.database().ref('/' + mykey + '/patients');
                     postRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
                       if (snapshot.hasChildren()) {
+
+                        var mm = today.substring(0, 7);
+                        var yy = today.substring(0, 4);
+
+                        var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
+                        yearRef.once('value').then(function (snapshot) {
+                          yearRef.set(snapshot.val() + 1);
+                        });
+
+                        var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
+                        monthRef.once('value').then(function (snapshot) {
+                          monthRef.set(snapshot.val() + 1);
+                        });
+
                         var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
                         ref.set(snapshot.numChildren());
+
                       }
                     });
 
@@ -1256,8 +1287,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 var postRef = firebase.database().ref('/' + mykey + '/patients');
                 postRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
                   if (snapshot.hasChildren()) {
+
+                    var mm = today.substring(0, 7);
+                    var yy = today.substring(0, 4);
+
+                    var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
+                    yearRef.once('value').then(function (snapshot) {
+                      yearRef.set(snapshot.val() + 1);
+                    });
+
+                    var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
+                    monthRef.once('value').then(function (snapshot) {
+                      monthRef.set(snapshot.val() + 1);
+                    });
+
                     var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
                     ref.set(snapshot.numChildren());
+
                   }
                 });
 
