@@ -282,8 +282,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
                     <!-- <div style="background:#009688; padding:10px;"> -->
                     <div>
-                      <iron-image style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
-                      <iron-image style$="{{_hasProfile(item.profile)}}" class="avatar" sizing="cover" src="[[item.profile]]"></iron-image>
+                      <iron-image preload fade style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
+                      <iron-image preload fade style$="{{_hasProfile(item.profile)}}" class="avatar" sizing="cover" src="[[item.profile]]"></iron-image>
                     </div>
 
                     <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
