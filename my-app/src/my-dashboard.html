@@ -15,9 +15,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="chartjs.html">
 
-<script src="../bower_components/chart.js/dist/Chart.min.js"></script>
-<script src="../bower_components/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.min.js"></script>
 <dom-module id="my-dashboard">
   <template>
     <style include="shared-styles">
@@ -144,7 +143,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <iron-icon style="margin-top:30px; margin-right:10px" icon="my-icons:event"></iron-icon>
             <paper-dropdown-menu style="cursor:pointer">
               <paper-listbox slot="dropdown-content" selected="{{sectedRange}}">
-                <paper-item>Last 30 days</paper-item>
+                <paper-item>Last 15 days</paper-item>
                 <paper-item>Last 12 months</paper-item>
                 <paper-item>Last 5 years</paper-item>
               </paper-listbox>
@@ -178,25 +177,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyDashboard extends Polymer.Element {
-      static get is() { return 'my-dashboard'; }
+    Polymer({
+      is: 'my-dashboard',
 
-      static get properties() {
-        return {
-          narrow: {
-            type: Boolean,
-            notify: true
-          },
-          myKey: String,
-          lastname: String,
-          user: Object,
-          sectedRange: {
-            type: Number,
-            value: 0,
-            observer: '_selectedRangeChanged'
-          }
-        };
-      }
+      properties: {
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        myKey: String,
+        lastname: String,
+        user: Object,
+        sectedRange: {
+          type: Number,
+          value: 0,
+          observer: '_selectedRangeChanged'
+        },
+        prevRange: String
+      },
 
       _selectedRangeChanged() {
 
@@ -212,7 +210,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ];
 
         if (this.sectedRange == 0) {
-          date.setDate(date.getDate() - 29);
+          date.setDate(date.getDate() - 14);
 
           var MM = date.getMonth();
           var day = date.getDate();
@@ -223,8 +221,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.text = monthNames[MM] + ' ' + day + ' - ' + today;
           last = date.getFullYear() + '-' + month + '-' + day;
           range = 'daily';
-          limit = 30;
-          text = 'last 30 days';
+          limit = 15;
+          text = 'last 15 days';
         }
 
         if (this.sectedRange == 1) {
@@ -262,7 +260,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             plugins: {
               datalabels: {
                 anchor: 'end',
-                align: 'right'
+                align: 'top',
+                backgroundColor: 'rgba(255, 99, 132, 1)',
+                // borderColor: 'rgba(255, 99, 132, 0.2)',
+                borderRadius: 2,
+                borderWidth: 1,
+                color: 'white'
               }
             },
             responsive: true,
@@ -284,7 +287,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             plugins: {
               datalabels: {
                 anchor: 'end',
-                align: 'right'
+                align: 'top',
+                backgroundColor: 'rgba(54, 162, 235, 1)',
+                // borderColor: 'rgba(54, 162, 235, 0.2)',
+                borderRadius: 2,
+                borderWidth: 1,
+                color: 'white'
               }
             },
             responsive: true,
@@ -295,9 +303,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         });
 
-        var ref = firebase.database().ref("/" + this.myKey + "/reports/" + range);
-        ref.orderByKey().startAt(last).limitToFirst(limit).on("value", function (snapshot) {
+        this.getData(this.myKey, range, last, limit, myChart, myChart2, monthNames);
+      },
 
+      getData(myKey, range, last, limit, myChart, myChart2, monthNames) {
+
+        if (this.prevRange) {
+          firebase.database().ref("/" + myKey + "/reports/" + this.prevRange).off();
+        }
+
+        this.prevRange = range;
+
+        var ref = firebase.database().ref("/" + myKey + "/reports/" + range).orderByKey().startAt(last).limitToFirst(limit).on("value", function (snapshot) {
           var returnArr = [];
           var returnArr2 = [];
           var labelDate = [];
@@ -351,7 +368,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           myChart2.update();
 
         });
-      }
+      },
 
       formatTodayDate(date) {
         var monthNames = [
@@ -366,7 +383,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var year = date.getFullYear();
 
         return monthNames[monthIndex] + ' ' + day + ', ' + year;
-      }
+      },
 
       toggleDrawer() {
         this.dispatchEvent(new CustomEvent('toggleDrawer', {
@@ -377,8 +394,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.narrow = !this.$.narrow;
       }
 
-    }
-
-    window.customElements.define(MyDashboard.is, MyDashboard);
+    })
   </script>
 </dom-module>

@@ -8,6 +8,7 @@
     "src/my-account.html",
     "src/search-bar.html",
     "src/time-element.html",
+    "src/chartjs.html",
     "src/image-resize.html",
     "dist/image-resize.js",
     "src/my-view2.html",

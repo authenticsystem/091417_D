@@ -317,7 +317,7 @@
                                             <span class="primary" style="color:black; font-weight:400; margin-right:2px;">Last Visit</span>
                                             <iron-icon icon="my-icons:watch-later"></iron-icon>
                                             <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
-                                            <paper-icon-button on-tap="_showAttach" id="attachment-icon" icon="my-icons:attachment" title="attacments"></paper-icon-button>
+                                            <!-- <paper-icon-button on-tap="_showAttach" id="attachment-icon" icon="my-icons:attachment" title="attacments"></paper-icon-button> -->
                                         </div>
                                         <span class="longText">Chief Complaint</span>
                                         <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
@@ -349,7 +349,7 @@
                                     </ul> -->
                                 </div>
 
-                                <div class="prev" id="show" style="display:none">
+                                <!-- <div class="prev" id="show" style="display:none">
                                     <div>
                                         <paper-icon-button on-tap="_hideAttach" style="bottom:16px; right:16px" icon="my-icons:close" title="close"></paper-icon-button>
                                     </div>
@@ -376,7 +376,7 @@
                                             <video class="imgh vid-6 vid-s-9" controls preload="auto" id="[[item.$key]]" src="[[item.url]]"></video>
                                         </template>
                                     </div>
-                                </div>
+                                </div> -->
 
                             </div>
                         </div>
@@ -392,11 +392,11 @@
                                     <paper-textarea label="History" value="{{history}}"></paper-textarea>
                                     <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
                                     <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
-                                    <div style="font-size:16px; margin-top:16px;">Health Records</div>
+                                    <!-- <div style="font-size:16px; margin-top:16px;">Health Records</div>
                                     <div style="border:1px solid gray; padding:6px;">
                                         <input on-change="_changeAttach" type="file" id="myFile" accept="image/*,video/*" multiple="multiple" />
                                         <output style="font-size:14px;" id="fileList"></output>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>

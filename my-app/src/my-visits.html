@@ -370,60 +370,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyVisits extends Polymer.Element {
-      static get is() { return 'my-visits'; }
+    Polymer({
+      is: 'my-visits',
 
-      static get properties() {
-        return {
-          items: {
-            type: Array,
-            value: function () {
-              return [];
-            }
-          },
-          myKey: String,
-          narrow: {
-            type: Boolean,
-            notify: true
-          },
-          openSearch: {
-            type: Boolean,
-            value: false,
-            notify: true
-          },
-          filterBy: {
-            type: Number,
-            value: 1
-          },
-          order: {
-            type: String,
-            value: 'order'
+      properties: {
+
+        items: {
+          type: Array,
+          value: function () {
+            return [];
           }
-        };
-      }
+        },
+        myKey: String,
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        openSearch: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        filterBy: {
+          type: Number,
+          value: 1
+        },
+        order: {
+          type: String,
+          value: 'order'
+        }
+      },
 
       _timeStampToDateTime(ts) {
         return new Date(ts);
-      }
+      },
 
       loadMoreData() {
         // load async stuff. e.g. XHR
 
         this.$.threshold.clearTriggers();
 
-      }
+      },
 
-      static get observers() {
-        return [
-          '_searchChanged(search)'
-        ];
-      }
+      observers: [
+        '_searchChanged(search)'
+      ],
 
       _getViewDetailsLink(e) {
         if (e) {
           return '/visits/detail/' + e.toString();
         }
-      }
+      },
 
       _noProfile(e) {
         if (!e) {
@@ -432,7 +429,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           return 'display:none';
         }
-      }
+      },
 
       _ageCal(bday) {
         if (bday) {
@@ -486,19 +483,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           return '';
         }
-      }
+      },
 
       _comma(e) {
         if (e) {
           return ',';
         }
-      }
+      },
 
       _hmo(e) {
         if (e) {
           return 'HMO: ' + e;
         }
-      }
+      },
 
       _date(e) {
         if (e) {
@@ -510,7 +507,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           return date.toLocaleTimeString("en-us", options);
         }
-      }
+      },
 
       _hasProfile(e) {
         if (e) {
@@ -519,13 +516,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           return 'display:none';
         }
-      }
+      },
 
       _getEditAppLink(e) {
         if (e) {
           return '/visits/edit/' + e.toString();
         }
-      }
+      },
 
       _searchChanged(search) {
         if (search) {
@@ -535,15 +532,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           this.order = 'order';
         }
-      }
+      },
 
       iconForItem(item) {
         return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';
-      }
+      },
 
       getClassForItem(item, selected) {
         return selected ? 'item expanded' : 'item';
-      }
+      },
 
       toggleDrawer() {
         this.dispatchEvent(new CustomEvent('toggleDrawer', {
@@ -552,20 +549,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }));
         this.$.narrow = !this.$.narrow;
-      }
+      },
 
       toggleSearch() {
         this.openSearch = true;
-      }
+      },
 
       toggleReturn() {
         this.openSearch = false;
         this.search = '';
-      }
+      },
 
       toggleClear() {
         this.search = '';
-      }
+      },
 
       _selectThis(e) {
         var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
@@ -584,7 +581,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         var currentDiv = document.getElementById("casesview");
         Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-      }
+      },
 
       _editThis(e) {
         var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
@@ -604,7 +601,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var currentDiv = document.getElementById("caseedit");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
         }
-      }
+      },
 
       _caseNew() {
         var node = Polymer.dom(this.root).querySelector("#newcase");
@@ -621,14 +618,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var currentDiv = document.getElementById("newcase");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
         }
-      }
+      },
 
       _openDelete(e) {
         var d_key = Polymer.dom(e).rootTarget.getAttribute("id");
         var dialogBtn = Polymer.dom(this.root).querySelector("#dialBtn");
         dialogBtn.setAttribute('alt', d_key);
         Polymer.dom(this.root).querySelector("#deleteDialog").open();
-      }
+      },
 
       _deletePatient(e) {
         var deleteMe = Polymer.dom(e).rootTarget.getAttribute("alt");
@@ -637,9 +634,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         Polymer.dom(this.root).querySelector("#deleteDialog").close();
       }
 
-
-    }
-
-    window.customElements.define(MyVisits.is, MyVisits);
+    })
   </script>
 </dom-module>

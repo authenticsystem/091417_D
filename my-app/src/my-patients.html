@@ -368,41 +368,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyPatients extends Polymer.Element {
-      static get is() { return 'my-patients'; }
+    Polymer({
+      is: 'my-patients',
 
-      static get properties() {
-        return {
-          items: {
-            type: Array,
-            value: function () {
-              return [];
-            }
-          },
-          myKey: String,
-          userUid: String,
-          narrow: {
-            type: Boolean,
-            notify: true
-          },
-          openSearch: {
-            type: Boolean,
-            value: false,
-            notify: true
-          },
-          filterBy: {
-            type: Number,
-            value: 1
+      properties: {
+
+        items: {
+          type: Array,
+          value: function () {
+            return [];
           }
-        };
-      }
+        },
+        myKey: String,
+        userUid: String,
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        openSearch: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        filterBy: {
+          type: Number,
+          value: 1
+        }
+      },
 
       loadMoreData() {
         // load async stuff. e.g. XHR
 
         this.$.threshold.clearTriggers();
 
-      }
+      },
 
       _ageCal(bday) {
         if (bday) {
@@ -456,7 +455,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           return '';
         }
-      }
+      },
 
       _starMe(e) {
         var id = Polymer.dom(e).rootTarget.getAttribute("alt");
@@ -470,16 +469,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             star.icon = 'my-icons:star';
           }
         }
-      }
+      },
 
-      static get observers() {
-        return [
-          '_searchChanged(search)'
-          // '_searchChanged(search, filterBy)',
-          // '_myKeyChanged(myKey)'
-          // '_patientChanged(mypatients)'
-        ];
-      }
+      observers: [
+        '_searchChanged(search)'
+        // '_searchChanged(search, filterBy)',
+        // '_myKeyChanged(myKey)'
+        // '_patientChanged(mypatients)'
+      ],
 
       // _myKeyChanged(e) {
       //   if (e) {
@@ -519,7 +516,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           return 'display:none';
         }
-      }
+      },
 
       _hasProfile(e) {
         if (e) {
@@ -528,14 +525,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           return 'display:none';
         }
-      }
+      },
 
       _searchChanged(search) {
         // var c = search.toLowerCase().replace(/\b[a-z]/g, function (letter) {
         //   return letter.toUpperCase();
         // });
         this.search = search.toUpperCase();
-      }
+      },
 
       // _searchChanged(search, filter) {
       //   if (search) {
@@ -563,7 +560,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       getClassForItem(item, selected) {
         return selected ? 'item expanded' : 'item';
-      }
+      },
 
       toggleDrawer() {
         this.dispatchEvent(new CustomEvent('toggleDrawer', {
@@ -572,20 +569,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }));
         this.$.narrow = !this.$.narrow;
-      }
+      },
 
       toggleSearch() {
         this.openSearch = true;
-      }
+      },
 
       toggleReturn() {
         this.openSearch = false;
         this.search = '';
-      }
+      },
 
       toggleClear() {
         this.search = '';
-      }
+      },
 
       _deletePatient(e) {
         var dialog = Polymer.dom(this.root).querySelector("#deleteDialog");
@@ -605,7 +602,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // var ref = firebase.database().ref('/sampleDoctor/patients');
         // ref.child(deleteMe).remove();
         // Polymer.dom(this.root).querySelector("#deleteDialog").close();
-      }
+      },
 
       _openDelete(e) {
         var d_key = Polymer.dom(e).rootTarget.getAttribute("alt");
@@ -613,19 +610,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var dialogBtn = Polymer.dom(this.root).querySelector("#dialBtn");
         dialogBtn.setAttribute('alt', d_key);
         Polymer.dom(this.root).querySelector("#deleteDialog").open();
-      }
+      },
 
       _getViewDetailsLink(e) {
         if (e) {
           return '/patients/detail/' + e.toString();
         }
-      }
+      },
 
       _getEditAppLink(e) {
         if (e) {
           return '/patients/edit/' + e.toString();
         }
-      }
+      },
 
       _selectThis(e) {
         var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
@@ -646,7 +643,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var currentDiv = document.getElementById("patientsview");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
         }
-      }
+      },
 
       _editThis(e) {
         var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
@@ -666,7 +663,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var currentDiv = document.getElementById("patientsedit");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
         }
-      }
+      },
 
       _patientsNew() {
         var node = Polymer.dom(this.root).querySelector("#patientsnew");
@@ -683,13 +680,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var currentDiv = document.getElementById("patientsnew");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
         }
-      }
+      },
 
       _comma(e) {
         if (e) {
           return ',';
         }
-      }
+      },
 
       _hmo(e) {
         if (e) {
@@ -697,8 +694,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-    }
+    })
 
-    window.customElements.define(MyPatients.is, MyPatients);
   </script>
 </dom-module>

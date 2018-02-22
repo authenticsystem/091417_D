@@ -188,13 +188,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-route route="{{route}}" pattern="[[rootPath]]:page" data="{{routeData}}" tail="{{subroute}}">
     </app-route>
 
-    <!-- <firebase-app auth-domain="p123-6256e.firebaseapp.com" database-url="https://p123-6256e.firebaseio.com" api-key="AIzaSyCV24k2Ev083HFXiASIj9g7RhvUi7C9J3w"
+    <firebase-app auth-domain="p123-6256e.firebaseapp.com" database-url="https://p123-6256e.firebaseio.com" api-key="AIzaSyCV24k2Ev083HFXiASIj9g7RhvUi7C9J3w"
       storage-bucket="p123-6256e.appspot.com">
-    </firebase-app> -->
-
-    <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com" api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ"
-      storage-bucket="emr-dev-c3005.appspot.com">
     </firebase-app>
+
+    <!-- <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com" api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ"
+      storage-bucket="emr-dev-c3005.appspot.com">
+    </firebase-app> -->
 
     <firebase-auth id="auth" status-known="{{statusKnown}}" user="{{user}}" provider="google" on-error="showError"></firebase-auth>
 
