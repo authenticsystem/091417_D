@@ -314,7 +314,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         this.prevRange = range;
 
-        var ref = firebase.database().ref("/" + myKey + "/reports/" + range).orderByKey().startAt(last).limitToFirst(limit).on("value", function (snapshot) {
+        firebase.database().ref("/" + myKey + "/reports/" + range).orderByKey().startAt(last).limitToFirst(limit).on("value", function (snapshot) {
           var returnArr = [];
           var returnArr2 = [];
           var labelDate = [];
