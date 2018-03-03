@@ -393,7 +393,7 @@
                                     <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
                                 </paper-input>
                                 <div style="margin-left:4px;margin-top:-10px;">
-                                    <span style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                                    <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
                                 </div>
                                 <!-- <b style="font-size:18px;">Today</b> -->
                                 <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
@@ -626,7 +626,7 @@
 
             observers: [
                 '_patientChanged(filterValue)',
-                '_showFab1(complain)',
+                '_showFab1(complain, todayDate)',
                 '_mypatientInfoChanged(patientInfo)',
                 '_myCasesChanged(mycases)',
                 '_myattachmentChaged(myattachment)',
@@ -642,7 +642,15 @@
                 ];
 
                 var d = new Date(date);
-                this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                if (date) {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+                    this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+                    this.text = 'Please choose date.';
+                }
+
                 var x = 0;
 
                 if (myNewPatientKey) {
@@ -779,8 +787,8 @@
                 }
             },
 
-            _showFab1(complain) {
-                if (!complain) {
+            _showFab1(complain, date) {
+                if (!complain || !date) {
                     this.favrighthide = true;
                 } else {
                     this.favrighthide = false;

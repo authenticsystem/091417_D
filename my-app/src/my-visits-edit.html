@@ -300,7 +300,7 @@
                                     <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
                                 </paper-input>
                                 <div style="margin-left:4px;margin-top:-10px;">
-                                    <span style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                                    <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
                                 </div>
                                 <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
                                 <paper-textarea label="History" value="{{history}}"></paper-textarea>
@@ -459,9 +459,14 @@
                         return [];
                     }
                 },
+                timestamp: String,
                 generatedID: String,
                 todayDate: String,
                 storeDate: String,
+                isDateChanged: {
+                    type: Boolean,
+                    value: false
+                },
                 lastPushTime: {
                     type: Number,
                     value: 0
@@ -678,7 +683,7 @@
             },
 
             observers: [
-                '_showFab1(complain)',
+                '_showFab1(complain, todayDate)',
                 '_todayDateChanged(todayDate)'
             ],
 
@@ -691,11 +696,23 @@
                 ];
 
                 var d = new Date(date);
-                this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                if (date) {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+                    this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+                    this.text = 'Please choose date.';
+                }
+
                 var x = 0;
                 var bol = date !== this.storeDate;
 
                 if (this.storeDate) {
+
+                    if (bol === false) { this.isDateChanged = false; }
+                    else { this.isDateChanged = true; }
+
                     if (date < this.formatTodayDate(new Date()) && bol !== false) {
                         if (this.mytimeCheck.length > 0) {
                             this.mytimeCheck.forEach(element => {
@@ -708,11 +725,15 @@
                         //generate new id
                         this.generatedID = this.generatePushID(date);
                     } else { this.lastPushTime = x }
-                } else { this.lastPushTime = x }
+
+                } else {
+                    this.lastPushTime = x;
+                    this.isDateChanged = false;
+                }
             },
 
-            _showFab1(complain) {
-                if (!complain) {
+            _showFab1(complain, date) {
+                if (!complain || !date) {
                     this.favrighthide = true;
                 } else {
                     this.favrighthide = false;
@@ -768,15 +789,23 @@
                         var myattachment = this.attachment;
                         var attachName = this.randomString(8);
                         var today = this.todayDate;
-                        var timestamp = firebase.database.ServerValue.TIMESTAMP;
-                        var order = firebase.database.ServerValue.TIMESTAMP;
+                        var timestamp = this.timestamp;
+                        var order = this.timestamp;
                         var oldPushKey;
 
-                        if (this.generatedID) {
-                            editkey = this.generatedID;
-                            timestamp = this.lastPushTime;
-                            order = this.lastPushTime;
+                        if (this.isDateChanged === true) {
                             oldPushKey = this.editKey;
+
+                            if (this.generatedID) {
+                                editkey = this.generatedID;
+                                timestamp = this.lastPushTime;
+                                order = this.lastPushTime;
+                            }
+                            else {
+                                editkey = this.generatePushID(new Date());
+                                timestamp = firebase.database.ServerValue.TIMESTAMP;
+                                order = firebase.database.ServerValue.TIMESTAMP;
+                            }
                         }
 
                         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
@@ -971,7 +1000,7 @@
                             firebase.database().ref("/" + mykey + "/cases/" + oldPushKey).remove();
                         }
 
-                        if (this.generatedID) {
+                        if (this.isDateChanged === true) {
 
                             var prevDate = this.storeDate;
 
