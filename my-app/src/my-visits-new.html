@@ -307,6 +307,9 @@
                             limit-to-last="1">
                         </firebase-query>
 
+                        <firebase-query id="query4" path="{{path}}" order-by-child="patientkey" equal-to="{{myNewPatientKey}}" data="{{mytimeCheck}}">
+                        </firebase-query>
+
                         <div id="lastVisit" class="docu" style="margin-top:-16px; display:none">
                             <div class="details">
                                 <div id="showed" id="prev">
@@ -386,18 +389,22 @@
                     <neon-animatable>
                         <div class="docu">
                             <div class="details">
-                                <div id="new">
-                                    <b style="font-size:18px;">Today</b>
-                                    <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
-                                    <paper-textarea label="History" value="{{history}}"></paper-textarea>
-                                    <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
-                                    <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
-                                    <!-- <div style="font-size:16px; margin-top:16px;">Health Records</div>
+                                <paper-input label="Date" type="date" value="{{todayDate}}" style="width:150px">
+                                    <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                                </paper-input>
+                                <div style="margin-left:4px;margin-top:-10px;">
+                                    <span style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                                </div>
+                                <!-- <b style="font-size:18px;">Today</b> -->
+                                <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
+                                <paper-textarea label="History" value="{{history}}"></paper-textarea>
+                                <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
+                                <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
+                                <!-- <div style="font-size:16px; margin-top:16px;">Health Records</div>
                                     <div style="border:1px solid gray; padding:6px;">
                                         <input on-change="_changeAttach" type="file" id="myFile" accept="image/*,video/*" multiple="multiple" />
                                         <output style="font-size:14px;" id="fileList"></output>
                                     </div> -->
-                                </div>
                             </div>
                         </div>
                         <br>
@@ -487,7 +494,12 @@
                     type: Object,
                     observer: '_myvideoChanged'
                 },
-                todayDate: String
+                todayDate: String,
+                lastPushTime: {
+                    type: Number,
+                    value: 0
+                },
+                myPatientKey: String
             },
 
             _showAttach() {
@@ -612,29 +624,42 @@
                 this.todayDate = this.formatTodayDate(new Date());
             },
 
-            formatTodayDate(date) {
-                var monthNames = [
-                    "01", "02", "03",
-                    "04", "05", "06", "07",
-                    "08", "09", "10",
-                    "11", "12"
-                ];
-
-                var day = date.getDate();
-                if (day < 10) { day = '0' + day };
-                var monthIndex = date.getMonth();
-                var year = date.getFullYear();
-
-                return year + '-' + monthNames[monthIndex] + '-' + day;
-            },
-
             observers: [
                 '_patientChanged(filterValue)',
                 '_showFab1(complain)',
                 '_mypatientInfoChanged(patientInfo)',
                 '_myCasesChanged(mycases)',
-                '_myattachmentChaged(myattachment)'
+                '_myattachmentChaged(myattachment)',
+                '_mytimeCheckChanged(mytimeCheck, todayDate, myNewPatientKey)'
             ],
+
+            _mytimeCheckChanged(timeCheck, date, myNewPatientKey) {
+                var monthNames = [
+                    "January", "February", "March",
+                    "April", "May", "June", "July",
+                    "August", "September", "October",
+                    "November", "December"
+                ];
+
+                var d = new Date(date);
+                this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                var x = 0;
+
+                if (myNewPatientKey) {
+                    this.path = '/' + this.myKey + '/cases';
+                    if (date < this.formatTodayDate(new Date())) {
+                        if (timeCheck.length > 0) {
+                            timeCheck.forEach(element => {
+                                if (date === element.created) {
+                                    x = element.timestamp;
+                                }
+                            });
+                            this.lastPushTime = x;
+                        }
+                    } else { this.lastPushTime = x; }
+                }
+                else { this.myNewPatientKey = this.myPatientKey; }
+            },
 
             _myattachmentChaged(e) {
                 if (e.length > 0) {
@@ -651,8 +676,8 @@
                     this.myAttachKey = e[0].$key;
                 }
                 else {
-                    this.myAttachKey = '';
                     this.noprev = 'No previous visit.';
+                    this.myAttachKey = '';
                 }
             },
 
@@ -718,8 +743,6 @@
                     else {
                         this.age = '';
                     }
-
-                    // console.log(this.age);
 
                     this.p_num = p[0].no;
 
@@ -814,6 +837,15 @@
                         var myattachment = this.attachment;
                         var attachName = this.randomString(8);
                         var today = this.todayDate;
+                        var timestamp = firebase.database.ServerValue.TIMESTAMP;
+                        var order = firebase.database.ServerValue.TIMESTAMP;
+                        var newPushKey;
+
+                        if (today < this.formatTodayDate(new Date())) {
+                            newPushKey = this.generatePushID(today);
+                            timestamp = this.lastPushTime;
+                            order = this.lastPushTime;
+                        }
 
                         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
                         var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
@@ -822,46 +854,63 @@
                         firebase.database().ref('/' + mykey + '/patients/' + key)
                             .once('value').then(function (patient) {
                                 if (patient.val().profile) {
-                                    var ref = firebase.database().ref("/" + mykey + "/cases");
-                                    var push = ref.push({
-                                        patient: mypatient,
-                                        complain: mycomplain,
-                                        history: myhistory,
-                                        diagnosis: mydiagnosis,
-                                        treatment: mytreatment,
-                                        patientkey: key,
-                                        profile: patient.val().profile,
-                                        timestamp: firebase.database.ServerValue.TIMESTAMP,
-                                        order: firebase.database.ServerValue.TIMESTAMP,
-                                        created: today
-                                    });
 
-                                    if (push.key) {
+                                    if (newPushKey) {
+                                        var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
+                                        var push = ref.set({
+                                            patient: mypatient,
+                                            complain: mycomplain,
+                                            history: myhistory,
+                                            diagnosis: mydiagnosis,
+                                            treatment: mytreatment,
+                                            patientkey: key,
+                                            profile: patient.val().profile,
+                                            timestamp: timestamp,
+                                            order: order,
+                                            created: today
+                                        });
+                                        var fbPushKey = newPushKey;
+                                    }
+                                    else {
+                                        var ref = firebase.database().ref("/" + mykey + "/cases");
+                                        var push = ref.push({
+                                            patient: mypatient,
+                                            complain: mycomplain,
+                                            history: myhistory,
+                                            diagnosis: mydiagnosis,
+                                            treatment: mytreatment,
+                                            patientkey: key,
+                                            profile: patient.val().profile,
+                                            timestamp: timestamp,
+                                            order: order,
+                                            created: today
+                                        });
+                                        var fbPushKey = push.key;
+                                    }
 
-                                        var dateRef = firebase.database().ref('/' + mykey + '/cases');
-                                        dateRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
-                                            if (snapshot.hasChildren()) {
+                                    if (fbPushKey) {
 
-                                                var mm = today.substring(0, 7);
-                                                var yy = today.substring(0, 4);
+                                        var mm = today.substring(0, 7);
+                                        var yy = today.substring(0, 4);
 
-                                                var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
-                                                yearRef.once('value').then(function (snapshot) {
-                                                    yearRef.set(snapshot.val() + 1);
-                                                });
-
-                                                var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
-                                                monthRef.once('value').then(function (snapshot) {
-                                                    monthRef.set(snapshot.val() + 1);
-                                                });
-
-                                                var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
-                                                ref.set(snapshot.numChildren());
-
-                                            }
+                                        var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
+                                        dayRef.once('value').then(function (snapshot) {
+                                            var data = snapshot.val() ? snapshot.val() : 0;
+                                            dayRef.set(data + 1);
                                         });
 
-                                        var postRef = firebase.database().ref('/' + mykey + '/cases/' + push.key);
+                                        var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
+                                        yearRef.once('value').then(function (snapshot) {
+                                            yearRef.set(snapshot.val() + 1);
+                                        });
+
+                                        var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
+                                        monthRef.once('value').then(function (snapshot) {
+                                            monthRef.set(snapshot.val() + 1);
+                                        });
+
+
+                                        var postRef = firebase.database().ref('/' + mykey + '/cases/' + fbPushKey);
                                         postRef.once('value').then(function (snapshot) {
                                             var patientRef = firebase.database().ref('/' + mykey + '/patients/' + snapshot.val().patientkey);
                                             patientRef.once('value').then(function (snapshot) {
@@ -885,12 +934,12 @@
                                                 var attachFile = myattachment[i];
                                                 var ext = attachFile.type.substring(6);
                                                 var name = attachName + i + '.' + ext;
-                                                var myURL = "/" + mykey + "/cases/" + push.key + "/attachment";
+                                                var myURL = "/" + mykey + "/cases/" + fbPushKey + "/attachment";
 
                                                 if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
                                                     ImageTools.resize(attachFile, {
-                                                        width: 200, // maximum width
-                                                        height: 200 // maximum height
+                                                        width: 440, // maximum width
+                                                        height: 400 // maximum height
                                                     }, function (blob, didItResize) {
 
                                                         var ext = blob.type.substring(6);
@@ -942,45 +991,59 @@
                                     }
                                 }
                                 else {
-                                    var ref = firebase.database().ref("/" + mykey + "/cases");
-                                    var push = ref.push({
-                                        patient: mypatient,
-                                        complain: mycomplain,
-                                        history: myhistory,
-                                        diagnosis: mydiagnosis,
-                                        treatment: mytreatment,
-                                        patientkey: key,
-                                        timestamp: firebase.database.ServerValue.TIMESTAMP,
-                                        order: firebase.database.ServerValue.TIMESTAMP,
-                                        created: today
-                                    });
+                                    if (newPushKey) {
+                                        var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
+                                        var push = ref.set({
+                                            patient: mypatient,
+                                            complain: mycomplain,
+                                            history: myhistory,
+                                            diagnosis: mydiagnosis,
+                                            treatment: mytreatment,
+                                            patientkey: key,
+                                            timestamp: timestamp,
+                                            order: order,
+                                            created: today
+                                        });
+                                        var fbPushKey = newPushKey;
+                                    }
+                                    else {
+                                        var ref = firebase.database().ref("/" + mykey + "/cases");
+                                        var push = ref.push({
+                                            patient: mypatient,
+                                            complain: mycomplain,
+                                            history: myhistory,
+                                            diagnosis: mydiagnosis,
+                                            treatment: mytreatment,
+                                            patientkey: key,
+                                            timestamp: timestamp,
+                                            order: order,
+                                            created: today
+                                        });
+                                        var fbPushKey = push.key;
+                                    }
 
-                                    if (push.key) {
+                                    if (fbPushKey) {
 
-                                        var dateRef = firebase.database().ref('/' + mykey + '/cases');
-                                        dateRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
-                                            if (snapshot.hasChildren()) {
+                                        var mm = today.substring(0, 7);
+                                        var yy = today.substring(0, 4);
 
-                                                var mm = today.substring(0, 7);
-                                                var yy = today.substring(0, 4);
-
-                                                var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
-                                                yearRef.once('value').then(function (snapshot) {
-                                                    yearRef.set(snapshot.val() + 1);
-                                                });
-
-                                                var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
-                                                monthRef.once('value').then(function (snapshot) {
-                                                    monthRef.set(snapshot.val() + 1);
-                                                });
-
-                                                var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
-                                                ref.set(snapshot.numChildren());
-
-                                            }
+                                        var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
+                                        dayRef.once('value').then(function (snapshot) {
+                                            var data = snapshot.val() ? snapshot.val() : 0;
+                                            dayRef.set(data + 1);
                                         });
 
-                                        var postRef = firebase.database().ref('/' + mykey + '/cases/' + push.key);
+                                        var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
+                                        yearRef.once('value').then(function (snapshot) {
+                                            yearRef.set(snapshot.val() + 1);
+                                        });
+
+                                        var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
+                                        monthRef.once('value').then(function (snapshot) {
+                                            monthRef.set(snapshot.val() + 1);
+                                        });
+
+                                        var postRef = firebase.database().ref('/' + mykey + '/cases/' + fbPushKey);
                                         postRef.once('value').then(function (snapshot) {
                                             var patientRef = firebase.database().ref('/' + mykey + '/patients/' + snapshot.val().patientkey);
                                             patientRef.once('value').then(function (snapshot) {
@@ -1004,12 +1067,12 @@
                                                 var attachFile = myattachment[i];
                                                 var ext = attachFile.type.substring(6);
                                                 var name = attachName + i + '.' + ext;
-                                                var myURL = "/" + mykey + "/cases/" + push.key + "/attachment";
+                                                var myURL = "/" + mykey + "/cases/" + fbPushKey + "/attachment";
 
                                                 if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
                                                     ImageTools.resize(attachFile, {
-                                                        width: 200, // maximum width
-                                                        height: 200 // maximum height
+                                                        width: 440, // maximum width
+                                                        height: 400 // maximum height
                                                     }, function (blob, didItResize) {
 
                                                         var ext = blob.type.substring(6);
@@ -1128,6 +1191,70 @@
 
             _timeStampToDateTime(ts) {
                 return new Date(ts);
+            },
+
+            generatePushID(date) {
+                //reference: https://gist.github.com/mikelehen/3596a30bd69384624c11
+                // Modeled after base64 web-safe chars, but ordered by ASCII.
+                var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+
+                // Timestamp of last push, used to prevent local collisions if you push twice in one ms.
+                // var lastPushTime = 0;
+                // We generate 72-bits of randomness which get turned into 12 characters and appended to the
+                // timestamp to prevent collisions with other clients.  We store the last characters we
+                // generated because in the event of a collision, we'll use those same characters except
+                // "incremented" by one.
+                var lastRandChars = [];
+
+                //check if there's a last push
+                if (this.lastPushTime === 0) {
+                    var now = new Date(date).getTime();
+                }
+                else {
+                    var now = this.lastPushTime + 1000;
+                }
+
+                this.lastPushTime = now;
+
+                var timeStampChars = new Array(8);
+
+                for (var i = 7; i >= 0; i--) {
+                    timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+                    // NOTE: Can't use << here because javascript will convert to int and lose the upper bits.
+                    now = Math.floor(now / 64);
+                }
+
+                if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+
+                var id = timeStampChars.join('');
+
+                for (i = 0; i < 12; i++) {
+                    lastRandChars[i] = Math.floor(Math.random() * 64);
+                }
+
+                for (i = 0; i < 12; i++) {
+                    id += PUSH_CHARS.charAt(lastRandChars[i]);
+                }
+
+                if (id.length != 20) throw new Error('Length should be 20.');
+
+                return id;
+            },
+
+            formatTodayDate(date) {
+                var monthNames = [
+                    "01", "02", "03",
+                    "04", "05", "06", "07",
+                    "08", "09", "10",
+                    "11", "12"
+                ];
+
+                var day = date.getDate();
+                if (day < 10) { day = '0' + day };
+                var monthIndex = date.getMonth();
+                var year = date.getFullYear();
+
+                return year + '-' + monthNames[monthIndex] + '-' + day;
             }
 
         })

@@ -31,23 +31,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
 
-<link rel="lazy-import" href="my-dashboard.html">
-<link rel="lazy-import" href="my-settings.html">
 <link rel="lazy-import" href="my-signin.html">
 <link rel="lazy-import" href="my-register-signin.html">
+<link rel="lazy-import" href="my-reset-password.html">
 <link rel="lazy-import" href="my-email-verification.html">
 <link rel="lazy-import" href="my-account-link.html">
+<link rel="lazy-import" href="my-dashboard.html">
 <link rel="lazy-import" href="my-visits.html">
-<link rel="lazy-import" href="my-reset-password.html">
-<link rel="lazy-import" href="my-billing.html">
-<link rel="lazy-import" href="my-collection.html">
-<link rel="lazy-import" href="my-accountlist.html">
-<link rel="lazy-import" href="my-help.html">
-<link rel="lazy-import" href="my-view2.html">
-<link rel="lazy-import" href="my-appointments.html">
 <link rel="lazy-import" href="my-patients.html">
-<link rel="lazy-import" href="my-queue.html">
-<link rel="lazy-import" href="my-map.html">
+<link rel="lazy-import" href="my-accountlist.html">
+<link rel="lazy-import" href="my-settings.html">
+<!-- <link rel="lazy-import" href="my-billing.html"> -->
+<!-- <link rel="lazy-import" href="my-collection.html"> -->
+<!-- <link rel="lazy-import" href="my-help.html"> -->
+<!-- <link rel="lazy-import" href="my-view2.html"> -->
+<!-- <link rel="lazy-import" href="my-appointments.html"> -->
+<!-- <link rel="lazy-import" href="my-queue.html"> -->
+<!-- <link rel="lazy-import" href="my-map.html"> -->
 <link rel="lazy-import" href="my-view404.html">
 
 
@@ -200,8 +200,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <template is="dom-if" if="{{_needToSignIn(user,statusKnown)}}">
       <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-        <my-register-signin name="register-signin"></my-register-signin>
         <my-signin name="signin"></my-signin>
+        <my-register-signin name="register-signin"></my-register-signin>
         <my-reset-password name="reset-password"></my-reset-password>
         <my-view404 name="view404"></my-view404>
       </iron-pages>
@@ -259,19 +259,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a>
 
-                  <a style="display:none" name="view2" href="[[rootPath]]view2">
+                  <!-- <a style="display:none" name="view2" href="[[rootPath]]view2">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:add-alert" slot="item-icon"></iron-icon>
                       <span>Notifications</span>
                     </paper-icon-item>
-                  </a>
+                  </a> -->
 
-                  <a style="display:none" name="appointments" href="[[rootPath]]appointments">
+                  <!-- <a style="display:none" name="appointments" href="[[rootPath]]appointments">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:event" slot="item-icon"></iron-icon>
                       <span>Calendar</span>
                     </paper-icon-item>
-                  </a>
+                  </a> -->
 
                   <a name="patients" href="[[rootPath]]patients">
                     <paper-icon-item toggles="true" class="menuSelected">
@@ -280,12 +280,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a>
 
-                  <a style="display:none" name="queue" href="[[rootPath]]queue">
+                  <!-- <a style="display:none" name="queue" href="[[rootPath]]queue">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:list" slot="item-icon"></iron-icon>
                       <span>Queue</span>
                     </paper-icon-item>
-                  </a>
+                  </a> -->
 
                   <!-- <a name="account" href="[[rootPath]]account">
               <paper-icon-item toggles="true" class="menuSelected">
@@ -301,19 +301,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a>
 
-                  <a style="display:none" name="billing" href="[[rootPath]]billing">
+                  <!-- <a style="display:none" name="billing" href="[[rootPath]]billing">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:send" slot="item-icon"></iron-icon>
                       <span>Billing</span>
                     </paper-icon-item>
-                  </a>
+                  </a> -->
 
-                  <a style="display:none" name="collection" href="[[rootPath]]collection">
+                  <!-- <a style="display:none" name="collection" href="[[rootPath]]collection">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:payment" slot="item-icon"></iron-icon>
                       <span>Collection</span>
                     </paper-icon-item>
-                  </a>
+                  </a> -->
                   <hr>
                   <a name="settings" href="[[rootPath]]settings">
                     <paper-icon-item toggles="true" class="menuSelected">
@@ -329,12 +329,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a>
 
-                  <a style="display:none" name="help" href="[[rootPath]]help">
+                  <!-- <a style="display:none" name="help" href="[[rootPath]]help">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:help-outline" slot="item-icon"></iron-icon>
                       <span>Help</span>
                     </paper-icon-item>
-                  </a>
+                  </a> -->
                   <span style="padding:20px; color:gray; font-size:12px;">
                     v0.1.2
                   </span>
@@ -342,19 +342,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
             </app-drawer>
             <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-              <my-dashboard my-key="{{mykey}}" lastname="{{lastname}}" user="{{user}}" name="dashboard"></my-dashboard>
               <!-- <my-account active={{isActive}} user={{user}} name="account"></my-account> -->
-              <my-settings route="[[subroute]]" active={{isActive}} user={{user}} name="settings"></my-settings>
-              <my-appointments name="appointments"></my-appointments>
+              <my-dashboard name="dashboard" my-key="[[mykey]]" user="[[user]]"></my-dashboard>
+              <my-settings name="settings" route="[[subroute]]" active=[[isActive]] user=[[user]]></my-settings>
+              <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" user-uid=[[user.uid]]></my-visits>
+              <my-patients name="patients" route="[[subroute]]" my-key="[[mykey]]" user-uid=[[user.uid]]></my-patients>
+              <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
+              <!-- <my-appointments name="appointments"></my-appointments>
               <my-billing name="billing"></my-billing>
               <my-collection name="collection"></my-collection>
-              <my-visits user-uid={{user.uid}} my-key="{{mykey}}" name="visits" route="[[subroute]]"></my-visits>
               <my-help name="help"></my-help>
               <my-view2 name="view2"></my-view2>
-              <my-patients user-uid={{user.uid}} my-key="{{mykey}}" name="patients" route="[[subroute]]"></my-patients>
-              <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
               <my-queue name="queue"></my-queue>
-              <my-map name="map"></my-map>
+              <my-map name="map"></my-map> -->
               <my-view404 name="view404"></my-view404>
             </iron-pages>
           </app-drawer-layout>
@@ -464,8 +464,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _signOut() {
         this.$.auth.signOut();
-        window.location.reload()
-        this.set("route.path", "");
+        location.reload();
       }
 
       _needToSignIn(e, f) {
@@ -549,9 +548,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         drawerlayout.forceNarrow = e.detail.narrow;
       }
 
-      _mymap() {
-        // window.location = "/map";
-      }
+      // _mymap() {
+      // window.location = "/map";
+      // }
 
     }
 

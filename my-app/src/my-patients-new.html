@@ -1173,8 +1173,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               if (this.profile.size > 9999) {
 
                 ImageTools.resize(this.profile, {
-                  width: 200, // maximum width
-                  height: 200 // maximum height
+                  width: 440, // maximum width
+                  height: 400 // maximum height
                 }, function (blob, didItResize) {
 
                   var storageRef = firebase.storage().ref('profilePicture/' + pic_name);

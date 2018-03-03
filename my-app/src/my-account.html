@@ -29,6 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="image-resize.html">
 
 <dom-module id="my-account">
     <template>
@@ -363,18 +364,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
             },
 
-            // _role(e) {
-            //     if (Object.keys(e).length > 0) {
-            //         this.verified = true;
-            //         if (e[0].role) return e[0].role;
-            //         else return 'Role not yet assign'
-            //     }
-            //     else {
-            //         this.verified = false;
-            //         return 'Role Unknown'
-            //     };
-            // },
-
             toggleDrawer() {
                 this.dispatchEvent(new CustomEvent('toggleDrawer', {
                     bubbles: true, composed: true, detail: {
@@ -397,39 +386,86 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     var name = pic_name + '.' + ext;
                     //create storage
                     var storageRef = firebase.storage().ref('profilePicture/' + name);
-                    //upload file
-                    var uploadTask = storageRef.put(file);
-                    //update progressbar
-                    uploader.style.display = 'inline-block';
-                    uploadTask.on('state_changed',
 
-                        function progress(snapshot) {
-                            var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            uploader.value = percentage;
-                            if (percentage === 100) {
-                                var user = firebase.auth().currentUser;
-                                var photoUrl = user.photoURL;
-                                if (photoUrl) {
-                                    firebase.storage().refFromURL(user.photoURL).delete();
+                    //check if file is big
+                    if (e.target.files[0].size > 9999) {
+                        //reduce file size
+                        ImageTools.resize(e.target.files[0], {
+                            width: 440, // maximum width
+                            height: 400 // maximum height
+                        }, function (blob, didItResize) {
+                            //upload file
+                            var uploadTask = storageRef.put(blob);
+                            //update progressbar
+                            uploader.style.display = 'inline-block';
+                            uploadTask.on('state_changed',
+
+                                function progress(snapshot) {
+                                    var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                    uploader.value = percentage;
+                                    if (percentage === 100) {
+                                        var user = firebase.auth().currentUser;
+                                        var photoUrl = user.photoURL;
+                                        if (photoUrl) {
+                                            firebase.storage().refFromURL(user.photoURL).delete();
+                                        }
+                                    }
+                                },
+                                function error(err) {
+                                },
+                                function () {
+                                    var downloadURL = uploadTask.snapshot.downloadURL;
+                                    var user = firebase.auth().currentUser;
+                                    user.updateProfile({
+                                        photoURL: downloadURL
+                                    }).then(function () {
+                                        // Update successful.
+                                        window.location.reload()
+                                    }).catch(function (error) {
+                                        // An error happened.
+                                    });
                                 }
-                            }
-                        },
-                        function error(err) {
-                        },
-                        function () {
-                            var downloadURL = uploadTask.snapshot.downloadURL;
-                            var user = firebase.auth().currentUser;
-                            user.updateProfile({
-                                photoURL: downloadURL
-                            }).then(function () {
-                                // Update successful.
-                                window.location.reload()
-                            }).catch(function (error) {
-                                // An error happened.
-                            });
-                        }
 
-                    );
+                            );
+                        });
+
+                    }
+                    else {
+                        //upload file
+                        var uploadTask = storageRef.put(file);
+                        //update progressbar
+                        uploader.style.display = 'inline-block';
+                        uploadTask.on('state_changed',
+
+                            function progress(snapshot) {
+                                var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                uploader.value = percentage;
+                                if (percentage === 100) {
+                                    var user = firebase.auth().currentUser;
+                                    var photoUrl = user.photoURL;
+                                    if (photoUrl) {
+                                        firebase.storage().refFromURL(user.photoURL).delete();
+                                    }
+                                }
+                            },
+                            function error(err) {
+                            },
+                            function () {
+                                var downloadURL = uploadTask.snapshot.downloadURL;
+                                var user = firebase.auth().currentUser;
+                                user.updateProfile({
+                                    photoURL: downloadURL
+                                }).then(function () {
+                                    // Update successful.
+                                    window.location.reload()
+                                }).catch(function (error) {
+                                    // An error happened.
+                                });
+                            }
+
+                        );
+                    }
+
                 });
             },
 
@@ -439,47 +475,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 return r;
             }
 
-            // openDialog() {
-            //     var dialog = Polymer.dom(this.root).querySelector("#dialog");
-            //     this.$.dialog.open();
-            // },
-            // _upload(e) {
-            //     var fileButton = Polymer.dom(this.root).querySelector("#fileButton");
-            //     var uploader = Polymer.dom(this.root).querySelector("#uploader");
-
-            //     fileButton.addEventListener('change', function (e) {
-            //         //get file
-            //         var file = e.target.files[0];
-            //         //create storage
-            //         var user = firebase.auth().currentUser;
-            //         var storageRef = firebase.storage().ref('profilePic/' + file.name);
-            //         //upload file
-            //         var uploadTask = storageRef.put(file);
-            //         //update progressbar
-            //         uploadTask.on('state_changed',
-
-            //             function progress(snapshot) {
-            //                 var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            //                 uploader.value = percentage;
-            //             },
-            //             function error(err) {
-            //             },
-            //             function () {
-            //                 var downloadURL = uploadTask.snapshot.downloadURL;
-            //                 var user = firebase.auth().currentUser;
-            //                 user.updateProfile({
-            //                     photoURL: downloadURL
-            //                 }).then(function () {
-            //                     // Update successful.
-            //                     window.location.reload()
-            //                 }).catch(function (error) {
-            //                     // An error happened.
-            //                 });
-            //             }
-
-            //         );
-            //     });
-            // },
             // _update() {
             //     var user = firebase.auth().currentUser;
             //     var name = Polymer.dom(this.root).querySelector("#name");

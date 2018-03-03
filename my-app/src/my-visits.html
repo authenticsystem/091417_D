@@ -401,6 +401,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      // _convertKeyToTimestamp(key) {
+      //   var PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+      //   // var key = prompt("Enter Firebase push ID");
+
+      //   key = key.substring(0, 8);
+      //   var timestamp = 0;
+      //   for (var i = 0; i < key.length; i++) {
+      //     var c = key.charAt(i);
+      //     timestamp = timestamp * 64 + PUSH_CHARS.indexOf(c);
+      //   }
+
+      //   console.log(timestamp + "\n" + new Date(timestamp));
+      // },
+
       _timeStampToDateTime(ts) {
         return new Date(ts);
       },
@@ -596,7 +610,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           newDiv.setAttribute("id", "d25");
           newDiv.setAttribute("edit-key", data_args);
           newDiv.setAttribute("prev-route", this.route.prefix);
-          // window.location = '/cases/edit/' + data_args;
           //if open existing
           var currentDiv = document.getElementById("caseedit");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
