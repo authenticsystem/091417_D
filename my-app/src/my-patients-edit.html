@@ -199,7 +199,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-toolbar>
         </app-header>
 
-        <firebase-query id="query" path="/{{myKey}}/patients" order-by-key equal-to="{{editKey}}" data="{{mypatient}}">
+        <firebase-query id="query" path="{{path}}" order-by-key equal-to="{{editKey}}" data="{{mypatient}}">
         </firebase-query>
 
         <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
@@ -276,6 +276,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </paper-radio-group>
                 </div>
                 <paper-input style="margin-top:-15px; display:none" id="doctor" value="{{doctor}}" label="Dr."></paper-input>
+                <paper-input style="margin-top:-15px; display:none" id="hospital" value="{{hospital_name}}" label="Hospital name"></paper-input>
               </div>
             </div>
             <br>
@@ -303,6 +304,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
 
             </div>
+            <br>
+            <br>
+            <br>
           </neon-animatable>
 
           <neon-animatable>
@@ -324,10 +328,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
 
             </div>
+            <br>
+            <br>
+            <br>
           </neon-animatable>
 
           <neon-animatable>
-            <div class="docu">
+
+            <div style="margin-right:10px">
+              <div style="float:right; padding:16px; margin-top:-34px;">
+                <paper-input type="date" value="{{todayDate}}" style="width:150px">
+                  <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                </paper-input>
+                <div style="margin-left:4px;margin-top:-10px;">
+                  <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="docu" style="margin-top:62px;">
               <div class="docu-header">5. Finalize</div>
 
               <div class="details">
@@ -575,6 +594,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
             <br>
             <br>
+            <br>
           </neon-animatable>
 
           <neon-animatable>
@@ -680,6 +700,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           value: ''
         },
+        hospital_name: {
+          type: String,
+          value: ''
+        },
 
         card: {
           type: String,
@@ -722,20 +746,64 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           value: ''
         },
+        isDateChanged: {
+          type: Boolean,
+          value: false
+        },
         profile: String,
         editKey: String,
         personal: Object,
         insurance: Object,
         emergency: Object,
-        mypatient: Object
+        mypatient: Object,
+        todayDate: String,
+        storeDate: String
       },
 
       observers: [
-        'personalInfoChanged(doctor,refer,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
+        'personalInfoChanged(doctor,refer,hospital_name,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
         'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
         'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
-        'mypatientChanged(mypatient)'
+        'mypatientChanged(mypatient)',
+        '_todayDateChanged(todayDate)',
+        '_editKeyChanged(editKey)'
       ],
+
+      _editKeyChanged(e) {
+        if (e) {
+          this.path = '/' + this.myKey + '/patients';
+        }
+        else {
+          this.path = '';
+        }
+      },
+
+      _todayDateChanged(date) {
+        var monthNames = [
+          "January", "February", "March",
+          "April", "May", "June", "July",
+          "August", "September", "October",
+          "November", "December"
+        ];
+
+        var d = new Date(date);
+        if (date) {
+          Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+          this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+          this.favrighthide = false;
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+          this.text = 'Please choose date.';
+          this.favrighthide = true;
+        }
+
+        var bol = date !== this.storeDate;
+        if (this.storeDate) {
+          if (bol === false) { this.isDateChanged = false; }
+          else { this.isDateChanged = true; }
+        }
+      },
 
       mypatientChanged(e) {
         if (e.length > 0) {
@@ -750,6 +818,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.refer = e[0].personal.referred;
             if (e[0].personal.referred == 'Dr') {
               this.doctor = e[0].personal.doctor;
+            }
+            else if (e[0].personal.referred == 'Hospital') {
+              this.hospital_name = e[0].personal.hospital;
             }
           }
 
@@ -769,6 +840,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               this.bday = monthThen + '/' + dayThen + '/' + yearThen;
             }
           }
+
+          this.todayDate = e[0].created;
 
           this.email = e[0].personal.email;
           this.fname = e[0].personal.firstname;
@@ -819,7 +892,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      personalInfoChanged(doctor, refer, email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
+      personalInfoChanged(doctor, refer, hospital_name, email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
         if (fname) {
           this.fname = fname.toUpperCase();
           fname = fname.toUpperCase();
@@ -882,13 +955,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (refer) {
           if (refer == 'Dr') {
             Polymer.dom(this.root).querySelector("#doctor").style.display = 'block';
+            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
             doctor = doctor;
             this.referredby = 'Dr. ' + doctor;
+            hospital_name = '';
+            this.hospital_name = '';
           }
-          else {
+          else if (refer == 'Hospital') {
+            Polymer.dom(this.root).querySelector("#hospital").style.display = 'block';
             Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
             this.doctor = '';
             doctor = '';
+            this.hospital_name = hospital_name;
+            hospital_name = hospital_name;
+            this.referredby = hospital_name;
+          }
+          else {
+            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
+            this.doctor = '';
+            doctor = '';
+            this.hospital_name = '';
+            hospital_name = '';
             this.referredby = refer;
           }
         }
@@ -938,6 +1026,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             emp_phone: emp_phone,
             referred: refer,
             doctor: doctor,
+            hospital: hospital_name,
             name: lname + ', ' + fname + ' ' + mname
           }
         }
@@ -1014,6 +1103,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ready() {
         this.selectedPage = 0;
         this.favrighthide = false;
+        this.storeDate = this.todayDate;
       },
 
       _select1(e) {
@@ -1066,6 +1156,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
 
+          if (parseInt(this.selectedPage) == 3) {
+            if (!this.todayDate) {
+              this.favrighthide = true;
+            }
+            else {
+              this.favrighthide = false;
+            }
+          }
+
           // if (parseInt(this.selectedPage) == 1) {
           //   if (!this.card || !this.bdate || !this.in_address || !this.home_phone || !this.indicate || !this.p_relation) {
           //     this.favlefthide = false;
@@ -1092,6 +1191,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             //complete
             var info = this.personal, insure = this.insurance, emerg = this.emergency, key = this.editKey;
             var mykey = this.myKey;
+            var today = this.todayDate;
 
             var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
             var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
@@ -1107,8 +1207,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               if (this.profile.size > 9999) {
 
                 ImageTools.resize(this.profile, {
-                  width: 200, // maximum width
-                  height: 200 // maximum height
+                  width: 440, // maximum width
+                  height: 400 // maximum height
                 }, function (blob, didItResize) {
 
                   var uploadTask = storageRef.put(blob);
@@ -1127,7 +1227,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                     personal: info,
                                     insurance: insure,
                                     emergency: emerg,
-                                    profile: downLoadURL
+                                    profile: downLoadURL,
+                                    created: today
                                   }).then(function () {
                                     saveLoad.style.display = 'none';
                                     saveSucc.style.display = 'block';
@@ -1148,7 +1249,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 personal: info,
                                 insurance: insure,
                                 emergency: emerg,
-                                profile: downLoadURL
+                                profile: downLoadURL,
+                                created: today
                               }).then(function () {
                                 saveLoad.style.display = 'none';
                                 saveSucc.style.display = 'block';
@@ -1177,7 +1279,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                   personal: info,
                                   insurance: insure,
                                   emergency: emerg,
-                                  profile: downLoadURL
+                                  profile: downLoadURL,
+                                  created: today
                                 }).then(function () {
                                   saveLoad.style.display = 'none';
                                   saveSucc.style.display = 'block';
@@ -1197,7 +1300,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                               personal: info,
                               insurance: insure,
                               emergency: emerg,
-                              profile: downLoadURL
+                              profile: downLoadURL,
+                              created: today
                             }).then(function () {
                               saveLoad.style.display = 'none';
                               saveSucc.style.display = 'block';
@@ -1212,13 +1316,60 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               saveLoad.style.display = 'block';
               var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
               var push = ref.update({
-                personal: this.personal,
-                insurance: this.insurance,
-                emergency: this.emergency
+                personal: info,
+                insurance: insure,
+                emergency: emerg,
+                created: today
               }).then(function () {
                 saveLoad.style.display = 'none';
                 saveSucc.style.display = 'block';
               });
+            }
+
+            if (this.isDateChanged === true) {
+
+              var prevDate = this.storeDate;
+
+              var oldmm = prevDate.substring(0, 7);
+              var oldyy = prevDate.substring(0, 4);
+
+              var mm = today.substring(0, 7);
+              var yy = today.substring(0, 4);
+
+              var prevDayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + prevDate + '/patients');
+              prevDayRef.once('value').then(function (snapshot) {
+                prevDayRef.set(snapshot.val() - 1);
+              });
+
+              var newDayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
+              newDayRef.once('value').then(function (snapshot) {
+                newDayRef.set(snapshot.val() + 1);
+              });
+
+              if (oldmm !== mm) {
+                var prevMonthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + oldmm + '/patients');
+                prevMonthRef.once('value').then(function (snapshot) {
+                  prevMonthRef.set(snapshot.val() - 1);
+                });
+
+                var newMonthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
+                newMonthRef.once('value').then(function (snapshot) {
+                  newMonthRef.set(snapshot.val() + 1);
+                });
+              }
+
+              if (oldyy !== yy) {
+                var prevYearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + oldyy + '/patients');
+                prevYearRef.once('value').then(function (snapshot) {
+                  prevYearRef.set(snapshot.val() - 1);
+                });
+
+                var newYearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
+                newYearRef.once('value').then(function (snapshot) {
+                  newYearRef.set(snapshot.val() + 1);
+                });
+              }
+
             }
           }
 

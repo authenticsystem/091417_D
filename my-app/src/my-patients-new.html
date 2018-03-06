@@ -234,7 +234,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-toolbar>
         </app-header>
 
-        <firebase-query id="query" path="/{{myKey}}/patients" data="{{patientsLength}}">
+        <firebase-query id="query" path="{{path}}" data="{{patientsLength}}">
         </firebase-query>
 
         <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
@@ -362,6 +362,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </paper-radio-group>
                 </div>
                 <paper-input style="margin-top:-15px; display:none" id="doctor" value="{{doctor}}" label="Dr."></paper-input>
+                <paper-input style="margin-top:-15px; display:none" id="hospital" value="{{hospital_name}}" label="Hospital name"></paper-input>
               </div>
             </div>
             <br>
@@ -389,6 +390,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
 
             </div>
+            <br>
+            <br>
+            <br>
           </neon-animatable>
 
           <neon-animatable>
@@ -410,10 +414,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
 
             </div>
+            <br>
+            <br>
+            <br>
           </neon-animatable>
 
           <neon-animatable>
-            <div class="docu">
+
+            <div style="margin-right:10px">
+              <div style="float:right; padding:16px; margin-top:-34px;">
+                <paper-input type="date" value="{{todayDate}}" style="width:150px">
+                  <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                </paper-input>
+                <div style="margin-left:4px;margin-top:-10px;">
+                  <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="docu" style="margin-top:62px;">
               <div class="docu-header">5. Finalize</div>
 
               <div class="details">
@@ -660,6 +679,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div> -->
               </div>
             </div>
+            <br>
+            <br>
+            <br>
           </neon-animatable>
 
           <neon-animatable>
@@ -769,6 +791,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           value: ''
         },
+        hospital_name: {
+          type: String,
+          value: ''
+        },
 
         card: {
           type: String,
@@ -827,14 +853,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       observers: [
-        'personalInfoChanged(doctor,refer,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
+        'personalInfoChanged(doctor,refer,hospital_name,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
         'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
         'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
-        'patientsLengthChanged(patientsLength)'
+        '_todayDateChanged(todayDate)'
       ],
-      patientsLengthChanged(e) {
-        if (e.length > 0) {
-          this.length = e.length;
+
+      _todayDateChanged(date) {
+        var monthNames = [
+          "January", "February", "March",
+          "April", "May", "June", "July",
+          "August", "September", "October",
+          "November", "December"
+        ];
+
+        var d = new Date(date);
+        if (date) {
+          Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+          this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+          this.favrighthide = false;
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+          this.text = 'Please choose date.';
+          this.favrighthide = true;
         }
       },
 
@@ -843,7 +885,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       //   this.selectedPage = select;
       // },
 
-      personalInfoChanged(doctor, refer, email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
+      personalInfoChanged(doctor, refer, hospital_name, email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
         if (fname) {
           this.fname = fname.toUpperCase();
           fname = fname.toUpperCase();
@@ -908,13 +950,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (refer) {
           if (refer == 'Dr') {
             Polymer.dom(this.root).querySelector("#doctor").style.display = 'block';
+            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
             doctor = doctor;
             this.referredby = 'Dr. ' + doctor;
+            hospital_name = '';
+            this.hospital_name = '';
           }
-          else {
+          else if (refer == 'Hospital') {
+            Polymer.dom(this.root).querySelector("#hospital").style.display = 'block';
             Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
             this.doctor = '';
             doctor = '';
+            this.hospital_name = hospital_name;
+            hospital_name = hospital_name;
+            this.referredby = hospital_name;
+          }
+          else {
+            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
+            this.doctor = '';
+            doctor = '';
+            this.hospital_name = '';
+            hospital_name = '';
             this.referredby = refer;
           }
         }
@@ -965,6 +1022,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             emp_phone: emp_phone,
             referred: refer,
             doctor: doctor,
+            hospital: hospital_name,
             name: lname + ', ' + fname + ' ' + mname
           }
         }
@@ -1114,6 +1172,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
 
+          if (parseInt(this.selectedPage) == 3) {
+            if (!this.todayDate) {
+              this.favrighthide = true;
+            }
+            else {
+              this.favrighthide = false;
+            }
+          }
+
           // if (parseInt(this.selectedPage) == 1) {
           //   if (!this.card || !this.bdate || !this.in_address || !this.home_phone || !this.indicate || !this.p_relation) {
           //     this.favlefthide = false;
@@ -1144,175 +1211,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             var info = this.personal, insure = this.insurance, emerg = this.emergency;
             var mykey = this.myKey;
-            var num = this.length + 1;
             var today = this.todayDate;
 
-            if (num > 0 && num < 10) {
-              num = '000' + num;
-            }
-            else if (num > 9 && num < 100) {
-              num = '00' + num;
-            }
-            else if (num > 99 && num < 1000) {
-              num = '0' + num;
-            }
-            else if (num > 999) {
-              num = num;
-            }
-            else {
-              num = '0000';
-            }
+            saveLoad.style.display = 'block';
+            var ref = firebase.database().ref("/" + mykey + "/patients");
+            var push = ref.push({
+              personal: info,
+              insurance: insure,
+              emergency: emerg,
+              created: today
+            });
 
-            if (this.profile) {
-              this.no = num;
-              saveLoad.style.display = 'block';
+            if (push.key) {
+              this.path = '/' + mykey + '/patients';
+              var num = this.patientsLength.length;
+              this.no = this._patientsNoUpdate(num, mykey, push.key);
+              this._reportsUpdate(today, mykey);
 
-              var ext = this.profile.type.substring(6);
-              var pic_name = this.randomString(8) + '.' + ext;
+              if (this.profile) {
+                var ext = this.profile.type.substring(6);
+                var pic_name = this.randomString(8) + '.' + ext;
 
-              if (this.profile.size > 9999) {
+                if (this.profile.size > 9999) {
+                  ImageTools.resize(this.profile, {
+                    width: 440, // maximum width
+                    height: 400 // maximum height
+                  }, function (blob, didItResize) {
+                    var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+                    storageRef.put(blob).then(function (snapshot) {
+                      firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
+                    });
 
-                ImageTools.resize(this.profile, {
-                  width: 440, // maximum width
-                  height: 400 // maximum height
-                }, function (blob, didItResize) {
-
+                  });
+                }
+                else {
                   var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
-                  storageRef.put(blob).then(function (snapshot) {
-                    var ref = firebase.database().ref("/" + mykey + "/patients");
-                    var push = ref.push({
-                      personal: info,
-                      insurance: insure,
-                      emergency: emerg,
-                      profile: snapshot.downloadURL,
-                      no: num,
-                      created: today
-                    });
-
-                    if (push.key) {
-
-                      var postRef = firebase.database().ref('/' + mykey + '/patients');
-                      postRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
-                        if (snapshot.hasChildren()) {
-
-                          var mm = today.substring(0, 7);
-                          var yy = today.substring(0, 4);
-
-                          var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
-                          yearRef.once('value').then(function (snapshot) {
-                            yearRef.set(snapshot.val() + 1);
-                          });
-
-                          var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
-                          monthRef.once('value').then(function (snapshot) {
-                            monthRef.set(snapshot.val() + 1);
-                          });
-
-                          var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
-                          ref.set(snapshot.numChildren());
-
-                        }
-                      });
-
-                      saveLoad.style.display = 'none';
-                      saveSucc.style.display = 'block';
-                    }
-                    else {
-                      saveErr.style.display = 'block';
-                    }
+                  storageRef.put(this.profile).then(function (snapshot) {
+                    firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
                   });
-
-                });
-              } else {
-
-                var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
-                storageRef.put(this.profile).then(function (snapshot) {
-                  var ref = firebase.database().ref("/" + mykey + "/patients");
-                  var push = ref.push({
-                    personal: info,
-                    insurance: insure,
-                    emergency: emerg,
-                    profile: snapshot.downloadURL,
-                    no: num,
-                    created: today
-                  });
-
-                  if (push.key) {
-
-                    var postRef = firebase.database().ref('/' + mykey + '/patients');
-                    postRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
-                      if (snapshot.hasChildren()) {
-
-                        var mm = today.substring(0, 7);
-                        var yy = today.substring(0, 4);
-
-                        var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
-                        yearRef.once('value').then(function (snapshot) {
-                          yearRef.set(snapshot.val() + 1);
-                        });
-
-                        var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
-                        monthRef.once('value').then(function (snapshot) {
-                          monthRef.set(snapshot.val() + 1);
-                        });
-
-                        var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
-                        ref.set(snapshot.numChildren());
-
-                      }
-                    });
-
-                    saveLoad.style.display = 'none';
-                    saveSucc.style.display = 'block';
-                  }
-                  else {
-                    saveErr.style.display = 'block';
-                  }
-                });
+                }
               }
 
+              saveLoad.style.display = 'none';
+              saveSucc.style.display = 'block';
             }
             else {
-              var ref = firebase.database().ref("/" + mykey + "/patients");
-              var push = ref.push({
-                personal: info,
-                insurance: insure,
-                emergency: emerg,
-                no: num,
-                created: today
-              });
-
-              if (push.key) {
-
-                var postRef = firebase.database().ref('/' + mykey + '/patients');
-                postRef.orderByChild('created').equalTo(today).once('value').then(function (snapshot) {
-                  if (snapshot.hasChildren()) {
-
-                    var mm = today.substring(0, 7);
-                    var yy = today.substring(0, 4);
-
-                    var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
-                    yearRef.once('value').then(function (snapshot) {
-                      yearRef.set(snapshot.val() + 1);
-                    });
-
-                    var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
-                    monthRef.once('value').then(function (snapshot) {
-                      monthRef.set(snapshot.val() + 1);
-                    });
-
-                    var ref = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
-                    ref.set(snapshot.numChildren());
-
-                  }
-                });
-
-                this.no = num;
-                saveSucc.style.display = 'block';
-              }
-              else {
-                saveErr.style.display = 'block';
-              }
+              this.path = '';
+              saveLoad.style.display = 'none';
+              saveErr.style.display = 'block';
             }
           }
 
@@ -1336,6 +1282,47 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.favlefthide = true;
           this.favrighthide = false;
         }
+      },
+
+      _patientsNoUpdate(num, mykey, pushkey) {
+        if (num > 0 && num < 10) {
+          num = '000' + num;
+        }
+        else if (num > 9 && num < 100) {
+          num = '00' + num;
+        }
+        else if (num > 99 && num < 1000) {
+          num = '0' + num;
+        }
+        else if (num > 999) {
+          num = num;
+        }
+        else {
+          num = '0000';
+        }
+
+        firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
+        return num;
+      },
+
+      _reportsUpdate(today, mykey) {
+        var mm = today.substring(0, 7);
+        var yy = today.substring(0, 4);
+
+        var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
+        dayRef.once('value').then(function (snapshot) {
+          dayRef.set(snapshot.val() + 1);
+        });
+
+        var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
+        yearRef.once('value').then(function (snapshot) {
+          yearRef.set(snapshot.val() + 1);
+        });
+
+        var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
+        monthRef.once('value').then(function (snapshot) {
+          monthRef.set(snapshot.val() + 1);
+        });
       },
 
       randomString(n) {

@@ -61,14 +61,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .avatar {
         height: 45px;
         width: 45px;
-        border-radius: 50%;
-        box-sizing: border-box;
-        background-color: #DDD;
-      }
-
-      .avatar2 {
-        height: 45px;
-        width: 45px;
         border: 2px solid white;
         border-radius: 50%;
         box-sizing: border-box;
@@ -268,8 +260,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <div id="{{item.$key}}" style=" padding: 16px; display:flex">
 
                         <div>
-                          <iron-image preload fade style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
-                          <iron-image preload fade style$="{{_hasProfile(item.profile)}}" class="avatar2" sizing="cover" src="[[item.profile]]"></iron-image>
+                          <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                         </div>
                         <div id="{{item.$key}}" style=" margin-left:10px;">
                           <!-- <div style="font-size:11px" class="longText">[[item.no]]</div> -->
@@ -430,18 +421,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         '_searchChanged(search)'
       ],
 
+      _patientImg(e) {
+        if (e) return e;
+        else return '../images/user.png';
+      },
+
       _getViewDetailsLink(e) {
         if (e) {
           return '/visits/detail/' + e.toString();
-        }
-      },
-
-      _noProfile(e) {
-        if (!e) {
-          return 'display:block';
-        }
-        else {
-          return 'display:none';
         }
       },
 
@@ -520,15 +507,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           };
 
           return date.toLocaleTimeString("en-us", options);
-        }
-      },
-
-      _hasProfile(e) {
-        if (e) {
-          return 'display:block';
-        }
-        else {
-          return 'display:none';
         }
       },
 

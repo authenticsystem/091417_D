@@ -24,6 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
@@ -176,11 +177,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         align-items: center;
         justify-content: center;
       }
+
+      .yellow-button {
+        float: right;
+        padding: 10px;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        color: #eeff41;
+      }
     </style>
 
     <div id="overlay">
       <paper-spinner id="spinner" active></paper-spinner>
     </div>
+
+    <paper-toast id="networkToast" duration="0" text="">
+      <paper-icon-button on-tap="_closeToast" class="yellow-button" icon="my-icons:close"></paper-icon-button>
+    </paper-toast>
+
 
     <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
     </app-location>
@@ -218,17 +232,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <template is="dom-if" if="{{user.emailVerified}}">
 
-        <firebase-query id="query" path="/accounts" data="{{myaccount}}" order-by-child="uid" equal-to="{{user.uid}}"></firebase-query>
-
-        <template is="dom-if" if="{{!isActive}}">
+        <template is="dom-if" if="{{!user.phoneNumber}}">
           <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-            <my-account-link is-active="{{isActive}}" name="account-link"></my-account-link>
+            <my-account-link name="account-link"></my-account-link>
             <!-- <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist> -->
             <my-view404 name="view404"></my-view404>
           </iron-pages>
         </template>
 
-        <template is="dom-if" if="{{isActive}}">
+        <template is="dom-if" if="{{user.phoneNumber}}">
+
+          <firebase-query id="query" path="/accounts" data="{{myaccount}}" order-by-child="uid" equal-to="{{user.uid}}"></firebase-query>
+
           <app-drawer-layout has-scrolling-region fullbleed narrow="{{narrow}}" id="drawerLayout">
             <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
 
@@ -342,9 +357,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
             </app-drawer>
             <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-              <!-- <my-account active={{isActive}} user={{user}} name="account"></my-account> -->
+              <!-- <my-account user={{user}} name="account"></my-account> -->
               <my-dashboard name="dashboard" my-key="[[mykey]]" user="[[user]]"></my-dashboard>
-              <my-settings name="settings" route="[[subroute]]" active=[[isActive]] user=[[user]]></my-settings>
+              <my-settings name="settings" route="[[subroute]]" user=[[user]]></my-settings>
               <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" user-uid=[[user.uid]]></my-visits>
               <my-patients name="patients" route="[[subroute]]" my-key="[[mykey]]" user-uid=[[user.uid]]></my-patients>
               <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
@@ -388,10 +403,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             notify: true
           },
-          isActive: {
-            type: Boolean,
-            value: false
-          },
           mykey: String
         };
       }
@@ -403,15 +414,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ];
       }
 
-      // _noAccount(e) {
-      //   setTimeout((e) => {
-      //     return true;
-      //   }, 3000);
-      // }
-
       _myaccountChanged(e) {
         if (e.length > 0) {
-          this.isActive = true;
           this.mykey = e[0].code;
           this.drTitle = e[0].designatory;
           this.lastname = e[0].name.lastname;
@@ -421,13 +425,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _routePageChanged(page, user, key) {
         if (user) {
           if (user.emailVerified) {
-            if (key) {
-              this.page = page || 'dashboard';
-              // Close a non-persistent drawer when the page & route are changed.
-              var drawer = Polymer.dom(this.root).querySelector("#drawer");
-              if (drawer) {
-                if (!drawer.persistent) {
-                  drawer.close();
+            if (user.phoneNumber) {
+              if (key) {
+                this.page = page || 'dashboard';
+                // Close a non-persistent drawer when the page & route are changed.
+                var drawer = Polymer.dom(this.root).querySelector("#drawer");
+                if (drawer) {
+                  if (!drawer.persistent) {
+                    drawer.close();
+                  }
                 }
               }
             }
@@ -526,12 +532,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-
       ready() {
         super.ready();
         this.addEventListener('toggleDrawer', (e) => this._onChangeSection(e));
         this.addEventListener('toggleDrawer2', (e) => this._onChangeSection2(e));
         // this.addEventListener('on-tap', (e) => this._onChangeSection(e));
+        // listen for online/offline
+        window.addEventListener('online', (e) => this._updateOnlineStatus(e));
+        window.addEventListener('offline', (e) => this._updateOnlineStatus(e));
+      }
+
+      _updateOnlineStatus() {
+        var toast = Polymer.dom(this.root).querySelector("#networkToast");
+        var condition = navigator.onLine ? "online" : "offline";
+
+        if (condition == 'online') {
+          toast.opened = true;
+          toast.text = 'Network connection established. Data synced.';
+
+          setTimeout((e) => {
+            toast.opened = false;
+          }, 5000);
+        }
+        else {
+          toast.opened = true;
+          toast.text = 'Network connection lost. Offline mode enabled.';
+        }
+      }
+
+      _closeToast() {
+        Polymer.dom(this.root).querySelector("#networkToast").opened = false;
       }
 
       _onChangeSection(e) {

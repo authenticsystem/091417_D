@@ -60,6 +60,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .avatar {
         height: 45px;
         width: 45px;
+        border: 2px solid white;
         border-radius: 50%;
         box-sizing: border-box;
         background-color: #DDD;
@@ -282,10 +283,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
                     <!-- <div style="background:#009688; padding:10px;"> -->
                     <div>
-                      <iron-image preload fade style$="{{_noProfile(item.profile)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
-                      <iron-image preload fade style$="{{_hasProfile(item.profile)}}" class="avatar" sizing="cover" src="[[item.profile]]"></iron-image>
+                      <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                     </div>
-
                     <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
                       <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
                       <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
@@ -478,6 +477,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // '_patientChanged(mypatients)'
       ],
 
+      _patientImg(e) {
+        if (e) return e;
+        else return '../images/user.png';
+      },
+
       // _myKeyChanged(e) {
       //   if (e) {
       //     this.myKey = e;
@@ -508,24 +512,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       //     // console.log(mypatients[0].$key);
       //   }
       // }
-
-      _noProfile(e) {
-        if (!e) {
-          return 'display:block';
-        }
-        else {
-          return 'display:none';
-        }
-      },
-
-      _hasProfile(e) {
-        if (e) {
-          return 'display:block';
-        }
-        else {
-          return 'display:none';
-        }
-      },
 
       _searchChanged(search) {
         // var c = search.toLowerCase().replace(/\b[a-z]/g, function (letter) {

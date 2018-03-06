@@ -136,7 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <paper-toast id="toastAccLink" text="" duration="5000"></paper-toast>
 
-        <div class="main-container" id="myContain" style="display:none">
+        <div class="main-container" id="myContain">
             <div class="divHolder">
                 <!-- <div class="div1">
                         <img style="width:200px;" src="../images/manifest/icon-512x512.png">
@@ -199,32 +199,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 account: {
                     type: Object,
                 },
-                verified: {
-                    type: Boolean,
-                    value: false
-                },
-                isActive: {
-                    type: Boolean,
-                    observer: '_isActiveChanged'
-                }
+                // isActive: {
+                //     type: Boolean,
+                //     observer: '_isActiveChanged'
+                // }
             },
 
-            _isActiveChanged() {
-                var container = Polymer.dom(this.root).querySelector("#myContain");
-                var toast = Polymer.dom(this.root).querySelector("#toastAccLink");
+            // _isActiveChanged() {
+            //     var container = Polymer.dom(this.root).querySelector("#myContain");
+            //     var toast = Polymer.dom(this.root).querySelector("#toastAccLink");
 
-                if (this.isActive == false) {
-                    toast.opened = true;
-                    toast.text = 'Checking user account ...';
-                    setTimeout((e) => {
-                        toast.opened = false;
-                        container.style.display = 'block';
-                    }, 3000);
-                }
-                else {
-                    toast.opened = false;
-                }
-            },
+            //     if (this.isActive == false) {
+            //         toast.opened = true;
+            //         toast.text = 'Checking user account ...';
+            //         setTimeout((e) => {
+            //             toast.opened = false;
+            //             container.style.display = 'block';
+            //         }, 3000);
+            //     }
+            //     else {
+            //         toast.opened = false;
+            //     }
+            // },
 
             _next() {
                 if (!this.mycode) {

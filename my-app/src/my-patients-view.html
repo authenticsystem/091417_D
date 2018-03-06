@@ -676,6 +676,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             if (e[0].personal.referred == 'Dr') {
               this.referredby = 'Dr. ' + e[0].personal.doctor;
             }
+            else if (e[0].personal.referred == 'Hospital') {
+              this.referredby = e[0].personal.hospital;
+            }
             else {
               this.referredby = e[0].personal.referred;
             }

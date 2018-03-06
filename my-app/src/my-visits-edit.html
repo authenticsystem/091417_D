@@ -353,7 +353,9 @@
                                 </div>
                             </div>
                         </div> -->
-
+                        <br>
+                        <br>
+                        <br>
                     </neon-animatable>
 
                     <neon-animatable>
@@ -847,58 +849,7 @@
 
                                             if (myattachment) {
                                                 saveRun.style.display = 'block';
-                                                for (var i = 0; i < myattachment.length; i++) {
-
-                                                    var attachFile = myattachment[i];
-                                                    var ext = attachFile.type.substring(6);
-                                                    var name = attachName + i + '.' + ext;
-                                                    var myURL = "/" + mykey + "/cases/" + editkey + "/attachment";
-
-                                                    if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
-                                                        ImageTools.resize(attachFile, {
-                                                            width: 440, // maximum width
-                                                            height: 400 // maximum height
-                                                        }, function (blob, didItResize) {
-
-                                                            var ext = blob.type.substring(6);
-                                                            var rand = Math.random().toString(36).slice(-8);
-                                                            var newName = rand + '.' + ext;
-
-                                                            var storageRef = firebase.storage().ref('attachment/' + newName);
-                                                            storageRef.put(blob).then(function (snapshot) {
-                                                                saveRun.style.display = 'none';
-                                                                saveSucc.style.display = 'block';
-
-                                                                var type = snapshot.metadata.contentType.slice(0, 5);
-                                                                var name = snapshot.metadata.name;
-                                                                var ref = firebase.database().ref(myURL);
-
-                                                                ref.push({
-                                                                    url: snapshot.downloadURL,
-                                                                    type: type,
-                                                                    name: name
-                                                                });
-                                                            });
-                                                        });
-                                                    }
-                                                    else {
-                                                        var storageRef = firebase.storage().ref('attachment/' + name);
-                                                        storageRef.put(attachFile).then(function (snapshot) {
-                                                            saveRun.style.display = 'none';
-                                                            saveSucc.style.display = 'block';
-
-                                                            var type = snapshot.metadata.contentType.slice(0, 5);
-                                                            var name = snapshot.metadata.name;
-                                                            var ref = firebase.database().ref(myURL);
-
-                                                            ref.push({
-                                                                url: snapshot.downloadURL,
-                                                                type: type,
-                                                                name: name
-                                                            });
-                                                        });
-                                                    }
-                                                }
+                                                this._attachmentUpdate(myattachment, attachName, mykey, editkey);
                                             }
                                             else {
                                                 saveRun.style.display = 'none';
@@ -935,58 +886,7 @@
 
                                             if (myattachment) {
                                                 saveRun.style.display = 'block';
-                                                for (var i = 0; i < myattachment.length; i++) {
-
-                                                    var attachFile = myattachment[i];
-                                                    var ext = attachFile.type.substring(6);
-                                                    var name = attachName + i + '.' + ext;
-                                                    var myURL = "/" + mykey + "/cases/" + editkey + "/attachment";
-
-                                                    if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
-                                                        ImageTools.resize(attachFile, {
-                                                            width: 440, // maximum width
-                                                            height: 400 // maximum height
-                                                        }, function (blob, didItResize) {
-
-                                                            var ext = blob.type.substring(6);
-                                                            var rand = Math.random().toString(36).slice(-8);
-                                                            var newName = rand + '.' + ext;
-
-                                                            var storageRef = firebase.storage().ref('attachment/' + newName);
-                                                            storageRef.put(blob).then(function (snapshot) {
-                                                                saveRun.style.display = 'none';
-                                                                saveSucc.style.display = 'block';
-
-                                                                var type = snapshot.metadata.contentType.slice(0, 5);
-                                                                var name = snapshot.metadata.name;
-                                                                var ref = firebase.database().ref(myURL);
-
-                                                                ref.push({
-                                                                    url: snapshot.downloadURL,
-                                                                    type: type,
-                                                                    name: name
-                                                                });
-                                                            });
-                                                        });
-                                                    }
-                                                    else {
-                                                        var storageRef = firebase.storage().ref('attachment/' + name);
-                                                        storageRef.put(attachFile).then(function (snapshot) {
-                                                            saveRun.style.display = 'none';
-                                                            saveSucc.style.display = 'block';
-
-                                                            var type = snapshot.metadata.contentType.slice(0, 5);
-                                                            var name = snapshot.metadata.name;
-                                                            var ref = firebase.database().ref(myURL);
-
-                                                            ref.push({
-                                                                url: snapshot.downloadURL,
-                                                                type: type,
-                                                                name: name
-                                                            });
-                                                        });
-                                                    }
-                                                }
+                                                this._attachmentUpdate(myattachment, attachName, mykey, editkey);
                                             }
                                             else {
                                                 saveRun.style.display = 'none';
@@ -1017,8 +917,7 @@
 
                             var newDayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
                             newDayRef.once('value').then(function (snapshot) {
-                                var data = snapshot.val() ? snapshot.val() : 0;
-                                newDayRef.set(data + 1);
+                                newDayRef.set(snapshot.val() + 1);
                             });
 
                             if (oldmm !== mm) {
@@ -1029,8 +928,7 @@
 
                                 var newMonthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
                                 newMonthRef.once('value').then(function (snapshot) {
-                                    var data = snapshot.val() ? snapshot.val() : 0;
-                                    newMonthRef.set(data + 1);
+                                    newMonthRef.set(snapshot.val() + 1);
                                 });
                             }
 
@@ -1042,8 +940,7 @@
 
                                 var newYearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
                                 newYearRef.once('value').then(function (snapshot) {
-                                    var data = snapshot.val() ? snapshot.val() : 0;
-                                    newYearRef.set(data + 1);
+                                    newYearRef.set(snapshot.val() + 1);
                                 });
                             }
 
@@ -1067,6 +964,61 @@
                     this.selectedPage = 0;
                     this.favlefthide = true;
                     this.favrighthide = true;
+                }
+            },
+
+            _attachmentUpdate(myattachment, attachName, mykey, editkey) {
+                for (var i = 0; i < myattachment.length; i++) {
+
+                    var attachFile = myattachment[i];
+                    var ext = attachFile.type.substring(6);
+                    var name = attachName + i + '.' + ext;
+                    var myURL = "/" + mykey + "/cases/" + editkey + "/attachment";
+
+                    if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
+                        ImageTools.resize(attachFile, {
+                            width: 440, // maximum width
+                            height: 400 // maximum height
+                        }, function (blob, didItResize) {
+
+                            var ext = blob.type.substring(6);
+                            var rand = Math.random().toString(36).slice(-8);
+                            var newName = rand + '.' + ext;
+
+                            var storageRef = firebase.storage().ref('attachment/' + newName);
+                            storageRef.put(blob).then(function (snapshot) {
+                                saveRun.style.display = 'none';
+                                saveSucc.style.display = 'block';
+
+                                var type = snapshot.metadata.contentType.slice(0, 5);
+                                var name = snapshot.metadata.name;
+                                var ref = firebase.database().ref(myURL);
+
+                                ref.push({
+                                    url: snapshot.downloadURL,
+                                    type: type,
+                                    name: name
+                                });
+                            });
+                        });
+                    }
+                    else {
+                        var storageRef = firebase.storage().ref('attachment/' + name);
+                        storageRef.put(attachFile).then(function (snapshot) {
+                            saveRun.style.display = 'none';
+                            saveSucc.style.display = 'block';
+
+                            var type = snapshot.metadata.contentType.slice(0, 5);
+                            var name = snapshot.metadata.name;
+                            var ref = firebase.database().ref(myURL);
+
+                            ref.push({
+                                url: snapshot.downloadURL,
+                                type: type,
+                                name: name
+                            });
+                        });
+                    }
                 }
             },
 

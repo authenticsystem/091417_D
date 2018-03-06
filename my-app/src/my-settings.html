@@ -156,11 +156,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
 
             <div name="/account">
-                <my-account active={{isActive}} user={{user}} name="account"></my-account>
+                <my-account user={{user}} name="account"></my-account>
             </div>
 
             <div name="/secretary">
-                <my-secretary active={{isActive}} user={{user}} name="account"></my-secretary>
+                <my-secretary user={{user}} name="account"></my-secretary>
             </div>
 
             <div name="view404">Not found.</div>
@@ -188,11 +188,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             properties: {
                 account: {
                     type: Object,
-                },
-                active: Boolean,
-                verified: {
-                    type: Boolean,
-                    value: false
                 },
                 user: {
                     type: Object,
