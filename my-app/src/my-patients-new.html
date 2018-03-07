@@ -1,0 +1,1397 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="image-resize.html">
+
+<dom-module id="my-patients-new">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+      app-header {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      }
+
+      paper-icon-button.menu {
+        margin-right: 16px;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-drawer {
+        --app-drawer-content-container: {
+          background-color: #F4F5F6;
+        }
+      }
+
+      paper-item {
+        height: 64px;
+      }
+
+      paper-item:hover {
+        background: rgba(104, 58, 183, 0.26);
+        cursor: pointer;
+      }
+
+      #item {
+        height: 0;
+      }
+
+      .mnu {
+        padding: 13px;
+      }
+
+      @media (min-width: 800px) {
+        .footer {
+          position: absolute;
+          bottom: 16px;
+          width: 100%;
+        }
+        .paper-fab-0 {
+          position: absolute;
+          left: 48px;
+          bottom: 48px;
+        }
+
+        .paper-fab-1 {
+          position: absolute;
+          right: 48px;
+          bottom: 48px;
+        }
+
+        #info {
+          display: flex;
+        }
+
+        /* #video {
+          width: 400px;
+          height: 325px;
+        }
+
+        #canvas {
+          width: 400px;
+          height: 325px;
+        }
+
+        #btn-take {
+          padding: 10px 105px;
+          margin-left: -7px;
+        } */
+      }
+
+      @media (max-width: 800px) {
+        .paper-fab-0 {
+          position: absolute;
+          left: 16px;
+          bottom: 48px;
+        }
+
+        .paper-fab-1 {
+          position: absolute;
+          right: 16px;
+          bottom: 48px;
+        }
+
+        .docu {
+          margin-left: 16px;
+          margin-right: 16px;
+        }
+
+        /* #video {
+          width: 200px;
+          height: 200px;
+        }
+
+        #canvas {
+          width: 200px;
+          height: 200px;
+        }
+
+        #btn-take {
+          padding: 10px 60px;
+          margin-left: -7px; 
+        }*/
+      }
+
+      .avatar {
+        height: 50px;
+        width: 50px;
+        border-radius: 50%;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+
+      .shortText,
+      .longText {
+        font-size: 14px;
+      }
+
+      .longText {
+        color: gray;
+        /* display: none; */
+      }
+    </style>
+
+    <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+      <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
+        <div class="mnu" role="listbox">
+          <!-- <iron-selector selected="profile" attr-for-selected="name"> -->
+
+          <!-- on-tap="_selectPage" data-args="0" -->
+          <!-- <paper-item id="lotdetails">
+            <div class="circle-mini-first">1</div>
+            <span>Add to Queue</span>
+          </paper-item> -->
+
+          <!--  on-tap="_selectPage" id="0" -->
+          <paper-item id="0">
+            <div class="circle-mini-first" id="0">1</div>
+            <span id="0">Profile Picture</span>
+          </paper-item>
+
+          <!-- on-tap="_selectPage" data-args="2" -->
+          <paper-item id="1">
+            <div id="1" class="circle-mini">2</div>
+            <span id="1">Basic Information</span>
+          </paper-item>
+
+          <!-- on-tap="_selectPage" data-args="3" -->
+          <paper-item id="2">
+            <div id="2" class="circle-mini">3</div>
+            <span id="2">Insurance</span>
+          </paper-item>
+
+          <!-- on-tap="_selectPage" data-args="4" -->
+          <paper-item id="3">
+            <div id="3" class="circle-mini">4</div>
+            <span id="3">In-case of Emergency</span>
+          </paper-item>
+
+          <paper-item id="4">
+            <div id="4" class="circle-mini">5</div>
+            <span id="4">Finalize</span>
+          </paper-item>
+
+          <paper-item>
+            <div class="circle-mini-last">6</div>
+            <span>Completed</span>
+          </paper-item>
+          <!-- </iron-selector> -->
+        </div>
+      </app-drawer>
+
+
+      <app-header-layout id="appheader" has-scrolling-region>
+        <app-header fixed slot="header">
+          <app-toolbar>
+            <a href="/patients">
+              <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
+            </a>
+            <div main-title>Add Patient</div>
+            <!-- <paper-menu-button>
+              <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
+              <paper-listbox slot="dropdown-content" style="cursor:pointer">
+                <paper-item>Discard</paper-item>
+                <paper-item>Delete</paper-item>
+              </paper-listbox>
+            </paper-menu-button>
+            <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button> -->
+            <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle></paper-icon-button>
+          </app-toolbar>
+        </app-header>
+
+        <firebase-query id="query" path="{{path}}" data="{{patientsLength}}">
+        </firebase-query>
+
+        <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+
+          <!-- <neon-animatable>
+            <div class="docu">
+
+              <div class="docu-header">
+                <span>1. Add to Queue</span>
+              </div>
+
+              <div class="details">
+                <paper-input></paper-input>
+              </div>
+
+            </div>
+          </neon-animatable> -->
+
+          <neon-animatable>
+            <div class="docu">
+
+              <div class="docu-header">
+                <span>1. Profile Picture</span>
+              </div>
+
+              <div class="details" style="text-align:center">
+
+                <!-- <canvas style="border-radius:50%; display:none" id="myCanvass"></canvas> -->
+                <img id="profilePic" style="width:200px; height:200px; border-radius:50%;" src="../images/user.png">
+                <br>
+                <div class="upload-btn-wrapper">
+                  <button class="btn">Upload profile picture</button>
+                  <input on-change="_changepic" id="myfile" type="file" name="myfile" accept="image/*" />
+                </div>
+                <br>
+                <!-- <span id="err" style="display:none; font-size:6px;">No file chosen</span> -->
+                <!-- <div id="select"> -->
+                <!-- <div style="margin-top:8px;">
+                    <div class="upload-btn-wrapper">
+                      <button class="myBtn">Take a photo</button>
+                      <input type="file" name="myfile" accept="image/*" />
+                    </div>
+                  </div> -->
+                <!-- <div id="recordMe" style="display:none">
+                  <video style="border:2px solid #ddbff5" id="video" autoplay></video>
+                  <br>
+                  <button class="myBtn" id="btn-take" on-tap="snapMe">Capture</button>
+                </div>
+
+                <div id="ohSnap" style="display:none;"> -->
+                <!-- <button id="snap" on-tap="snapMe">Snap Photo</button> -->
+                <!-- <canvas style="border:2px solid #ddbff5;" id="canvas"></canvas>
+                  <br>
+                  <button class="myBtn" id="btn-take" on-tap="_discard">Discard</button>
+                </div> -->
+                <!-- <br>
+                <div style="text-align:center; margin-top:15px;">
+                  <div class="upload-btn-wrapper">
+                    <button class="btn">Take a photo</button>
+                    <input type="file" name="myfile1" accept="image/*" />
+                  </div>
+                  <br>
+                  <div class="upload-btn-wrapper">
+                    <button class="btn">Upload a photo</button>
+                    <input type="file" name="myfile3" accept="image/*,video/*" />
+                  </div>
+                </div> -->
+                <!-- </div> -->
+
+              </div>
+            </div>
+          </neon-animatable>
+
+          <neon-animatable>
+
+            <div class="docu">
+              <div class="docu-header">
+                <span>2. Basic Information</span>
+              </div>
+
+              <div class="details">
+                <div id="info">
+                  <paper-input id="fname" value="{{fname}}" label="Firstname *" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input id="mname" value="{{mname}}" label="Middlename *" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input id="lname" value="{{lname}}" label="Lastname *" style="width:100%"></paper-input>
+                </div>
+                <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
+                <div id="info">
+                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$" auto-validate
+                    error-message="Invalid date format!" value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
+                  <paper-input value="{{age}}" label="Age" style="width:100%;"></paper-input>
+                  <!-- <span>Age: {{age}}</span> -->
+                </div>
+                <div id="info">
+                  <paper-dropdown-menu-light label="Marital Status" style="width:100%; margin-right:10px">
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{status}}" class="dropdown-content">
+                      <paper-item id="item">Single</paper-item>
+                      <paper-item id="item">Married</paper-item>
+                      <paper-item id="item">Divorced</paper-item>
+                      <paper-item id="item">Separated</paper-item>
+                      <paper-item id="item">Widowed</paper-item>
+                    </paper-listbox>
+                  </paper-dropdown-menu-light>
+                  <paper-dropdown-menu-light label="Gender" style="width:100%; margin-right:10px">
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{sex}}" class="dropdown-content">
+                      <paper-item id="item">Male</paper-item>
+                      <paper-item id="item">Female</paper-item>
+                    </paper-listbox>
+                  </paper-dropdown-menu-light>
+                  <paper-input type="number" value="{{contact}}" label="Contact Number" style="width:100%;"></paper-input>
+                </div>
+                <paper-input value="{{address}}" label="Street Address"></paper-input>
+                <paper-input value="{{occupation}}" label="Occupation"></paper-input>
+                <div id="info">
+                  <paper-input value="{{employer}}" label="Employer" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input value="{{emp_phone}}" type="number" label="Employer Phone no." style="width:100%"></paper-input>
+                </div>
+                <br>
+                <span>Referred to clinic by (choose one)</span>
+                <div id="info">
+                  <paper-radio-group style="font-size:14px;" selected="{{refer}}">
+                    <paper-radio-button name="Dr">Dr</paper-radio-button>
+                    <paper-radio-button name="Insurance plan">Insurance plan</paper-radio-button>
+                    <paper-radio-button name="Hospital">Hospital</paper-radio-button>
+                  </paper-radio-group>
+                </div>
+                <paper-input style="margin-top:-15px; display:none" id="doctor" value="{{doctor}}" label="Dr."></paper-input>
+                <paper-input style="margin-top:-15px; display:none" id="hospital" value="{{hospital_name}}" label="Hospital name"></paper-input>
+              </div>
+            </div>
+            <br>
+            <br>
+            <br>
+          </neon-animatable>
+
+          <neon-animatable>
+            <div class="docu">
+
+              <div class="docu-header">
+                <span>3. Insurance</span>
+              </div>
+
+              <div class="details">
+                <div id="info">
+                  <paper-input value="{{card}}" Label="ID Card Number" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input value="{{bdate}}" placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$"
+                    auto-validate error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
+                </div>
+                <paper-input value="{{in_address}}" Label="Address (If different)"></paper-input>
+                <paper-input value="{{home_phone}}" type="number" Label="Home phone no."></paper-input>
+                <paper-input value="{{indicate}}" Label="Please indicate primary insurance"></paper-input>
+                <paper-input value="{{p_relation}}" Label="Relationship to patient"></paper-input>
+              </div>
+
+            </div>
+            <br>
+            <br>
+            <br>
+          </neon-animatable>
+
+          <neon-animatable>
+            <div class="docu">
+
+              <div class="docu-header">
+                <span>4. In-case of emergency</span>
+              </div>
+
+              <div class="details">
+                <div id="info">
+                  <paper-input value="{{name_e}}" label="Name of local friend or relative" style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input value="{{relation_e}}" label="Relationship to patient" style="width:100%;"></paper-input>
+                </div>
+                <div id="info">
+                  <paper-input value="{{phone_e}}" type="number" label="Home phone no." style="width:100%; margin-right:10px"></paper-input>
+                  <paper-input value="{{work_phone}}" type="number" label="Work phone no" style="width:100%;"></paper-input>
+                </div>
+              </div>
+
+            </div>
+            <br>
+            <br>
+            <br>
+          </neon-animatable>
+
+          <neon-animatable>
+
+            <div style="margin-right:10px">
+              <div style="float:right; padding:16px; margin-top:-34px;">
+                <paper-input type="date" value="{{todayDate}}" style="width:150px">
+                  <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                </paper-input>
+                <div style="margin-left:4px;margin-top:-10px;">
+                  <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="docu" style="margin-top:62px;">
+              <div class="docu-header">5. Finalize</div>
+
+              <div class="details">
+                <!-- <div style="margin-bottom:10px;">Please review the following details:</div> -->
+                <img id="p_profile" src="../images/user.png" class="avatar">
+
+                <!-- <div style="font-weight:bold">Basic Information</div> -->
+
+                <table style="margin-bottom:6px;">
+                  <tr>
+                    <td>
+                      <span class="longText">Firstname</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{fname}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Middlename</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{mname}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Lastname</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{lname}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Email address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{email}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Birth date</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{bday}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Age</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{age}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Marital Status</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{stat}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Gender</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{gender}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Contact no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{contact}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Street address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{address}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Occupation</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{occupation}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Employer</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{occupation}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Employer phone no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{emp_phone}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Referred to clinic by</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{referredby}}</td>
+                  </tr>
+                </table>
+
+                <div style="font-weight:bold; padding:5px; background:rgb(236, 235, 235)">Insurance</div>
+                <table style="padding:6px">
+                  <tr>
+                    <td>
+                      <span class="longText">ID Card no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{card}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Birth date</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{bdate}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{in_address}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Home phone no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{home_phone}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Primary Insurance</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{indicate}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Relationship to patient</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{p_relation}}</td>
+                  </tr>
+                </table>
+
+                <div style="font-weight:bold; padding:5px; background:rgb(236, 235, 235)">In-case of emergency</div>
+                <table style="padding:6px">
+                  <tr>
+                    <td>
+                      <span class="longText">Name</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{name_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Relationship to patient</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{relation_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Home phone no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{phone_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Work phone no</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{work_phone}}</td>
+                  </tr>
+                </table>
+
+
+
+                <!-- <div style="margin-left:10px;">
+                  <div>Email address: {{email}}</div>
+                  <div>Firstname: {{fname}}</div>
+                  <div>Middlename: {{mname}}</div>
+                  <div>Lastname: {{lname}}</div>
+                  <div>Birth date: {{bday}}</div>
+                  <div>Age: {{age}}</div>
+                  <div>Marital Status: {{stat}}</div>
+                  <div>Sex: {{gender}}</div>
+                  <div>Contact no: {{contact}}</div>
+                  <div>Street address: {{address}}</div>
+                  <div>Occupation: {{occupation}}</div>
+                  <div>Employer: {{employer}}</div>
+                  <div>Employer phone no: {{emp_phone}}</div>
+                </div>
+                <div style="font-weight:bold">Insurance</div>
+                <div style="margin-left:10px;">
+                  <div>ID Card no: {{card}}</div>
+                  <div>Birth date: {{bdate}}</div>
+                  <div>address: {{in_address}}</div>
+                  <div>Home phone no: {{home_phone}}</div>
+                  <div>Primary insurance: {{indicate}}</div>
+                  <div>Relationship to patient: {{p_relation}}</div>
+                </div>
+                <div style="font-weight:bold">In-case of emergency</div>
+                <div style="margin-left:10px;">
+                  <div>Name: {{name_e}}</div>
+                  <div>Relationship to patient: {{relation_e}}</div>
+                  <div>Home phone no: {{phone_e}}</div>
+                  <div>Work phone no: {{work_phone}}</div>
+                </div> -->
+              </div>
+            </div>
+            <br>
+            <br>
+            <br>
+          </neon-animatable>
+
+          <neon-animatable>
+            <div class="docu">
+              <div class="docu-header">6. Completed</div>
+
+              <div class="details">
+                <div id="saveSuccess" style="color: green; display:none;">Patient successfully saved.
+                  <br> Patient no
+                  <b style="color:blue">{{no}}</b>
+                </div>
+                <div id="saveLoad" style="color: orange; display:none;">Saving patient info.</div>
+                <div id="saveFailed" style="color: red; display:none;">Opps! Something went wrong while saving patient.</div>
+              </div>
+            </div>
+          </neon-animatable>
+
+        </neon-animated-pages>
+
+      </app-header-layout>
+
+      <div class="footer">
+        <div hidden$="[[favlefthide]]">
+          <paper-fab style="background: #1976d2;" id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
+        </div>
+        <div hidden$="[[favrighthide]]">
+          <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+        </div>
+      </div>
+
+    </app-drawer-layout>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-patients-new',
+
+      properties: {
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        myKey: String,
+        selectedPage: Number,
+        entryanimation: {
+          type: String,
+          value: "slide-from-right-animation"
+        },
+        exitanimation: {
+          type: String,
+          value: "slide-left-animation"
+        },
+        favlefthide: {
+          type: Boolean,
+          value: true
+        },
+        favrighthide: {
+          type: Boolean,
+          value: true
+        },
+        mname: {
+          type: String,
+          value: ''
+        },
+        email: {
+          type: String,
+          value: ''
+        },
+        bday: {
+          type: String,
+          value: ''
+        },
+        age: {
+          type: String,
+          value: ''
+        },
+        contact: {
+          type: String,
+          value: ''
+        },
+        address: {
+          type: String,
+          value: ''
+        },
+        occupation: {
+          type: String,
+          value: ''
+        },
+        employer: {
+          type: String,
+          value: ''
+        },
+        emp_phone: {
+          type: String,
+          value: ''
+        },
+        gender: {
+          type: String,
+          value: ''
+        },
+        stat: {
+          type: String,
+          value: ''
+        },
+        doctor: {
+          type: String,
+          value: ''
+        },
+        hospital_name: {
+          type: String,
+          value: ''
+        },
+
+        card: {
+          type: String,
+          value: ''
+        },
+        bdate: {
+          type: String,
+          value: ''
+        },
+        in_address: {
+          type: String,
+          value: ''
+        },
+        home_phone: {
+          type: String,
+          value: ''
+        },
+        indicate: {
+          type: String,
+          value: ''
+        },
+        p_relation: {
+          type: String,
+          value: ''
+        },
+
+        name_e: {
+          type: String,
+          value: ''
+        },
+        relation_e: {
+          type: String,
+          value: ''
+        },
+        phone_e: {
+          type: String,
+          value: ''
+        },
+        work_phone: {
+          type: String,
+          value: ''
+        },
+        profile: String,
+        personal: Object,
+        insurance: Object,
+        emergency: Object,
+        length: {
+          type: Number,
+          value: 0
+        },
+        todayDate: String
+        // canvas: String,
+        // context: String,
+        // video: String,
+        // localstream: Object,
+      },
+
+      observers: [
+        'personalInfoChanged(doctor,refer,hospital_name,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
+        'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
+        'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
+        '_todayDateChanged(todayDate)'
+      ],
+
+      _todayDateChanged(date) {
+        var monthNames = [
+          "January", "February", "March",
+          "April", "May", "June", "July",
+          "August", "September", "October",
+          "November", "December"
+        ];
+
+        var d = new Date(date);
+        if (date) {
+          Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+          this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+          this.favrighthide = false;
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+          this.text = 'Please choose date.';
+          this.favrighthide = true;
+        }
+      },
+
+      // _selectPage(e) {
+      //   var select = Polymer.dom(e).rootTarget.getAttribute("id");
+      //   this.selectedPage = select;
+      // },
+
+      personalInfoChanged(doctor, refer, hospital_name, email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
+        if (fname) {
+          this.fname = fname.toUpperCase();
+          fname = fname.toUpperCase();
+        }
+
+        if (mname) {
+          this.mname = mname.toUpperCase();
+          mname = mname.toUpperCase();
+        }
+
+        if (lname) {
+          this.lname = lname.toUpperCase();
+          lname = lname.toUpperCase();
+        }
+
+        if (bday) {
+          var dateformat = /^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$/;
+          if (bday.match(dateformat)) {
+
+            var mdate = bday.toString();
+
+            var monthThen = parseInt(mdate.substring(0, 2), 10);
+            var dayThen = parseInt(mdate.substring(3, 5), 10);
+            var yearThen = parseInt(mdate.substring(6, 10), 10);
+
+            // yyyy-mm-dd
+            bday = yearThen + '-' + monthThen + '-' + dayThen;
+
+            // bday = new Date(mydate);
+
+            var daysBetweenDates;
+            daysBetweenDates = function (d1, d2) {
+              var diffDays, oneDay;
+              oneDay = 24 * 60 * 60 * 1000;
+              diffDays = (d2 - Date.parse(d1)) / oneDay;
+              return diffDays;
+            };
+
+            var ageNum = daysBetweenDates(bday, new Date()) / 365;
+
+            function N(num, places) {
+              return +(Math.round(num + "e+" + places) + "e-" + places);
+            }
+
+            var x = N(ageNum, 3);
+
+            if (x <= 0) {
+              this.age = 0;
+            }
+            else {
+              this.age = x;
+            }
+          }
+          else {
+            this.age = '';
+          }
+        }
+        else {
+          this.age = '';
+        }
+
+        if (refer) {
+          if (refer == 'Dr') {
+            Polymer.dom(this.root).querySelector("#doctor").style.display = 'block';
+            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
+            doctor = doctor;
+            this.referredby = 'Dr. ' + doctor;
+            hospital_name = '';
+            this.hospital_name = '';
+          }
+          else if (refer == 'Hospital') {
+            Polymer.dom(this.root).querySelector("#hospital").style.display = 'block';
+            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+            this.doctor = '';
+            doctor = '';
+            this.hospital_name = hospital_name;
+            hospital_name = hospital_name;
+            this.referredby = hospital_name;
+          }
+          else {
+            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
+            this.doctor = '';
+            doctor = '';
+            this.hospital_name = '';
+            hospital_name = '';
+            this.referredby = refer;
+          }
+        }
+        else {
+          refer = '';
+        }
+
+        if (sex == 0) {
+          this.gender = 'Male';
+        }
+        if (sex == 1) {
+          this.gender = 'Female';
+        }
+        if (status == 0) {
+          this.stat = 'Single';
+        }
+        if (status == 1) {
+          this.stat = 'Married';
+        }
+        if (status == 2) {
+          this.stat = 'Divorced'
+        }
+        if (status == 3) {
+          this.stat = 'Separated';
+        }
+        if (status == 4) {
+          this.stat = 'Widowed';
+        }
+
+        if (!fname || !lname) {
+          this.favrighthide = true;
+        }
+        else {
+          // console.log(bday);
+          this.favrighthide = false;
+          this.personal = {
+            email: email,
+            firstname: fname,
+            middlename: mname,
+            lastname: lname,
+            birthday: bday,
+            status: this.stat,
+            sex: this.gender,
+            contact: contact,
+            address: address,
+            occupation: occupation,
+            employer: employer,
+            emp_phone: emp_phone,
+            referred: refer,
+            doctor: doctor,
+            hospital: hospital_name,
+            name: lname + ', ' + fname + ' ' + mname
+          }
+        }
+      },
+
+      insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation) {
+        var date = '';
+        if (bdate) {
+          var dateformat = /^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$/;
+          if (bdate.match(dateformat)) {
+            this.ibd = bdate;
+            date = bdate;
+          }
+          else {
+            this.ibd = '';
+            date = '';
+          }
+        }
+        else {
+          this.ibd = '';
+          date = '';
+        }
+
+        this.insurance = {
+          card: card,
+          birthday: bdate,
+          address: in_address,
+          home_phone: home_phone,
+          primary_insurance: indicate,
+          relationship: p_relation
+        }
+      },
+
+      emergencyChanged(name_e, relation_e, phone_e, work_phone) {
+        this.emergency = {
+          name: name_e,
+          relationship: relation_e,
+          home_phone: phone_e,
+          work_phone: work_phone
+        }
+      },
+
+      _changepic(e) {
+        if (e.target.files.length > 0) {
+          // Polymer.dom(this.root).querySelector("#err").style.display = 'none';
+          var img = Polymer.dom(this.root).querySelector("#profilePic");
+          var i = Polymer.dom(this.root).querySelector("#p_profile");
+
+          this.profile = e.target.files[0];
+
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            img.src = e.target.result;
+            i.src = e.target.result;
+          };
+          reader.readAsDataURL(e.target.files[0]);
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#profilePic").src = '../images/user.png';
+          Polymer.dom(this.root).querySelector("#p_profile").src = '../images/user.png';
+          // Polymer.dom(this.root).querySelector("#err").style.display = 'inline-block';
+        }
+      },
+
+      toggleDrawer() {
+        this.dispatchEvent(new CustomEvent('toggleDrawer', {
+          bubbles: true, composed: true, detail: {
+            narrow: this.$.narrow
+          }
+        }));
+        this.$.narrow = !this.$.narrow;
+      },
+
+      formatTodayDate(date) {
+        var monthNames = [
+          "01", "02", "03",
+          "04", "05", "06", "07",
+          "08", "09", "10",
+          "11", "12"
+        ];
+
+        var day = date.getDate();
+        if (day < 10) { day = '0' + day };
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return year + '-' + monthNames[monthIndex] + '-' + day;
+      },
+
+      ready() {
+        this.selectedPage = 0;
+        this.favrighthide = false;
+        this.todayDate = this.formatTodayDate(new Date());
+        // this.canvas = Polymer.dom(this.root).querySelector("#canvas");
+        // this.context = this.canvas.getContext('2d');
+        // this.video = Polymer.dom(this.root).querySelector("#video");
+        // this.imgHolder = Polymer.dom(this.root).querySelector("#profilePic");
+      },
+
+      _select1(e) {
+        this.entryanimation = "slide-from-left-animation";
+        this.exitanimation = "slide-right-animation";
+
+        if (parseInt(this.selectedPage) <= 5) {
+          if (parseInt(this.selectedPage) !== 0) {
+            this.selectedPage = (parseInt(this.selectedPage) - 1);
+
+            if (this.selectedPage === 0) {
+              this.favlefthide = true;
+            }
+
+            if (this.selectedPage == 4) {
+              this.favrighthide = true;
+            }
+            else {
+              Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+              Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+              this.favrighthide = false;
+            }
+
+          }
+          else {
+            this.favlefthide = true;
+            this.favrighthide = false;
+          }
+        }
+        else {
+          this.selectedPage = 5;
+        }
+
+      },
+
+      _select2(e) {
+        this.entryanimation = "slide-from-right-animation";
+        this.exitanimation = "slide-left-animation";
+
+        if (parseInt(this.selectedPage) >= 0) {
+
+          if (parseInt(this.selectedPage) == 0) {
+            if (!this.fname || !this.lname) {
+              this.favlefthide = false;
+              this.favrighthide = true;
+            }
+            else {
+              this.favlefthide = false;
+              this.favrighthide = false;
+            }
+          }
+
+          if (parseInt(this.selectedPage) == 3) {
+            if (!this.todayDate) {
+              this.favrighthide = true;
+            }
+            else {
+              this.favrighthide = false;
+            }
+          }
+
+          // if (parseInt(this.selectedPage) == 1) {
+          //   if (!this.card || !this.bdate || !this.in_address || !this.home_phone || !this.indicate || !this.p_relation) {
+          //     this.favlefthide = false;
+          //     this.favrighthide = true;
+          //   }
+          //   else {
+          //     this.favlefthide = false;
+          //     this.favrighthide = false;
+          //   }
+          // }
+
+          // if (parseInt(this.selectedPage) == 2) {
+          //   if (!this.name_e || !this.relation_e || !this.phone_e || !this.work_phone) {
+          //     this.favlefthide = false;
+          //     this.favrighthide = true;
+          //   }
+          //   else {
+          //     this.favlefthide = false;
+          //     this.favrighthide = false;
+          //   }
+          // }
+
+          if (parseInt(this.selectedPage) == 4) {
+            //complete
+            var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
+            var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+            var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
+
+            var info = this.personal, insure = this.insurance, emerg = this.emergency;
+            var mykey = this.myKey;
+            var today = this.todayDate;
+
+            saveLoad.style.display = 'block';
+            var ref = firebase.database().ref("/" + mykey + "/patients");
+            var push = ref.push({
+              personal: info,
+              insurance: insure,
+              emergency: emerg,
+              created: today
+            });
+
+            if (push.key) {
+              this.path = '/' + mykey + '/patients';
+              var num = this.patientsLength.length;
+              this.no = this._patientsNoUpdate(num, mykey, push.key);
+              this._reportsUpdate(today, mykey);
+
+              if (this.profile) {
+                var ext = this.profile.type.substring(6);
+                var pic_name = this.randomString(8) + '.' + ext;
+
+                if (this.profile.size > 9999) {
+                  ImageTools.resize(this.profile, {
+                    width: 440, // maximum width
+                    height: 400 // maximum height
+                  }, function (blob, didItResize) {
+                    var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+                    storageRef.put(blob).then(function (snapshot) {
+                      firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
+                    });
+
+                  });
+                }
+                else {
+                  var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+                  storageRef.put(this.profile).then(function (snapshot) {
+                    firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
+                  });
+                }
+              }
+
+              saveLoad.style.display = 'none';
+              saveSucc.style.display = 'block';
+            }
+            else {
+              this.path = '';
+              saveLoad.style.display = 'none';
+              saveErr.style.display = 'block';
+            }
+          }
+
+          if (parseInt(this.selectedPage) !== 5) {
+
+            this.selectedPage = (parseInt(this.selectedPage) + 1);
+
+            if (parseInt(this.selectedPage) == 4) {
+              Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+              Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+            }
+
+            if (parseInt(this.selectedPage) == 5) {
+              this.favlefthide = false;
+              this.favrighthide = true;
+            }
+          }
+        }
+        else {
+          this.selectedPage = 0;
+          this.favlefthide = true;
+          this.favrighthide = false;
+        }
+      },
+
+      _patientsNoUpdate(num, mykey, pushkey) {
+        if (num > 0 && num < 10) {
+          num = '000' + num;
+        }
+        else if (num > 9 && num < 100) {
+          num = '00' + num;
+        }
+        else if (num > 99 && num < 1000) {
+          num = '0' + num;
+        }
+        else if (num > 999) {
+          num = num;
+        }
+        else {
+          num = '0000';
+        }
+
+        firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
+        return num;
+      },
+
+      _reportsUpdate(today, mykey) {
+        var mm = today.substring(0, 7);
+        var yy = today.substring(0, 4);
+
+        var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
+        dayRef.once('value').then(function (snapshot) {
+          dayRef.set(snapshot.val() + 1);
+        });
+
+        var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
+        yearRef.once('value').then(function (snapshot) {
+          yearRef.set(snapshot.val() + 1);
+        });
+
+        var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
+        monthRef.once('value').then(function (snapshot) {
+          monthRef.set(snapshot.val() + 1);
+        });
+      },
+
+      randomString(n) {
+        var r = "";
+        while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+        return r;
+      }
+
+      // _select2(e) {
+      //   this.entryanimation = "slide-from-right-animation";
+      //   this.exitanimation = "slide-left-animation";
+
+      //   if (parseInt(this.selectedPage) !== 4) {
+      //     this.selectedPage = (parseInt(this.selectedPage) + 1);
+      //     Polymer.dom(this.root).querySelector("#favleft").setAttribute("style", "background: #1976d2;");
+      //     Polymer.dom(this.root).querySelector("#favleft").setAttribute("icon", "my-icons:chevron-left");
+      //     this.favlefthide = false;
+      //   }
+      //   else {
+      //     this.selectedPage = 0;
+      //     this.favlefthide = true;
+      //   }
+
+      // },
+
+      // _discard() {
+      //   Polymer.dom(this.root).querySelector("#select").style.display = 'block';
+      //   Polymer.dom(this.root).querySelector("#recordMe").style.display = 'none';
+      //   Polymer.dom(this.root).querySelector("#ohSnap").style.display = 'none';
+      // },
+
+      // snapMe() {
+      //   Polymer.dom(this.root).querySelector("#select").style.display = 'none';
+      //   Polymer.dom(this.root).querySelector("#recordMe").style.display = 'none';
+      //   Polymer.dom(this.root).querySelector("#ohSnap").style.display = 'block';
+
+      //   this.context.drawImage(this.video, 0, 0, 300, 150);
+      //   if (this.context) {
+      //     this.localstream.getTracks().forEach((track) => {
+      //       track.stop();
+      //     })
+      //   }
+      // },
+
+      // _capture() {
+      //   Polymer.dom(this.root).querySelector("#select").style.display = 'none';
+      //   Polymer.dom(this.root).querySelector("#recordMe").style.display = 'block';
+      //   Polymer.dom(this.root).querySelector("#ohSnap").style.display = 'none';
+
+      //   var video = this.video;
+      //   vendorUrl = window.URL || window.webkitURL;
+
+      //   // navigator.getMedia = navigator.getUserMedia ||
+      //   //   navigator.webkitGetUserMedia ||
+      //   //   navigator.mozGetUserMedia ||
+      //   //   navigator.msGetUserMedia;
+      //   navigator.mediaDevices.getUserMedia({
+      //     video: true,
+      //     audio: false
+      //   })
+      //     .then(stream => {
+      //       this.localstream = stream;
+      //       video.src = vendorUrl.createObjectURL(stream);
+      //       video.play();
+      //     })
+      //     .catch((err) => {
+      //       window.alert(err);
+      //     });
+      // }
+    })
+  </script>
+</dom-module>

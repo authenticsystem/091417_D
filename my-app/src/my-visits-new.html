@@ -1,0 +1,1197 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html">
+<link rel="import" href="../bower_components/paper-time-input/paper-time-input.html">
+
+<link rel="import" href="time-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="image-resize.html">
+
+<dom-module id="my-visits-new">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            app-header paper-icon-button {
+                --paper-icon-button-ink-color: #000000;
+            }
+
+            app-drawer-layout:not([narrow]) [drawer-toggle] {
+                display: none;
+            }
+
+            app-drawer {
+                --app-drawer-content-container: {
+                    background-color: #F4F5F6;
+                }
+            }
+
+            paper-icon-button.menu {
+                margin-right: 15px;
+            }
+
+            paper-item {
+                height: 64px;
+            }
+
+            .mnu {
+                padding: 16px;
+            }
+
+            paper-fab {
+                background: #1976d2;
+            }
+
+            .labelitem {
+                padding: 0px;
+                margin: 0;
+            }
+
+
+
+            @media (min-width: 800px) {
+                .footer {
+                    position: absolute;
+                    bottom: 16px;
+                    width: 100%;
+                }
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 48px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 48px;
+                    bottom: 48px;
+                }
+
+                .vid-6 {
+                    width: 30%;
+                }
+            }
+
+            @media (max-width: 800px) {
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 16px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 16px;
+                    bottom: 48px;
+                }
+
+                .docu {
+                    margin-left: 16px;
+                    margin-right: 16px;
+                }
+
+                .vid-s-9 {
+                    width: 90%;
+                }
+            }
+
+
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+            }
+
+
+            datetime-picker.begin {
+                --datetime-selected-background: #2362EC;
+                --datetime-background: #071533;
+                --datetime-color: #eeeeee;
+            }
+
+            datetime-picker.end {
+                --datetime-selected-background: #CC1C1C;
+                --datetime-background: #071533;
+                --datetime-color: #eeeeee;
+            }
+
+            paper-item:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
+
+            .avatar {
+                height: 45px;
+                width: 45px;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: transparent;
+            }
+
+            .pad {
+                padding: 0 16px;
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .col-md {
+                padding: 6px;
+            }
+
+            .primary {
+                font-size: 14px;
+                font-weight: 400;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .longText {
+                color: gray;
+                /* display: none; */
+            }
+
+            /* #textera {
+                padding: 16px;
+                font-size: 14px;
+                font-weight: 300;
+                width: 95%;
+                font-family: Arial;
+            } */
+
+            #list {
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                padding: 0;
+                display: none;
+            }
+
+            #attachment-icon {
+                float: right;
+                cursor: pointer;
+                bottom: 16px;
+                left: 10px;
+            }
+
+            #attachment-icon:hover {
+                color: dimgray;
+            }
+
+            .imgh {
+                margin-right: 3px;
+                padding: 6px;
+                display: inline;
+            }
+
+            .imgh:hover {
+                box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
+                cursor: pointer;
+            }
+        </style>
+
+        <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+
+            <app-header-layout id="appheader" has-scrolling-region>
+                <app-header fixed slot="header">
+                    <app-toolbar>
+                        <a href="/visits">
+                            <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
+                        </a>
+                        <div main-title>Add Visit</div>
+                        <!-- <paper-menu-button>
+                            <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+                            <paper-listbox style="cursor:pointer" slot="dropdown-content">
+                                <paper-item>Discard</paper-item>
+                                <paper-item>Delete</paper-item>
+                            </paper-listbox>
+                        </paper-menu-button> -->
+
+                        <!-- <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="toggleDrawer"></paper-icon-button> -->
+                    </app-toolbar>
+                    <!-- <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3.5%;">
+                        <img class="avatar" src="../images/user.png"></img>
+                        <div class="pad">
+                            <div class="primary">Dr. Liz Grimes</div>
+                            <div class="shortText">MD</div>
+                            <div class="longText"></div>
+                        </div>
+                    </app-toolbar> -->
+                </app-header>
+
+                <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+                    <neon-animatable>
+
+                        <firebase-query id="query1" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name" start-at="{{filterValue}}"
+                            limit-to-first="5">
+                        </firebase-query>
+
+                        <firebase-query id="query2" path="/{{myKey}}/patients" data="{{patientInfo}}" order-by-key equal-to="{{myPatientKey}}" limit-to-last="1">
+                        </firebase-query>
+
+                        <div class="docu">
+                            <div class="details">
+
+                                <paper-input on-keyup="_ack" label="Patient *" value="{{filterValue}}" placeholder="Search patient"></paper-input>
+                                <paper-listbox id="list">
+                                    <template is="dom-repeat" items="[[thypatients]]">
+                                        <paper-item on-tap="_bind" id="{{item.$key}} {{item.personal.lastname}}, {{item.personal.firstname}} {{item.personal.middlename}}">
+                                            <paper-item-body two-line>
+                                                <div id="{{item.$key}} {{item.personal.lastname}}, {{item.personal.firstname}} {{item.personal.middlename}}">
+                                                    [[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]
+                                                </div>
+                                            </paper-item-body>
+                                        </paper-item>
+                                    </template>
+                                </paper-listbox>
+
+                                <!-- <div id="info" style="display:none">
+                                    <paper-input readonly label="Birth date" value="{{bday}}"></paper-input>
+                                    <paper-input readonly label="Age" value="{{age}}"></paper-input>
+                                    <paper-input readonly label="Gender" value="{{sex}}"></paper-input>
+                                    <paper-input readonly label="Marital Status" value="{{status}}"></paper-input>
+                                    <paper-input readonly label="Occupation" value="{{occupation}}"></paper-input>
+                                    <paper-input readonly label="Employer" value="{{employer}}"></paper-input>
+                                    <paper-input readonly label="Referred to clinic by" value="{{referred}}"></paper-input>
+                                </div> -->
+                                <!-- <br>
+                                <div id="insure" style="display:none">
+                                    <b style="font-size:18px;">Insurance Information</b>
+                                    <paper-input readonly label="ID Card Number" value="{{card}}"></paper-input>
+                                    <paper-input readonly label="Birth date" value="{{bdate}}"></paper-input>
+                                    <paper-input readonly label="Address" value="{{address}}"></paper-input>
+                                    <paper-input readonly label="Home phone no" value="{{homephone}}"></paper-input>
+                                    <paper-input readonly label="Primary Insurance" value="{{insurance}}"></paper-input>
+                                    <paper-input readonly label="Relationship to patient" value="{{relation}}"></paper-input>
+                                </div> -->
+
+                            </div>
+                        </div>
+
+                        <div id="patientProfile" class="docu" style="margin-top:-16px; display:none;">
+                            <div class="details" style="display: flex;">
+                                <img class="avatar" src="{{p_profile}}"></img>
+                                <div style="margin-left:10px; font-weight:400; color:black">
+                                    <span style="font-size:11px;display:block" class="longText">{{p_num}}</span>
+                                    <span class="primary">{{filterValue}}</span>
+                                    <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}} {{sex}}</span>
+                                    <!-- <span class="longText" style="font-weight:400">{{_myAgeSex(age,sex)}}</span> -->
+                                    <span class="longText" style="font-weight:400;display:block">{{_hmo(insurance)}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <firebase-query id="query3" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}" data="{{mycases}}"
+                            limit-to-last="1">
+                        </firebase-query>
+
+                        <firebase-query id="query4" path="{{path}}" order-by-child="patientkey" equal-to="{{myNewPatientKey}}" data="{{mytimeCheck}}">
+                        </firebase-query>
+
+                        <div id="lastVisit" class="docu" style="margin-top:-16px; display:none">
+                            <div class="details">
+                                <div id="showed" id="prev">
+                                    <!-- <span class="primary" style="color:black; font-weight:400">Last Visit</span> -->
+                                    <div>{{noprev}}</div>
+                                    <template is="dom-repeat" items="[[mycases]]">
+                                        <div style="margin-bottom:16px;">
+                                            <span class="primary" style="color:black; font-weight:400; margin-right:2px;">Last Visit</span>
+                                            <iron-icon icon="my-icons:watch-later"></iron-icon>
+                                            <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                                            <!-- <paper-icon-button on-tap="_showAttach" id="attachment-icon" icon="my-icons:attachment" title="attacments"></paper-icon-button> -->
+                                        </div>
+                                        <span class="longText">Chief Complaint</span>
+                                        <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+
+                                        <div hidden$="{{!item.history}}">
+                                            <span class="longText">History</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.history}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.diagnosis}}">
+                                            <span class="longText">Diagnosis</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.diagnosis}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.treatment}}">
+                                            <span class="longText">Treatment</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.treatment}}</div>
+                                        </div>
+                                    </template>
+                                    <!-- <span style="font-size:16px;">{{attach}}</span>
+                                    <firebase-query id="query4" path="/{{myKey}}/cases/{{myAttachKey}}/attachment" data="{{myattachment}}" limit-to-last="1">
+                                    </firebase-query>
+                                    <ul>
+                                        <template is="dom-repeat" items="[[myattachment]]">
+                                            <li>
+                                                <a href="{{item.url}}" target="_blank">[[item.name]]</a>
+                                            </li>
+                                        </template>
+                                    </ul> -->
+                                </div>
+
+                                <!-- <div class="prev" id="show" style="display:none">
+                                    <div>
+                                        <paper-icon-button on-tap="_hideAttach" style="bottom:16px; right:16px" icon="my-icons:close" title="close"></paper-icon-button>
+                                    </div>
+
+                                    <firebase-query id="query" path="/{{myKey}}/cases/{{myAttachKey}}/attachment" data="{{myimage}}" order-by-child="type" equal-to="image">
+                                    </firebase-query>
+                                    Images
+                                    <div style="padding:16px; text-align:center; border: 1px solid gray">
+                                        {{imageTxt}}
+                                        <sl-gallery>
+                                            <template is="dom-repeat" items="{{myimage}}">
+                                                <sl-gallery-image preload fade src="[[item.url]]" small="[[item.url]]"></sl-gallery-image>
+                                            </template>
+                                        </sl-gallery>
+                                    </div>
+                                    <br>
+
+                                    <firebase-query id="query" path="/{{myKey}}/cases/{{myAttachKey}}/attachment" data="{{myvideo}}" order-by-child="type" equal-to="video">
+                                    </firebase-query>
+                                    Videos
+                                    <div style="padding:16px; text-align:center; border: 1px solid gray">
+                                        {{videoTxt}}
+                                        <template is="dom-repeat" items="{{myvideo}}">
+                                            <video class="imgh vid-6 vid-s-9" controls preload="auto" id="[[item.$key]]" src="[[item.url]]"></video>
+                                        </template>
+                                    </div>
+                                </div> -->
+
+                            </div>
+                        </div>
+
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="details">
+                                <paper-input label="Date" type="date" value="{{todayDate}}" style="width:150px">
+                                    <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                                </paper-input>
+                                <div style="margin-left:4px;margin-top:-10px;">
+                                    <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                                </div>
+                                <!-- <b style="font-size:18px;">Today</b> -->
+                                <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
+                                <paper-textarea label="History" value="{{history}}"></paper-textarea>
+                                <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
+                                <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
+                                <!-- <div style="font-size:16px; margin-top:16px;">Health Records</div>
+                                    <div style="border:1px solid gray; padding:6px;">
+                                        <input on-change="_changeAttach" type="file" id="myFile" accept="image/*,video/*" multiple="multiple" />
+                                        <output style="font-size:14px;" id="fileList"></output>
+                                    </div> -->
+                            </div>
+                        </div>
+                        <br>
+                        <br>
+                        <br>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="details">
+                                <div id="saveSuccess" style="color: green; display:none">Visit successfully saved.</div>
+                                <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving data.</div>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                </neon-animated-pages>
+
+            </app-header-layout>
+
+            <div class="footer">
+                <div hidden$="[[favlefthide]]">
+                    <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
+                </div>
+                <div hidden$="[[favrighthide]]">
+                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+                </div>
+            </div>
+
+        </app-drawer-layout>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-visits-new',
+
+            properties: {
+                narrow: {
+                    type: Boolean,
+                    notify: true
+                },
+                myKey: String,
+                selectedPage: Number,
+                entryanimation: {
+                    type: String,
+                    value: "slide-from-right-animation"
+                },
+                exitanimation: {
+                    type: String,
+                    value: "slide-left-animation"
+                },
+                favlefthide: {
+                    type: Boolean,
+                    value: true
+                },
+                favrighthide: {
+                    type: Boolean,
+                    value: true
+                },
+                complain: {
+                    type: String
+                },
+                history: {
+                    type: String,
+                    value: ''
+                },
+                diagnosis: {
+                    type: String,
+                    value: ''
+                },
+                treatment: {
+                    type: String,
+                    value: ''
+                },
+                attachment: {
+                    type: Object,
+                    value: ''
+                },
+                mykey: String,
+                myimage: {
+                    type: Object,
+                    observer: '_myimageChanged'
+                },
+                myvideo: {
+                    type: Object,
+                    observer: '_myvideoChanged'
+                },
+                todayDate: String,
+                lastPushTime: {
+                    type: Number,
+                    value: 0
+                },
+                myPatientKey: String
+            },
+
+            _showAttach() {
+                Polymer.dom(this.root).querySelector("#showed").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#show").style.display = 'block';
+            },
+
+            _hideAttach() {
+                Polymer.dom(this.root).querySelector("#showed").style.display = 'block';
+                Polymer.dom(this.root).querySelector("#show").style.display = 'none';
+            },
+
+            _myvideoChanged(e) {
+                if (e.length > 0) {
+                    this.videoTxt = '';
+                }
+                else {
+                    this.videoTxt = 'No Videos Attach';
+                }
+            },
+
+            _myimageChanged(e) {
+                if (e.length > 0) {
+                    this.imageTxt = '';
+                }
+                else {
+                    this.imageTxt = 'No Images Attach';
+                }
+            },
+
+            // Filter: function (val) {
+            //     if (!val) {
+            //         Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
+            //         Polymer.dom(this.root).querySelector("#info").style.display = 'none';
+            //         Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+            //     }
+            //     else {
+            //         var c = val.toLowerCase().replace(/\b[a-z]/g, function (letter) {
+            //             return letter.toUpperCase();
+            //         });
+            //         val = c;
+            //         this.filterValue = c;
+            //         console.log(val);
+            //         Polymer.dom(this.root).querySelector("#list").style.display = 'block';
+            //     }
+            // return function (person) {
+            //     var name = person.personal.firstname + ' ' + person.personal.middlename + ' ' + person.personal.lastname;
+            //     // console.log(name);
+            //     if (!val) {
+            //         return false;
+            //     }
+            //     else {
+            //         return !name.toLowerCase().indexOf(val.toLowerCase());
+            //     }
+            // };
+            //},
+
+            _date(e) {
+                if (e) {
+                    var date = new Date(e);
+                    var options = {
+                        weekday: "long", year: "numeric", month: "short",
+                        day: "numeric", hour: "2-digit", minute: "2-digit"
+                    };
+
+                    return date.toLocaleTimeString("en-us", options);
+                }
+            },
+
+            _bind(e) {
+                this.favrighthide = false;
+                var str = Polymer.dom(e).rootTarget.getAttribute("id");
+                var name = str.slice(21);
+                var key = str.slice(0, 20);
+
+                if (name) {
+                    this.filterValue = name;
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                }
+
+                if (key) {
+                    Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'block';
+                    Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'block';
+                    // Polymer.dom(this.root).querySelector("#info").style.display = 'block';
+                    this.myPatientKey = key;
+                    this.mykey = key;
+                }
+            },
+
+            _changeAttach(e) {
+                var list = Polymer.dom(this.root).querySelector("#fileList");
+                if (e.target.files.length > 0) {
+
+                    var files = e.target.files;
+                    this.attachment = files;
+
+                    if (e.target.files.length > 1) {
+                        var output = [];
+                        for (var i = 0, f; f = files[i]; i++) {
+                            output.push('<li>', escape(f.name), '</li>');
+                            // output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ')</li>');
+                            // output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                            //     f.size, ' bytes, last modified: ',
+                            //     f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                            //     '</li>');
+                        }
+                        list.innerHTML = '<ul>' + output.join('') + '</ul>';
+                    }
+                    else {
+                        list.innerHTML = '';
+                    }
+                }
+                else {
+                    list.innerHTML = '';
+                }
+            },
+
+            ready() {
+                this.selectedPage = 0;
+                this.favrighthide = true;
+                this.favlefthide = true;
+                this.todayDate = this.formatTodayDate(new Date());
+            },
+
+            observers: [
+                '_patientChanged(filterValue)',
+                '_showFab1(complain, todayDate)',
+                '_mypatientInfoChanged(patientInfo)',
+                '_myCasesChanged(mycases)',
+                '_myattachmentChaged(myattachment)',
+                '_mytimeCheckChanged(mytimeCheck, todayDate, myNewPatientKey)'
+            ],
+
+            _mytimeCheckChanged(timeCheck, date, myNewPatientKey) {
+                var monthNames = [
+                    "January", "February", "March",
+                    "April", "May", "June", "July",
+                    "August", "September", "October",
+                    "November", "December"
+                ];
+
+                var d = new Date(date);
+                if (date) {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+                    this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+                    this.text = 'Please choose date.';
+                }
+
+                var x = 0;
+
+                if (myNewPatientKey) {
+                    this.path = '/' + this.myKey + '/cases';
+                    if (date < this.formatTodayDate(new Date())) {
+                        if (timeCheck.length > 0) {
+                            timeCheck.forEach(element => {
+                                if (date === element.created) {
+                                    x = element.timestamp;
+                                }
+                            });
+                            this.lastPushTime = x;
+                        }
+                    } else { this.lastPushTime = x; }
+                }
+                else { this.myNewPatientKey = this.myPatientKey; }
+            },
+
+            _myattachmentChaged(e) {
+                if (e.length > 0) {
+                    this.attach = 'Attachment';
+                }
+                else {
+                    this.attach = '';
+                }
+            },
+
+            _myCasesChanged(e) {
+                if (e.length > 0) {
+                    this.noprev = '';
+                    this.myAttachKey = e[0].$key;
+                }
+                else {
+                    this.noprev = 'No previous visit.';
+                    this.myAttachKey = '';
+                }
+            },
+
+            _mypatientInfoChanged(p) {
+                if (p.length > 0) {
+                    if (p[0].profile) {
+                        this.p_profile = p[0].profile;
+                    }
+                    else {
+                        this.p_profile = '../images/user.png';
+                    }
+
+                    this.bday = p[0].personal.birthday;
+
+                    if (p[0].personal.birthday) {
+
+                        var today = new Date();
+                        var birthday = new Date(p[0].personal.birthday);
+
+                        var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+                        var year_age = Math.floor(differenceInMilisecond / 31536000000);
+                        var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+                        var month_age = Math.floor(day_age / 30);
+
+                        day_age = day_age % 30;
+
+                        if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+                            console.log('err');
+                            // $("#exact_age").text("Invalid birthday - Please try again!");
+                        }
+                        else {
+                            if (year_age > 0) {
+                                if (year_age == 1) {
+                                    this.age = year_age + " year old";
+                                }
+                                else {
+                                    this.age = year_age + " years old";
+                                }
+                            }
+                            else if (year_age == 0 && month_age > 0) {
+                                if (month_age == 1) {
+                                    this.age = month_age + " month old";
+                                }
+                                else {
+                                    this.age = month_age + " months old";
+                                }
+                            }
+                            else if (year_age == 0 && month_age == 0 && day_age > 0) {
+                                if (day_age == 1) {
+                                    this.age = day_age + " day old";
+                                }
+                                else {
+                                    this.age = day_age + " days old";
+                                }
+                            }
+                            else {
+                                this.age = year_age + " years " + month_age + " months " + day_age + " days old";
+                            }
+                        }
+                    }
+                    else {
+                        this.age = '';
+                    }
+
+                    this.p_num = p[0].no;
+
+                    this.sex = p[0].personal.sex;
+                    this.occupation = p[0].personal.occupation;
+                    this.status = p[0].personal.status;
+                    this.employer = p[0].personal.employer;
+
+                    if (p[0].personal.referred == 'Dr') {
+                        this.referred = "Dr. " + p[0].personal.doctor;
+                    }
+                    else {
+                        this.referred = p[0].personal.referred;
+                    }
+
+                    this.card = p[0].insurance.card;
+                    this.bdate = p[0].insurance.birthday;
+                    this.address = p[0].insurance.address;
+                    this.homephone = p[0].insurance.home_phone;
+                    this.insurance = p[0].insurance.primary_insurance;
+                    this.relation = p[0].insurance.relationship;
+                }
+            },
+
+            _patientChanged(patient) {
+                if (!patient) {
+                    Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                    this.favrighthide = true;
+                } else {
+                    this.filterValue = patient.toUpperCase();
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
+                }
+            },
+
+            _showFab1(complain, date) {
+                if (!complain || !date) {
+                    this.favrighthide = true;
+                } else {
+                    this.favrighthide = false;
+                }
+            },
+
+            _select1(e) {
+                this.entryanimation = "slide-from-left-animation";
+                this.exitanimation = "slide-right-animation";
+
+                if (parseInt(this.selectedPage) <= 1) {
+                    if (parseInt(this.selectedPage) !== 0) {
+                        this.selectedPage = (parseInt(this.selectedPage) - 1);
+
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");;
+
+                        if (this.selectedPage === 0) {
+                            this.favlefthide = true;
+                        }
+
+                        if (this.selectedPage == 1) {
+                            this.favrighthide = false;
+                        }
+                        else {
+                            this.favrighthide = false;
+                        }
+
+                    }
+                    else {
+                        this.favlefthide = true;
+                        this.favrighthide = false;
+                    }
+                }
+                else {
+                    this.selectedPage = 1;
+                }
+
+            },
+
+            _select2(e) {
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                if (parseInt(this.selectedPage) >= 0) {
+
+                    this.favlefthide = false;
+
+                    if (parseInt(this.selectedPage) == 1) {
+
+                        var key = this.mykey, mypatient = this.filterValue,
+                            mycomplain = this.complain, myhistory = this.history,
+                            mydiagnosis = this.diagnosis, mytreatment = this.treatment;
+                        var mykey = this.myKey;
+                        var myattachment = this.attachment;
+                        var attachName = this.randomString(8);
+                        var today = this.todayDate;
+                        var timestamp = firebase.database.ServerValue.TIMESTAMP;
+                        var order = firebase.database.ServerValue.TIMESTAMP;
+                        var newPushKey;
+
+                        if (today < this.formatTodayDate(new Date())) {
+                            newPushKey = this.generatePushID(today);
+                            timestamp = this.lastPushTime;
+                            order = this.lastPushTime;
+                        }
+
+                        var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+                        var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
+                        var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
+
+                        firebase.database().ref('/' + mykey + '/patients/' + key)
+                            .once('value').then(function (patient) {
+                                if (patient.val().profile) {
+
+                                    if (newPushKey) {
+                                        var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
+                                        var push = ref.set({
+                                            patient: mypatient,
+                                            complain: mycomplain,
+                                            history: myhistory,
+                                            diagnosis: mydiagnosis,
+                                            treatment: mytreatment,
+                                            patientkey: key,
+                                            profile: patient.val().profile,
+                                            timestamp: timestamp,
+                                            order: order,
+                                            created: today
+                                        });
+                                        var fbPushKey = newPushKey;
+                                    }
+                                    else {
+                                        var ref = firebase.database().ref("/" + mykey + "/cases");
+                                        var push = ref.push({
+                                            patient: mypatient,
+                                            complain: mycomplain,
+                                            history: myhistory,
+                                            diagnosis: mydiagnosis,
+                                            treatment: mytreatment,
+                                            patientkey: key,
+                                            profile: patient.val().profile,
+                                            timestamp: timestamp,
+                                            order: order,
+                                            created: today
+                                        });
+                                        var fbPushKey = push.key;
+                                    }
+
+                                    if (fbPushKey) {
+
+                                        this._updateOrder(mykey, fbPushKey);
+                                        this._reportsUpdate(today, mykey);
+
+                                        if (myattachment) {
+                                            saveRun.style.display = 'block';
+                                            this._attachmentUpdate(myattachment, attachName, mykey, fbPushKey);
+                                        }
+                                        else {
+                                            saveRun.style.display = 'none';
+                                            saveSucc.style.display = 'block';
+                                        }
+                                    }
+                                    else {
+                                        saveErr.style.display = 'block';
+                                    }
+                                }
+                                else {
+                                    if (newPushKey) {
+                                        var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
+                                        var push = ref.set({
+                                            patient: mypatient,
+                                            complain: mycomplain,
+                                            history: myhistory,
+                                            diagnosis: mydiagnosis,
+                                            treatment: mytreatment,
+                                            patientkey: key,
+                                            timestamp: timestamp,
+                                            order: order,
+                                            created: today
+                                        });
+                                        var fbPushKey = newPushKey;
+                                    }
+                                    else {
+                                        var ref = firebase.database().ref("/" + mykey + "/cases");
+                                        var push = ref.push({
+                                            patient: mypatient,
+                                            complain: mycomplain,
+                                            history: myhistory,
+                                            diagnosis: mydiagnosis,
+                                            treatment: mytreatment,
+                                            patientkey: key,
+                                            timestamp: timestamp,
+                                            order: order,
+                                            created: today
+                                        });
+                                        var fbPushKey = push.key;
+                                    }
+
+                                    if (fbPushKey) {
+
+                                        this._updateOrder(mykey, fbPushKey);
+                                        this._reportsUpdate(today, mykey);
+
+                                        if (myattachment) {
+                                            saveRun.style.display = 'block';
+                                            this._attachmentUpdate(myattachment, attachName, mykey, fbPushKey);
+                                        }
+                                        else {
+                                            saveRun.style.display = 'none';
+                                            saveSucc.style.display = 'block';
+                                        }
+                                    }
+                                    else {
+                                        saveErr.style.display = 'block';
+                                    }
+                                }
+                            });
+
+                    }
+
+                    if (this.selectedPage == 0) {
+                        if (!this.complain) {
+                            this.favrighthide = true;
+                        }
+                        else {
+                            this.favrighthide = false;
+                        }
+                    }
+
+                    if (this.selectedPage == 1) {
+                        this.favlefthide = false;
+                        this.favrighthide = true;
+                    }
+
+                    if (parseInt(this.selectedPage) !== 2) {
+
+                        this.selectedPage = (parseInt(this.selectedPage) + 1);
+
+                        if (parseInt(this.selectedPage) == 1) {
+                            // this.favrighthide = true;
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                        }
+                    }
+                }
+                else {
+                    this.selectedPage = 0;
+                    this.favlefthide = true;
+                    this.favrighthide = true;
+                }
+
+            },
+
+            _reportsUpdate(today, mykey) {
+                var mm = today.substring(0, 7);
+                var yy = today.substring(0, 4);
+
+                var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
+                dayRef.once('value').then(function (snapshot) {
+                    dayRef.set(snapshot.val() + 1);
+                });
+
+                var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
+                yearRef.once('value').then(function (snapshot) {
+                    yearRef.set(snapshot.val() + 1);
+                });
+
+                var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
+                monthRef.once('value').then(function (snapshot) {
+                    monthRef.set(snapshot.val() + 1);
+                });
+            },
+
+            _updateOrder(mykey, fbPushKey) {
+                var postRef = firebase.database().ref('/' + mykey + '/cases/' + fbPushKey);
+                postRef.once('value').then(function (snapshot) {
+                    var patientRef = firebase.database().ref('/' + mykey + '/patients/' + snapshot.val().patientkey);
+                    patientRef.once('value').then(function (snapshot) {
+                        postRef.update({
+                            patientinfo: {
+                                num: snapshot.val().no,
+                                birthday: snapshot.val().personal.birthday,
+                                gender: snapshot.val().personal.sex,
+                                hmo: snapshot.val().insurance.primary_insurance
+                            },
+                        });
+                    });
+                    order = snapshot.val().order * -1;
+                    postRef.update({ order });
+                });
+            },
+
+            _attachmentUpdate(myattachment, attachName, mykey, fbPushKey) {
+                for (var i = 0; i < myattachment.length; i++) {
+
+                    var attachFile = myattachment[i];
+                    var ext = attachFile.type.substring(6);
+                    var name = attachName + i + '.' + ext;
+                    var myURL = "/" + mykey + "/cases/" + fbPushKey + "/attachment";
+
+                    if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
+                        ImageTools.resize(attachFile, {
+                            width: 440, // maximum width
+                            height: 400 // maximum height
+                        }, function (blob, didItResize) {
+
+                            var ext = blob.type.substring(6);
+                            var rand = Math.random().toString(36).slice(-8);
+                            var newName = rand + '.' + ext;
+
+                            var storageRef = firebase.storage().ref('attachment/' + newName);
+                            storageRef.put(blob).then(function (snapshot) {
+                                saveRun.style.display = 'none';
+                                saveSucc.style.display = 'block';
+
+                                var type = snapshot.metadata.contentType.slice(0, 5);
+                                var name = snapshot.metadata.name;
+                                var ref = firebase.database().ref(myURL);
+
+                                ref.push({
+                                    url: snapshot.downloadURL,
+                                    type: type,
+                                    name: name
+                                });
+                            });
+
+                        });
+                    } else {
+                        var storageRef = firebase.storage().ref('attachment/' + name);
+                        storageRef.put(attachFile).then(function (snapshot) {
+                            saveRun.style.display = 'none';
+                            saveSucc.style.display = 'block';
+
+                            var type = snapshot.metadata.contentType.slice(0, 5);
+                            var name = snapshot.metadata.name;
+                            var ref = firebase.database().ref(myURL);
+
+                            ref.push({
+                                url: snapshot.downloadURL,
+                                type: type,
+                                name: name
+                            });
+                        });
+                    }
+                }
+            },
+
+            randomString(n) {
+                var r = "";
+                while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+                return r;
+            },
+
+            // guid: function () {
+            //     var uid = new ShortUniqueId();
+            //     return uid.randomUUID(8);
+            // },
+
+            _comma(e) {
+                if (e) {
+                    return ',';
+                }
+            },
+
+            _hmo(e) {
+                if (e) {
+                    return 'HMO: ' + e;
+                }
+            },
+
+            _ack() {
+                Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'none';
+            },
+
+            _timeStampToDateTime(ts) {
+                return new Date(ts);
+            },
+
+            generatePushID(date) {
+                //reference: https://gist.github.com/mikelehen/3596a30bd69384624c11
+                // Modeled after base64 web-safe chars, but ordered by ASCII.
+                var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+
+                // Timestamp of last push, used to prevent local collisions if you push twice in one ms.
+                // var lastPushTime = 0;
+                // We generate 72-bits of randomness which get turned into 12 characters and appended to the
+                // timestamp to prevent collisions with other clients.  We store the last characters we
+                // generated because in the event of a collision, we'll use those same characters except
+                // "incremented" by one.
+                var lastRandChars = [];
+
+                //check if there's a last push
+                if (this.lastPushTime === 0) {
+                    var now = new Date(date).getTime();
+                }
+                else {
+                    var now = this.lastPushTime + 1000;
+                }
+
+                this.lastPushTime = now;
+
+                var timeStampChars = new Array(8);
+
+                for (var i = 7; i >= 0; i--) {
+                    timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+                    // NOTE: Can't use << here because javascript will convert to int and lose the upper bits.
+                    now = Math.floor(now / 64);
+                }
+
+                if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+
+                var id = timeStampChars.join('');
+
+                for (i = 0; i < 12; i++) {
+                    lastRandChars[i] = Math.floor(Math.random() * 64);
+                }
+
+                for (i = 0; i < 12; i++) {
+                    id += PUSH_CHARS.charAt(lastRandChars[i]);
+                }
+
+                if (id.length != 20) throw new Error('Length should be 20.');
+
+                return id;
+            },
+
+            formatTodayDate(date) {
+                var monthNames = [
+                    "01", "02", "03",
+                    "04", "05", "06", "07",
+                    "08", "09", "10",
+                    "11", "12"
+                ];
+
+                var day = date.getDate();
+                if (day < 10) { day = '0' + day };
+                var monthIndex = date.getMonth();
+                var year = date.getFullYear();
+
+                return year + '-' + monthNames[monthIndex] + '-' + day;
+            }
+
+        })
+
+    </script>
+</dom-module>

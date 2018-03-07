@@ -1,0 +1,841 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tab.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="time-element.html">
+
+<dom-module id="my-patients-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+      app-header {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      }
+
+      paper-icon-button.menu {
+        margin-right: 16px;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-drawer {
+        --app-drawer-content-container: {
+          background-color: #F4F5F6;
+        }
+      }
+
+      paper-item {
+        height: 64px;
+      }
+
+      paper-item:hover {
+        background: rgba(104, 58, 183, 0.26);
+        cursor: pointer;
+      }
+
+      #item {
+        height: 0;
+      }
+
+      .mnu {
+        padding: 13px;
+      }
+
+      paper-fab.fab-menu {
+        position: fixed;
+        right: 32px;
+        bottom: 32px;
+      }
+
+      paper-fab.fab-menu2 {
+        position: fixed;
+        right: 41px;
+        bottom: 100px;
+      }
+
+      paper-fab.fab-menu3 {
+        position: fixed;
+        right: 41px;
+        bottom: 155px;
+      }
+
+      @media (min-width: 800px) {
+        .footer {
+          position: absolute;
+          bottom: 16px;
+          width: 100%;
+        }
+        .paper-fab-0 {
+          position: absolute;
+          left: 48px;
+          bottom: 48px;
+        }
+
+        .paper-fab-1 {
+          position: absolute;
+          right: 48px;
+          bottom: 48px;
+        }
+
+        #info {
+          display: flex;
+        }
+
+        .docu1 {
+          margin-bottom: -16px;
+        }
+
+        .docu {
+          padding: 0;
+        }
+
+        .vid-6 {
+          width: 30%;
+        }
+      }
+
+      @media (max-width: 800px) {
+        .paper-fab-0 {
+          position: absolute;
+          left: 16px;
+          bottom: 48px;
+        }
+
+        .paper-fab-1 {
+          position: absolute;
+          right: 16px;
+          bottom: 48px;
+        }
+
+        .docu {
+          padding: 0;
+          margin-top: 0;
+          margin-bottom: 0;
+          width: 100%;
+          margin-right: 0;
+          overflow-x: hidden;
+          /* margin-left: 16px;
+          margin-right: 16px; */
+        }
+
+        .docu1 {
+          overflow-x: hidden;
+          margin-right: 16px;
+          margin-left: 16px;
+          margin-top: 16px;
+          margin-bottom: 16px;
+        }
+
+        .vid-s-9 {
+          width: 90%;
+        }
+      }
+
+
+
+      .avatar {
+        height: 70px;
+        width: 70px;
+        border-radius: 50%;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+
+      .pad {
+        padding: 0 16px;
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
+
+      .primary {
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .shortText,
+      .longText {
+        font-size: 14px;
+      }
+
+      .longText {
+        color: gray;
+        /* display: none; */
+      }
+
+      .attachment-icon {
+        float: right;
+        cursor: pointer;
+        bottom: 16px;
+        left: 10px;
+      }
+
+      .attachment-icon:hover {
+        color: dimgray;
+      }
+
+      .imgh {
+        margin-right: 3px;
+        padding: 6px;
+      }
+
+      .imgh:hover {
+        box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+      }
+    </style>
+
+    <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+
+      <app-header-layout id="appheader" has-scrolling-region>
+        <app-header fixed slot="header">
+          <app-toolbar>
+            <a href="/patients">
+              <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
+            </a>
+            <div main-title>{{no}}</div>
+            <paper-icon-button icon="my-icons:print" on-click="_print"></paper-icon-button>
+            <!-- <paper-menu-button>
+              <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+              <paper-listbox style="cursor:pointer" slot="dropdown-content">
+                <paper-item>Edit</paper-item>
+                <paper-item>Delete</paper-item>
+              </paper-listbox>
+            </paper-menu-button> -->
+          </app-toolbar>
+          <paper-tabs selected="{{selectedPage}}" scrollable fit-container>
+            <paper-tab>Patient Info</paper-tab>
+            <paper-tab>Visits</paper-tab>
+          </paper-tabs>
+        </app-header>
+
+        <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+
+          <neon-animatable>
+
+            <firebase-query id="query" path="/{{myKey}}/patients" order-by-key equal-to="{{viewKey}}" data="{{mypatient}}">
+            </firebase-query>
+
+            <div class="docu" id="printMe">
+              <!-- <div style="background:url({{p_profile}}); padding: 80px; background-repeat: no-repeat; 
+               background-position: center; background-size: cover;"></div> -->
+              <div class="docu-header" style="padding:16px; display: flex; margin-bottom:3px;">
+                <img class="avatar" src="{{p_profile}}"></img>
+                <div style="margin-left:10px; padding:8px; font-weight:400; color:black">
+                  {{name}}
+                  <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}} {{sex}}</span>
+                  <!-- <span class="longText" style="font-weight:400">{{_myAgeSex(age,sex)}}</span> -->
+                  <span class="longText" style="font-weight:400;display:block">[[_hmo(indicate)]]</span>
+                </div>
+              </div>
+
+
+              <div class="details" style="padding:18px">
+                <!-- <div >Basic Information</div> -->
+                <div style="font-weight:bold; margin-top:16px; padding:5px; background:rgb(236, 235, 235)">Basic Information</div>
+                <table style="margin-bottom:6px; padding:6px;">
+                  <tr>
+                    <td>
+                      <span class="longText">Email address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{email}}</td>
+                  </tr>
+                  <!-- <tr>
+                    <td>Firstname</td>
+                    <td>:</td>
+                    <td>{{fname}}</td>
+                  </tr>
+                  <tr>
+                    <td>Middlename</td>
+                    <td>:</td>
+                    <td>{{mname}}</td>
+                  </tr>
+                  <tr>
+                    <td>Lastname</td>
+                    <td>:</td>
+                    <td>{{lname}}</td>
+                  </tr> -->
+                  <tr>
+                    <td>
+                      <span class="longText">Birth date</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{bday}}</td>
+                  </tr>
+                  <!-- <tr>
+                    <td>
+                      <span class="longText">Age</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td>{{age}}</td>
+                  </tr> -->
+                  <tr>
+                    <td>
+                      <span class="longText">Marital Status</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{status}}</td>
+                  </tr>
+                  <!-- <tr>
+                    <td>
+                      <span class="longText">Gender</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td>{{sex}}</td>
+                  </tr> -->
+                  <tr>
+                    <td>
+                      <span class="longText">Contact no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{contact}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Street address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{address}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Occupation</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{occupation}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Employer</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{employer}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Employer phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{emp_phone}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Referred to clinic by</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{referredby}}</td>
+                  </tr>
+                </table>
+
+                <div style="font-weight:bold;  margin-top:16px;  padding:5px; background:rgb(236, 235, 235)">Insurance</div>
+                <table style="padding:6px">
+                  <tr>
+                    <td>
+                      <span class="longText">ID Card no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{card}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Birth date</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{bdate}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{in_address}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Home phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{home_phone}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Primary Insurance</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{indicate}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Relationship to patient</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{p_relation}}</td>
+                  </tr>
+                </table>
+
+                <div style="font-weight:bold; margin-top:16px;  padding:5px; background:rgb(236, 235, 235)">In-case of emergency</div>
+                <table style="padding:6px">
+                  <tr>
+                    <td>
+                      <span class="longText">Name</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{name_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Relationship to patient</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{relation_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Home phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{phone_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Work phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{work_phone}}</td>
+                  </tr>
+                </table>
+                <br>
+              </div>
+
+            </div>
+          </neon-animatable>
+
+          <neon-animatable>
+
+            <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{viewKey}}" data="{{mycases}}">
+            </firebase-query>
+
+            <div id="noRecord" class="docu1" style="padding:16px;">
+              <div class="details">
+                No record found.
+              </div>
+            </div>
+
+            <div style="margin-bottom: 26px;">
+              <template is="dom-repeat" items="{{_descending(mycases)}}">
+
+                <div class="docu1" style="padding:16px;" id="printMe">
+                  <!-- <div class="docu-header">Cases</div> -->
+                  <div class="details">
+                    <!-- <div style="font-weight:bold">{{_date(item.timestamp)}}</div> -->
+                    <iron-icon icon="my-icons:watch-later"></iron-icon>
+                    <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                    <!-- <paper-icon-button alt="{{item.$key}}" on-tap="_showAttach" class="attachment-icon" icon="my-icons:attachment" title="attacments"></paper-icon-button> -->
+                    <br>
+                    <br>
+                    <span class="longText">Chief Complaint</span>
+                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                    <!-- <hr> -->
+                    <div hidden$="{{!item.history}}">
+                      <span class="longText">History</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.history}}</div>
+                    </div>
+                    <!-- <hr> -->
+                    <div hidden$="{{!item.diagnosis}}">
+                      <span class="longText">Diagnosis</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.diagnosis}}</div>
+                    </div>
+                    <!-- <hr> -->
+                    <div hidden$="{{!item.treatment}}">
+                      <span class="longText">Treatment</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.treatment}}</div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <!-- <br>
+            <br>
+            <br> -->
+            <!-- <hr>
+                  <table style="padding:8px;">
+                    <tr>
+                      <td>
+                        <span class="longText">Chief complaint</span>
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td>{{item.complain}}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="longText">History</span>
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td>{{item.history}}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="longText">Diagnosis</span>
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td>{{item.diagnosis}}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="longText">Treatment</span>
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td>{{item.treatment}}</td>
+                    </tr>
+                  </table> -->
+          </neon-animatable>
+
+        </neon-animated-pages>
+
+        <!-- <paper-fab id="more-fab" class="fab-menu" icon="my-icons:add" on-tap="_showMini" title="More options"></paper-fab> -->
+        <paper-fab id="less-fab" style="display:none" class="fab-menu" icon="my-icons:clear" on-tap="_hideMini" title="Hide options"></paper-fab>
+        <a href="/visits/new">
+          <paper-fab class="fab-menu2" style="display:none" mini icon="my-icons:create-new-folder" title="Add visit"></paper-fab>
+        </a>
+        <paper-fab class="fab-menu3" style="display:none" mini icon="my-icons:queue" title="Add to queue"></paper-fab>
+
+      </app-header-layout>
+
+    </app-drawer-layout>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-patients-view',
+
+      properties: {
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        myKey: String,
+        selectedPage: Number,
+        entryanimation: {
+          type: String,
+          value: "slide-from-right-animation"
+        },
+        exitanimation: {
+          type: String,
+          value: "slide-left-animation"
+        },
+        viewKey: String,
+        mypatient: Object,
+        mycases: Object
+        // myimage: Object,
+        // myvideo: Object,
+      },
+
+      observers: [
+        'mypatientChanged(mypatient)',
+        'mycaseChanged(mycases)',
+        'selectedPageChanged(selectedPage)',
+        // '_myimageChanged(myimage)',
+        // '_myvideoChanged(myvideo)'
+      ],
+
+      // _show(e) {
+      //   if (e) {
+      //     return 'show' + e;
+      //   }
+      // },
+
+      // _showed(e) {
+      //   if (e) {
+      //     return 'showed' + e;
+      //   }
+      // },
+
+      // _showAttach(e) {
+      //   var id = Polymer.dom(e).rootTarget.getAttribute("alt");
+      //   Polymer.dom(this.root).querySelector("#showed" + id).style.display = 'none';
+      //   Polymer.dom(this.root).querySelector("#show" + id).style.display = 'block';
+      // },
+
+      // _hideAttach(e) {
+      //   var id = Polymer.dom(e).rootTarget.getAttribute("alt");
+      //   Polymer.dom(this.root).querySelector("#showed" + id).style.display = 'block';
+      //   Polymer.dom(this.root).querySelector("#show" + id).style.display = 'none';
+      // },
+
+      // _myvideoChanged(e) {
+      //   if (e.length > 0) {
+      //     Polymer.dom(this.root).querySelector("#videoTxt").style.display = 'none';
+      //   }
+      // },
+
+      // _myimageChanged(e) {
+      //   if (e.length > 0) {
+      //     Polymer.dom(this.root).querySelector("#imageTxt").style.display = 'none';
+      //   }
+      // },
+
+      _descending(data) {
+        return data.reverse();
+      },
+
+      mycaseChanged(c) {
+        if (c.length > 0) {
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+        }
+      },
+
+      _timeStampToDateTime(ts) {
+        return new Date(ts);
+      },
+
+      _date(e) {
+        if (e) {
+          var date = new Date(e);
+          var options = {
+            weekday: "long", year: "numeric", month: "short",
+            day: "numeric", hour: "2-digit", minute: "2-digit"
+          };
+
+          return date.toLocaleTimeString("en-us", options);
+        }
+      },
+
+      mypatientChanged(e) {
+        if (e.length > 0) {
+          if (e[0].profile) {
+            this.p_profile = e[0].profile;
+          }
+          else {
+            this.p_profile = '../images/user.png';
+          }
+
+          if (e[0].personal.referred) {
+            if (e[0].personal.referred == 'Dr') {
+              this.referredby = 'Dr. ' + e[0].personal.doctor;
+            }
+            else if (e[0].personal.referred == 'Hospital') {
+              this.referredby = e[0].personal.hospital;
+            }
+            else {
+              this.referredby = e[0].personal.referred;
+            }
+          }
+
+          if (e[0].personal.birthday) {
+
+            Date.shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            var today = new Date();
+            var birthday = new Date(e[0].personal.birthday);
+            var mdate = e[0].personal.birthday.toString();
+
+            var yearThen = parseInt(mdate.substring(0, 4), 10);
+            var monthThen = Date.shortMonths[birthday.getMonth()];
+            var dayThen = parseInt(mdate.substring(8, 10), 10);
+
+            this.bday = dayThen + '-' + monthThen + '-' + yearThen;
+
+            var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+            var year_age = Math.floor(differenceInMilisecond / 31536000000);
+            var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+            var month_age = Math.floor(day_age / 30);
+
+            day_age = day_age % 30;
+
+            if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+              console.log('err');
+              // $("#exact_age").text("Invalid birthday - Please try again!");
+            }
+            else {
+              if (year_age > 0) {
+                if (year_age == 1) {
+                  this.age = year_age + " year old";
+                }
+                else {
+                  this.age = year_age + " years old";
+                }
+              }
+              else if (year_age == 0 && month_age > 0) {
+                if (month_age == 1) {
+                  this.age = month_age + " month old";
+                }
+                else {
+                  this.age = month_age + " months old";
+                }
+              }
+              else if (year_age == 0 && month_age == 0 && day_age > 0) {
+                if (day_age == 1) {
+                  this.age = day_age + " day old";
+                }
+                else {
+                  this.age = day_age + " days old";
+                }
+              }
+              else {
+                this.age = year_age + " years " + month_age + " months " + day_age + " days old";
+              }
+            }
+          }
+          else {
+            this.age = '';
+          }
+
+          this.email = e[0].personal.email;
+          this.fname = e[0].personal.firstname;
+          this.mname = e[0].personal.middlename;
+          this.lname = e[0].personal.lastname;
+          // this.bday = e[0].personal.birthday;
+          this.contact = e[0].personal.contact;
+          this.address = e[0].personal.address;
+          this.occupation = e[0].personal.occupation;
+          this.employer = e[0].personal.employer;
+          this.emp_phone = e[0].personal.emp_phone;
+          this.sex = e[0].personal.sex;
+          this.status = e[0].personal.status;
+          this.name = e[0].personal.lastname + ', ' + e[0].personal.firstname + ' ' + e[0].personal.middlename;
+          this.no = e[0].no;
+
+          this.card = e[0].insurance.card;
+          this.bdate = e[0].insurance.birthday;
+          this.in_address = e[0].insurance.address;
+          this.home_phone = e[0].insurance.home_phone;
+          this.indicate = e[0].insurance.primary_insurance;
+          this.p_relation = e[0].insurance.relationship;
+
+          this.name_e = e[0].emergency.name;
+          this.relation_e = e[0].emergency.relationship;
+          this.phone_e = e[0].emergency.home_phone;
+          this.work_phone = e[0].emergency.work_phone;
+        }
+      },
+
+      _print() {
+        var content = Polymer.dom(this.root).querySelector("#printMe").innerHTML;
+        var mywindow = window.open('', 'Print', 'height=600,width=800');
+        mywindow.document.write(content);
+        mywindow.print();
+      },
+
+      _showMini() {
+        Polymer.dom(this.root).querySelector("#more-fab").style.display = 'none';
+        Polymer.dom(this.root).querySelector("#less-fab").style.display = 'block';
+        Polymer.dom(this.root).querySelector(".fab-menu2").style.display = 'block';
+        Polymer.dom(this.root).querySelector(".fab-menu3").style.display = 'block';
+      },
+
+      _hideMini() {
+        Polymer.dom(this.root).querySelector("#more-fab").style.display = 'block';
+        Polymer.dom(this.root).querySelector("#less-fab").style.display = 'none';
+        Polymer.dom(this.root).querySelector(".fab-menu2").style.display = 'none';
+        Polymer.dom(this.root).querySelector(".fab-menu3").style.display = 'none';
+      },
+
+      _changepic() {
+        if (event.target.files[0]) {
+          Polymer.dom(this.root).querySelector("#profilePic").src = URL.createObjectURL(event.target.files[0]);
+        }
+      },
+
+      toggleDrawer() {
+        this.dispatchEvent(new CustomEvent('toggleDrawer', {
+          bubbles: true, composed: true, detail: {
+            narrow: this.$.narrow
+          }
+        }));
+        this.$.narrow = !this.$.narrow;
+      },
+
+      ready() {
+        this.selectedPage = 0;
+      },
+
+      _comma(e) {
+        if (e) {
+          return ',';
+        }
+      },
+
+      _hmo(e) {
+        if (e) {
+          return 'HMO: ' + e;
+        }
+      },
+
+      selectedPageChanged(e) {
+        if (e == 0) {
+          this.entryanimation = "slide-from-right-animation";
+          this.exitanimation = "slide-left-animation";
+        }
+        else {
+          this.entryanimation = "slide-from-left-animation";
+          this.exitanimation = "slide-right-animation";
+        }
+      }
+    })
+  </script>
+</dom-module>

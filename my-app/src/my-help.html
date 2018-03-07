@@ -12,7 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
-<dom-module id="my-view2">
+<dom-module id="my-help">
   <template>
     <style include="shared-styles">
       :host {
@@ -36,7 +36,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-header fixed slot="header">
         <app-toolbar primary>
           <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-          <div main-title>Notifications</div>
+          <div main-title>Help</div>
         </app-toolbar>
       </app-header>
 
@@ -49,8 +49,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyView2 extends Polymer.Element {
-      static get is() { return 'my-view2'; }
+    class MyHelp extends Polymer.Element {
+      static get is() { return 'my-help'; }
 
       static get properties() {
         return {
@@ -71,6 +71,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     }
 
-    window.customElements.define(MyView2.is, MyView2);
+    window.customElements.define(MyHelp.is, MyHelp);
   </script>
 </dom-module>

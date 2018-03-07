@@ -21,17 +21,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
 
+<link rel="lazy-import" href="my-signin.html">
+<link rel="lazy-import" href="my-register-signin.html">
+<link rel="lazy-import" href="my-reset-password.html">
+<link rel="lazy-import" href="my-email-verification.html">
+<link rel="lazy-import" href="my-account-link.html">
 <link rel="lazy-import" href="my-dashboard.html">
-<link rel="lazy-import" href="my-view2.html">
-<link rel="lazy-import" href="my-view3.html">
+<link rel="lazy-import" href="my-visits.html">
 <link rel="lazy-import" href="my-patients.html">
+<link rel="lazy-import" href="my-accountlist.html">
+<link rel="lazy-import" href="my-settings.html">
+<!-- <link rel="lazy-import" href="my-billing.html"> -->
+<!-- <link rel="lazy-import" href="my-collection.html"> -->
+<!-- <link rel="lazy-import" href="my-help.html"> -->
+<!-- <link rel="lazy-import" href="my-view2.html"> -->
+<!-- <link rel="lazy-import" href="my-appointments.html"> -->
+<!-- <link rel="lazy-import" href="my-queue.html"> -->
+<!-- <link rel="lazy-import" href="my-map.html"> -->
 <link rel="lazy-import" href="my-view404.html">
 
 
@@ -60,7 +77,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .drawer-list {
-        margin: 16px;
+        margin: 10px;
       }
 
       .drawer-list a {
@@ -68,6 +85,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         /* padding: 0 16px; */
         text-decoration: none;
         color: var(--app-secondary-color);
+
         /* line-height: 40px; */
       }
 
@@ -120,13 +138,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .primary {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: bold;
       }
 
       .shortText,
       .longText {
-        font-size: 14px;
+        font-size: 12px;
       }
 
       .longText {
@@ -147,7 +165,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply --layout-flex;
         @apply --layout-vertical;
       }
+
+      #overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .yellow-button {
+        float: right;
+        padding: 10px;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        color: #eeff41;
+      }
     </style>
+
+    <div id="overlay">
+      <paper-spinner id="spinner" active></paper-spinner>
+    </div>
+
+    <paper-toast id="networkToast" duration="0" text="">
+      <paper-icon-button on-tap="_closeToast" class="yellow-button" icon="my-icons:close"></paper-icon-button>
+    </paper-toast>
+
 
     <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
     </app-location>
@@ -155,104 +202,180 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-route route="{{route}}" pattern="[[rootPath]]:page" data="{{routeData}}" tail="{{subroute}}">
     </app-route>
 
+    <!-- <firebase-app auth-domain="p123-6256e.firebaseapp.com" database-url="https://p123-6256e.firebaseio.com" api-key="AIzaSyCV24k2Ev083HFXiASIj9g7RhvUi7C9J3w"
+      storage-bucket="p123-6256e.appspot.com">
+    </firebase-app> -->
 
-    <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
-      <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
-        <app-header fixed>
-          <app-toolbar>
-            <iron-image class="avatar" sizing="contain" src=""></iron-image>
-            <div class="pad">
-              <div class="primary">Dr. Liz Grimes</div>
-              <div class="shortText">MD</div>
-              <div class="longText"></div>
-            </div>
-          </app-toolbar>
+    <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com" api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ"
+      storage-bucket="emr-dev-c3005.appspot.com">
+    </firebase-app>
 
-          <app-toolbar>
-            <div class="divHeaderLabelLocation">Location: (not set)</div>
-          </app-toolbar>
-          <paper-fab mini icon="my-icons:my-location"></paper-fab>
-        </app-header>
+    <firebase-auth id="auth" status-known="{{statusKnown}}" user="{{user}}" provider="google" on-error="showError"></firebase-auth>
 
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="dashboard" href="[[rootPath]]">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:dashboard" slot="item-icon"></iron-icon>
-              <span>Dashboard</span>
-            </paper-icon-item>
-          </a>
-
-          <a name="view2" href="[[rootPath]]view2">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:add-alert" slot="item-icon"></iron-icon>
-              <span>Notifications</span>
-            </paper-icon-item>
-          </a>
-
-          <a name="view3" href="[[rootPath]]view3">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:event" slot="item-icon"></iron-icon>
-              <span>Appointments</span>
-            </paper-icon-item>
-          </a>
-
-          <a name="patients" href="[[rootPath]]patients">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:supervisor-account" slot="item-icon"></iron-icon>
-              <span>Patients</span>
-            </paper-icon-item>
-          </a>
-
-          <a name="queue" href="[[rootPath]]queue">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:list" slot="item-icon"></iron-icon>
-              <span>Queue</span>
-            </paper-icon-item>
-          </a>
-
-          <a name="billing" href="[[rootPath]]billing">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:send" slot="item-icon"></iron-icon>
-              <span>Billing</span>
-            </paper-icon-item>
-          </a>
-
-          <a name="collection" href="[[rootPath]]collection">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:payment" slot="item-icon"></iron-icon>
-              <span>Collection</span>
-            </paper-icon-item>
-          </a>
-
-          <a name="reports" href="[[rootPath]]reports">
-            <paper-icon-item toggles="true" class="menuSelected">
-              <iron-icon icon="my-icons:trending-up" slot="item-icon"></iron-icon>
-              <span>Reports</span>
-            </paper-icon-item>
-          </a>
-        </iron-selector>
-      </app-drawer>
-
-      <!-- <app-header-layout fullbleed>  -->
-          <!-- <app-header slot="header" fixed>
-            <app-toolbar>
-              <paper-icon-button id="toggle" icon="my-icons:menu" drawer-toggle></paper-icon-button>
-              <div main-title>Patients</div>
-              <paper-icon-button icon="my-icons:search" on-tap="toggleSearch"></paper-icon-button>              
-            </app-toolbar>
-          </app-header> -->
-
+    <template is="dom-if" if="{{_needToSignIn(user,statusKnown)}}">
       <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-        <my-dashboard name="dashboard"></my-dashboard>
-        <my-view2 name="view2"></my-view2>
-        <my-view3 name="view3"></my-view3>
-        <my-patients narrow="{{narrow}}" name="patients"></my-patients>
+        <my-signin name="signin"></my-signin>
+        <my-register-signin name="register-signin"></my-register-signin>
+        <my-reset-password name="reset-password"></my-reset-password>
         <my-view404 name="view404"></my-view404>
       </iron-pages>
+    </template>
 
-    <!-- </app-header-layout> -->
+    <template is="dom-if" if="{{_alreadySignedIn(user,statusKnown)}}">
 
-    </app-drawer-layout>
+      <template is="dom-if" if="{{!user.emailVerified}}">
+        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
+          <my-email-verification name="email-verification"></my-email-verification>
+          <my-view404 name="view404"></my-view404>
+        </iron-pages>
+      </template>
+
+      <template is="dom-if" if="{{user.emailVerified}}">
+
+        <template is="dom-if" if="{{!user.phoneNumber}}">
+          <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
+            <my-account-link name="account-link"></my-account-link>
+            <!-- <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist> -->
+            <my-view404 name="view404"></my-view404>
+          </iron-pages>
+        </template>
+
+        <template is="dom-if" if="{{user.phoneNumber}}">
+
+          <firebase-query id="query" path="/accounts" data="{{myaccount}}" order-by-child="uid" equal-to="{{user.uid}}"></firebase-query>
+
+          <app-drawer-layout has-scrolling-region fullbleed narrow="{{narrow}}" id="drawerLayout">
+            <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
+
+              <div style="height: 100%; overflow: auto;">
+                <app-header fixed>
+                  <app-toolbar>
+                    <iron-image preload fade style$="{{_hasprofile(user.photoURL)}}" class="avatar" sizing="cover" src="{{user.photoURL}}"></iron-image>
+                    <iron-image style$="{{_noprofile(user.photoURL)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
+                    <div class="pad">
+                      <div hidden$="{{user.displayName}}" class="primary">{{user.email}}</div>
+                      <div hidden$="{{!user.displayName}}" class="primary">Dr. {{user.displayName}}</div>
+                      <div class="shortText">{{drTitle}}</div>
+                      <div class="longText"></div>
+                    </div>
+                  </app-toolbar>
+
+                  <!-- <app-toolbar>
+                  <div class="divHeaderLabelLocation">Location: (not set)</div>
+                </app-toolbar> -->
+                  <!-- <paper-fab mini icon="my-icons:my-location" on-tap="_mymap"></paper-fab> -->
+                </app-header>
+
+                <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+                  <a name="dashboard" href="[[rootPath]]">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:dashboard" slot="item-icon"></iron-icon>
+                      <span>Dashboard</span>
+                    </paper-icon-item>
+                  </a>
+
+                  <!-- <a style="display:none" name="view2" href="[[rootPath]]view2">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:add-alert" slot="item-icon"></iron-icon>
+                      <span>Notifications</span>
+                    </paper-icon-item>
+                  </a> -->
+
+                  <!-- <a style="display:none" name="appointments" href="[[rootPath]]appointments">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:event" slot="item-icon"></iron-icon>
+                      <span>Calendar</span>
+                    </paper-icon-item>
+                  </a> -->
+
+                  <a name="patients" href="[[rootPath]]patients">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:supervisor-account" slot="item-icon"></iron-icon>
+                      <span>Patients</span>
+                    </paper-icon-item>
+                  </a>
+
+                  <!-- <a style="display:none" name="queue" href="[[rootPath]]queue">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:list" slot="item-icon"></iron-icon>
+                      <span>Queue</span>
+                    </paper-icon-item>
+                  </a> -->
+
+                  <!-- <a name="account" href="[[rootPath]]account">
+              <paper-icon-item toggles="true" class="menuSelected">
+                <iron-icon icon="my-icons:account-circle" slot="item-icon"></iron-icon>
+                <span>My account</span>
+              </paper-icon-item>
+            </a> -->
+
+                  <a name="visits" href="[[rootPath]]visits">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:folder-open" slot="item-icon"></iron-icon>
+                      <span>Visits</span>
+                    </paper-icon-item>
+                  </a>
+
+                  <!-- <a style="display:none" name="billing" href="[[rootPath]]billing">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:send" slot="item-icon"></iron-icon>
+                      <span>Billing</span>
+                    </paper-icon-item>
+                  </a> -->
+
+                  <!-- <a style="display:none" name="collection" href="[[rootPath]]collection">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:payment" slot="item-icon"></iron-icon>
+                      <span>Collection</span>
+                    </paper-icon-item>
+                  </a> -->
+                  <hr>
+                  <a name="settings" href="[[rootPath]]settings">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:settings" slot="item-icon"></iron-icon>
+                      <span>Settings</span>
+                    </paper-icon-item>
+                  </a>
+
+                  <a name="signin" href="#" on-tap="_signOut">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:lock-outline" slot="item-icon"></iron-icon>
+                      <span>Logout</span>
+                    </paper-icon-item>
+                  </a>
+
+                  <!-- <a style="display:none" name="help" href="[[rootPath]]help">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:help-outline" slot="item-icon"></iron-icon>
+                      <span>Help</span>
+                    </paper-icon-item>
+                  </a> -->
+                  <span style="padding:20px; color:gray; font-size:12px;">
+                    v0.2.0
+                  </span>
+                </iron-selector>
+              </div>
+            </app-drawer>
+            <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
+              <!-- <my-account user={{user}} name="account"></my-account> -->
+              <my-dashboard name="dashboard" my-key="[[mykey]]" user="[[user]]"></my-dashboard>
+              <my-settings name="settings" route="[[subroute]]" user=[[user]]></my-settings>
+              <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" user-uid=[[user.uid]]></my-visits>
+              <my-patients name="patients" route="[[subroute]]" my-key="[[mykey]]" user-uid=[[user.uid]]></my-patients>
+              <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
+              <!-- <my-appointments name="appointments"></my-appointments>
+              <my-billing name="billing"></my-billing>
+              <my-collection name="collection"></my-collection>
+              <my-help name="help"></my-help>
+              <my-view2 name="view2"></my-view2>
+              <my-queue name="queue"></my-queue>
+              <my-map name="map"></my-map> -->
+              <my-view404 name="view404"></my-view404>
+            </iron-pages>
+          </app-drawer-layout>
+        </template>
+      </template>
+    </template>
 
   </template>
 
@@ -279,33 +402,110 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           narrow: {
             type: Boolean,
             notify: true
-          }
+          },
+          mykey: String
         };
       }
 
       static get observers() {
         return [
-          '_routePageChanged(routeData.page)',
+          '_routePageChanged(routeData.page, user, mykey)',
+          '_myaccountChanged(myaccount)'
         ];
       }
 
-      _routePageChanged(page) {
-        // If no page was found in the route data, page will be an empty string.
-        // Default to 'view1' in that case.
-        this.page = page || 'dashboard';
+      _myaccountChanged(e) {
+        if (e.length > 0) {
+          this.mykey = e[0].code;
+          this.drTitle = e[0].designatory;
+          this.lastname = e[0].name.lastname;
+        }
+      }
 
-        // Close a non-persistent drawer when the page & route are changed.
-        if (!this.$.drawer.persistent) {
-          this.$.drawer.close();
+      _routePageChanged(page, user, key) {
+        if (user) {
+          if (user.emailVerified) {
+            if (user.phoneNumber) {
+              if (key) {
+                this.page = page || 'dashboard';
+                // Close a non-persistent drawer when the page & route are changed.
+                var drawer = Polymer.dom(this.root).querySelector("#drawer");
+                if (drawer) {
+                  if (!drawer.persistent) {
+                    drawer.close();
+                  }
+                }
+              }
+            }
+            else {
+              this.page = page || 'account-link';
+            }
+          }
+          else {
+            this.page = page || 'email-verification';
+          }
+        }
+        else {
+          this.page = page || 'signin';
+        }
+      }
+
+      _hasprofile(e) {
+        if (e) {
+          return 'display:block';
+        }
+        else {
+          return 'display:none';
+        }
+      }
+
+      _noprofile(e) {
+        if (!e) {
+          return 'display:block';
+        }
+        else {
+          return 'display:none';
+        }
+      }
+
+      _signOut() {
+        this.$.auth.signOut();
+        location.reload();
+      }
+
+      _needToSignIn(e, f) {
+        if (f === true) {
+          return e === null;
+        }
+        else {
+          return false;
+        }
+      }
+
+      _alreadySignedIn(e, f) {
+        if (f === true) {
+          return e !== null;
+        }
+        else {
+          return false;
         }
       }
 
       _pageChanged(page) {
+        // Polymer.dom(this.root).querySelector("#overlay").style.display = 'flex';
+        // Polymer.dom(this.root).querySelector("#spinner").active = true;
         // Load page import on demand. Show 404 page if fails
+        var loader = Polymer.dom(this.root).querySelector("#overlay");
+        var spinner = Polymer.dom(this.root).querySelector("#spinner");
+        loader.style.display = 'flex';
+        spinner.active = true;
         var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
         Polymer.importHref(
           resolvedPageUrl,
-          null,
+          function () {
+            loader.style.display = 'none';
+            spinner.active = false;
+          },
           this._showPage404.bind(this),
           true);
 
@@ -316,10 +516,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       toggleMenu() {
-        if (this.$.drawerLayout.forceNarrow || !this.$.drawerLayout.narrow) {
-          this.$.drawerLayout.forceNarrow = !this.$.drawerLayout.forceNarrow;
+        var drawerlayout = Polymer.dom(this.root).querySelector("#drawerLayout");
+        if (drawerlayout.forceNarrow || !drawerlayout.narrow) {
+          drawerlayout.forceNarrow = !drawerlayout.forceNarrow;
         } else {
-          this.$.drawerLayout.drawer.toggle();
+          drawerlayout.toggle();
         }
       }
 
@@ -331,22 +532,55 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-
       ready() {
         super.ready();
         this.addEventListener('toggleDrawer', (e) => this._onChangeSection(e));
+        this.addEventListener('toggleDrawer2', (e) => this._onChangeSection2(e));
         // this.addEventListener('on-tap', (e) => this._onChangeSection(e));
+        // listen for online/offline
+        window.addEventListener('online', (e) => this._updateOnlineStatus(e));
+        window.addEventListener('offline', (e) => this._updateOnlineStatus(e));
+      }
+
+      _updateOnlineStatus() {
+        var toast = Polymer.dom(this.root).querySelector("#networkToast");
+        var condition = navigator.onLine ? "online" : "offline";
+
+        if (condition == 'online') {
+          toast.opened = true;
+          toast.text = 'Network connection established. Data synced.';
+
+          setTimeout((e) => {
+            toast.opened = false;
+          }, 5000);
+        }
+        else {
+          toast.opened = true;
+          toast.text = 'Network connection lost. Offline mode enabled.';
+        }
+      }
+
+      _closeToast() {
+        Polymer.dom(this.root).querySelector("#networkToast").opened = false;
       }
 
       _onChangeSection(e) {
-        if (this.$.drawerLayout.forceNarrow || !this.$.drawerLayout.narrow) {
-          this.$.drawerLayout.forceNarrow = !this.$.drawerLayout.forceNarrow;
+        var drawerlayout = Polymer.dom(this.root).querySelector("#drawerLayout");
+        if (drawerlayout.forceNarrow || !drawerlayout.narrow) {
+          drawerlayout.forceNarrow = !drawerlayout.forceNarrow;
         } else {
-          this.$.drawerLayout.drawer.toggle();
+          drawerlayout.drawer.toggle();
         }
-        // alert(`thing count is ${this.narrow}`);
       }
 
+      _onChangeSection2(e) {
+        var drawerlayout = Polymer.dom(this.root).querySelector("#drawerLayout");
+        drawerlayout.forceNarrow = e.detail.narrow;
+      }
+
+      // _mymap() {
+      // window.location = "/map";
+      // }
 
     }
 
