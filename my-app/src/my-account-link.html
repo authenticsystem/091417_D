@@ -300,6 +300,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         .credential(this.confirmationResult.verificationId, this.myphonecode);
                     var accountKey = this.account[0].$key;
                     var userName = this.account[0].name.firstname + ' ' + this.account[0].name.middlename + ' ' + this.account[0].name.lastname + ' ' + this.account[0].name.suffix;
+                    var secName = this.account[0].name.lastname + ' ' + this.account[0].name.firstname + ' ' + this.account[0].name.middlename + ' ' + this.account[0].name.suffix;
+                    var role = this.account[0].role;
+                    var code = this.mycode;
 
                     firebase.auth().currentUser.linkWithCredential(credential).then(function (user) {
                         var fbDB = firebase.database().ref();
@@ -307,6 +310,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         user.updateProfile({ displayName: userName });
                         fbDB.child('accounts/' + accountKey + '/uid').set(data);
                         fbDB.child('accounts/' + accountKey + '/active').set(true);
+                        if (role == 'Secretary') {
+                            fbDB.child('secretary').push({
+                                name: secName,
+                                code: code,
+                                key: accountKey
+                            });
+                        }
                         hide.style.display = 'none';
                         show.style.display = 'block';
                         verifySpin.style.display = 'none';

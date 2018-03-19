@@ -14,14 +14,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
-<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
@@ -136,7 +130,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div class="divHolder">
                         <div class="div1" align="center">
                             <a href="/settings/account">
-                                <div class="card">
+                                <div on-tap="_newAccount" class="card">
                                     <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
                                     <h3>My Account</h3>
                                 </div>
@@ -144,7 +138,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         </div>
                         <div class="div1" align="center">
                             <a href="/settings/secretary">
-                                <div class="card">
+                                <div on-tap="_newSecretary" class="card">
                                     <img preload style="width:150px; height:150px;" src="../images/secretary.png">
                                     <h3>My Secretary</h3>
                                 </div>
@@ -156,11 +150,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
 
             <div name="/account">
-                <my-account user={{user}} name="account"></my-account>
+                <div id="acc1"></div>
+                <my-account id="acc2" user="{{user}}"></my-account>
             </div>
 
             <div name="/secretary">
-                <my-secretary user={{user}} name="account"></my-secretary>
+                <div id="sec1"></div>
+                <my-secretary id="sec2" user="{{user}}" my-key="{{myKey}}" my-lastname="{{myLastname}}"></my-secretary>
             </div>
 
             <div name="view404">Not found.</div>
@@ -189,10 +185,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 account: {
                     type: Object,
                 },
-                user: {
-                    type: Object,
-                    // observer: 'userChanged'
-                }
+                user: Object,
+                myKey: String,
+                myLastname: String
             },
 
             toggleDrawer() {
@@ -202,8 +197,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     }
                 }));
                 this.$.narrow = !this.$.narrow;
-            }
+            },
 
+            _newAccount() {
+                var node = Polymer.dom(this.root).querySelector("#acc1");
+                if (node) {
+                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#acc2");
+                    if (oldDiv) {
+                        Polymer.dom(node.parentNode).removeChild(oldDiv);
+                    }
+                    var newDiv = document.createElement("my-account");
+                    newDiv.setAttribute("user", this.user);
+                    newDiv.setAttribute("id", "acc2");
+                    //if open existing
+                    var currentDiv = document.getElementById("acc1");
+                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                }
+            },
+
+            _newSecretary() {
+                var node = Polymer.dom(this.root).querySelector("#sec1");
+                if (node) {
+                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#sec2");
+                    if (oldDiv) {
+                        Polymer.dom(node.parentNode).removeChild(oldDiv);
+                    }
+                    var newDiv = document.createElement("my-secretary");
+                    newDiv.setAttribute("user", this.user);
+                    newDiv.setAttribute("my-key", this.myKey);
+                    newDiv.setAttribute("my-lastname", this.myLastname);
+                    newDiv.setAttribute("id", "sec2");
+                    //if open existing
+                    var currentDiv = document.getElementById("sec1");
+                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                }
+            }
         })
 
 

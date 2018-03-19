@@ -20,11 +20,11 @@
 <link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 
+<!-- <link rel="import" href="short-unique-id.html"> -->
 <!-- <link rel="import" href="video-gallery.html"> -->
 <link rel="import" href="time-element.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
-<!-- <link rel="import" href="short-unique-id.html"> -->
 
 <dom-module id="my-visits-view">
     <template>
@@ -97,6 +97,11 @@
                     width: 30%;
                 }
 
+                .galleryHolder {
+                    padding: 16px;
+                    border: 1px solid gray
+                }
+
                 /* .vid-m-6 {
                     width: 90%;
                     height: 50%
@@ -123,6 +128,11 @@
 
                 .vid-s-9 {
                     width: 90%;
+                }
+
+                .galleryHolder {
+                    padding: 6px;
+                    border: 1px solid gray
                 }
             }
 
@@ -219,14 +229,12 @@
                 color: dimgray;
             }
 
-            .imgh {
-                margin-right: 3px;
-                padding: 6px;
+            #gallery-image:hover {
+                opacity: 0.7;
             }
 
-            .imgh:hover {
-                box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
-                cursor: pointer;
+            #gallery-image {
+                transition: 0.3s;
             }
         </style>
 
@@ -328,6 +336,9 @@
                     </div>
                 </div>
 
+                <firebase-query id="query" path="/{{myKey}}/cases/{{viewKey}}/attachment" data="{{myimaging}}">
+                </firebase-query>
+
                 <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
                     <neon-animatable>
                         <div class="docu" style="margin-top:-16px;">
@@ -346,6 +357,28 @@
                                     <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{history}}</div>
                                 </div>
 
+                                <div hidden$="{{!laboratory}}">
+                                    <span class="longText">Laboratory</span>
+                                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{laboratory}}</div>
+                                </div>
+
+                                <div hidden$="{{!imaging}}">
+                                    <span class="longText">Imaging</span>
+                                    <div class="galleryHolder">
+                                        <sl-gallery id="gallery">
+                                            <!-- <template is="dom-repeat" items="{{myimaging}}">
+                                                <sl-gallery-image src="[[item.url]]" small="[[item.url]]"></sl-gallery-image>
+                                            </template> -->
+                                        </sl-gallery>
+                                    </div>
+                                </div>
+                                <br>
+
+                                <div hidden$="{{!pe}}">
+                                    <span class="longText">Physical Exam</span>
+                                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{pe}}</div>
+                                </div>
+
                                 <div hidden$="{{!diagnosis}}">
                                     <span class="longText">Diagnosis</span>
                                     <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{diagnosis}}</div>
@@ -354,6 +387,11 @@
                                 <div hidden$="{{!treatment}}">
                                     <span class="longText">Treatment</span>
                                     <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{treatment}}</div>
+                                </div>
+
+                                <div hidden$="{{!plan}}">
+                                    <span class="longText">Plan</span>
+                                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{plan}}</div>
                                 </div>
 
                                 <!-- <firebase-query id="query" path="/{{myKey}}/cases/{{viewKey}}/attachment" data="{{myattachment}}">
@@ -413,10 +451,6 @@
 
             </app-header-layout>
 
-            <!-- <paper-dialog id="videoDialog" confirm-button="Done">
-                <video controls preload="auto" class="vid-m-6 vid-s-9" width="100%" src="{{vidSrc}}"></video>
-            </paper-dialog> -->
-
             <div class="footer">
                 <div hidden$="[[favlefthide]]">
                     <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
@@ -464,11 +498,19 @@
                     type: Boolean,
                     value: false
                 },
-                complain: {
+                history: {
                     type: String,
                     value: ''
                 },
-                history: {
+                laboratory: {
+                    type: String,
+                    value: ''
+                },
+                imaging: {
+                    type: Boolean,
+                    value: false
+                },
+                pe: {
                     type: String,
                     value: ''
                 },
@@ -480,6 +522,10 @@
                     type: String,
                     value: ''
                 },
+                plan: {
+                    type: String,
+                    value: ''
+                },
                 myimage: {
                     type: Object,
                     observer: '_myimageChanged'
@@ -487,15 +533,26 @@
                 myvideo: {
                     type: Object,
                     observer: '_myvideoChanged'
+                },
+                myimaging: {
+                    type: Object,
+                    observer: '_myimagingChanged'
                 }
-
             },
 
-            // _zoom(e) {
-            //     var zoomMe = Polymer.dom(e).rootTarget.getAttribute("id");
-            //     this.vidSrc = zoomMe;
-            //     Polymer.dom(this.root).querySelector("#videoDialog").open();
-            // },
+            _myimagingChanged() {
+                if (this.myimaging.length > 0) {
+                    const image = this.myimaging;
+                    const gallery = Polymer.dom(this.root).querySelector('#gallery');
+                    image.forEach(img => {
+                        const el = document.createElement('sl-gallery-image');
+                        el.setAttribute('src', img.url);
+                        el.setAttribute('small', img.url);
+                        el.setAttribute('id', 'gallery-image');
+                        gallery.appendChild(el);
+                    });
+                }
+            },
 
             _showAttach() {
                 this.selectedPage = 1;
@@ -591,6 +648,10 @@
                     this.diagnosis = e[0].diagnosis;
                     this.history = e[0].history;
                     this.treatment = e[0].treatment;
+                    this.laboratory = e[0].laboratory;
+                    this.pe = e[0].pe;
+                    this.imaging = e[0].imaging;
+                    this.plan = e[0].plan;
 
                     if (e[0].profile) {
                         this.profile = e[0].profile;

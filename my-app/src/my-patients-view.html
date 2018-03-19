@@ -27,8 +27,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tab.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
 
+<link rel="import" href="my-gallery.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="time-element.html">
@@ -129,6 +129,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         .vid-6 {
           width: 30%;
         }
+
+        .galleryHolder {
+          padding: 16px;
+          border: 1px solid gray
+        }
       }
 
       @media (max-width: 800px) {
@@ -166,9 +171,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         .vid-s-9 {
           width: 90%;
         }
+
+        .galleryHolder {
+          padding: 6px;
+          border: 1px solid gray
+        }
       }
-
-
 
       .avatar {
         height: 70px;
@@ -210,14 +218,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: dimgray;
       }
 
-      .imgh {
-        margin-right: 3px;
-        padding: 6px;
+      #myImg:hover {
+        opacity: 0.7;
       }
 
-      .imgh:hover {
-        box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
-        cursor: pointer;
+      #myImg {
+        transition: 0.3s;
       }
     </style>
 
@@ -253,8 +259,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </firebase-query>
 
             <div class="docu" id="printMe">
-              <!-- <div style="background:url({{p_profile}}); padding: 80px; background-repeat: no-repeat; 
-               background-position: center; background-size: cover;"></div> -->
               <div class="docu-header" style="padding:16px; display: flex; margin-bottom:3px;">
                 <img class="avatar" src="{{p_profile}}"></img>
                 <div style="margin-left:10px; padding:8px; font-weight:400; color:black">
@@ -278,21 +282,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <td></td>
                     <td style="color:rgb(37, 37, 37)">{{email}}</td>
                   </tr>
-                  <!-- <tr>
-                    <td>Firstname</td>
-                    <td>:</td>
-                    <td>{{fname}}</td>
-                  </tr>
-                  <tr>
-                    <td>Middlename</td>
-                    <td>:</td>
-                    <td>{{mname}}</td>
-                  </tr>
-                  <tr>
-                    <td>Lastname</td>
-                    <td>:</td>
-                    <td>{{lname}}</td>
-                  </tr> -->
                   <tr>
                     <td>
                       <span class="longText">Birth date</span>
@@ -301,14 +290,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <td></td>
                     <td style="color:rgb(37, 37, 37)">{{bday}}</td>
                   </tr>
-                  <!-- <tr>
-                    <td>
-                      <span class="longText">Age</span>
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td>{{age}}</td>
-                  </tr> -->
                   <tr>
                     <td>
                       <span class="longText">Marital Status</span>
@@ -317,14 +298,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <td></td>
                     <td style="color:rgb(37, 37, 37)">{{status}}</td>
                   </tr>
-                  <!-- <tr>
-                    <td>
-                      <span class="longText">Gender</span>
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td>{{sex}}</td>
-                  </tr> -->
                   <tr>
                     <td>
                       <span class="longText">Contact no.</span>
@@ -480,76 +453,64 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
 
             <div style="margin-bottom: 26px;">
-              <template is="dom-repeat" items="{{_descending(mycases)}}">
+              <template is="dom-repeat" items="{{_descending(mycases)}}" as="caseses">
 
                 <div class="docu1" style="padding:16px;" id="printMe">
                   <!-- <div class="docu-header">Cases</div> -->
                   <div class="details">
                     <!-- <div style="font-weight:bold">{{_date(item.timestamp)}}</div> -->
                     <iron-icon icon="my-icons:watch-later"></iron-icon>
-                    <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
-                    <!-- <paper-icon-button alt="{{item.$key}}" on-tap="_showAttach" class="attachment-icon" icon="my-icons:attachment" title="attacments"></paper-icon-button> -->
+                    <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(caseses.timestamp)}}">{{_timeStampToDateTime(caseses.timestamp)}}</time-ago>
                     <br>
                     <br>
                     <span class="longText">Chief Complaint</span>
-                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
-                    <!-- <hr> -->
-                    <div hidden$="{{!item.history}}">
+                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.complain}}</div>
+
+                    <div hidden$="{{!caseses.history}}">
                       <span class="longText">History</span>
-                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.history}}</div>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.history}}</div>
                     </div>
-                    <!-- <hr> -->
-                    <div hidden$="{{!item.diagnosis}}">
+
+                    <div hidden$="{{!caseses.laboratory}}">
+                      <span class="longText">Laboratory</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.laboratory}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.imaging}}">
+                      <span class="longText">Imaging</span>
+                      <div class="galleryHolder">
+                        <my-gallery id="gallery">
+                          <template is="dom-repeat" items="{{_array(caseses.attachment)}}" as="img">
+                            <sl-gallery-image id="myImg" src="[[img.url]]" small="[[img.url]]"></sl-gallery-image>
+                          </template>
+                        </my-gallery>
+                      </div>
+                    </div>
+                    <br>
+
+                    <div hidden$="{{!caseses.pe}}">
+                      <span class="longText">Physical Exam</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.pe}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.diagnosis}}">
                       <span class="longText">Diagnosis</span>
-                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.diagnosis}}</div>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.diagnosis}}</div>
                     </div>
-                    <!-- <hr> -->
-                    <div hidden$="{{!item.treatment}}">
+
+                    <div hidden$="{{!caseses.treatment}}">
                       <span class="longText">Treatment</span>
-                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.treatment}}</div>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.treatment}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.plan}}">
+                      <span class="longText">Plan</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.plan}}</div>
                     </div>
                   </div>
                 </div>
               </template>
             </div>
-            <!-- <br>
-            <br>
-            <br> -->
-            <!-- <hr>
-                  <table style="padding:8px;">
-                    <tr>
-                      <td>
-                        <span class="longText">Chief complaint</span>
-                      </td>
-                      <td></td>
-                      <td></td>
-                      <td>{{item.complain}}</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <span class="longText">History</span>
-                      </td>
-                      <td></td>
-                      <td></td>
-                      <td>{{item.history}}</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <span class="longText">Diagnosis</span>
-                      </td>
-                      <td></td>
-                      <td></td>
-                      <td>{{item.diagnosis}}</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <span class="longText">Treatment</span>
-                      </td>
-                      <td></td>
-                      <td></td>
-                      <td>{{item.treatment}}</td>
-                    </tr>
-                  </table> -->
           </neon-animatable>
 
         </neon-animated-pages>
@@ -589,53 +550,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         viewKey: String,
         mypatient: Object,
         mycases: Object
-        // myimage: Object,
-        // myvideo: Object,
       },
 
       observers: [
         'mypatientChanged(mypatient)',
         'mycaseChanged(mycases)',
-        'selectedPageChanged(selectedPage)',
-        // '_myimageChanged(myimage)',
-        // '_myvideoChanged(myvideo)'
+        'selectedPageChanged(selectedPage)'
       ],
 
-      // _show(e) {
-      //   if (e) {
-      //     return 'show' + e;
-      //   }
-      // },
-
-      // _showed(e) {
-      //   if (e) {
-      //     return 'showed' + e;
-      //   }
-      // },
-
-      // _showAttach(e) {
-      //   var id = Polymer.dom(e).rootTarget.getAttribute("alt");
-      //   Polymer.dom(this.root).querySelector("#showed" + id).style.display = 'none';
-      //   Polymer.dom(this.root).querySelector("#show" + id).style.display = 'block';
-      // },
-
-      // _hideAttach(e) {
-      //   var id = Polymer.dom(e).rootTarget.getAttribute("alt");
-      //   Polymer.dom(this.root).querySelector("#showed" + id).style.display = 'block';
-      //   Polymer.dom(this.root).querySelector("#show" + id).style.display = 'none';
-      // },
-
-      // _myvideoChanged(e) {
-      //   if (e.length > 0) {
-      //     Polymer.dom(this.root).querySelector("#videoTxt").style.display = 'none';
-      //   }
-      // },
-
-      // _myimageChanged(e) {
-      //   if (e.length > 0) {
-      //     Polymer.dom(this.root).querySelector("#imageTxt").style.display = 'none';
-      //   }
-      // },
+      _array(e) {
+        if (e) return Object.values(e);
+        else return '';
+      },
 
       _descending(data) {
         return data.reverse();

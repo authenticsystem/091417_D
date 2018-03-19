@@ -304,13 +304,16 @@
                                 </div>
                                 <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
                                 <paper-textarea label="History" value="{{history}}"></paper-textarea>
+                                <paper-textarea label="Laboratory" value="{{laboratory}}"></paper-textarea>
+                                <div style="font-size:16px; margin-top:16px;">Imaging</div>
+                                <div style="border:1px solid gray; padding:6px;">
+                                    <input on-change="_changeAttach" type="file" id="myFile" accept="image/*" multiple="multiple" />
+                                    <output style="font-size:14px;" id="fileList"></output>
+                                </div>
+                                <paper-textarea label="Physical Exam" value="{{pe}}"></paper-textarea>
                                 <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
                                 <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
-                                <!-- <div style="font-size:16px; margin-top:16px;">Health Records</div>
-                                <div style="border:1px solid gray; padding:6px;">
-                                    <input on-change="_changeAttach" type="file" id="myFile" accept="image/*,video/*" multiple="multiple" />
-                                    <output style="font-size:14px;" id="fileList"></output>
-                                </div> -->
+                                <paper-textarea label="Plan" value="{{plan}}"></paper-textarea>
                             </div>
                         </div>
 
@@ -427,20 +430,31 @@
                     value: true
                 },
                 complain: {
-                    type: String,
-                    value: '',
+                    type: String
                 },
                 history: {
                     type: String,
-                    value: '',
+                    value: ''
+                },
+                laboratory: {
+                    type: String,
+                    value: ''
+                },
+                pe: {
+                    type: String,
+                    value: ''
                 },
                 diagnosis: {
                     type: String,
-                    value: '',
+                    value: ''
                 },
                 treatment: {
                     type: String,
-                    value: '',
+                    value: ''
+                },
+                plan: {
+                    type: String,
+                    value: ''
                 },
                 attachment: {
                     type: Object,
@@ -642,6 +656,9 @@
                     this.complain = this.mycases[0].complain;
                     this.diagnosis = this.mycases[0].diagnosis;
                     this.history = this.mycases[0].history;
+                    this.laboratory = this.mycases[0].laboratory;
+                    this.pe = this.mycases[0].pe;
+                    this.plan = this.mycases[0].plan;
                     this.treatment = this.mycases[0].treatment;
                     this.mykey = this.mycases[0].patientkey;
                     this.timestamp = this.mycases[0].timestamp;
@@ -785,8 +802,9 @@
 
                         var key = this.mykey, mypatient = this.filterValue,
                             mycomplain = this.complain, myhistory = this.history,
+                            mylaboratory = this.laboratory, mype = this.pe,
                             mydiagnosis = this.diagnosis, mytreatment = this.treatment,
-                            editkey = this.editKey;
+                            myplan = this.plan, editkey = this.editKey;
                         var mykey = this.myKey;
                         var myattachment = this.attachment;
                         var attachName = this.randomString(8);
@@ -826,6 +844,9 @@
                                         patient: mypatient,
                                         complain: mycomplain,
                                         history: myhistory,
+                                        laboratory: mylaboratory,
+                                        pe: mype,
+                                        plan: myplan,
                                         diagnosis: mydiagnosis,
                                         treatment: mytreatment,
                                         patientkey: key,
@@ -849,7 +870,7 @@
 
                                             if (myattachment) {
                                                 saveRun.style.display = 'block';
-                                                this._attachmentUpdate(myattachment, attachName, mykey, editkey);
+                                                _attachmentUpdate(myattachment, attachName, mykey, editkey, saveRun, saveSucc);
                                             }
                                             else {
                                                 saveRun.style.display = 'none';
@@ -863,6 +884,9 @@
                                         patient: mypatient,
                                         complain: mycomplain,
                                         history: myhistory,
+                                        laboratory: mylaboratory,
+                                        pe: mype,
+                                        plan: myplan,
                                         diagnosis: mydiagnosis,
                                         treatment: mytreatment,
                                         patientkey: key,
@@ -886,13 +910,14 @@
 
                                             if (myattachment) {
                                                 saveRun.style.display = 'block';
-                                                this._attachmentUpdate(myattachment, attachName, mykey, editkey);
+                                                _attachmentUpdate(myattachment, attachName, mykey, editkey, saveRun, saveSucc);
                                             }
                                             else {
                                                 saveRun.style.display = 'none';
                                                 saveSucc.style.display = 'block';
                                             }
                                         });
+
                                 }
                             });
 
@@ -949,6 +974,7 @@
                     }
 
                 }
+
                 if (parseInt(this.selectedPage) !== 2) {
 
                     this.selectedPage = (parseInt(this.selectedPage) + 1);
@@ -959,34 +985,50 @@
                         Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
                     }
                 }
-
                 else {
                     this.selectedPage = 0;
                     this.favlefthide = true;
                     this.favrighthide = true;
                 }
-            },
 
-            _attachmentUpdate(myattachment, attachName, mykey, editkey) {
-                for (var i = 0; i < myattachment.length; i++) {
+                function _attachmentUpdate(myattachment, attachName, mykey, editkey, saveRun, saveSucc) {
+                    for (var i = 0; i < myattachment.length; i++) {
 
-                    var attachFile = myattachment[i];
-                    var ext = attachFile.type.substring(6);
-                    var name = attachName + i + '.' + ext;
-                    var myURL = "/" + mykey + "/cases/" + editkey + "/attachment";
+                        var attachFile = myattachment[i];
+                        var ext = attachFile.type.substring(6);
+                        var name = attachName + i + '.' + ext;
+                        var myURL = "/" + mykey + "/cases/" + editkey + "/attachment";
 
-                    if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
-                        ImageTools.resize(attachFile, {
-                            width: 440, // maximum width
-                            height: 400 // maximum height
-                        }, function (blob, didItResize) {
+                        if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
+                            ImageTools.resize(attachFile, {
+                                width: 440, // maximum width
+                                height: 400 // maximum height
+                            }, function (blob, didItResize) {
 
-                            var ext = blob.type.substring(6);
-                            var rand = Math.random().toString(36).slice(-8);
-                            var newName = rand + '.' + ext;
+                                var ext = blob.type.substring(6);
+                                var rand = Math.random().toString(36).slice(-8);
+                                var newName = rand + '.' + ext;
 
-                            var storageRef = firebase.storage().ref('attachment/' + newName);
-                            storageRef.put(blob).then(function (snapshot) {
+                                var storageRef = firebase.storage().ref('attachment/' + newName);
+                                storageRef.put(blob).then(function (snapshot) {
+                                    saveRun.style.display = 'none';
+                                    saveSucc.style.display = 'block';
+
+                                    var type = snapshot.metadata.contentType.slice(0, 5);
+                                    var name = snapshot.metadata.name;
+                                    var ref = firebase.database().ref(myURL);
+
+                                    ref.push({
+                                        url: snapshot.downloadURL,
+                                        type: type,
+                                        name: name
+                                    });
+                                });
+                            });
+                        }
+                        else {
+                            var storageRef = firebase.storage().ref('attachment/' + name);
+                            storageRef.put(attachFile).then(function (snapshot) {
                                 saveRun.style.display = 'none';
                                 saveSucc.style.display = 'block';
 
@@ -1000,26 +1042,10 @@
                                     name: name
                                 });
                             });
-                        });
-                    }
-                    else {
-                        var storageRef = firebase.storage().ref('attachment/' + name);
-                        storageRef.put(attachFile).then(function (snapshot) {
-                            saveRun.style.display = 'none';
-                            saveSucc.style.display = 'block';
-
-                            var type = snapshot.metadata.contentType.slice(0, 5);
-                            var name = snapshot.metadata.name;
-                            var ref = firebase.database().ref(myURL);
-
-                            ref.push({
-                                url: snapshot.downloadURL,
-                                type: type,
-                                name: name
-                            });
-                        });
+                        }
                     }
                 }
+
             },
 
             randomString(n) {

@@ -17,6 +17,7 @@
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html">
 <link rel="import" href="../bower_components/paper-time-input/paper-time-input.html">
+<link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
 
 <link rel="import" href="time-element.html">
 <link rel="import" href="shared-styles.html">
@@ -93,6 +94,11 @@
                 .vid-6 {
                     width: 30%;
                 }
+
+                .galleryHolder {
+                    padding: 16px;
+                    border: 1px solid gray
+                }
             }
 
             @media (max-width: 800px) {
@@ -115,6 +121,11 @@
 
                 .vid-s-9 {
                     width: 90%;
+                }
+
+                .galleryHolder {
+                    padding: 6px;
+                    border: 1px solid gray
                 }
             }
 
@@ -200,15 +211,12 @@
                 color: dimgray;
             }
 
-            .imgh {
-                margin-right: 3px;
-                padding: 6px;
-                display: inline;
+            #gallery-image:hover {
+                opacity: 0.7;
             }
 
-            .imgh:hover {
-                box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
-                cursor: pointer;
+            #gallery-image {
+                transition: 0.3s;
             }
         </style>
 
@@ -316,6 +324,10 @@
                                     <!-- <span class="primary" style="color:black; font-weight:400">Last Visit</span> -->
                                     <div>{{noprev}}</div>
                                     <template is="dom-repeat" items="[[mycases]]">
+
+                                        <firebase-query id="query5" path="/{{myKey}}/cases/{{item.$key}}/attachment" data="{{myimaging}}">
+                                        </firebase-query>
+
                                         <div style="margin-bottom:16px;">
                                             <span class="primary" style="color:black; font-weight:400; margin-right:2px;">Last Visit</span>
                                             <iron-icon icon="my-icons:watch-later"></iron-icon>
@@ -330,6 +342,29 @@
                                             <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.history}}</div>
                                         </div>
 
+                                        <div hidden$="{{!item.laboratory}}">
+                                            <span class="longText">Laboratory</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.laboratory}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.imaging}}">
+                                            <span class="longText">Imaging</span>
+                                            <div class="galleryHolder">
+                                                <sl-gallery id="gallery">
+                                                    <!-- <template is="dom-repeat" items="{{myimaging}}">
+                                                        <sl-gallery-image src="[[item.url]]" small="[[item.url]]"></sl-gallery-image>
+                                                    </template> -->
+                                                </sl-gallery>
+                                            </div>
+                                        </div>
+
+                                        <br>
+
+                                        <div hidden$="{{!item.pe}}">
+                                            <span class="longText">Physical Exam</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.pe}}</div>
+                                        </div>
+
                                         <div hidden$="{{!item.diagnosis}}">
                                             <span class="longText">Diagnosis</span>
                                             <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.diagnosis}}</div>
@@ -338,6 +373,11 @@
                                         <div hidden$="{{!item.treatment}}">
                                             <span class="longText">Treatment</span>
                                             <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.treatment}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.plan}}">
+                                            <span class="longText">Plan</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.plan}}</div>
                                         </div>
                                     </template>
                                     <!-- <span style="font-size:16px;">{{attach}}</span>
@@ -398,13 +438,16 @@
                                 <!-- <b style="font-size:18px;">Today</b> -->
                                 <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
                                 <paper-textarea label="History" value="{{history}}"></paper-textarea>
+                                <paper-textarea label="Laboratory" value="{{laboratory}}"></paper-textarea>
+                                <div style="font-size:16px; margin-top:16px;">Imaging</div>
+                                <div style="border:1px solid gray; padding:6px;">
+                                    <input on-change="_changeAttach" type="file" id="myFile" accept="image/*" multiple="multiple" />
+                                    <output style="font-size:14px;" id="fileList"></output>
+                                </div>
+                                <paper-textarea label="Physical Exam" value="{{pe}}"></paper-textarea>
                                 <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
                                 <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
-                                <!-- <div style="font-size:16px; margin-top:16px;">Health Records</div>
-                                    <div style="border:1px solid gray; padding:6px;">
-                                        <input on-change="_changeAttach" type="file" id="myFile" accept="image/*,video/*" multiple="multiple" />
-                                        <output style="font-size:14px;" id="fileList"></output>
-                                    </div> -->
+                                <paper-textarea label="Plan" value="{{plan}}"></paper-textarea>
                             </div>
                         </div>
                         <br>
@@ -473,11 +516,23 @@
                     type: String,
                     value: ''
                 },
+                laboratory: {
+                    type: String,
+                    value: ''
+                },
+                pe: {
+                    type: String,
+                    value: ''
+                },
                 diagnosis: {
                     type: String,
                     value: ''
                 },
                 treatment: {
+                    type: String,
+                    value: ''
+                },
+                plan: {
                     type: String,
                     value: ''
                 },
@@ -499,7 +554,9 @@
                     type: Number,
                     value: 0
                 },
-                myPatientKey: String
+                myPatientKey: String,
+                myimaging: Object,
+                mycases: Object
             },
 
             _showAttach() {
@@ -575,17 +632,34 @@
                 var name = str.slice(21);
                 var key = str.slice(0, 20);
 
-                if (name) {
-                    this.filterValue = name;
-                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
-                }
+                this.filterValue = name;
+                this.myPatientKey = key;
+                this.mykey = key;
+                Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'block';
+                Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'block';
 
-                if (key) {
-                    Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'block';
-                    Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'block';
-                    // Polymer.dom(this.root).querySelector("#info").style.display = 'block';
-                    this.myPatientKey = key;
-                    this.mykey = key;
+                if (this.mycases.length > 0) {
+                    this.noprev = '';
+                }
+                else {
+                    this.noprev = 'No previous visit.';
+                }
+            },
+
+            _myimagingChanged(e) {
+                if (e) {
+                    const gallery = Polymer.dom(this.root).querySelector('#gallery');
+
+                    if (gallery) {
+                        e.forEach(img => {
+                            const el = document.createElement('sl-gallery-image');
+                            el.setAttribute('src', img.url);
+                            el.setAttribute('small', img.url);
+                            el.setAttribute('id', 'gallery-image');
+                            gallery.appendChild(el);
+                        });
+                    }
                 }
             },
 
@@ -628,7 +702,7 @@
                 '_patientChanged(filterValue)',
                 '_showFab1(complain, todayDate)',
                 '_mypatientInfoChanged(patientInfo)',
-                '_myCasesChanged(mycases)',
+                '_myimagingChanged(myimaging)',
                 '_myattachmentChaged(myattachment)',
                 '_mytimeCheckChanged(mytimeCheck, todayDate, myNewPatientKey)'
             ],
@@ -675,17 +749,6 @@
                 }
                 else {
                     this.attach = '';
-                }
-            },
-
-            _myCasesChanged(e) {
-                if (e.length > 0) {
-                    this.noprev = '';
-                    this.myAttachKey = e[0].$key;
-                }
-                else {
-                    this.noprev = 'No previous visit.';
-                    this.myAttachKey = '';
                 }
             },
 
@@ -838,9 +901,7 @@
 
                     if (parseInt(this.selectedPage) == 1) {
 
-                        var key = this.mykey, mypatient = this.filterValue,
-                            mycomplain = this.complain, myhistory = this.history,
-                            mydiagnosis = this.diagnosis, mytreatment = this.treatment;
+                        var key = this.mykey;
                         var mykey = this.myKey;
                         var myattachment = this.attachment;
                         var attachName = this.randomString(8);
@@ -855,6 +916,21 @@
                             order = this.lastPushTime;
                         }
 
+                        var data = {
+                            patient: this.filterValue,
+                            complain: this.complain,
+                            history: this.history,
+                            diagnosis: this.diagnosis,
+                            treatment: this.treatment,
+                            patientkey: key,
+                            timestamp: timestamp,
+                            order: order,
+                            created: today,
+                            laboratory: this.laboratory,
+                            pe: this.pe,
+                            plan: this.plan
+                        }
+
                         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
                         var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
                         var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
@@ -865,47 +941,28 @@
 
                                     if (newPushKey) {
                                         var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
-                                        var push = ref.set({
-                                            patient: mypatient,
-                                            complain: mycomplain,
-                                            history: myhistory,
-                                            diagnosis: mydiagnosis,
-                                            treatment: mytreatment,
-                                            patientkey: key,
-                                            profile: patient.val().profile,
-                                            timestamp: timestamp,
-                                            order: order,
-                                            created: today
-                                        });
+                                        var push = ref.set(data);
                                         var fbPushKey = newPushKey;
                                     }
                                     else {
                                         var ref = firebase.database().ref("/" + mykey + "/cases");
-                                        var push = ref.push({
-                                            patient: mypatient,
-                                            complain: mycomplain,
-                                            history: myhistory,
-                                            diagnosis: mydiagnosis,
-                                            treatment: mytreatment,
-                                            patientkey: key,
-                                            profile: patient.val().profile,
-                                            timestamp: timestamp,
-                                            order: order,
-                                            created: today
-                                        });
+                                        var push = ref.push(data);
                                         var fbPushKey = push.key;
                                     }
 
                                     if (fbPushKey) {
 
-                                        this._updateOrder(mykey, fbPushKey);
-                                        this._reportsUpdate(today, mykey);
+                                        firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/profile").set(patient.val().profile);
+                                        _updateOrder(mykey, fbPushKey);
+                                        _reportsUpdate(today, mykey);
 
                                         if (myattachment) {
                                             saveRun.style.display = 'block';
-                                            this._attachmentUpdate(myattachment, attachName, mykey, fbPushKey);
+                                            firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(true);
+                                            _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc);
                                         }
                                         else {
+                                            firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(false);
                                             saveRun.style.display = 'none';
                                             saveSucc.style.display = 'block';
                                         }
@@ -917,45 +974,27 @@
                                 else {
                                     if (newPushKey) {
                                         var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
-                                        var push = ref.set({
-                                            patient: mypatient,
-                                            complain: mycomplain,
-                                            history: myhistory,
-                                            diagnosis: mydiagnosis,
-                                            treatment: mytreatment,
-                                            patientkey: key,
-                                            timestamp: timestamp,
-                                            order: order,
-                                            created: today
-                                        });
+                                        var push = ref.set(data);
                                         var fbPushKey = newPushKey;
                                     }
                                     else {
                                         var ref = firebase.database().ref("/" + mykey + "/cases");
-                                        var push = ref.push({
-                                            patient: mypatient,
-                                            complain: mycomplain,
-                                            history: myhistory,
-                                            diagnosis: mydiagnosis,
-                                            treatment: mytreatment,
-                                            patientkey: key,
-                                            timestamp: timestamp,
-                                            order: order,
-                                            created: today
-                                        });
+                                        var push = ref.push(data);
                                         var fbPushKey = push.key;
                                     }
 
                                     if (fbPushKey) {
 
-                                        this._updateOrder(mykey, fbPushKey);
-                                        this._reportsUpdate(today, mykey);
+                                        _updateOrder(mykey, fbPushKey);
+                                        _reportsUpdate(today, mykey);
 
                                         if (myattachment) {
                                             saveRun.style.display = 'block';
-                                            this._attachmentUpdate(myattachment, attachName, mykey, fbPushKey);
+                                            firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(true);
+                                            _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc);
                                         }
                                         else {
+                                            firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(false);
                                             saveRun.style.display = 'none';
                                             saveSucc.style.display = 'block';
                                         }
@@ -999,67 +1038,83 @@
                     this.favrighthide = true;
                 }
 
-            },
+                function _reportsUpdate(today, mykey) {
+                    var mm = today.substring(0, 7);
+                    var yy = today.substring(0, 4);
 
-            _reportsUpdate(today, mykey) {
-                var mm = today.substring(0, 7);
-                var yy = today.substring(0, 4);
-
-                var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
-                dayRef.once('value').then(function (snapshot) {
-                    dayRef.set(snapshot.val() + 1);
-                });
-
-                var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
-                yearRef.once('value').then(function (snapshot) {
-                    yearRef.set(snapshot.val() + 1);
-                });
-
-                var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
-                monthRef.once('value').then(function (snapshot) {
-                    monthRef.set(snapshot.val() + 1);
-                });
-            },
-
-            _updateOrder(mykey, fbPushKey) {
-                var postRef = firebase.database().ref('/' + mykey + '/cases/' + fbPushKey);
-                postRef.once('value').then(function (snapshot) {
-                    var patientRef = firebase.database().ref('/' + mykey + '/patients/' + snapshot.val().patientkey);
-                    patientRef.once('value').then(function (snapshot) {
-                        postRef.update({
-                            patientinfo: {
-                                num: snapshot.val().no,
-                                birthday: snapshot.val().personal.birthday,
-                                gender: snapshot.val().personal.sex,
-                                hmo: snapshot.val().insurance.primary_insurance
-                            },
-                        });
+                    var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
+                    dayRef.once('value').then(function (snapshot) {
+                        dayRef.set(snapshot.val() + 1);
                     });
-                    order = snapshot.val().order * -1;
-                    postRef.update({ order });
-                });
-            },
 
-            _attachmentUpdate(myattachment, attachName, mykey, fbPushKey) {
-                for (var i = 0; i < myattachment.length; i++) {
+                    var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
+                    yearRef.once('value').then(function (snapshot) {
+                        yearRef.set(snapshot.val() + 1);
+                    });
 
-                    var attachFile = myattachment[i];
-                    var ext = attachFile.type.substring(6);
-                    var name = attachName + i + '.' + ext;
-                    var myURL = "/" + mykey + "/cases/" + fbPushKey + "/attachment";
+                    var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
+                    monthRef.once('value').then(function (snapshot) {
+                        monthRef.set(snapshot.val() + 1);
+                    });
+                }
 
-                    if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
-                        ImageTools.resize(attachFile, {
-                            width: 440, // maximum width
-                            height: 400 // maximum height
-                        }, function (blob, didItResize) {
+                function _updateOrder(mykey, fbPushKey) {
+                    var postRef = firebase.database().ref('/' + mykey + '/cases/' + fbPushKey);
+                    postRef.once('value').then(function (snapshot) {
+                        var patientRef = firebase.database().ref('/' + mykey + '/patients/' + snapshot.val().patientkey);
+                        patientRef.once('value').then(function (snapshot) {
+                            postRef.update({
+                                patientinfo: {
+                                    num: snapshot.val().no,
+                                    birthday: snapshot.val().personal.birthday,
+                                    gender: snapshot.val().personal.sex,
+                                    hmo: snapshot.val().insurance.primary_insurance
+                                },
+                            });
+                        });
+                        order = snapshot.val().order * -1;
+                        postRef.update({ order });
+                    });
+                }
 
-                            var ext = blob.type.substring(6);
-                            var rand = Math.random().toString(36).slice(-8);
-                            var newName = rand + '.' + ext;
+                function _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc) {
+                    for (var i = 0; i < myattachment.length; i++) {
 
-                            var storageRef = firebase.storage().ref('attachment/' + newName);
-                            storageRef.put(blob).then(function (snapshot) {
+                        var attachFile = myattachment[i];
+                        var ext = attachFile.type.substring(6);
+                        var name = attachName + i + '.' + ext;
+                        var myURL = "/" + mykey + "/cases/" + fbPushKey + "/attachment";
+
+                        if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
+                            ImageTools.resize(attachFile, {
+                                width: 440, // maximum width
+                                height: 400 // maximum height
+                            }, function (blob, didItResize) {
+
+                                var ext = blob.type.substring(6);
+                                var rand = Math.random().toString(36).slice(-8);
+                                var newName = rand + '.' + ext;
+
+                                var storageRef = firebase.storage().ref('attachment/' + newName);
+                                storageRef.put(blob).then(function (snapshot) {
+                                    saveRun.style.display = 'none';
+                                    saveSucc.style.display = 'block';
+
+                                    var type = snapshot.metadata.contentType.slice(0, 5);
+                                    var name = snapshot.metadata.name;
+                                    var ref = firebase.database().ref(myURL);
+
+                                    ref.push({
+                                        url: snapshot.downloadURL,
+                                        type: type,
+                                        name: name
+                                    });
+                                });
+
+                            });
+                        } else {
+                            var storageRef = firebase.storage().ref('attachment/' + name);
+                            storageRef.put(attachFile).then(function (snapshot) {
                                 saveRun.style.display = 'none';
                                 saveSucc.style.display = 'block';
 
@@ -1073,26 +1128,10 @@
                                     name: name
                                 });
                             });
-
-                        });
-                    } else {
-                        var storageRef = firebase.storage().ref('attachment/' + name);
-                        storageRef.put(attachFile).then(function (snapshot) {
-                            saveRun.style.display = 'none';
-                            saveSucc.style.display = 'block';
-
-                            var type = snapshot.metadata.contentType.slice(0, 5);
-                            var name = snapshot.metadata.name;
-                            var ref = firebase.database().ref(myURL);
-
-                            ref.push({
-                                url: snapshot.downloadURL,
-                                type: type,
-                                name: name
-                            });
-                        });
+                        }
                     }
                 }
+
             },
 
             randomString(n) {

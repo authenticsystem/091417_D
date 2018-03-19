@@ -57,7 +57,8 @@
     "sl-gallery": "jsilvermist/sl-gallery#^1.0.1",
     "paper-toggle-button": "PolymerElements/paper-toggle-button#^2.0.0",
     "chart.js": "^2.7.1",
-    "chartjs-plugin-datalabels": "^0.2.0"
+    "chartjs-plugin-datalabels": "^0.2.0",
+    "web-animations-js": "^2.3.1"
   },
   "resolutions": {
     "polymer": "^2.0.0",

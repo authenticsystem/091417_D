@@ -130,8 +130,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="card">
                 <div class="divHolder">
                     <div class="div1">
-                        <img hidden$="{{user.photoURL}}" style="width:200px; height:200px; border-radius:50%;" src="../images/user.png">
-                        <img hidden$="{{!user.photoURL}}" style="width:200px; height:200px; border-radius:50%;" src="{{user.photoURL}}">
+                        <img style="width:200px; height:200px; border-radius:50%;" src$="{{_src(user.photoURL)}}">
                         <div class="upload-btn-wrapper">
                             <button class="btn">Change profile picture</button>
                             <input type="file" name="myfile" id="fileButton" on-tap="_upload" accept="image/*" />
@@ -468,6 +467,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 var r = "";
                 while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
                 return r;
+            },
+
+            _src(e) {
+                if (e) return e;
+                else return '../images/user.png';
             }
 
             // _update() {

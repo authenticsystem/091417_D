@@ -11,7 +11,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/bwt-datatable/bwt-datatable-card.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
@@ -23,6 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 
+<link rel="import" href="bwt-datatable-card.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="short-unique-id.html">
@@ -110,37 +110,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template> -->
 
     <!-- <template is="dom-if" if="{{access}}"> -->
-      <div hidden$="{{!accountActive}}">
-        <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+    <div hidden$="{{!accountActive}}">
+      <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
 
-          <div name="">
-            <app-header-layout fullbleed has-scrolling-region>
-              <app-header fixed slot="header">
-                <app-toolbar primary>
-                  <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                  <div main-title id="addAccount">Accounts</div>
-                </app-toolbar>
-              </app-header>
+        <div name="">
+          <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+              <app-toolbar primary>
+                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                <div main-title id="addAccount">Accounts</div>
+              </app-toolbar>
+            </app-header>
 
-              <firebase-query id="accQuery" path="/accounts" data="{{account}}"></firebase-query>
+            <firebase-query id="accQuery" path="/accounts" data="{{account}}"></firebase-query>
 
-              <paper-datatable-card style="padding:17px;" header-fixed id-property="$key" header="Accounts" id="datatableCard">
-                <!-- <div slot="toolbar-select">
+            <paper-datatable-card style="padding:17px;" header-fixed id-property="$key" header="Accounts" id="datatableCard">
+              <!-- <div slot="toolbar-select">
                 <paper-icon-button id="delete" class="delete" icon="my-icons:delete-forever" no-ink on-tap="_deleteSelected"></paper-icon-button>
                 <paper-tooltip for="delete" position="bottom">Delete</paper-tooltip>
               </div> -->
-                <div slot="toolbar-select-single">
-                  <a style="text-decoration:none" href$="{{_getAccount(keyS)}}">
-                    <paper-icon-button id="edit" class="edit" alt="{{keyS}}" id="{{keyS}}" data-args="{{keyS}}" icon="datatable:editable"></paper-icon-button>
-                    <paper-tooltip for="edit" position="bottom">Edit</paper-tooltip>
-                  </a>
-                  <!-- <paper-icon-button hidden="{{block}}" id="activate" class="delete" icon="my-icons:assignment-turned-in" no-ink on-tap="_activateSelected"></paper-icon-button>
+              <div slot="toolbar-select-single">
+                <a style="text-decoration:none" href$="{{_getAccount(keyS)}}">
+                  <paper-icon-button id="edit" class="edit" alt="{{keyS}}" id="{{keyS}}" data-args="{{keyS}}" icon="datatable:editable"></paper-icon-button>
+                  <paper-tooltip for="edit" position="bottom">Edit</paper-tooltip>
+                </a>
+                <!-- <paper-icon-button hidden="{{block}}" id="activate" class="delete" icon="my-icons:assignment-turned-in" no-ink on-tap="_activateSelected"></paper-icon-button>
                   <paper-icon-button hidden="{{!block}}" id="deactivate" class="delete" icon="my-icons:block" no-ink on-tap="_deactivateSelected"></paper-icon-button>
                   <paper-tooltip for="activate" position="bottom">Activate</paper-tooltip>
                   <paper-tooltip for="deactivate" position="bottom">Deactivate</paper-tooltip> -->
-                </div>
+              </div>
 
-                <!-- <paper-dialog id="deleteAccount">
+              <!-- <paper-dialog id="deleteAccount">
                 <br>
                 <h3>Delete account permanently?</h3>
                 <div class="buttons">
@@ -149,66 +149,63 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
               </paper-dialog> -->
 
-                <paper-dialog id="deactivateAccount">
-                  <br>
-                  <h3>Deactivate account?</h3>
-                  <div class="buttons">
-                    <paper-button dialog-dismiss autofocus>No</paper-button>
-                    <paper-button dialog-confirm on-tap="deactivate">Yes</paper-button>
-                  </div>
-                </paper-dialog>
+              <paper-dialog id="deactivateAccount">
+                <br>
+                <h3>Deactivate account?</h3>
+                <div class="buttons">
+                  <paper-button dialog-dismiss autofocus>No</paper-button>
+                  <paper-button dialog-confirm on-tap="deactivate">Yes</paper-button>
+                </div>
+              </paper-dialog>
 
-                <paper-dialog id="activateAccount">
-                  <br>
-                  <h3>Activate account?</h3>
-                  <div class="buttons">
-                    <paper-button dialog-dismiss autofocus>No</paper-button>
-                    <paper-button dialog-confirm on-tap="activate">Yes</paper-button>
-                  </div>
-                </paper-dialog>
+              <paper-dialog id="activateAccount">
+                <br>
+                <h3>Activate account?</h3>
+                <div class="buttons">
+                  <paper-button dialog-dismiss autofocus>No</paper-button>
+                  <paper-button dialog-confirm on-tap="activate">Yes</paper-button>
+                </div>
+              </paper-dialog>
 
-                <paper-datatable data="{{account}}" id="datatable" header-fixed multi-selection selectable selected-items="{{selectedItem}}">
-                  <div no-results>
-                    Loading or no more items...
-                  </div>
-                  <paper-datatable-column header="Account Code" type="String" property="code"></paper-datatable-column>
-                  <paper-datatable-column header="Designatory letters" type="String" property="designatory"></paper-datatable-column>
-                  <paper-datatable-column header="Name" type="Object" property="name">
-                    <template>
-                      <span>[[value.firstname]]</span>
-                      <span>[[value.middlename]]</span>
-                      <span>[[value.lastname]]</span>
-                      <span>[[value.suffix]]</span>
-                    </template>
-                  </paper-datatable-column>
-                  <paper-datatable-column header="Cellphone" type="String" property="cellphone"></paper-datatable-column>
-                  <paper-datatable-column header="Active" type="Boolean" property="active"></paper-datatable-column>
-                </paper-datatable>
-              </paper-datatable-card>
+              <paper-datatable data="{{account}}" id="datatable" header-fixed multi-selection selectable selected-items="{{selectedItem}}">
+                <paper-datatable-column header="Account Code" type="String" property="code"></paper-datatable-column>
+                <paper-datatable-column header="Designatory letters" type="String" property="designatory"></paper-datatable-column>
+                <paper-datatable-column header="Name" type="Object" property="name">
+                  <template>
+                    <span>[[value.firstname]]</span>
+                    <span>[[value.middlename]]</span>
+                    <span>[[value.lastname]]</span>
+                    <span>[[value.suffix]]</span>
+                  </template>
+                </paper-datatable-column>
+                <paper-datatable-column header="Cellphone" type="String" property="cellphone"></paper-datatable-column>
+                <paper-datatable-column header="Active" type="Boolean" property="active"></paper-datatable-column>
+              </paper-datatable>
+            </paper-datatable-card>
 
-            </app-header-layout>
-            <a href="/accountlist/new" style="text-decoration: none;">
-              <paper-fab noink class="fab-menu" on-tap="_appsnew" icon="my-icons:add"></paper-fab>
-            </a>
+          </app-header-layout>
+          <a href="/accountlist/new" style="text-decoration: none;">
+            <paper-fab noink class="fab-menu" on-tap="_appsnew" icon="my-icons:add"></paper-fab>
+          </a>
 
-          </div>
+        </div>
 
-          <div name="/new">
-            <div id="appnew"></div>
-            <my-accountlist-new id="d23" path="" prev-route="{{route.prefix}}"></my-accountlist-new>
-          </div>
+        <div name="/new">
+          <div id="appnew"></div>
+          <my-accountlist-new id="d23" path="" prev-route="{{route.prefix}}"></my-accountlist-new>
+        </div>
 
-          <div name="view404">Not found.</div>
+        <div name="view404">Not found.</div>
 
-        </iron-pages>
-      </div>
+      </iron-pages>
+    </div>
 
-      <div hidden$="{{!editActive}}">
-        <div id="appedit"></div>
-        <my-accountlist-edit id="d25" transaction-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-accountlist-edit>
-      </div>
+    <div hidden$="{{!editActive}}">
+      <div id="appedit"></div>
+      <my-accountlist-edit id="d25" transaction-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-accountlist-edit>
+    </div>
 
-      <paper-toast id="toast" text="{{txt}}"></paper-toast>
+    <paper-toast id="toast" text="{{txt}}"></paper-toast>
     <!-- </template> -->
   </template>
 
