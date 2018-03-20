@@ -130,10 +130,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <paper-tooltip for="delete" position="bottom">Delete</paper-tooltip>
               </div> -->
               <div slot="toolbar-select-single">
-                <a style="text-decoration:none" href$="{{_getAccount(keyS)}}">
+                <!-- <a style="text-decoration:none" href$="{{_getAccount(keyS)}}">
                   <paper-icon-button id="edit" class="edit" alt="{{keyS}}" id="{{keyS}}" data-args="{{keyS}}" icon="datatable:editable"></paper-icon-button>
                   <paper-tooltip for="edit" position="bottom">Edit</paper-tooltip>
-                </a>
+                </a> -->
                 <!-- <paper-icon-button hidden="{{block}}" id="activate" class="delete" icon="my-icons:assignment-turned-in" no-ink on-tap="_activateSelected"></paper-icon-button>
                   <paper-icon-button hidden="{{!block}}" id="deactivate" class="delete" icon="my-icons:block" no-ink on-tap="_deactivateSelected"></paper-icon-button>
                   <paper-tooltip for="activate" position="bottom">Activate</paper-tooltip>
@@ -167,7 +167,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
               </paper-dialog>
 
-              <paper-datatable data="{{account}}" id="datatable" header-fixed multi-selection selectable selected-items="{{selectedItem}}">
+              <paper-datatable data="{{account}}" id="datatable" header-fixed selected-items="{{selectedItem}}">
                 <paper-datatable-column header="Account Code" type="String" property="code"></paper-datatable-column>
                 <paper-datatable-column header="Designatory letters" type="String" property="designatory"></paper-datatable-column>
                 <paper-datatable-column header="Name" type="Object" property="name">

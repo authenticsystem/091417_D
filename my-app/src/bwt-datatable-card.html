@@ -163,7 +163,10 @@
             </div>
             <div class="horizontal center layout" id="bottomBlock">
                 <div class="flex"></div>
-                <span>Rows per page:</span>
+                <div>
+                    <slot name="footer-tool"></slot>
+                </div>
+                <!-- <span>Rows per page:</span>
                 <paper-dropdown-menu no-label-float style="width: 68px;">
                     <paper-listbox slot="dropdown-content" selected="{{pageSize}}" attr-for-selected="value">
                         <template is="dom-repeat" items="[[pageSizeOptions]]" as="size">
@@ -179,7 +182,7 @@
                 <paper-icon-button icon="datatable:first-page" on-tap="firstPage" disabled="[[_prevPageDisabled(page)]]"></paper-icon-button>
                 <paper-icon-button icon="datatable:prev-page" on-tap="prevPage" disabled="[[_prevPageDisabled(page)]]"></paper-icon-button>
                 <paper-icon-button icon="datatable:next-page" on-tap="nextPage" disabled="[[_nextPageDisabled(page, pageSize, _numberOfItems)]]"></paper-icon-button>
-                <paper-icon-button icon="datatable:last-page" on-tap="lastPage" disabled="[[_nextPageDisabled(page, pageSize, _numberOfItems)]]"></paper-icon-button>
+                <paper-icon-button icon="datatable:last-page" on-tap="lastPage" disabled="[[_nextPageDisabled(page, pageSize, _numberOfItems)]]"></paper-icon-button> -->
             </div>
         </div>
     </template>
