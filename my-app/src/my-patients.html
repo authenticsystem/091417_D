@@ -119,6 +119,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           flex-direction: column;
           /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
+
+        #noRecord {
+          margin: 16px;
+          display: flex;
+          flex-direction: column;
+        }
+
         paper-search-bar {
           margin-left: 80px;
           width: 50%;
@@ -134,6 +141,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           /* height: 100vh; */
           /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
+
+        #noRecord {
+          width: 736px;
+          margin: 16px auto;
+        }
+
         paper-search-bar {
           margin-left: 50px;
           width: 50%;
@@ -277,6 +290,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <firebase-query id="query" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}">
             </firebase-query>
 
+            <div id="noRecord">
+              <div class="item">
+                <div id$="[[_fetching()]]" style="margin:auto">
+                  {{record}}
+                </div>
+              </div>
+            </div>
+
             <iron-list items="[[mypatients]]" as="item" selection-enabled scroll-target="threshold">
               <template>
                 <div class="divSeparator">
@@ -395,11 +416,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      _fetching() {
+        this.record = 'Loading data . . .';
+        setTimeout((e) => {
+          this.record = 'No record found.';
+        }, 3000);
+      },
+
       loadMoreData() {
         // load async stuff. e.g. XHR
-
         this.$.threshold.clearTriggers();
-
       },
 
       _ageCal(bday) {
@@ -471,10 +497,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       observers: [
-        '_searchChanged(search)'
+        '_searchChanged(search)',
+        '_mypatientsChanged(mypatients)'
         // '_searchChanged(search, filterBy)',
-        // '_myKeyChanged(myKey)'
-        // '_patientChanged(mypatients)'
       ],
 
       _patientImg(e) {
@@ -482,36 +507,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else return '../images/user.png';
       },
 
-      // _myKeyChanged(e) {
-      //   if (e) {
-      //     this.myKey = e;
-      //   }
-      //   else {
-      //     this.myKey = this.userUid;
-      //   }
-      //   console.log(e);
-      // }
-
-      // _patientChanged(mypatients) {
-      //   if (mypatients.length > 0) {
-      //     var PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
-      //     var id = mypatients[0].$key;
-
-
-      //       id = id.substring(0, 8);
-      //       var timestamp = 0;
-      //       for (var i = 0; i < id.length; i++) {
-      //         var c = id.charAt(i);
-      //         timestamp = timestamp * 64 + PUSH_CHARS.indexOf(c);
-      //       }
-      //       // return timestamp;
-      //       console.log(timestamp);
-
-
-
-      //     // console.log(mypatients[0].$key);
-      //   }
-      // }
+      _mypatientsChanged(e) {
+        if (e.length > 0) {
+          // var PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+          // var id = e[0].$key;
+          // id = id.substring(0, 8);
+          // var timestamp = 0;
+          // for (var i = 0; i < id.length; i++) {
+          //   var c = id.charAt(i);
+          //   timestamp = timestamp * 64 + PUSH_CHARS.indexOf(c);
+          // }
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+        }
+      },
 
       _searchChanged(search) {
         // var c = search.toLowerCase().replace(/\b[a-z]/g, function (letter) {

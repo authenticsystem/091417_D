@@ -118,6 +118,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           flex-direction: column;
           /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
+
+        #noRecord {
+          margin: 16px;
+          display: flex;
+          flex-direction: column;
+        }
+
         paper-search-bar {
           margin-left: 80px;
           width: 50%;
@@ -133,6 +140,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           /* height: 100vh; */
           /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
+
+        #noRecord {
+          width: 736px;
+          margin: 16px auto;
+        }
+
         paper-search-bar {
           margin-left: 50px;
           width: 50%;
@@ -246,6 +259,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             <firebase-query id="query" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="{{order}}" start-at="{{search}}">
             </firebase-query>
+
+            <div id="noRecord">
+              <div class="item" style="padding:15px">
+                <div id$="[[_fetching()]]" style="margin:auto">
+                  {{record}}
+                </div>
+              </div>
+            </div>
 
             <iron-list items="[[mycases]]" as="item" selection-enabled scroll-target="threshold">
               <template>
@@ -392,34 +413,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      // _convertKeyToTimestamp(key) {
-      //   var PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
-      //   // var key = prompt("Enter Firebase push ID");
-
-      //   key = key.substring(0, 8);
-      //   var timestamp = 0;
-      //   for (var i = 0; i < key.length; i++) {
-      //     var c = key.charAt(i);
-      //     timestamp = timestamp * 64 + PUSH_CHARS.indexOf(c);
-      //   }
-
-      //   console.log(timestamp + "\n" + new Date(timestamp));
-      // },
-
       _timeStampToDateTime(ts) {
         return new Date(ts);
       },
 
       loadMoreData() {
         // load async stuff. e.g. XHR
-
         this.$.threshold.clearTriggers();
-
       },
 
       observers: [
-        '_searchChanged(search)'
+        '_searchChanged(search)',
+        '_mycasesChanged(mycases)'
       ],
+
+      _fetching() {
+        this.record = 'Loading data . . .';
+        setTimeout((e) => {
+          this.record = 'No record found.';
+        }, 3000);
+      },
+
+      _mycasesChanged(e) {
+        if (e.length > 0) {
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+        }
+      },
 
       _patientImg(e) {
         if (e) return e;
