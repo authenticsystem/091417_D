@@ -14,7 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
@@ -25,7 +25,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
-<link rel="import" href="../bower_components/paper-tabs/paper-tab.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 
 <link rel="import" href="my-gallery.html">
@@ -225,6 +225,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       #myImg {
         transition: 0.3s;
       }
+
+      .action paper-button {
+        height: 32px;
+        font-size: 12px;
+        font-weight: 400;
+        width: 80px;
+      }
+
+      paper-button.green {
+        background-color: var(--paper-green-500);
+        color: white;
+      }
     </style>
 
     <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -237,13 +249,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </a>
             <div main-title>{{no}}</div>
             <paper-icon-button icon="my-icons:print" on-click="_print"></paper-icon-button>
-            <!-- <paper-menu-button>
+            <paper-menu-button horizontal-align="right">
               <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
               <paper-listbox style="cursor:pointer" slot="dropdown-content">
-                <paper-item>Edit</paper-item>
-                <paper-item>Delete</paper-item>
+                <paper-item hidden$="{{isQue}}" on-tap="_send2Que">Add to queue</paper-item>
+                <paper-item hidden$="{{!isQue}}" on-tap="_queInfo">Queue Info</paper-item>
               </paper-listbox>
-            </paper-menu-button> -->
+            </paper-menu-button>
           </app-toolbar>
           <paper-tabs selected="{{selectedPage}}" scrollable fit-container>
             <paper-tab>Patient Info</paper-tab>
@@ -268,7 +280,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <span class="longText" style="font-weight:400;display:block">[[_hmo(indicate)]]</span>
                 </div>
               </div>
-
 
               <div class="details" style="padding:18px">
                 <!-- <div >Basic Information</div> -->
@@ -526,6 +537,51 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </app-drawer-layout>
 
+    <firebase-query disabled="{{isSelectDoc}}" path="/{{myKey}}/doctors" data="{{mydoctors}}"></firebase-query>
+    <paper-dialog id="selectDialog" confirm-button="Done">
+      <h3>Add queue to</h3>
+      <paper-dropdown-menu style="cursor:pointer; margin-top:-26px" label="Select doctor">
+        <paper-listbox slot="dropdown-content" class="dropdown-content" attr-for-selected="name" selected="{{docSelect}}">
+          <template is="dom-repeat" items="[[mydoctors]]">
+            <paper-item name="[[item.code]]~[[item.lastname]]">Dr. [[item.lastname]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <div class="buttons">
+        <div class="action">
+          <paper-button id="addQueBTN" dialog-confirm on-tap="_addQueuePatient" toggles class="custom green">OK</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="addDialog" confirm-button="Done">
+      <h3>Add this patient to queue?</h3>
+      <div class="buttons">
+        <div class="action">
+          <paper-button toggles dialog-confirm on-tap="_addQueue2Patient" class="custom green">OK</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="queInfoDialog" confirm-button="Done">
+      <h3 style="font-weight:400">Currently queued to
+        <b>[[queTo]]</b>.</h3>
+      <div class="buttons">
+        <div class="action">
+          <paper-button toggles dialog-confirm class="custom green">OK</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="confirmDialog" confirm-button="Done">
+      <h3>Patient successfully added to queue.</h3>
+      <div class="buttons">
+        <div class="action">
+          <paper-button toggles dialog-confirm class="custom green">OK</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
   </template>
 
   <script>
@@ -538,10 +594,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true
         },
         myKey: String,
+        myLastname: String,
+        myRole: String,
         selectedPage: Number,
         entryanimation: {
           type: String,
           value: "slide-from-right-animation"
+        },
+        isSelectDoc: {
+          type: Boolean,
+          value: true
         },
         exitanimation: {
           type: String,
@@ -549,14 +611,113 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         viewKey: String,
         mypatient: Object,
-        mycases: Object
+        mycases: Object,
+        emergency: Object,
+        insurance: Object,
+        personal: Object,
+        doc: String
       },
 
       observers: [
-        'mypatientChanged(mypatient)',
+        'mypatientChanged(mypatient.*)',
         'mycaseChanged(mycases)',
-        'selectedPageChanged(selectedPage)'
+        'selectedPageChanged(selectedPage)',
+        '_docSelectChanged(docSelect)'
       ],
+
+      _docSelectChanged(e) {
+        if (e) Polymer.dom(this.root).querySelector("#addQueBTN").disabled = false;
+        else Polymer.dom(this.root).querySelector("#addQueBTN").disabled = true;
+      },
+
+      _addQueuePatient() {
+        Polymer.dom(this.root).querySelector("#selectDialog").close();
+        var mykey = this.myKey;
+        var [docselect, doclastname] = this.docSelect.split('~');
+        var viewkey = this.viewKey;
+        var emerg = this.emergency, insure = this.insurance, person = this.personal;
+        var today = this.formatTodayDate(new Date());
+        var confirmDialog = Polymer.dom(this.root).querySelector("#confirmDialog");
+
+        firebase.database().ref("/" + mykey + "/patients/" + viewkey + "/isQueue").set(true);
+        firebase.database().ref("/" + mykey + "/patients/" + viewkey + "/queueTo").set(doclastname);
+        firebase.database().ref("/" + docselect + "/patients").orderByChild('patient_ref').equalTo(viewkey)
+          .once('value').then(function (data) {
+            if (!data.val()) {
+              var ref = firebase.database().ref("/" + docselect + "/patients");
+              var push = ref.push({
+                personal: person,
+                insurance: insure,
+                emergency: emerg,
+                created: today,
+                isQueue: true,
+                queueTo: doclastname,
+                patient_ref: viewkey
+              });
+
+              if (push.key) {
+                ref.once('value').then(function (dataNum) {
+                  var num = dataNum.numChildren() ? dataNum.numChildren() : 1;
+                  _patientsNoUpdate(num, docselect, push.key);
+                  _reportsUpdate(today, docselect);
+                });
+                confirmDialog.open();
+              }
+            }
+            else {
+              firebase.database().ref("/" + docselect + "/patients/" + Object.keys(data.val())[0] + "/isQueue").set(true);
+              confirmDialog.open();
+            }
+          });
+
+        function _patientsNoUpdate(num, mykey, pushkey) {
+          if (num > 0 && num < 10) {
+            num = '000' + num;
+          }
+          else if (num > 9 && num < 100) {
+            num = '00' + num;
+          }
+          else if (num > 99 && num < 1000) {
+            num = '0' + num;
+          }
+          else if (num > 999) {
+            num = num;
+          }
+          else {
+            num = '0000';
+          }
+
+          firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
+        }
+
+        function _reportsUpdate(today, mykey) {
+          var mm = today.substring(0, 7);
+          var yy = today.substring(0, 4);
+
+          var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
+          dayRef.once('value').then(function (snapshot) {
+            dayRef.set(snapshot.val() + 1);
+          });
+
+          var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
+          yearRef.once('value').then(function (snapshot) {
+            yearRef.set(snapshot.val() + 1);
+          });
+
+          var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
+          monthRef.once('value').then(function (snapshot) {
+            monthRef.set(snapshot.val() + 1);
+          });
+        }
+
+        this.isSelectDoc = true;
+      },
+
+      _addQueue2Patient() {
+        firebase.database().ref("/" + this.myKey + "/patients/" + this.viewKey + "/isQueue").set(true);
+        firebase.database().ref("/" + this.myKey + "/patients/" + this.viewKey + "/queueTo").set(this.myLastname);
+        Polymer.dom(this.root).querySelector("#confirmDialog").open();
+      },
 
       _array(e) {
         if (e) return Object.values(e);
@@ -589,34 +750,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      mypatientChanged(e) {
-        if (e.length > 0) {
-          if (e[0].profile) {
-            this.p_profile = e[0].profile;
+      mypatientChanged() {
+        if (this.mypatient.length > 0) {
+          this.emergency = this.mypatient[0].emergency;
+          this.insurance = this.mypatient[0].insurance;
+          this.personal = this.mypatient[0].personal;
+
+          if (this.mypatient[0].profile) {
+            this.p_profile = this.mypatient[0].profile;
           }
           else {
             this.p_profile = '../images/user.png';
           }
 
-          if (e[0].personal.referred) {
-            if (e[0].personal.referred == 'Dr') {
-              this.referredby = 'Dr. ' + e[0].personal.doctor;
+          if (this.mypatient[0].personal.referred) {
+            if (this.mypatient[0].personal.referred == 'Dr') {
+              this.referredby = 'Dr. ' + this.mypatient[0].personal.doctor;
             }
-            else if (e[0].personal.referred == 'Hospital') {
-              this.referredby = e[0].personal.hospital;
+            else if (this.mypatient[0].personal.referred == 'Hospital') {
+              this.referredby = this.mypatient[0].personal.hospital;
             }
             else {
-              this.referredby = e[0].personal.referred;
+              this.referredby = this.mypatient[0].personal.referred;
             }
           }
 
-          if (e[0].personal.birthday) {
+          if (this.mypatient[0].personal.birthday) {
 
             Date.shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
             var today = new Date();
-            var birthday = new Date(e[0].personal.birthday);
-            var mdate = e[0].personal.birthday.toString();
+            var birthday = new Date(this.mypatient[0].personal.birthday);
+            var mdate = this.mypatient[0].personal.birthday.toString();
 
             var yearThen = parseInt(mdate.substring(0, 4), 10);
             var monthThen = Date.shortMonths[birthday.getMonth()];
@@ -671,32 +836,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.age = '';
           }
 
-          this.email = e[0].personal.email;
-          this.fname = e[0].personal.firstname;
-          this.mname = e[0].personal.middlename;
-          this.lname = e[0].personal.lastname;
-          // this.bday = e[0].personal.birthday;
-          this.contact = e[0].personal.contact;
-          this.address = e[0].personal.address;
-          this.occupation = e[0].personal.occupation;
-          this.employer = e[0].personal.employer;
-          this.emp_phone = e[0].personal.emp_phone;
-          this.sex = e[0].personal.sex;
-          this.status = e[0].personal.status;
-          this.name = e[0].personal.lastname + ', ' + e[0].personal.firstname + ' ' + e[0].personal.middlename;
-          this.no = e[0].no;
+          this.email = this.mypatient[0].personal.email;
+          this.fname = this.mypatient[0].personal.firstname;
+          this.mname = this.mypatient[0].personal.middlename;
+          this.lname = this.mypatient[0].personal.lastname;
+          // this.bday = this.mypatient[0].personal.birthday;
+          this.contact = this.mypatient[0].personal.contact;
+          this.address = this.mypatient[0].personal.address;
+          this.occupation = this.mypatient[0].personal.occupation;
+          this.employer = this.mypatient[0].personal.employer;
+          this.emp_phone = this.mypatient[0].personal.emp_phone;
+          this.sex = this.mypatient[0].personal.sex;
+          this.status = this.mypatient[0].personal.status;
+          this.name = this.mypatient[0].personal.lastname + ', ' + this.mypatient[0].personal.firstname + ' ' + this.mypatient[0].personal.middlename;
+          this.no = this.mypatient[0].no;
 
-          this.card = e[0].insurance.card;
-          this.bdate = e[0].insurance.birthday;
-          this.in_address = e[0].insurance.address;
-          this.home_phone = e[0].insurance.home_phone;
-          this.indicate = e[0].insurance.primary_insurance;
-          this.p_relation = e[0].insurance.relationship;
+          this.card = this.mypatient[0].insurance.card;
+          this.bdate = this.mypatient[0].insurance.birthday;
+          this.in_address = this.mypatient[0].insurance.address;
+          this.home_phone = this.mypatient[0].insurance.home_phone;
+          this.indicate = this.mypatient[0].insurance.primary_insurance;
+          this.p_relation = this.mypatient[0].insurance.relationship;
 
-          this.name_e = e[0].emergency.name;
-          this.relation_e = e[0].emergency.relationship;
-          this.phone_e = e[0].emergency.home_phone;
-          this.work_phone = e[0].emergency.work_phone;
+          this.name_e = this.mypatient[0].emergency.name;
+          this.relation_e = this.mypatient[0].emergency.relationship;
+          this.phone_e = this.mypatient[0].emergency.home_phone;
+          this.work_phone = this.mypatient[0].emergency.work_phone;
+          this.isQue = this.mypatient[0].isQueue;
+          this.doc = this.mypatient[0].queueTo;
         }
       },
 
@@ -705,6 +872,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var mywindow = window.open('', 'Print', 'height=600,width=800');
         mywindow.document.write(content);
         mywindow.print();
+      },
+
+      _send2Que() {
+        if (this.myRole == 'Secretary') {
+          this.isSelectDoc = false;
+          Polymer.dom(this.root).querySelector("#selectDialog").open();
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#addDialog").open();
+        }
+      },
+
+      _queInfo() {
+        if (this.myRole == 'Secretary') {
+          this.queTo = 'Dr. ' + this.doc;
+          Polymer.dom(this.root).querySelector("#queInfoDialog").open();
+        }
+        else {
+          this.queTo = 'yours';
+          Polymer.dom(this.root).querySelector("#queInfoDialog").open();
+        }
       },
 
       _showMini() {
@@ -738,6 +926,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         this.selectedPage = 0;
+        Polymer.dom(this.root).querySelector("#addQueBTN").disabled = true;
+      },
+
+      formatTodayDate(date) {
+        var monthNames = [
+          "01", "02", "03",
+          "04", "05", "06", "07",
+          "08", "09", "10",
+          "11", "12"
+        ];
+
+        var day = date.getDate();
+        if (day < 10) { day = '0' + day };
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return year + '-' + monthNames[monthIndex] + '-' + day;
       },
 
       _comma(e) {

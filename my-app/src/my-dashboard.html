@@ -169,7 +169,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <!-- </div> -->
       </div>
 
-      <div class="card" id="card2">
+      <div hidden$="{{_roleChecked(myRole)}}" class="card" id="card2">
         <canvas id="myChart2"></canvas>
       </div>
 
@@ -186,6 +186,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true
         },
         myKey: String,
+        myRole: String,
         lastname: String,
         user: Object,
         sectedRange: {
@@ -194,6 +195,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_selectedRangeChanged'
         },
         prevRange: String
+      },
+
+      _roleChecked(e) {
+        if (e == 'Secretary') return true;
+        else return false;
       },
 
       _selectedRangeChanged() {

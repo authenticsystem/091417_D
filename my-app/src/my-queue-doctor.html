@@ -1,0 +1,318 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-queue-doctor">
+    <template>
+        <style include="shared-styles">
+            :host {
+                height: 100vh;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .item {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+                /* margin-bottom: 5px; */
+            }
+
+            .item:hover {
+                box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
+            }
+
+            .avatar {
+                height: 45px;
+                width: 45px;
+                border: 2px solid white;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: #DDD;
+            }
+
+            .pad {
+                /* border-left: 6px solid rgb(208, 137, 236); */
+                margin-left: 10px;
+                /* padding: 10px; */
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .primary {
+                font-size: 14px;
+                font-weight: 400;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .longText {
+                color: gray;
+                /* display: none; */
+            }
+
+            @media (max-width: 768px) {
+                iron-list {
+                    margin: 16px;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                #noRecord {
+                    margin: 16px;
+                    display: flex;
+                    flex-direction: column;
+                }
+            }
+
+            @media (min-width: 768px) {
+                iron-list {
+                    width: 736px;
+                    margin: 16px auto;
+                }
+
+                #noRecord {
+                    width: 736px;
+                    margin: 16px auto;
+                }
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            paper-fab.fab-menu {
+                position: fixed;
+                bottom: 32px;
+                float: right;
+                right: 32px;
+
+            }
+        </style>
+
+        <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+                <app-toolbar primary>
+                    <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                    <div main-title>Queue</div>
+                </app-toolbar>
+            </app-header>
+
+            <firebase-query path="/{{myKey}}/patients" data="{{myqueue}}" order-by-child="isQueue" equal-to="true">
+            </firebase-query>
+
+            <div id="noRecord">
+                <div class="item">
+                    <div style="margin:auto">
+                        {{record}}
+                    </div>
+                </div>
+            </div>
+
+            <iron-list items="[[myqueue]]" as="item" selection-enabled scroll-target="threshold">
+                <template>
+                    <div class="divSeparator">
+                        <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                            <div>
+                                <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+                            </div>
+                            <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
+                                <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
+                                <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
+                                <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div>
+                                <div id="{{item.$key}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
+                                <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
+                            </div>
+                            <div style="padding:10px"> </div>
+                        </div>
+                    </div>
+                </template>
+            </iron-list>
+
+            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+            </iron-scroll-threshold>
+
+            <!-- <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_addDialog"></paper-fab> -->
+
+        </app-header-layout>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'my-queue-doctor',
+            properties: {
+                myKey: String,
+                myRole: String,
+                items: {
+                    type: Array,
+                    value: []
+                },
+            },
+
+            observers: [
+                // '_onSelected(tabs)',
+                '_myqueueChanged(myqueue)'
+            ],
+
+            getClassForItem(item, selected) {
+                return selected ? 'item expanded' : 'item';
+            },
+
+            loadMoreData() {
+                // load async stuff. e.g. XHR
+                this.$.threshold.clearTriggers();
+            },
+
+            _myqueueChanged(e) {
+                if (e.length > 0) {
+                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
+                    this._fetching();
+                }
+            },
+
+            _fetching() {
+                this.record = 'Loading data . . .';
+                setTimeout((e) => {
+                    this.record = 'No record found.';
+                }, 3000);
+            },
+
+            // _onSelected(e) {
+            //     console.log(this.myRole)
+            // },
+
+            _queueNew() {
+                var node = Polymer.dom(this.root).querySelector("#StartNew");
+                if (node) {
+                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+                    if (oldDiv) {
+                        Polymer.dom(node.parentNode).removeChild(oldDiv);
+                    }
+                    var newDiv = document.createElement("my-new-patients");
+                    newDiv.setAttribute("id", "d23");
+                    //  newDiv.setAttribute("prev-route", this.route.prefix);
+                    // newDiv.setAttribute("block", "3")
+                    //if open existing
+                    var currentDiv = document.getElementById("StartNew");
+                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                }
+            },
+
+            _addDialog() {
+
+            },
+
+            _ageCal(bday) {
+                if (bday) {
+
+                    var today = new Date();
+                    var birthday = new Date(bday);
+
+                    var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+                    var year_age = Math.floor(differenceInMilisecond / 31536000000);
+                    var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+                    var month_age = Math.floor(day_age / 30);
+
+                    day_age = day_age % 30;
+
+                    if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+                        console.log('err');
+                        // $("#exact_age").text("Invalid birthday - Please try again!");
+                    }
+                    else {
+                        if (year_age > 0) {
+                            if (year_age == 1) {
+                                return year_age + " year old";
+                            }
+                            else {
+                                return year_age + " years old";
+                            }
+                        }
+                        else if (year_age == 0 && month_age > 0) {
+                            if (month_age == 1) {
+                                return month_age + " month old";
+                            }
+                            else {
+                                return month_age + " months old";
+                            }
+                        }
+                        else if (year_age == 0 && month_age == 0 && day_age > 0) {
+                            if (day_age == 1) {
+                                return day_age + " day old";
+                            }
+                            else {
+                                return day_age + " days old";
+                            }
+                        }
+                        else {
+                            return year_age + " years " + month_age + " months " + day_age + " days old";
+                        }
+                    }
+                }
+                else {
+                    return '';
+                }
+            },
+
+            _comma(e) {
+                if (e) {
+                    return ',';
+                }
+            },
+
+            _hmo(e) {
+                if (e) {
+                    return 'HMO: ' + e;
+                }
+            },
+
+            _patientImg(e) {
+                if (e) return e;
+                else return '../images/user.png';
+            },
+
+            toggleDrawer() {
+                this.dispatchEvent(new CustomEvent('toggleDrawer', {
+                    bubbles: true, composed: true, detail: {
+                        narrow: this.$.narrow
+                    }
+                }));
+                this.$.narrow = !this.$.narrow;
+            }
+        })
+    </script>
+</dom-module>

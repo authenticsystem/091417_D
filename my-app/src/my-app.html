@@ -42,12 +42,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="my-patients.html">
 <link rel="lazy-import" href="my-accountlist.html">
 <link rel="lazy-import" href="my-settings.html">
+<link rel="lazy-import" href="my-queue.html">
 <!-- <link rel="lazy-import" href="my-billing.html"> -->
 <!-- <link rel="lazy-import" href="my-collection.html"> -->
 <!-- <link rel="lazy-import" href="my-help.html"> -->
 <!-- <link rel="lazy-import" href="my-view2.html"> -->
 <!-- <link rel="lazy-import" href="my-appointments.html"> -->
-<!-- <link rel="lazy-import" href="my-queue.html"> -->
 <!-- <link rel="lazy-import" href="my-map.html"> -->
 <link rel="lazy-import" href="my-view404.html">
 
@@ -297,12 +297,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a>
 
-                  <!-- <a style="display:none" name="queue" href="[[rootPath]]queue">
+                  <a name="queue" href="[[rootPath]]queue">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:list" slot="item-icon"></iron-icon>
                       <span>Queue</span>
                     </paper-icon-item>
-                  </a> -->
+                  </a>
 
                   <!-- <a name="account" href="[[rootPath]]account">
               <paper-icon-item toggles="true" class="menuSelected">
@@ -311,7 +311,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </paper-icon-item>
             </a> -->
 
-                  <a name="visits" href="[[rootPath]]visits">
+                  <a style$="{{_access(visitsAccess)}}" name="visits" href="[[rootPath]]visits">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:folder-open" slot="item-icon"></iron-icon>
                       <span>Visits</span>
@@ -353,24 +353,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a> -->
                   <span style="padding:20px; color:gray; font-size:12px;">
-                    v0.3.6
+                    v0.4.0
                   </span>
                 </iron-selector>
               </div>
             </app-drawer>
             <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
               <!-- <my-account user={{user}} name="account"></my-account> -->
-              <my-dashboard name="dashboard" my-key="[[mykey]]" user="[[user]]"></my-dashboard>
+              <my-dashboard name="dashboard" my-role="[[role]]" my-key="[[mykey]]" user="[[user]]"></my-dashboard>
               <my-settings name="settings" route="[[subroute]]" my-key="[[mykey]]" my-lastname="[[lastname]]" user="[[user]]"></my-settings>
               <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" user-uid="[[user.uid]]"></my-visits>
-              <my-patients name="patients" route="[[subroute]]" my-key="[[mykey]]" user-uid="[[user.uid]]"></my-patients>
+              <my-patients name="patients" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[lastname]]" user-uid="[[user.uid]]"></my-patients>
               <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
+              <my-queue name="queue" my-role="[[role]]" my-key="[[mykey]]"></my-queue>
               <!-- <my-appointments name="appointments"></my-appointments>
               <my-billing name="billing"></my-billing>
               <my-collection name="collection"></my-collection>
               <my-help name="help"></my-help>
               <my-view2 name="view2"></my-view2>
-              <my-queue name="queue"></my-queue>
               <my-map name="map"></my-map> -->
               <my-view404 name="view404"></my-view404>
             </iron-pages>
@@ -405,6 +405,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             notify: true
           },
+          visitsAccess: {
+            type: Boolean,
+            value: false
+          },
           mykey: String
         };
       }
@@ -421,7 +425,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.mykey = e[0].code;
           this.drTitle = e[0].designatory;
           this.lastname = e[0].name.lastname;
+          this.role = e[0].role;
+
+          if (e[0].role != 'Secretary') { this.visitsAccess = true; }
         }
+      }
+
+      _access(e) {
+        if (e == true) { return 'display:block'; }
+        else { return 'display:none'; }
       }
 
       _routePageChanged(page, user, key) {

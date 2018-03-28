@@ -25,13 +25,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="my-icons.html">
 
-<link rel="import" href="search-bar.html">
 <link rel="import" href="my-patients-new.html">
 <link rel="import" href="my-patients-view.html">
 <link rel="import" href="my-patients-edit.html">
-<!-- <link rel="import" href="shared-styles.html"> -->
+<link rel="import" href="search-bar.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="shared-styles.html">
 
 <dom-module id="my-patients">
   <template>
@@ -358,7 +358,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div name="/new">
           <div id="patientsnew"></div>
-          <my-patients-new id="d23" path="" prev-route="{{route.prefix}}" my-key="{{myKey}}"></my-patients-new>
+          <my-patients-new id="d23" my-lastname="{{myLastname}}" my-role="{{myRole}}" my-key="{{myKey}}"></my-patients-new>
         </div>
 
         <div name="view404">Not found.</div>
@@ -367,12 +367,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div hidden$="{{!editActive}}">
       <div id="patientsedit"></div>
-      <my-patients-edit id="d25" my-key='{{myKey}}' edit-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-patients-edit>
+      <my-patients-edit id="d25" my-lastname="{{myLastname}}" my-role="{{myRole}}" my-key='{{myKey}}' edit-key='{{editData.key}}'></my-patients-edit>
     </div>
 
     <div hidden$="{{!detailActive}}">
       <div id="patientsview"></div>
-      <my-patients-view id="d26" my-key='{{myKey}}' view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-patients-view>
+      <my-patients-view id="d26" my-lastname="{{myLastname}}" my-role="{{myRole}}" my-key='{{myKey}}' view-key='{{detailData.key}}'></my-patients-view>
     </div>
 
     <paper-dialog id="deleteDialog" confirm-button="Done">
@@ -400,7 +400,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         },
         myKey: String,
+        myLastname: String,
         userUid: String,
+        myRole: String,
         narrow: {
           type: Boolean,
           notify: true
@@ -498,7 +500,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       observers: [
         '_searchChanged(search)',
-        '_mypatientsChanged(mypatients)'
+        '_mypatientsChanged(mypatients.*)'
         // '_searchChanged(search, filterBy)',
       ],
 
@@ -507,8 +509,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else return '../images/user.png';
       },
 
-      _mypatientsChanged(e) {
-        if (e.length > 0) {
+      _mypatientsChanged() {
+        if (this.mypatients.length > 0) {
           // var PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
           // var id = e[0].$key;
           // id = id.substring(0, 8);
@@ -518,6 +520,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           //   timestamp = timestamp * 64 + PUSH_CHARS.indexOf(c);
           // }
           Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+        } else {
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
         }
       },
 
@@ -629,8 +633,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           var newDiv = document.createElement("my-patients-view");
           newDiv.setAttribute("id", "d26");
+          newDiv.setAttribute("my-role", this.myRole);
+          newDiv.setAttribute("my-lastname", this.myLastname);
           newDiv.setAttribute("view-key", data_args);
-          newDiv.setAttribute("prev-route", this.route.prefix);
           newDiv.setAttribute("my-key", this.myKey);
           Polymer.dom(this.root).querySelector("#open").click();
           //if open existing
@@ -649,8 +654,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           var newDiv = document.createElement("my-patients-edit");
           newDiv.setAttribute("id", "d25");
+          newDiv.setAttribute("my-role", this.myRole);
+          newDiv.setAttribute("my-lastname", this.myLastname);
           newDiv.setAttribute("edit-key", data_args);
-          newDiv.setAttribute("prev-route", this.route.prefix);
           newDiv.setAttribute("my-key", this.myKey);
           // window.location = '/patients/edit/' + data_args;
           //if open existing
@@ -667,9 +673,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             Polymer.dom(node.parentNode).removeChild(oldDiv);
           }
           var newDiv = document.createElement("my-patients-new");
+          newDiv.setAttribute("my-role", this.myRole);
+          newDiv.setAttribute("my-lastname", this.myLastname);
           newDiv.setAttribute("my-key", this.myKey);
           newDiv.setAttribute("id", "d23");
-          newDiv.setAttribute("prev-route", this.route.prefix);
           //if open existing
           var currentDiv = document.getElementById("patientsnew");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);

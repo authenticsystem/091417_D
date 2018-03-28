@@ -424,7 +424,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       observers: [
         '_searchChanged(search)',
-        '_mycasesChanged(mycases)'
+        '_mycasesChanged(mycases.*)'
       ],
 
       _fetching() {
@@ -434,9 +434,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }, 3000);
       },
 
-      _mycasesChanged(e) {
-        if (e.length > 0) {
+      _mycasesChanged() {
+        if (this.mycases.length > 0) {
           Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+        } else {
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
         }
       },
 

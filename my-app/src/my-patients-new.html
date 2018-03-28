@@ -14,7 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
@@ -25,6 +25,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
@@ -163,6 +164,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .longText {
         color: gray;
         /* display: none; */
+      }
+
+      .action paper-button {
+        height: 32px;
+        font-size: 12px;
+        font-weight: 400;
+        width: 80px;
+      }
+
+      paper-button.green {
+        background-color: var(--paper-green-500);
+        color: white;
       }
     </style>
 
@@ -714,6 +727,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </app-drawer-layout>
 
+    <paper-dialog id="queueDialog" confirm-button="Done">
+      <h3>Add patient to queue?</h3>
+      <div class="buttons">
+        <div class="action">
+          <paper-button on-tap="_addPatient" style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>No</paper-button>
+          <paper-button on-tap="_queuePatient" toggles class="custom green">Yes</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
+    <firebase-query disabled$="{{isSelectDoc}}" path="/{{myKey}}/doctors" data="{{mydoctors}}"></firebase-query>
+    <paper-dialog id="selectDialog" confirm-button="Done">
+      <h3>Add queue to</h3>
+      <paper-dropdown-menu style="cursor:pointer; margin-top:-26px" label="Select doctor">
+        <paper-listbox slot="dropdown-content" class="dropdown-content" attr-for-selected="name" selected="{{docSelect}}">
+          <template is="dom-repeat" items="[[mydoctors]]">
+            <paper-item name="[[item.code]]~[[item.lastname]]">Dr. [[item.lastname]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <div class="buttons">
+        <div class="action">
+          <paper-button id="addQueBTN" on-tap="_addQueuePatient" toggles class="custom green">OK</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
   </template>
 
   <script>
@@ -726,6 +766,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true
         },
         myKey: String,
+        myRole: String,
+        myLastname: String,
         selectedPage: Number,
         entryanimation: {
           type: String,
@@ -734,6 +776,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         exitanimation: {
           type: String,
           value: "slide-left-animation"
+        },
+        isSelectDoc: {
+          type: Boolean,
+          value: true
         },
         favlefthide: {
           type: Boolean,
@@ -845,7 +891,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Number,
           value: 0
         },
-        todayDate: String
+        todayDate: String,
+        patientPushKey: String
         // canvas: String,
         // context: String,
         // video: String,
@@ -856,8 +903,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'personalInfoChanged(doctor,refer,hospital_name,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
         'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
         'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
-        '_todayDateChanged(todayDate)'
+        '_todayDateChanged(todayDate)',
+        '_docSelectChanged(docSelect)'
       ],
+
+      _docSelectChanged(e) {
+        if (e) Polymer.dom(this.root).querySelector("#addQueBTN").disabled = false;
+        else Polymer.dom(this.root).querySelector("#addQueBTN").disabled = true;
+      },
 
       _todayDateChanged(date) {
         var monthNames = [
@@ -1116,6 +1169,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.selectedPage = 0;
         this.favrighthide = false;
         this.todayDate = this.formatTodayDate(new Date());
+        Polymer.dom(this.root).querySelector("#addQueBTN").disabled = true;
         // this.canvas = Polymer.dom(this.root).querySelector("#canvas");
         // this.context = this.canvas.getContext('2d');
         // this.video = Polymer.dom(this.root).querySelector("#video");
@@ -1204,67 +1258,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // }
 
           if (parseInt(this.selectedPage) == 4) {
-            //complete
-            var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
-            var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
-            var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
+            Polymer.dom(this.root).querySelector("#queueDialog").open();
+          }
 
-            var info = this.personal, insure = this.insurance, emerg = this.emergency;
-            var mykey = this.myKey;
-            var today = this.todayDate;
-
-            saveLoad.style.display = 'block';
-            var ref = firebase.database().ref("/" + mykey + "/patients");
-            var push = ref.push({
-              personal: info,
-              insurance: insure,
-              emergency: emerg,
-              created: today
-            });
-
-            if (push.key) {
-              this.path = '/' + mykey + '/patients';
-              var num = this.patientsLength.length;
-              this.no = this._patientsNoUpdate(num, mykey, push.key);
-              this._reportsUpdate(today, mykey);
-
-              if (this.profile) {
-                var ext = this.profile.type.substring(6);
-                var pic_name = this.randomString(8) + '.' + ext;
-
-                if (this.profile.size > 9999) {
-                  ImageTools.resize(this.profile, {
-                    width: 440, // maximum width
-                    height: 400 // maximum height
-                  }, function (blob, didItResize) {
-                    var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
-                    storageRef.put(blob).then(function (snapshot) {
-                      firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
-                    });
-
-                  });
-                }
-                else {
-                  var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
-                  storageRef.put(this.profile).then(function (snapshot) {
-                    firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
-                  });
-                }
-              }
-
-              saveLoad.style.display = 'none';
-              saveSucc.style.display = 'block';
-            }
-            else {
-              this.path = '';
-              saveLoad.style.display = 'none';
-              saveErr.style.display = 'block';
-            }
+          if (parseInt(this.selectedPage) !== 4) {
+            this.selectedPage = (parseInt(this.selectedPage) + 1);
           }
 
           if (parseInt(this.selectedPage) !== 5) {
-
-            this.selectedPage = (parseInt(this.selectedPage) + 1);
 
             if (parseInt(this.selectedPage) == 4) {
               Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
@@ -1281,6 +1282,167 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.selectedPage = 0;
           this.favlefthide = true;
           this.favrighthide = false;
+        }
+      },
+
+      _addPatient() {
+        this.favlefthide = true;
+        this.favrighthide = true;
+        Polymer.dom(this.root).querySelector("#queueDialog").close();
+        this.selectedPage = (parseInt(this.selectedPage) + 1);
+
+        this._insertNewPatient(false, this.myKey, '');
+      },
+
+      _queuePatient() {
+        Polymer.dom(this.root).querySelector("#queueDialog").close();
+        if (this.myRole == 'Secretary') {
+          this.isSelectDoc = false;
+          Polymer.dom(this.root).querySelector("#selectDialog").open();
+        }
+        else {
+          this.favlefthide = true;
+          this.favrighthide = true;
+          this.selectedPage = (parseInt(this.selectedPage) + 1);
+          this._insertNewPatient(true, this.myKey, this.myLastname);
+        }
+      },
+
+      _addQueuePatient() {
+        this.favlefthide = true;
+        this.favrighthide = true;
+        Polymer.dom(this.root).querySelector("#selectDialog").close();
+        this.selectedPage = (parseInt(this.selectedPage) + 1);
+        var [docselect, doclastname] = this.docSelect.split('~');
+
+        this._insertNewPatient(true, this.myKey, doclastname);
+        if (this.patientPushKey) {
+          this._insertNewPatient2(true, docselect, doclastname);
+          this.isSelectDoc = true;
+        }
+      },
+
+      _insertNewPatient(que, mykey, queTo) {
+        var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
+        var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+        var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
+        var today = this.todayDate;
+
+        saveLoad.style.display = 'block';
+        var ref = firebase.database().ref("/" + mykey + "/patients");
+        var push = ref.push({
+          personal: this.personal,
+          insurance: this.insurance,
+          emergency: this.emergency,
+          created: today,
+          isQueue: que,
+          queueTo: queTo
+        });
+
+        if (push.key) {
+          this.patientPushKey = push.key;
+          this.path = '/' + mykey + '/patients';
+          var num = this.patientsLength.length ? this.patientsLength.length : 1;
+          this.no = this._patientsNoUpdate(num, mykey, push.key);
+          this._reportsUpdate(today, mykey);
+
+          if (this.profile) {
+            var ext = this.profile.type.substring(6);
+            var pic_name = this.randomString(8) + '.' + ext;
+
+            if (this.profile.size > 9999) {
+              ImageTools.resize(this.profile, {
+                width: 440, // maximum width
+                height: 400 // maximum height
+              }, function (blob, didItResize) {
+                var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+                storageRef.put(blob).then(function (snapshot) {
+                  firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
+                });
+
+              });
+            }
+            else {
+              var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+              storageRef.put(this.profile).then(function (snapshot) {
+                firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
+              });
+            }
+          }
+
+          saveLoad.style.display = 'none';
+          saveSucc.style.display = 'block';
+        }
+        else {
+          this.path = '';
+          saveLoad.style.display = 'none';
+          saveErr.style.display = 'block';
+        }
+      },
+
+      _insertNewPatient2(que, mykey, queTo) {
+        var today = this.todayDate;
+        var ref = firebase.database().ref("/" + mykey + "/patients");
+        var push = ref.push({
+          personal: this.personal,
+          insurance: this.insurance,
+          emergency: this.emergency,
+          created: today,
+          isQueue: que,
+          queueTo: queTo,
+          patient_ref: this.patientPushKey
+        });
+
+        if (push.key) {
+          ref.once('value').then(function (data) {
+            var num = data.numChildren() ? data.numChildren() : 1;
+            _patientsNoUpdate(num, mykey, push.key);
+          });
+          this._reportsUpdate(today, mykey);
+
+          if (this.profile) {
+            var ext = this.profile.type.substring(6);
+            var pic_name = this.randomString(8) + '.' + ext;
+
+            if (this.profile.size > 9999) {
+              ImageTools.resize(this.profile, {
+                width: 440, // maximum width
+                height: 400 // maximum height
+              }, function (blob, didItResize) {
+                var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+                storageRef.put(blob).then(function (snapshot) {
+                  firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
+                });
+
+              });
+            }
+            else {
+              var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
+              storageRef.put(this.profile).then(function (snapshot) {
+                firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
+              });
+            }
+          }
+        }
+
+        function _patientsNoUpdate(num, mykey, pushkey) {
+          if (num > 0 && num < 10) {
+            num = '000' + num;
+          }
+          else if (num > 9 && num < 100) {
+            num = '00' + num;
+          }
+          else if (num > 99 && num < 1000) {
+            num = '0' + num;
+          }
+          else if (num > 999) {
+            num = num;
+          }
+          else {
+            num = '0000';
+          }
+
+          firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
         }
       },
 

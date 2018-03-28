@@ -953,6 +953,7 @@
                                     if (fbPushKey) {
 
                                         firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/profile").set(patient.val().profile);
+                                        firebase.database().ref("/" + mykey + "/patients/" + key + "/isQueue").set(false);
                                         _updateOrder(mykey, fbPushKey);
                                         _reportsUpdate(today, mykey);
 
@@ -985,6 +986,7 @@
 
                                     if (fbPushKey) {
 
+                                        firebase.database().ref("/" + mykey + "/patients/" + key + "/isQueue").set(false);
                                         _updateOrder(mykey, fbPushKey);
                                         _reportsUpdate(today, mykey);
 
