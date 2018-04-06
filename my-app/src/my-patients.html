@@ -358,7 +358,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div name="/new">
           <div id="patientsnew"></div>
-          <my-patients-new id="d23" my-lastname="{{myLastname}}" my-role="{{myRole}}" my-key="{{myKey}}"></my-patients-new>
+          <my-patients-new id="d23" my-queue="{{myQueue}}" prev-route="{{route.prefix}}" my-lastname="{{myLastname}}" my-role="{{myRole}}"
+            my-key="{{myKey}}"></my-patients-new>
         </div>
 
         <div name="view404">Not found.</div>
@@ -398,6 +399,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: function () {
             return [];
           }
+        },
+        route: String,
+        myQueue: {
+          type: String,
+          value: 'false'
         },
         myKey: String,
         myLastname: String,
@@ -674,7 +680,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           var newDiv = document.createElement("my-patients-new");
           newDiv.setAttribute("my-role", this.myRole);
+          newDiv.setAttribute("prev-route", this.route.prefix);
           newDiv.setAttribute("my-lastname", this.myLastname);
+          newDiv.setAttribute("my-queue", this.myQueue);
           newDiv.setAttribute("my-key", this.myKey);
           newDiv.setAttribute("id", "d23");
           //if open existing

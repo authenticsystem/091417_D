@@ -225,7 +225,7 @@
             <app-header-layout id="appheader" has-scrolling-region>
                 <app-header fixed slot="header">
                     <app-toolbar>
-                        <a href="/visits">
+                        <a href="{{prevRoute}}">
                             <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
                         </a>
                         <div main-title>Add Visit</div>
@@ -253,7 +253,7 @@
                     <neon-animatable>
 
                         <firebase-query id="query1" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name" start-at="{{filterValue}}"
-                            limit-to-first="5">
+                            limit-to-first="{{myLimit}}">
                         </firebase-query>
 
                         <firebase-query id="query2" path="/{{myKey}}/patients" data="{{patientInfo}}" order-by-key equal-to="{{myPatientKey}}" limit-to-last="1">
@@ -491,8 +491,14 @@
                     type: Boolean,
                     notify: true
                 },
+                prevRoute: String,
+                filterValue: String,
                 myKey: String,
                 selectedPage: Number,
+                myLimit: {
+                    type: Number,
+                    value: 5
+                },
                 entryanimation: {
                     type: String,
                     value: "slide-from-right-animation"

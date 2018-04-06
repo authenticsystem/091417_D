@@ -136,7 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 </div>
                             </a>
                         </div>
-                        <div class="div1" align="center">
+                        <div hidden="{{isSecretary}}" class="div1" align="center">
                             <a href="/settings/secretary">
                                 <div on-tap="_newSecretary" class="card">
                                     <img preload style="width:150px; height:150px;" src="../images/secretary.png">
@@ -187,7 +187,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 },
                 user: Object,
                 myKey: String,
-                myLastname: String
+                myLastname: String,
+                myRole: {
+                    type: String,
+                    observer: '_myRoleChanged'
+                },
+                isSecretary: {
+                    type: Boolean,
+                    value: true
+                }
+            },
+
+            _myRoleChanged() {
+                if (this.myRole == 'Secretary') this.isSecretary = true;
+                else this.isSecretary = false;
             },
 
             toggleDrawer() {

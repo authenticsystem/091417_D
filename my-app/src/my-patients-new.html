@@ -227,14 +227,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
       </app-drawer>
 
-
       <app-header-layout id="appheader" has-scrolling-region>
         <app-header fixed slot="header">
           <app-toolbar>
-            <a href="/patients">
+            <a href="{{prevRoute}}">
               <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
             </a>
-            <div main-title>Add Patient</div>
+            <div main-title>Add {{_label(prevRoute)}}</div>
             <!-- <paper-menu-button>
               <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
               <paper-listbox slot="dropdown-content" style="cursor:pointer">
@@ -246,9 +245,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle></paper-icon-button>
           </app-toolbar>
         </app-header>
-
-        <firebase-query id="query" path="{{path}}" data="{{patientsLength}}">
-        </firebase-query>
 
         <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
 
@@ -342,7 +338,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <!-- <span>Age: {{age}}</span> -->
                 </div>
                 <div id="info">
-                  <paper-dropdown-menu-light label="Marital Status" style="width:100%; margin-right:10px">
+                  <paper-dropdown-menu label="Marital Status" style="width:100%; margin-right:10px">
                     <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{status}}" class="dropdown-content">
                       <paper-item id="item">Single</paper-item>
                       <paper-item id="item">Married</paper-item>
@@ -350,13 +346,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <paper-item id="item">Separated</paper-item>
                       <paper-item id="item">Widowed</paper-item>
                     </paper-listbox>
-                  </paper-dropdown-menu-light>
-                  <paper-dropdown-menu-light label="Gender" style="width:100%; margin-right:10px">
+                  </paper-dropdown-menu>
+                  <paper-dropdown-menu label="Gender" style="width:100%; margin-right:10px">
                     <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{sex}}" class="dropdown-content">
                       <paper-item id="item">Male</paper-item>
                       <paper-item id="item">Female</paper-item>
                     </paper-listbox>
-                  </paper-dropdown-menu-light>
+                  </paper-dropdown-menu>
                   <paper-input type="number" value="{{contact}}" label="Contact Number" style="width:100%;"></paper-input>
                 </div>
                 <paper-input value="{{address}}" label="Street Address"></paper-input>
@@ -703,8 +699,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <div class="details">
                 <div id="saveSuccess" style="color: green; display:none;">Patient successfully saved.
-                  <br> Patient no
-                  <b style="color:blue">{{no}}</b>
+                  <p id="p" style="margin-top:-4px">Patient no
+                    <!-- <b id="bold" style="color:blue">{{no}}</b> -->
+                  </p>
                 </div>
                 <div id="saveLoad" style="color: orange; display:none;">Saving patient info.</div>
                 <div id="saveFailed" style="color: red; display:none;">Opps! Something went wrong while saving patient.</div>
@@ -766,7 +763,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true
         },
         myKey: String,
+        prevRoute: String,
+        myQueue: String,
         myRole: String,
+        doctorCode: String,
         myLastname: String,
         selectedPage: Number,
         entryanimation: {
@@ -887,10 +887,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         personal: Object,
         insurance: Object,
         emergency: Object,
-        length: {
-          type: Number,
-          value: 0
-        },
         todayDate: String,
         patientPushKey: String
         // canvas: String,
@@ -1118,6 +1114,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      _label(e) {
+        return e.charAt(1).toUpperCase() + e.slice(2).replace("s", "");
+      },
+
       _changepic(e) {
         if (e.target.files.length > 0) {
           // Polymer.dom(this.root).querySelector("#err").style.display = 'none';
@@ -1258,10 +1258,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // }
 
           if (parseInt(this.selectedPage) == 4) {
-            Polymer.dom(this.root).querySelector("#queueDialog").open();
+            if (this.myQueue == 'false') {
+              Polymer.dom(this.root).querySelector("#queueDialog").open();
+            }
+            else {
+              this._insertNewPatient(true, this.myKey, this.myLastname);
+              if (this.patientPushKey) {
+                this.selectedPage = (parseInt(this.selectedPage) + 1);
+                this.favlefthide = true;
+                this.favrighthide = true;
+
+                if (this.myRole == 'Secretary') {
+                  this._insertNewPatient2(true, this.doctorCode, this.myLastname);
+                }
+              }
+            }
           }
 
-          if (parseInt(this.selectedPage) !== 4) {
+          if (parseInt(this.selectedPage) < 4) {
             this.selectedPage = (parseInt(this.selectedPage) + 1);
           }
 
@@ -1324,6 +1338,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _insertNewPatient(que, mykey, queTo) {
         var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
+        var p = Polymer.dom(this.root).querySelector("#p");
         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
         var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
         var today = this.todayDate;
@@ -1341,9 +1356,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         if (push.key) {
           this.patientPushKey = push.key;
-          this.path = '/' + mykey + '/patients';
-          var num = this.patientsLength.length ? this.patientsLength.length : 1;
-          this.no = this._patientsNoUpdate(num, mykey, push.key);
+          ref.once('value').then(function (data) {
+            var num = data.numChildren() ? data.numChildren() : 1;
+            var no = _patientsNoUpdate(num, mykey, push.key);
+            console.log(num);
+
+            var b = document.createElement("b");
+            b.id = "bold";
+            b.style.color = "blue";
+            var t = document.createTextNode(no);
+            b.appendChild(t);
+            p.appendChild(b);
+          });
           this._reportsUpdate(today, mykey);
 
           if (this.profile) {
@@ -1374,13 +1398,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           saveSucc.style.display = 'block';
         }
         else {
-          this.path = '';
           saveLoad.style.display = 'none';
           saveErr.style.display = 'block';
+        }
+
+        function _patientsNoUpdate(num, mykey, pushkey) {
+          if (num > 0 && num < 10) {
+            num = '000' + num;
+          }
+          else if (num > 9 && num < 100) {
+            num = '00' + num;
+          }
+          else if (num > 99 && num < 1000) {
+            num = '0' + num;
+          }
+          else if (num > 999) {
+            num = num;
+          }
+          else {
+            num = '0000';
+          }
+
+          firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
+          return num;
         }
       },
 
       _insertNewPatient2(que, mykey, queTo) {
+        var p = Polymer.dom(this.root).querySelector("#p");
         var today = this.todayDate;
         var ref = firebase.database().ref("/" + mykey + "/patients");
         var push = ref.push({
@@ -1396,7 +1441,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (push.key) {
           ref.once('value').then(function (data) {
             var num = data.numChildren() ? data.numChildren() : 1;
-            _patientsNoUpdate(num, mykey, push.key);
+            var no = _patientsNoUpdate(num, mykey, push.key);
+
+            var oldB = Polymer.dom(p.parentNode).querySelector("#bold");
+            if (oldB) {
+              p.removeChild(oldB);
+            }
+            var b = document.createElement("b");
+            b.id = "bold";
+            b.style.color = "blue";
+            var t = document.createTextNode(no);
+            b.appendChild(t);
+            p.appendChild(b);
           });
           this._reportsUpdate(today, mykey);
 
@@ -1443,28 +1499,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
           firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
+          return num;
         }
-      },
-
-      _patientsNoUpdate(num, mykey, pushkey) {
-        if (num > 0 && num < 10) {
-          num = '000' + num;
-        }
-        else if (num > 9 && num < 100) {
-          num = '00' + num;
-        }
-        else if (num > 99 && num < 1000) {
-          num = '0' + num;
-        }
-        else if (num > 999) {
-          num = num;
-        }
-        else {
-          num = '0000';
-        }
-
-        firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
-        return num;
       },
 
       _reportsUpdate(today, mykey) {

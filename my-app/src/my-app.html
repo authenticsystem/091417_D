@@ -176,6 +176,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        z-index: 2;
       }
 
       .yellow-button {
@@ -353,7 +354,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a> -->
                   <span style="padding:20px; color:gray; font-size:12px;">
-                    v0.4.0
+                    v0.4.4
                   </span>
                 </iron-selector>
               </div>
@@ -361,11 +362,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
               <!-- <my-account user={{user}} name="account"></my-account> -->
               <my-dashboard name="dashboard" my-role="[[role]]" my-key="[[mykey]]" user="[[user]]"></my-dashboard>
-              <my-settings name="settings" route="[[subroute]]" my-key="[[mykey]]" my-lastname="[[lastname]]" user="[[user]]"></my-settings>
+              <my-settings name="settings" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[lastname]]" user="[[user]]"></my-settings>
               <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" user-uid="[[user.uid]]"></my-visits>
               <my-patients name="patients" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[lastname]]" user-uid="[[user.uid]]"></my-patients>
               <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
-              <my-queue name="queue" my-role="[[role]]" my-key="[[mykey]]"></my-queue>
+              <my-queue name="queue" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[lastname]]"></my-queue>
               <!-- <my-appointments name="appointments"></my-appointments>
               <my-billing name="billing"></my-billing>
               <my-collection name="collection"></my-collection>
@@ -440,7 +441,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (user) {
           if (user.emailVerified) {
             if (user.phoneNumber) {
+              Polymer.dom(this.root).querySelector("#overlay").style.display = 'flex';
+              Polymer.dom(this.root).querySelector("#spinner").active = true;
               if (key) {
+                Polymer.dom(this.root).querySelector("#overlay").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#spinner").active = false;
                 this.page = page || 'dashboard';
                 // Close a non-persistent drawer when the page & route are changed.
                 var drawer = Polymer.dom(this.root).querySelector("#drawer");

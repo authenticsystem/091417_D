@@ -17,6 +17,7 @@
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 
+<link rel="import" href="my-visits-new.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -119,51 +120,75 @@
             }
         </style>
 
-        <app-header-layout fullbleed has-scrolling-region>
-            <app-header fixed slot="header">
-                <app-toolbar primary>
-                    <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                    <div main-title>Queue</div>
-                </app-toolbar>
-            </app-header>
+        <app-route route="{{route}}" pattern="" active="{{queueActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/visit/new" data="{{newData}}" active="{{qVisitsActive}}"></app-route>
 
-            <firebase-query path="/{{myKey}}/patients" data="{{myqueue}}" order-by-child="isQueue" equal-to="true">
-            </firebase-query>
+        <div hidden$="{{!queueActive}}">
+            <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+                <div name="">
+                    <app-header-layout fullbleed has-scrolling-region>
+                        <app-header fixed slot="header">
+                            <app-toolbar primary>
+                                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                                <div main-title>Queue</div>
+                            </app-toolbar>
+                        </app-header>
 
-            <div id="noRecord">
-                <div class="item">
-                    <div style="margin:auto">
-                        {{record}}
-                    </div>
-                </div>
-            </div>
+                        <firebase-query path="/{{myKey}}/patients" data="{{myqueue}}" order-by-child="isQueue" equal-to="true">
+                        </firebase-query>
 
-            <iron-list items="[[myqueue]]" as="item" selection-enabled scroll-target="threshold">
-                <template>
-                    <div class="divSeparator">
-                        <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-                            <div>
-                                <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+                        <div id="noRecord">
+                            <div class="item">
+                                <div style="margin:auto">
+                                    {{record}}
+                                </div>
                             </div>
-                            <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
-                                <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
-                                <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
-                                <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div>
-                                <div id="{{item.$key}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
-                                <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
-                            </div>
-                            <div style="padding:10px"> </div>
                         </div>
-                    </div>
-                </template>
-            </iron-list>
 
-            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
-            </iron-scroll-threshold>
+                        <iron-list items="[[myqueue]]" as="item" selection-enabled scroll-target="threshold">
+                            <template>
+                                <div class="divSeparator">
+                                    <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                                        <div>
+                                            <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+                                        </div>
+                                        <div class="pad" on-tap="_selectThis" id="{{item.personal.name}}">
+                                            <div id="{{item.personal.name}}" style="font-size:11px" class="longText">[[item.no]]</div>
+                                            <div id="{{item.personal.name}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
+                                            <div id="{{item.personal.name}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div>
+                                            <div id="{{item.personal.name}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
+                                            <div id="{{item.personal.name}}" class="longText">[[item.lastchiefcomplaint]]</div>
+                                        </div>
+                                        <a id="open" href="{{route.prefix}}/visit/new"></a>
+                                        <div style="padding:10px"> </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </iron-list>
 
-            <!-- <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_addDialog"></paper-fab> -->
+                        <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+                        </iron-scroll-threshold>
 
-        </app-header-layout>
+                        <a href="/queue/new" style="text-decoration: none;">
+                            <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_queueNew"></paper-fab>
+                        </a>
+
+                    </app-header-layout>
+                </div>
+
+                <div name="/new">
+                    <div id="patientsnew"></div>
+                    <my-patients-new id="d23" my-lastname="{{myLastname}}" prev-route="{{route.prefix}}" my-role="{{myRole}}" my-key="{{myKey}}"></my-patients-new>
+                </div>
+
+                <div name="view404">Not found.</div>
+            </iron-pages>
+        </div>
+
+        <div hidden$="{{!qVisitsActive}}">
+            <div id="newcase"></div>
+            <my-visits-new id="d23" my-limit="1" my-key='{{myKey}}' filter-value="{{filterValue}}" prev-route="{{route.prefix}}"></my-visits-new>
+        </div>
 
     </template>
     <script>
@@ -172,6 +197,9 @@
             properties: {
                 myKey: String,
                 myRole: String,
+                route: String,
+                myLastname: String,
+                filterValue: String,
                 items: {
                     type: Array,
                     value: []
@@ -179,8 +207,7 @@
             },
 
             observers: [
-                // '_onSelected(tabs)',
-                '_myqueueChanged(myqueue)'
+                '_myqueueChanged(myqueue.*)'
             ],
 
             getClassForItem(item, selected) {
@@ -192,8 +219,8 @@
                 this.$.threshold.clearTriggers();
             },
 
-            _myqueueChanged(e) {
-                if (e.length > 0) {
+            _myqueueChanged() {
+                if (this.myqueue.length > 0) {
                     Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
                 }
                 else {
@@ -209,29 +236,44 @@
                 }, 3000);
             },
 
-            // _onSelected(e) {
-            //     console.log(this.myRole)
-            // },
-
-            _queueNew() {
-                var node = Polymer.dom(this.root).querySelector("#StartNew");
+            _selectThis(e) {
+                var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+                var node = Polymer.dom(this.root).querySelector("#newcase");
                 if (node) {
                     var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
                     if (oldDiv) {
                         Polymer.dom(node.parentNode).removeChild(oldDiv);
                     }
-                    var newDiv = document.createElement("my-new-patients");
+                    var newDiv = document.createElement("my-visits-new");
+                    newDiv.setAttribute("filter-value", data_args);
+                    newDiv.setAttribute("my-limit", 1);
+                    newDiv.setAttribute("my-key", this.myKey);
                     newDiv.setAttribute("id", "d23");
-                    //  newDiv.setAttribute("prev-route", this.route.prefix);
-                    // newDiv.setAttribute("block", "3")
+                    newDiv.setAttribute("prev-route", this.route.prefix);
+                    Polymer.dom(this.root).querySelector("#open").click();
                     //if open existing
-                    var currentDiv = document.getElementById("StartNew");
+                    var currentDiv = document.getElementById("newcase");
                     Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
                 }
             },
 
-            _addDialog() {
-
+            _queueNew() {
+                var node = Polymer.dom(this.root).querySelector("#patientsnew");
+                if (node) {
+                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+                    if (oldDiv) {
+                        Polymer.dom(node.parentNode).removeChild(oldDiv);
+                    }
+                    var newDiv = document.createElement("my-patients-new");
+                    newDiv.setAttribute("my-role", this.myRole);
+                    newDiv.setAttribute("prev-route", this.route.prefix);
+                    newDiv.setAttribute("my-lastname", this.myLastname);
+                    newDiv.setAttribute("my-key", this.myKey);
+                    newDiv.setAttribute("id", "d23");
+                    //if open existing
+                    var currentDiv = document.getElementById("patientsnew");
+                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                }
             },
 
             _ageCal(bday) {
