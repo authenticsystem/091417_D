@@ -154,7 +154,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <app-toolbar primary id="tool1">
                         <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                         <div main-title>My Location</div>
-                        <paper-icon-button class="menu" icon="my-icons:add" title="Add new location" drawer-toggle on-tap="toggleAdd"></paper-icon-button>
+                        <paper-icon-button style$="{{_access(myRole)}}" class="menu" icon="my-icons:add" title="Add new location" drawer-toggle on-tap="toggleAdd"></paper-icon-button>
                     </app-toolbar>
                 </template>
 
@@ -214,7 +214,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <paper-item name="set">
                     <iron-icon icon="my-icons:my-location"></iron-icon> &nbsp; Set as current location?
                 </paper-item>
-                <paper-item name="remove">
+                <paper-item style$="{{_access(myRole)}}" name="remove">
                     <iron-icon icon="my-icons:delete-forever"></iron-icon> &nbsp; Remove location?
                 </paper-item>
             </paper-listbox>
@@ -248,6 +248,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             static get properties() {
                 return {
                     myKey: String,
+                    myRole: String,
                     location_key: String,
                     location_name: String,
                     openAdd: {
@@ -268,6 +269,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     '_mylocationChanged(mylocation.*)',
                     '_selectedCMDChanged(selectedCMD)'
                 ];
+            }
+
+            _access(e) {
+                if (e != 'Secretary') { return 'display:block'; }
+                else { return 'display:none'; }
             }
 
             _selectThis(e) {
