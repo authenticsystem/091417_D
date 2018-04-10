@@ -1,0 +1,406 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+
+<link rel="import" href="search-bar.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-location">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+
+                padding: 10px;
+            }
+
+            /* app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            } */
+
+            #tool1 {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            #tool2 {
+                background-color: white;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            .item {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+            }
+
+            .item:hover {
+                box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
+            }
+
+            @media (max-width: 768px) {
+                .input {
+                    margin: 16px;
+                }
+
+                iron-list {
+                    margin: 16px;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                paper-search-bar {
+                    margin-left: 80px;
+                    width: 50%;
+                    color: black;
+                }
+            }
+
+            @media (min-width: 768px) {
+                .input {
+                    width: 736px;
+                    margin: 16px auto;
+                }
+
+                iron-list {
+                    width: 736px;
+                    margin: 16px auto;
+                }
+
+                paper-search-bar {
+                    margin-left: 50px;
+                    width: 50%;
+                    color: black;
+                }
+            }
+
+            paper-button {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                width: 80px;
+                background: rgb(223, 218, 218);
+                color: black;
+                float: right;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            #btn-menu {
+                color: gray;
+                position: fixed;
+                right: 35px;
+            }
+
+            #btn-menu2 {
+                color: green;
+                position: fixed;
+                right: 65px;
+            }
+
+            #noRecord {
+                width: 736px;
+                margin: 16px auto;
+            }
+
+            .pad {
+                margin-left: 4px;
+                padding: 6px;
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .small {
+                --paper-avatar-width: 35px;
+            }
+
+            paper-item:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
+        </style>
+
+
+        <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+                <template is="dom-if" if="{{!openAdd}}">
+                    <app-toolbar primary id="tool1">
+                        <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                        <div main-title>My Location</div>
+                        <paper-icon-button class="menu" icon="my-icons:add" title="Add new location" drawer-toggle on-tap="toggleAdd"></paper-icon-button>
+                    </app-toolbar>
+                </template>
+
+                <template is="dom-if" if="{{openAdd}}">
+                    <app-toolbar primary id="tool2">
+                        <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                        <paper-search-bar id="search" placeholder="Add new location" query="{{search}}" disable-filter-button></paper-search-bar>
+                        <iron-a11y-keys target="[[target]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
+                        <template is="dom-if" if="{{search}}">
+                            <paper-icon-button id="btn-menu" icon="my-icons:close" title="clear" drawer-toggle on-tap="toggleClear"></paper-icon-button>
+                            <paper-icon-button id="btn-menu2" icon="my-icons:check" title="add" drawer-toggle on-tap="toggleAddLocation"></paper-icon-button>
+                        </template>
+                    </app-toolbar>
+                </template>
+            </app-header>
+
+            <!-- <div class="input">
+                <paper-input label="New Location" always-float-label></paper-input>
+                <paper-button>Add</paper-button>
+            </div> -->
+
+            <firebase-query path="/{{myKey}}/locations" data="{{mylocation}}" order-by-child="location_name"></firebase-query>
+
+            <div id="noRecord">
+                <div class="item">
+                    <div id$="[[_fetching()]]" style="margin:auto">
+                        {{record}}
+                    </div>
+                </div>
+            </div>
+
+            <iron-list items="[[mylocation]]" as="item" selection-enabled scroll-target="threshold">
+                <template>
+                    <div class="divSeparator">
+                        <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                            <paper-avatar class="small" label="[[item.location_name]]"></paper-avatar>
+                            <div class="pad" on-tap="_selectThis" id="[[item.$key]]~[[item.location_name]]">
+                                <div id="[[item.$key]]~[[item.location_name]]">[[item.location_name]]</div>
+                            </div>
+                            <div style="padding:10px"> </div>
+                            <div hidden="{{!item.location_active}}">
+                                <iron-icon icon="my-icons:my-location" style="display:inline-block;position: absolute;  right: 10px; color: #673AB7; top:18px;">
+                                </iron-icon>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </iron-list>
+
+            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+            </iron-scroll-threshold>
+
+        </app-header-layout>
+
+        <paper-dialog id="openDialog" confirm-button="Done">
+            <paper-listbox attr-for-selected="name" selected="{{selectedCMD}}">
+                <paper-item name="set">
+                    <iron-icon icon="my-icons:my-location"></iron-icon> &nbsp; Set as current location?
+                </paper-item>
+                <paper-item name="remove">
+                    <iron-icon icon="my-icons:delete-forever"></iron-icon> &nbsp; Remove location?
+                </paper-item>
+            </paper-listbox>
+        </paper-dialog>
+
+        <paper-dialog id="alertDialog" confirm-button="Done">
+            <h3>Location is in use! Can't remove location!</h3>
+            <div class="buttons">
+                <div class="action">
+                    <paper-button dialog-confirm toggles style="background:rgb(207, 206, 206);color:black">Ok</paper-button>
+                </div>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="removeDialog" confirm-button="Done">
+            <h3>Sure you want to permanently remove this location?</h3>
+            <div class="buttons">
+                <div class="action">
+                    <paper-button dialog-confirm on-tap="removeLocation" toggles style="background:green;color:white">Yes</paper-button>
+                    <paper-button dialog-confirm toggles style="background:rgb(207, 206, 206);color:black">Cancel</paper-button>
+                </div>
+            </div>
+        </paper-dialog>
+
+    </template>
+
+    <script>
+        class MyLocation extends Polymer.Element {
+            static get is() { return 'my-location'; }
+
+            static get properties() {
+                return {
+                    myKey: String,
+                    location_key: String,
+                    location_name: String,
+                    openAdd: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    },
+                    narrow: {
+                        type: Boolean,
+                        notify: true
+                    }
+                };
+            }
+
+            static get observers() {
+                return [
+                    '_mysearchChanged(search)',
+                    '_mylocationChanged(mylocation.*)',
+                    '_selectedCMDChanged(selectedCMD)'
+                ];
+            }
+
+            _selectThis(e) {
+                var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+                if (data_args) {
+                    var [key, name] = data_args.split('~');
+                    this.location_key = key;
+                    this.location_name = name;
+                    this.selectedCMD = '';
+                    this.$.openDialog.open();
+                }
+            }
+
+            _selectedCMDChanged(e) {
+                if (e) {
+                    var key = this.location_key;
+                    var location_name = this.location_name;
+                    var ref = firebase.database().ref('/' + this.myKey + '/locations');
+                    var accRef = firebase.database().ref('/accounts');
+
+                    if (e == 'set') {
+                        ref.orderByChild('location_active').equalTo(true).once('value').then(function (data) {
+                            if (data.exists()) {
+                                if (key != Object.keys(data.val())[0]) {
+                                    ref.child(Object.keys(data.val())[0]).update({ location_active: false });
+                                }
+                            }
+                        });
+                        ref.child(this.location_key).update({ location_active: true });
+                        accRef.orderByChild('code').equalTo(this.myKey).once('value').then(function (account) {
+                            if (account.exists()) {
+                                accRef.child(Object.keys(account.val())[0]).update({ location: location_name });
+                            }
+                        });
+                    }
+                    else {
+                        this.$.removeDialog.open();
+                    }
+                    this.$.openDialog.close();
+                }
+            }
+
+            removeLocation() {
+                var key = this.location_key;
+                var ref = firebase.database().ref('/' + this.myKey + '/locations');
+                var alert = Polymer.dom(this.root).querySelector("#alertDialog");
+
+                ref.orderByChild('location_active').equalTo(true).once('value').then(function (data) {
+                    if (data.exists()) {
+                        if (key != Object.keys(data.val())[0]) {
+                            ref.child(key).remove();
+                        }
+                        else {
+                            alert.open();
+                        }
+                    }
+                });
+            }
+
+            _fetching() {
+                this.record = 'Loading data . . .';
+                setTimeout((e) => {
+                    this.record = 'No record found.';
+                }, 3000);
+            }
+
+            toggleAdd() {
+                this.openAdd = true;
+            }
+
+            toggleReturn() {
+                this.openAdd = false;
+                this.search = '';
+            }
+
+            toggleClear() {
+                this.search = '';
+            }
+
+            onEnter() {
+                this.toggleAddLocation();
+            }
+
+            toggleAddLocation() {
+                var ref = firebase.database().ref("/" + this.myKey + "/locations");
+                var push = ref.push({
+                    location_name: this.search,
+                    location_active: false
+                });
+                if (push.key) this.toggleReturn();
+            }
+
+            getClassForItem(item, selected) {
+                return selected ? 'item expanded' : 'item';
+            }
+
+            _mysearchChanged(e) {
+                if (e) {
+                    this.search = this.convertCase(e);
+                    this.target = Polymer.dom(this.root).querySelector("#search");
+                }
+            }
+
+            _mylocationChanged() {
+                if (this.mylocation.length > 0) {
+                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+                } else {
+                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
+                }
+            }
+
+            convertCase(str) {
+                var lower = String(str).toLowerCase();
+                return lower.replace(/(^| )(\w)/g, function (x) {
+                    return x.toUpperCase();
+                });
+            }
+
+            loadMoreData() {
+                // load async stuff. e.g. XHR
+                Polymer.dom(this.root).querySelector("#threshold").clearTriggers();
+            }
+
+            toggleDrawer() {
+                this.dispatchEvent(new CustomEvent('toggleDrawer', {
+                    bubbles: true, composed: true, detail: {
+                        narrow: this.$.narrow
+                    }
+                }));
+                this.$.narrow = !this.$.narrow;
+            }
+        }
+
+        window.customElements.define(MyLocation.is, MyLocation);
+    </script>
+</dom-module>

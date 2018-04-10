@@ -18,7 +18,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
@@ -351,15 +350,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           </app-header-layout>
 
-          <a href="/patients/new" style="text-decoration: none;">
-            <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_patientsNew"></paper-fab>
-          </a>
+          <a href="/patients/new" id="newPatient"></a>
+          <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_patientsNew"></paper-fab>
+          <!-- </a> -->
         </div>
 
         <div name="/new">
           <div id="patientsnew"></div>
-          <my-patients-new id="d23" my-queue="{{myQueue}}" prev-route="{{route.prefix}}" my-lastname="{{myLastname}}" my-role="{{myRole}}"
-            my-key="{{myKey}}"></my-patients-new>
+          <my-patients-new id="d23" my-location="{{myLocation}}" my-queue="{{myQueue}}" prev-route="{{route.prefix}}" my-lastname="{{myLastname}}"
+            my-role="{{myRole}}" my-key="{{myKey}}"></my-patients-new>
         </div>
 
         <div name="view404">Not found.</div>
@@ -373,7 +372,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div hidden$="{{!detailActive}}">
       <div id="patientsview"></div>
-      <my-patients-view id="d26" my-lastname="{{myLastname}}" my-role="{{myRole}}" my-key='{{myKey}}' view-key='{{detailData.key}}'></my-patients-view>
+      <my-patients-view my-location="{{myLocation}}" id="d26" my-lastname="{{myLastname}}" my-role="{{myRole}}" my-key='{{myKey}}'
+        view-key='{{detailData.key}}'></my-patients-view>
     </div>
 
     <paper-dialog id="deleteDialog" confirm-button="Done">
@@ -385,6 +385,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
       </div>
     </paper-dialog>
+
+    <!-- <paper-dialog id="locationDialog" confirm-button="Done">
+      <h3>Request denied! Location not set.</h3>
+      <div class="buttons">
+        <div class="action">
+          <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>OK</paper-button>
+        </div>
+      </div>
+    </paper-dialog> -->
 
   </template>
 
@@ -405,6 +414,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           value: 'false'
         },
+        myLocation: String,
         myKey: String,
         myLastname: String,
         userUid: String,
@@ -641,6 +651,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           newDiv.setAttribute("id", "d26");
           newDiv.setAttribute("my-role", this.myRole);
           newDiv.setAttribute("my-lastname", this.myLastname);
+          newDiv.setAttribute("my-location", this.myLocation);
           newDiv.setAttribute("view-key", data_args);
           newDiv.setAttribute("my-key", this.myKey);
           Polymer.dom(this.root).querySelector("#open").click();
@@ -672,6 +683,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _patientsNew() {
+        // if (this.myLocation == '(not set)') {
+        //   Polymer.dom(this.root).querySelector("#locationDialog").open();
+        // }
+        // else {
+        Polymer.dom(this.root).querySelector("#newPatient").click();
         var node = Polymer.dom(this.root).querySelector("#patientsnew");
         if (node) {
           var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
@@ -682,6 +698,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           newDiv.setAttribute("my-role", this.myRole);
           newDiv.setAttribute("prev-route", this.route.prefix);
           newDiv.setAttribute("my-lastname", this.myLastname);
+          newDiv.setAttribute("my-location", this.myLocation);
           newDiv.setAttribute("my-queue", this.myQueue);
           newDiv.setAttribute("my-key", this.myKey);
           newDiv.setAttribute("id", "d23");
@@ -689,6 +706,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var currentDiv = document.getElementById("patientsnew");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
         }
+        //}
       },
 
       _comma(e) {

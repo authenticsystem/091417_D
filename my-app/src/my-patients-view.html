@@ -259,7 +259,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-toolbar>
           <paper-tabs selected="{{selectedPage}}" scrollable fit-container>
             <paper-tab>Patient Info</paper-tab>
-            <paper-tab>Visits</paper-tab>
+            <paper-tab style$="{{_roleChecked(myRole)}}">Visits</paper-tab>
           </paper-tabs>
         </app-header>
 
@@ -549,6 +549,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </paper-dropdown-menu>
       <div class="buttons">
         <div class="action">
+          <paper-button style="background:rgb(207, 206, 206);color:black" on-tap="_canselAddQueuePatient" dialog-dismiss autofocus>Cancel</paper-button>
           <paper-button id="addQueBTN" dialog-confirm on-tap="_addQueuePatient" toggles class="custom green">OK</paper-button>
         </div>
       </div>
@@ -558,7 +559,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <h3>Add this patient to queue?</h3>
       <div class="buttons">
         <div class="action">
-          <paper-button toggles dialog-confirm on-tap="_addQueue2Patient" class="custom green">OK</paper-button>
+          <paper-button style="background:rgb(207, 206, 206);color:black" dialog-dismiss autofocus>No</paper-button>
+          <paper-button toggles dialog-confirm on-tap="_addQueue2Patient" class="custom green">Yes</paper-button>
         </div>
       </div>
     </paper-dialog>
@@ -582,6 +584,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
     </paper-dialog>
 
+    <paper-dialog id="locationDialog" confirm-button="Done">
+      <h3>Request denied! Location not set.</h3>
+      <div class="buttons">
+        <div class="action">
+          <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>OK</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
   </template>
 
   <script>
@@ -593,6 +604,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           notify: true
         },
+        myLocation: String,
         myKey: String,
         myLastname: String,
         myRole: String,
@@ -625,9 +637,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         '_docSelectChanged(docSelect)'
       ],
 
+      _roleChecked(e) {
+        if (e == 'Secretary') return 'display:none';
+        else return 'display:block';
+      },
+
       _docSelectChanged(e) {
         if (e) Polymer.dom(this.root).querySelector("#addQueBTN").disabled = false;
         else Polymer.dom(this.root).querySelector("#addQueBTN").disabled = true;
+      },
+
+      _canselAddQueuePatient() {
+        this.docSelect = null;
       },
 
       _addQueuePatient() {
@@ -636,6 +657,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var [docselect, doclastname] = this.docSelect.split('~');
         var viewkey = this.viewKey;
         var emerg = this.emergency, insure = this.insurance, person = this.personal;
+        var myLocation = this.myLocation;
         var today = this.formatTodayDate(new Date());
         var confirmDialog = Polymer.dom(this.root).querySelector("#confirmDialog");
 
@@ -651,6 +673,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 emergency: emerg,
                 created: today,
                 isQueue: true,
+                isQueue_location: true + '_' + myLocation,
                 queueTo: doclastname,
                 patient_ref: viewkey
               });
@@ -666,6 +689,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
             else {
               firebase.database().ref("/" + docselect + "/patients/" + Object.keys(data.val())[0] + "/isQueue").set(true);
+              firebase.database().ref("/" + docselect + "/patients/" + Object.keys(data.val())[0] + "/isQueue_location").set(true + '_' + myLocation);
               confirmDialog.open();
             }
           });
@@ -716,6 +740,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _addQueue2Patient() {
         firebase.database().ref("/" + this.myKey + "/patients/" + this.viewKey + "/isQueue").set(true);
         firebase.database().ref("/" + this.myKey + "/patients/" + this.viewKey + "/queueTo").set(this.myLastname);
+        firebase.database().ref("/" + this.myKey + "/patients/" + this.viewKey + "/isQueue_location").set(true + '_' + this.myLocation);
         Polymer.dom(this.root).querySelector("#confirmDialog").open();
       },
 
@@ -875,12 +900,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _send2Que() {
-        if (this.myRole == 'Secretary') {
-          this.isSelectDoc = false;
-          Polymer.dom(this.root).querySelector("#selectDialog").open();
+        if (this.myLocation == '(not set)') {
+          Polymer.dom(this.root).querySelector("#locationDialog").open();
         }
         else {
-          Polymer.dom(this.root).querySelector("#addDialog").open();
+          if (this.myRole == 'Secretary') {
+            this.isSelectDoc = false;
+            Polymer.dom(this.root).querySelector("#selectDialog").open();
+          }
+          else {
+            Polymer.dom(this.root).querySelector("#addDialog").open();
+          }
         }
       },
 

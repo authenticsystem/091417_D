@@ -491,6 +491,7 @@
                     type: Boolean,
                     notify: true
                 },
+                myLocation: String,
                 prevRoute: String,
                 filterValue: String,
                 myKey: String,
@@ -909,6 +910,7 @@
 
                         var key = this.mykey;
                         var mykey = this.myKey;
+                        var myLocation = this.myLocation;
                         var myattachment = this.attachment;
                         var attachName = this.randomString(8);
                         var today = this.todayDate;
@@ -960,6 +962,7 @@
 
                                         firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/profile").set(patient.val().profile);
                                         firebase.database().ref("/" + mykey + "/patients/" + key + "/isQueue").set(false);
+                                        firebase.database().ref("/" + mykey + "/patients/" + key + "/isQueue_location").set(false + '_' + myLocation);
                                         _updateOrder(mykey, fbPushKey);
                                         _reportsUpdate(today, mykey);
 
@@ -993,6 +996,7 @@
                                     if (fbPushKey) {
 
                                         firebase.database().ref("/" + mykey + "/patients/" + key + "/isQueue").set(false);
+                                        firebase.database().ref("/" + mykey + "/patients/" + key + "/isQueue_location").set(false + '_' + myLocation);
                                         _updateOrder(mykey, fbPushKey);
                                         _reportsUpdate(today, mykey);
 

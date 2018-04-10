@@ -352,7 +352,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div name="/new">
           <div id="newcase"></div>
-          <my-visits-new id="d23" my-key='{{myKey}}' path="" prev-route="{{route.prefix}}"></my-visits-new>
+          <my-visits-new id="d23" my-location="{{myLocation}}" my-key='{{myKey}}' path="" prev-route="{{route.prefix}}"></my-visits-new>
         </div>
 
         <div name="view404">Not found.</div>
@@ -393,6 +393,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return [];
           }
         },
+        myLocation: String,
         route: String,
         myKey: String,
         narrow: {
@@ -625,6 +626,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           var newDiv = document.createElement("my-visits-new");
           newDiv.setAttribute("my-key", this.myKey);
+          newDiv.setAttribute("my-location", this.myLocation);
           newDiv.setAttribute("id", "d23");
           newDiv.setAttribute("prev-route", this.route.prefix);
           //if open existing

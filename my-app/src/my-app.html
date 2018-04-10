@@ -20,6 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
@@ -43,12 +44,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="my-accountlist.html">
 <link rel="lazy-import" href="my-settings.html">
 <link rel="lazy-import" href="my-queue.html">
+<link rel="lazy-import" href="my-location.html">
 <!-- <link rel="lazy-import" href="my-billing.html"> -->
 <!-- <link rel="lazy-import" href="my-collection.html"> -->
 <!-- <link rel="lazy-import" href="my-help.html"> -->
 <!-- <link rel="lazy-import" href="my-view2.html"> -->
 <!-- <link rel="lazy-import" href="my-appointments.html"> -->
-<!-- <link rel="lazy-import" href="my-map.html"> -->
 <link rel="lazy-import" href="my-view404.html">
 
 
@@ -263,10 +264,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </div>
                   </app-toolbar>
 
-                  <!-- <app-toolbar>
-                  <div class="divHeaderLabelLocation">Location: (not set)</div>
-                </app-toolbar> -->
-                  <!-- <paper-fab mini icon="my-icons:my-location" on-tap="_mymap"></paper-fab> -->
+                  <app-toolbar>
+                    <div class="divHeaderLabelLocation">Location: {{_set(mylocation)}}</div>
+                  </app-toolbar>
+                  <a style$="{{_access(hasAccess)}}" href="/location">
+                    <paper-fab mini icon="my-icons:my-location"></paper-fab>
+                  </a>
                 </app-header>
 
                 <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
@@ -312,7 +315,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </paper-icon-item>
             </a> -->
 
-                  <a style$="{{_access(visitsAccess)}}" name="visits" href="[[rootPath]]visits">
+                  <a style$="{{_access(hasAccess)}}" name="visits" href="[[rootPath]]visits">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:folder-open" slot="item-icon"></iron-icon>
                       <span>Visits</span>
@@ -354,7 +357,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a> -->
                   <span style="padding:20px; color:gray; font-size:12px;">
-                    v0.4.4
+                    v0.5.0
                   </span>
                 </iron-selector>
               </div>
@@ -364,15 +367,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <my-dashboard name="dashboard" my-role="[[role]]" my-key="[[mykey]]" user="[[user]]"></my-dashboard>
               <my-settings name="settings" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[lastname]]" user="[[user]]"></my-settings>
               <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" user-uid="[[user.uid]]"></my-visits>
-              <my-patients name="patients" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[lastname]]" user-uid="[[user.uid]]"></my-patients>
-              <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
-              <my-queue name="queue" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[lastname]]"></my-queue>
+              <my-patients name="patients" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[lastname]]" my-location="[[mylocation]]"
+                user-uid="[[user.uid]]"></my-patients>
+              <my-queue name="queue" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[lastname]]" my-location="[[mylocation]]"></my-queue>
               <!-- <my-appointments name="appointments"></my-appointments>
               <my-billing name="billing"></my-billing>
               <my-collection name="collection"></my-collection>
               <my-help name="help"></my-help>
-              <my-view2 name="view2"></my-view2>
-              <my-map name="map"></my-map> -->
+              <my-view2 name="view2"></my-view2> -->
+              <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
+              <my-location name="location" my-key="[[mykey]]"></my-location>
               <my-view404 name="view404"></my-view404>
             </iron-pages>
           </app-drawer-layout>
@@ -406,7 +410,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             notify: true
           },
-          visitsAccess: {
+          hasAccess: {
             type: Boolean,
             value: false
           },
@@ -417,24 +421,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get observers() {
         return [
           '_routePageChanged(routeData.page, user, mykey)',
-          '_myaccountChanged(myaccount)'
+          '_myaccountChanged(myaccount.*)'
         ];
       }
 
-      _myaccountChanged(e) {
-        if (e.length > 0) {
-          this.mykey = e[0].code;
-          this.drTitle = e[0].designatory;
-          this.lastname = e[0].name.lastname;
-          this.role = e[0].role;
+      _myaccountChanged() {
+        if (this.myaccount.length > 0) {
+          this.mykey = this.myaccount[0].code;
+          this.drTitle = this.myaccount[0].designatory;
+          this.lastname = this.myaccount[0].name.lastname;
+          this.role = this.myaccount[0].role;
 
-          if (e[0].role != 'Secretary') { this.visitsAccess = true; }
+          if (this.myaccount[0].location) { this.mylocation = this.myaccount[0].location; }
+          else { this.mylocation = '(not set)'; }
+
+          if (this.myaccount[0].role != 'Secretary') { this.hasAccess = true; }
         }
       }
 
       _access(e) {
         if (e == true) { return 'display:block'; }
         else { return 'display:none'; }
+      }
+
+      _set(e) {
+        if (e.length > 40) return e.substring(0, 40) + '...';
+        else return e;
       }
 
       _routePageChanged(page, user, key) {
@@ -584,10 +596,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var drawerlayout = Polymer.dom(this.root).querySelector("#drawerLayout");
         drawerlayout.forceNarrow = e.detail.narrow;
       }
-
-      // _mymap() {
-      // window.location = "/map";
-      // }
 
     }
 

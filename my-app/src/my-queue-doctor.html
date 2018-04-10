@@ -134,7 +134,7 @@
                             </app-toolbar>
                         </app-header>
 
-                        <firebase-query path="/{{myKey}}/patients" data="{{myqueue}}" order-by-child="isQueue" equal-to="true">
+                        <firebase-query path="/{{myKey}}/patients" data="{{myqueue}}" order-by-child="isQueue_location" equal-to="true_{{myLocation}}">
                         </firebase-query>
 
                         <div id="noRecord">
@@ -169,16 +169,16 @@
                         <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
                         </iron-scroll-threshold>
 
-                        <a href="/queue/new" style="text-decoration: none;">
-                            <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_queueNew"></paper-fab>
-                        </a>
+                        <a href="/queue/new" id="queAdd"></a>
+                        <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_queueNew"></paper-fab>
 
                     </app-header-layout>
                 </div>
 
                 <div name="/new">
                     <div id="patientsnew"></div>
-                    <my-patients-new id="d23" my-lastname="{{myLastname}}" prev-route="{{route.prefix}}" my-role="{{myRole}}" my-key="{{myKey}}"></my-patients-new>
+                    <my-patients-new id="d23" my-location="{{myLocation}}" my-lastname="{{myLastname}}" prev-route="{{route.prefix}}" my-role="{{myRole}}"
+                        my-key="{{myKey}}"></my-patients-new>
                 </div>
 
                 <div name="view404">Not found.</div>
@@ -187,8 +187,17 @@
 
         <div hidden$="{{!qVisitsActive}}">
             <div id="newcase"></div>
-            <my-visits-new id="d23" my-limit="1" my-key='{{myKey}}' filter-value="{{filterValue}}" prev-route="{{route.prefix}}"></my-visits-new>
+            <my-visits-new id="d23" my-limit="1" my-key='{{myKey}}' my-location="{{myLocation}}" filter-value="{{filterValue}}" prev-route="{{route.prefix}}"></my-visits-new>
         </div>
+
+        <paper-dialog id="locationDialog" confirm-button="Done">
+            <h3>Request denied! Location not set.</h3>
+            <div class="buttons">
+                <div class="action">
+                    <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>OK</paper-button>
+                </div>
+            </div>
+        </paper-dialog>
 
     </template>
     <script>
@@ -197,6 +206,7 @@
             properties: {
                 myKey: String,
                 myRole: String,
+                myLocation: String,
                 route: String,
                 myLastname: String,
                 filterValue: String,
@@ -248,6 +258,7 @@
                     newDiv.setAttribute("filter-value", data_args);
                     newDiv.setAttribute("my-limit", 1);
                     newDiv.setAttribute("my-key", this.myKey);
+                    newDiv.setAttribute("my-location", this.myLocation);
                     newDiv.setAttribute("id", "d23");
                     newDiv.setAttribute("prev-route", this.route.prefix);
                     Polymer.dom(this.root).querySelector("#open").click();
@@ -256,23 +267,30 @@
                     Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
                 }
             },
-
+            
             _queueNew() {
-                var node = Polymer.dom(this.root).querySelector("#patientsnew");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
+                if (this.myLocation == '(not set)') {
+                    Polymer.dom(this.root).querySelector("#locationDialog").open();
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#queAdd").click();
+                    var node = Polymer.dom(this.root).querySelector("#patientsnew");
+                    if (node) {
+                        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+                        if (oldDiv) {
+                            Polymer.dom(node.parentNode).removeChild(oldDiv);
+                        }
+                        var newDiv = document.createElement("my-patients-new");
+                        newDiv.setAttribute("my-role", this.myRole);
+                        newDiv.setAttribute("prev-route", this.route.prefix);
+                        newDiv.setAttribute("my-lastname", this.myLastname);
+                        newDiv.setAttribute("my-location", this.myLocation);
+                        newDiv.setAttribute("my-key", this.myKey);
+                        newDiv.setAttribute("id", "d23");
+                        //if open existing
+                        var currentDiv = document.getElementById("patientsnew");
+                        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
                     }
-                    var newDiv = document.createElement("my-patients-new");
-                    newDiv.setAttribute("my-role", this.myRole);
-                    newDiv.setAttribute("prev-route", this.route.prefix);
-                    newDiv.setAttribute("my-lastname", this.myLastname);
-                    newDiv.setAttribute("my-key", this.myKey);
-                    newDiv.setAttribute("id", "d23");
-                    //if open existing
-                    var currentDiv = document.getElementById("patientsnew");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
                 }
             },
 

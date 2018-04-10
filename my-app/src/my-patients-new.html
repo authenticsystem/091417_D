@@ -766,6 +766,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         prevRoute: String,
         myQueue: String,
         myRole: String,
+        myLocation: String,
         doctorCode: String,
         myLastname: String,
         selectedPage: Number,
@@ -1259,17 +1260,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           if (parseInt(this.selectedPage) == 4) {
             if (this.myQueue == 'false') {
-              Polymer.dom(this.root).querySelector("#queueDialog").open();
+              if (this.myLocation == "(not set)") {
+                this._insertNewPatient(false, this.myKey, this.myLastname, '');
+                if (this.patientPushKey) {
+                  this.selectedPage = (parseInt(this.selectedPage) + 1);
+                  this.favlefthide = true;
+                  this.favrighthide = true;
+                }
+              }
+              else {
+                Polymer.dom(this.root).querySelector("#queueDialog").open();
+              }
             }
             else {
-              this._insertNewPatient(true, this.myKey, this.myLastname);
+              this._insertNewPatient(true, this.myKey, this.myLastname, this.myLocation);
               if (this.patientPushKey) {
                 this.selectedPage = (parseInt(this.selectedPage) + 1);
                 this.favlefthide = true;
                 this.favrighthide = true;
 
                 if (this.myRole == 'Secretary') {
-                  this._insertNewPatient2(true, this.doctorCode, this.myLastname);
+                  this._insertNewPatient2(true, this.doctorCode, this.myLastname, this.myLocation);
                 }
               }
             }
@@ -1305,7 +1316,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         Polymer.dom(this.root).querySelector("#queueDialog").close();
         this.selectedPage = (parseInt(this.selectedPage) + 1);
 
-        this._insertNewPatient(false, this.myKey, '');
+        this._insertNewPatient(false, this.myKey, '', this.myLocation);
       },
 
       _queuePatient() {
@@ -1318,7 +1329,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.favlefthide = true;
           this.favrighthide = true;
           this.selectedPage = (parseInt(this.selectedPage) + 1);
-          this._insertNewPatient(true, this.myKey, this.myLastname);
+          this._insertNewPatient(true, this.myKey, this.myLastname, this.myLocation);
         }
       },
 
@@ -1329,14 +1340,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.selectedPage = (parseInt(this.selectedPage) + 1);
         var [docselect, doclastname] = this.docSelect.split('~');
 
-        this._insertNewPatient(true, this.myKey, doclastname);
+        this._insertNewPatient(true, this.myKey, doclastname, this.myLocation);
         if (this.patientPushKey) {
-          this._insertNewPatient2(true, docselect, doclastname);
+          this._insertNewPatient2(true, docselect, doclastname, this.myLocation);
           this.isSelectDoc = true;
         }
       },
 
-      _insertNewPatient(que, mykey, queTo) {
+      _insertNewPatient(que, mykey, queTo, myLocation) {
         var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
         var p = Polymer.dom(this.root).querySelector("#p");
         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
@@ -1351,6 +1362,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           emergency: this.emergency,
           created: today,
           isQueue: que,
+          isQueue_location: que + '_' + myLocation,
           queueTo: queTo
         });
 
@@ -1359,12 +1371,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           ref.once('value').then(function (data) {
             var num = data.numChildren() ? data.numChildren() : 1;
             var no = _patientsNoUpdate(num, mykey, push.key);
-            console.log(num);
 
             var b = document.createElement("b");
             b.id = "bold";
             b.style.color = "blue";
-            var t = document.createTextNode(no);
+            var t = document.createTextNode(no + '.');
             b.appendChild(t);
             p.appendChild(b);
           });
@@ -1424,7 +1435,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _insertNewPatient2(que, mykey, queTo) {
+      _insertNewPatient2(que, mykey, queTo, myLocation) {
         var p = Polymer.dom(this.root).querySelector("#p");
         var today = this.todayDate;
         var ref = firebase.database().ref("/" + mykey + "/patients");
@@ -1435,6 +1446,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           created: today,
           isQueue: que,
           queueTo: queTo,
+          isQueue_location: que + '_' + myLocation,
           patient_ref: this.patientPushKey
         });
 
@@ -1450,7 +1462,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var b = document.createElement("b");
             b.id = "bold";
             b.style.color = "blue";
-            var t = document.createTextNode(no);
+            var t = document.createTextNode(no + '.');
             b.appendChild(t);
             p.appendChild(b);
           });
