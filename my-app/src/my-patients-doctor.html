@@ -1,0 +1,724 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+
+<link rel="import" href="my-patients-new.html">
+<link rel="import" href="my-patients-view.html">
+<link rel="import" href="my-patients-edit.html">
+<link rel="import" href="search-bar.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-patients-doctor">
+  <template>
+    <style include="shared-styles">
+      :host {
+        height: 100vh;
+        margin: 0;
+
+        display: flex;
+        flex-direction: column;
+      }
+
+      .item {
+        @apply --layout-horizontal;
+        padding: 15px;
+        background-color: white;
+        border-bottom: 1px solid #ddd;
+        cursor: pointer;
+        /* margin-bottom: 5px; */
+      }
+
+      .item:hover {
+        box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
+      }
+
+      .avatar {
+        height: 45px;
+        width: 45px;
+        border: 2px solid white;
+        border-radius: 50%;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+
+      .pad {
+        /* border-left: 6px solid rgb(208, 137, 236); */
+        margin-left: 10px;
+        /* padding: 10px; */
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
+
+      .primary {
+        font-size: 14px;
+        font-weight: 400;
+      }
+
+      .shortText,
+      .longText {
+        font-size: 14px;
+      }
+
+      .longText {
+        color: gray;
+        /* display: none; */
+      }
+
+      /* .item:hover .shortText::after {
+        content: ' [+]';
+        color: gray;
+      } */
+
+      /* .item.expanded:hover .shortText::after {
+        content: '';
+      }
+
+      .item.expanded .longText {
+        display: block;
+      } */
+
+      /* .item.expanded:hover .longText::after {
+        content: ' [–]';
+      } */
+
+      .spacer {
+        @apply --layout-flex;
+      }
+
+      @media (max-width: 768px) {
+        iron-list {
+          margin: 16px;
+          /* margin-top: 0px; */
+          display: flex;
+          /* height: 100vh; */
+          flex-direction: column;
+          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
+        }
+
+        #noRecord {
+          margin: 16px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        paper-search-bar {
+          margin-left: 80px;
+          width: 50%;
+          color: black;
+        }
+      }
+
+      @media (min-width: 768px) {
+        iron-list {
+          width: 736px;
+          margin: 16px auto;
+          /* margin-top: 0px; */
+          /* height: 100vh; */
+          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
+        }
+
+        #noRecord {
+          width: 736px;
+          margin: 16px auto;
+        }
+
+        paper-search-bar {
+          margin-left: 50px;
+          width: 50%;
+          color: black;
+        }
+
+      }
+
+      #tool1 {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      }
+
+      #tool2 {
+        background-color: white;
+      }
+
+      #btn-arrow {
+        position: absolute;
+        color: black;
+      }
+
+      #btn-menu {
+        color: gray;
+        position: fixed;
+        right: 35px;
+      }
+
+      #btn-clear {
+        position: fixed;
+        right: 80px;
+        color: gray;
+      }
+
+      /* app-header {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      } */
+
+      paper-fab.fab-menu {
+        position: fixed;
+        right: 32px;
+        bottom: 32px;
+      }
+
+      paper-fab.fab-search {
+        position: fixed;
+        right: 40px;
+        bottom: 104px;
+      }
+
+      paper-icon-button.menu {
+        margin-right: 16px;
+      }
+
+      .action paper-button {
+        height: 32px;
+        font-size: 12px;
+        font-weight: 400;
+        width: 80px;
+      }
+
+      paper-button.green {
+        background-color: var(--paper-green-500);
+        color: white;
+      }
+
+      .b-edit {
+        /* display: inline-block;
+        position: absolute;
+        right: 48px; */
+        color: rgb(2, 160, 68);
+        /* top: 8px; */
+      }
+
+      .b-view {
+        /* display: inline-block;
+        position: absolute;
+        right: 8px; */
+        color: rgb(2, 136, 160);
+        /* top: 8px; */
+      }
+
+      .item-header {
+        padding: 50px;
+        background: rgb(2, 136, 160);
+      }
+
+      .star {
+        display: inline-block;
+        position: absolute;
+        right: 10px;
+        color: #673AB7;
+        top: 8px;
+      }
+
+      .star:hover {
+        color: rgb(40, 0, 109);
+      }
+    </style>
+
+    <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail/:key" tail="{{detailRoute}}" data="{{detailData}}" active="{{detailActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route>
+
+    <!-- <iron-ajax auto url="src/data.json" last-response="{{items}}"></iron-ajax> -->
+    <div hidden$="{{!applicationActive}}">
+      <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+        <div name="">
+          <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+              <template is="dom-if" if="{{!openSearch}}">
+                <app-toolbar primary id="tool1">
+                  <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                  <div main-title>Patients</div>
+                  <!-- <div main-title hidden$="{{access}}">Opps!</div> -->
+                  <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+                </app-toolbar>
+              </template>
+
+              <template is="dom-if" if="{{openSearch}}">
+                <app-toolbar primary id="tool2">
+                  <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                  <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
+                  <template is="dom-if" if="{{search}}">
+                    <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
+                  </template>
+                  <!-- <paper-menu-button id="btn-menu" horizontal-align="right">
+                    <paper-icon-button slot="dropdown-trigger" icon="my-icons:tune"></paper-icon-button>
+                    <paper-listbox style="cursor:pointer" slot="dropdown-content" selected="{{filterBy}}">
+                      <paper-item style="display:none;">Filter By</paper-item>
+                      <paper-item>By Firstname</paper-item>
+                      <paper-item>By Middlename</paper-item>
+                      <paper-item>By Lastname</paper-item>
+                    </paper-listbox>
+                  </paper-menu-button> -->
+                </app-toolbar>
+              </template>
+            </app-header>
+
+            <firebase-query id="query" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}">
+            </firebase-query>
+
+            <div id="noRecord">
+              <div class="item">
+                <div id$="[[_fetching()]]" style="margin:auto">
+                  {{record}}
+                </div>
+              </div>
+            </div>
+
+            <iron-list items="[[mypatients]]" as="item" selection-enabled scroll-target="threshold">
+              <template>
+                <div class="divSeparator">
+                  <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                    <!-- <div style="background:#009688; padding:10px;"> -->
+                    <div>
+                      <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+                    </div>
+                    <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
+                      <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
+                      <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
+                      <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div>
+                      <div id="{{item.$key}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
+                      <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
+                      <!-- <div class="shortText">[[item.personal.address]]</div> -->
+                      <!-- <div class="shortText">Contact: [[item.personal.contact]]</div> -->
+                    </div>
+
+                    <div style="padding:10px"> </div>
+
+                    <a id="open" href$="{{_getViewDetailsLink(e)}}"></a>
+
+                    <!-- <paper-icon-button class="star" noink on-tap="_starMe" icon="my-icons:star-border" alt="star{{item.$key}}" id="star{{item.$key}}"
+                      title="Pin me">
+                    </paper-icon-button> -->
+
+                    <a href$="{{_getEditAppLink(item.$key)}}">
+                      <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="Edit" style="display:inline-block;position: absolute;  right: 10px; color: #673AB7; top:8px;">
+                      </paper-icon-button>
+                    </a>
+                    <!-- <a href$="{{_getViewDetailsLink(item.$key)}}">
+                      <paper-icon-button noink on-tap="_selectThis" icon="my-icons:local-offer" alt="{{item.$key}}" title="view details" style="display:inline-block;position: absolute;  right: 10px; color: #009687f3; top:8px;">
+                      </paper-icon-button>
+                    </a> -->
+                    <!-- <paper-icon-button class="b-view" on-tap="_openDelete" alt="{{item.$key}}" icon="my-icons:close" title="delete"></paper-icon-button> -->
+                    <!-- <paper-menu-button vertical-align="bottom" horizontal-align="right">
+                      <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
+                      <paper-listbox slot="dropdown-content">
+                          <paper-item on-tap="_editThis" id="{{item.$key}}">View</paper-item>
+                        <paper-item on-tap="_editThis" id="{{item.$key}}">Edit</paper-item>
+                        <paper-item on-tap="_openDelete" id="{{item.$key}}">Delete</paper-item>
+                      </paper-listbox>
+                    </paper-menu-button> -->
+                  </div>
+                </div>
+              </template>
+            </iron-list>
+
+            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+            </iron-scroll-threshold>
+
+          </app-header-layout>
+
+          <a href="/patients/new" id="newPatient"></a>
+          <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_patientsNew"></paper-fab>
+          <!-- </a> -->
+        </div>
+
+        <div name="/new">
+          <div id="patientsnew"></div>
+          <my-patients-new id="d23" my-location="{{myLocation}}" prev-route="{{route.prefix}}" my-lastname="{{myLastname}}" my-role="{{myRole}}"
+            my-key="{{myKey}}"></my-patients-new>
+        </div>
+
+        <div name="view404">Not found.</div>
+      </iron-pages>
+    </div>
+
+    <div hidden$="{{!editActive}}">
+      <div id="patientsedit"></div>
+      <my-patients-edit id="d25" prev-route"{{route.prefix}}" my-lastname="{{myLastname}}" my-role="{{myRole}}" my-key='{{myKey}}' edit-key='{{editData.key}}'></my-patients-edit>
+    </div>
+
+    <div hidden$="{{!detailActive}}">
+      <div id="patientsview"></div>
+      <my-patients-view id="d26" my-location="{{myLocation}}" prev-route"{{route.prefix}}" my-lastname="{{myLastname}}" my-role="{{myRole}}" my-key='{{myKey}}'
+        view-key='{{detailData.key}}'></my-patients-view>
+    </div>
+
+    <paper-dialog id="deleteDialog" confirm-button="Done">
+      <h3>Are you sure you want to delete this patient?</h3>
+      <div class="buttons">
+        <div class="action">
+          <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>No</paper-button>
+          <paper-button id="dialBtn" on-tap="_deletePatient" toggles class="custom green">Yes</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
+    <!-- <paper-dialog id="locationDialog" confirm-button="Done">
+      <h3>Request denied! Location not set.</h3>
+      <div class="buttons">
+        <div class="action">
+          <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>OK</paper-button>
+        </div>
+      </div>
+    </paper-dialog> -->
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-patients-doctor',
+
+      properties: {
+
+        items: {
+          type: Array,
+          value: function () {
+            return [];
+          }
+        },
+        route: String,
+        myLocation: String,
+        myKey: String,
+        myLastname: String,
+        userUid: String,
+        myRole: String,
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        openSearch: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        filterBy: {
+          type: Number,
+          value: 1
+        }
+      },
+
+      _fetching() {
+        this.record = 'Loading data . . .';
+        setTimeout((e) => {
+          this.record = 'No record found.';
+        }, 3000);
+      },
+
+      loadMoreData() {
+        // load async stuff. e.g. XHR
+        this.$.threshold.clearTriggers();
+      },
+
+      _ageCal(bday) {
+        if (bday) {
+
+          var today = new Date();
+          var birthday = new Date(bday);
+
+          var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+          var year_age = Math.floor(differenceInMilisecond / 31536000000);
+          var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+          var month_age = Math.floor(day_age / 30);
+
+          day_age = day_age % 30;
+
+          if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+            console.log('err');
+            // $("#exact_age").text("Invalid birthday - Please try again!");
+          }
+          else {
+            if (year_age > 0) {
+              if (year_age == 1) {
+                return year_age + " year old";
+              }
+              else {
+                return year_age + " years old";
+              }
+            }
+            else if (year_age == 0 && month_age > 0) {
+              if (month_age == 1) {
+                return month_age + " month old";
+              }
+              else {
+                return month_age + " months old";
+              }
+            }
+            else if (year_age == 0 && month_age == 0 && day_age > 0) {
+              if (day_age == 1) {
+                return day_age + " day old";
+              }
+              else {
+                return day_age + " days old";
+              }
+            }
+            else {
+              return year_age + " years " + month_age + " months " + day_age + " days old";
+            }
+          }
+        }
+        else {
+          return '';
+        }
+      },
+
+      _starMe(e) {
+        var id = Polymer.dom(e).rootTarget.getAttribute("alt");
+        // console.log(id);
+        var star = Polymer.dom(this.root).querySelector('#' + id);
+        if (star) {
+          if (star.icon == 'my-icons:star') {
+            star.icon = 'my-icons:star-border';
+          }
+          else {
+            star.icon = 'my-icons:star';
+          }
+        }
+      },
+
+      observers: [
+        '_searchChanged(search)',
+        '_mypatientsChanged(mypatients.*)'
+        // '_searchChanged(search, filterBy)',
+      ],
+
+      _patientImg(e) {
+        if (e) return e;
+        else return '../images/user.png';
+      },
+
+      _mypatientsChanged() {
+        if (this.mypatients.length > 0) {
+          // var PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+          // var id = e[0].$key;
+          // id = id.substring(0, 8);
+          // var timestamp = 0;
+          // for (var i = 0; i < id.length; i++) {
+          //   var c = id.charAt(i);
+          //   timestamp = timestamp * 64 + PUSH_CHARS.indexOf(c);
+          // }
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+        } else {
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
+        }
+      },
+
+      _searchChanged(search) {
+        // var c = search.toLowerCase().replace(/\b[a-z]/g, function (letter) {
+        //   return letter.toUpperCase();
+        // });
+        this.search = search.toUpperCase();
+      },
+
+      // _searchChanged(search, filter) {
+      //   if (search) {
+      //     if (filter) {
+      //       if (filter == 1) {
+      //         this.filterChild = 'personal/firstname';
+      //       }
+      //       if (filter == 2) {
+      //         this.filterChild = 'personal/middlename';
+      //       }
+      //       if (filter == 3) {
+      //         this.filterChild = 'personal/lastname';
+      //       }
+      //     }
+      //     this.searchChild = search;
+      //   }
+      //   else {
+      //     this.searchChild = '';
+      //   }
+      // }
+
+      // iconForItem(item) {
+      //   return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';
+      // }
+
+      getClassForItem(item, selected) {
+        return selected ? 'item expanded' : 'item';
+      },
+
+      toggleDrawer() {
+        this.dispatchEvent(new CustomEvent('toggleDrawer', {
+          bubbles: true, composed: true, detail: {
+            narrow: this.$.narrow
+          }
+        }));
+        this.$.narrow = !this.$.narrow;
+      },
+
+      toggleSearch() {
+        this.openSearch = true;
+      },
+
+      toggleReturn() {
+        this.openSearch = false;
+        this.search = '';
+      },
+
+      toggleClear() {
+        this.search = '';
+      },
+
+      _deletePatient(e) {
+        var dialog = Polymer.dom(this.root).querySelector("#deleteDialog");
+        var deleteMe = Polymer.dom(e).rootTarget.getAttribute("alt");
+        firebase.database().ref('/sampleDoctor/patients/' + deleteMe)
+          .once('value').then(function (patient) {
+            if (patient.val().profile) {
+              firebase.storage().refFromURL(patient.val().profile).delete();
+              firebase.database().ref('/sampleDoctor/patients').child(patient.key).remove();
+              dialog.close();
+            }
+            else {
+              firebase.database().ref('/sampleDoctor/patients').child(patient.key).remove();
+              dialog.close();
+            }
+          });
+        // var ref = firebase.database().ref('/sampleDoctor/patients');
+        // ref.child(deleteMe).remove();
+        // Polymer.dom(this.root).querySelector("#deleteDialog").close();
+      },
+
+      _openDelete(e) {
+        var d_key = Polymer.dom(e).rootTarget.getAttribute("alt");
+
+        var dialogBtn = Polymer.dom(this.root).querySelector("#dialBtn");
+        dialogBtn.setAttribute('alt', d_key);
+        Polymer.dom(this.root).querySelector("#deleteDialog").open();
+      },
+
+      _getViewDetailsLink(e) {
+        if (e) {
+          return '/patients/detail/' + e.toString();
+        }
+      },
+
+      _getEditAppLink(e) {
+        if (e) {
+          return '/patients/edit/' + e.toString();
+        }
+      },
+
+      _selectThis(e) {
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+        var node = Polymer.dom(this.root).querySelector("#patientsview");
+        this.e = data_args;
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-patients-view");
+          newDiv.setAttribute("id", "d26");
+          newDiv.setAttribute("my-role", this.myRole);
+          newDiv.setAttribute("my-lastname", this.myLastname);
+          newDiv.setAttribute("my-location", this.myLocation);
+          newDiv.setAttribute("view-key", data_args);
+          newDiv.setAttribute("my-key", this.myKey);
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          Polymer.dom(this.root).querySelector("#open").click();
+          //if open existing
+          var currentDiv = document.getElementById("patientsview");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
+      },
+
+      _editThis(e) {
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
+        var node = Polymer.dom(this.root).querySelector("#patientsedit");
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-patients-edit");
+          newDiv.setAttribute("id", "d25");
+          newDiv.setAttribute("my-role", this.myRole);
+          newDiv.setAttribute("my-lastname", this.myLastname);
+          newDiv.setAttribute("edit-key", data_args);
+          newDiv.setAttribute("my-key", this.myKey);
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          // window.location = '/patients/edit/' + data_args;
+          //if open existing
+          var currentDiv = document.getElementById("patientsedit");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
+      },
+
+      _patientsNew() {
+        // if (this.myLocation == '(not set)') {
+        //   Polymer.dom(this.root).querySelector("#locationDialog").open();
+        // }
+        // else {
+        Polymer.dom(this.root).querySelector("#newPatient").click();
+        var node = Polymer.dom(this.root).querySelector("#patientsnew");
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-patients-new");
+          newDiv.setAttribute("my-role", this.myRole);
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          newDiv.setAttribute("my-lastname", this.myLastname);
+          newDiv.setAttribute("my-location", this.myLocation);
+          newDiv.setAttribute("my-key", this.myKey);
+          newDiv.setAttribute("id", "d23");
+          //if open existing
+          var currentDiv = document.getElementById("patientsnew");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
+        //}
+      },
+
+      _comma(e) {
+        if (e) {
+          return ',';
+        }
+      },
+
+      _hmo(e) {
+        if (e) {
+          return 'HMO: ' + e;
+        }
+      }
+
+    })
+
+  </script>
+</dom-module>

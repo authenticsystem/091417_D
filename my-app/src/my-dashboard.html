@@ -137,7 +137,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </app-toolbar>
       </app-header>
 
-      <div style="padding:26px; margin-top:-30px">
+      <div hidden$="{{_isSecretary(myRole)}}" class="card">
+        Hello!
+      </div>
+
+      <div hidden$="{{_isDoctor(myRole)}}" style="padding:26px; margin-top:-30px">
         <div style="float:right;">
           <div style="display:flex;">
             <iron-icon style="margin-top:30px; margin-right:10px" icon="my-icons:event"></iron-icon>
@@ -155,22 +159,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
       </div>
 
-      <div class="card" id="card1">
-        <!-- <h4>No. of patients in the last 7 days</h4> -->
-        <canvas id="myChart"></canvas>
+      <div hidden$="{{_isDoctor(myRole)}}">
+        <div class="card" id="card1">
+          <!-- <h4>No. of patients in the last 7 days</h4> -->
+          <canvas id="myChart"></canvas>
 
-        <!-- <img width="200" src="../images/manifest/icon-512x512.png"></img> -->
-        <!-- <p class="css-typing">WELCOME Dr. {{lastname}}</p> -->
-        <!-- <div class="pad"> -->
-        <!-- <div class="customMe"></div> -->
-        <!-- <p class="css-typing"><span>[</span> HELLO Dr. {{lastname}} <span>]</span></p> -->
-        <!-- <p class="css-typing">Hello 
+          <!-- <img width="200" src="../images/manifest/icon-512x512.png"></img> -->
+          <!-- <p class="css-typing">WELCOME Dr. {{lastname}}</p> -->
+          <!-- <div class="pad"> -->
+          <!-- <div class="customMe"></div> -->
+          <!-- <p class="css-typing"><span>[</span> HELLO Dr. {{lastname}} <span>]</span></p> -->
+          <!-- <p class="css-typing">Hello 
         </p> -->
-        <!-- </div> -->
-      </div>
+          <!-- </div> -->
+        </div>
 
-      <div hidden$="{{_roleChecked(myRole)}}" class="card" id="card2">
-        <canvas id="myChart2"></canvas>
+        <div class="card" id="card2">
+          <canvas id="myChart2"></canvas>
+        </div>
       </div>
 
     </app-header-layout>
@@ -197,9 +203,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         prevRange: String
       },
 
-      _roleChecked(e) {
+      _isDoctor(e) {
         if (e == 'Secretary') return true;
         else return false;
+      },
+
+      _isSecretary(e) {
+        if (e == 'Secretary') return false;
+        else return true;
       },
 
       _selectedRangeChanged() {

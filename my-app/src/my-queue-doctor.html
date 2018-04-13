@@ -16,7 +16,10 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-messaging.html">
 
+<link rel="import" href="my-patients-view.html">
+<link rel="import" href="my-patients-edit.html">
 <link rel="import" href="my-visits-new.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
@@ -29,6 +32,7 @@
                 margin: 0;
                 display: flex;
                 flex-direction: column;
+
             }
 
             .item {
@@ -37,10 +41,41 @@
                 background-color: white;
                 border-bottom: 1px solid #ddd;
                 cursor: pointer;
+                box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
+                /* counter-reset: section; */
+                /* opacity: 0.5; */
                 /* margin-bottom: 5px; */
             }
 
-            .item:hover {
+            .itemNoRecord {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+            }
+
+            .item_D {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+                opacity: 0.3;
+            }
+
+            .item_N {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+                opacity: 0.75;
+            }
+
+            .item_N:hover,
+            .item_D:hover {
+                opacity: 1;
                 box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
             }
 
@@ -118,10 +153,19 @@
                 right: 32px;
 
             }
+
+            .itemDialog:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
         </style>
 
         <app-route route="{{route}}" pattern="" active="{{queueActive}}"></app-route>
-        <app-route route="{{route}}" pattern="/visit/new" data="{{newData}}" active="{{qVisitsActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/visit/new" active="{{qVisitNewActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/patient/edit/:key" data="{{editData}}" active="{{qPatientEditActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/patient/detail/:key" data="{{detailData}}" active="{{qPatientViewActive}}"></app-route>
+
+        <firebase-messaging id="messaging" token="{{token}}"></firebase-messaging>
 
         <div hidden$="{{!queueActive}}">
             <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
@@ -134,11 +178,11 @@
                             </app-toolbar>
                         </app-header>
 
-                        <firebase-query path="/{{myKey}}/patients" data="{{myqueue}}" order-by-child="isQueue_location" equal-to="true_{{myLocation}}">
+                        <firebase-query path="/{{myKey}}/patients" data="{{myqueue}}" order-by-child="queueLocation" equal-to="{{myLocation}}">
                         </firebase-query>
 
                         <div id="noRecord">
-                            <div class="item">
+                            <div class="itemNoRecord">
                                 <div style="margin:auto">
                                     {{record}}
                                 </div>
@@ -148,18 +192,22 @@
                         <iron-list items="[[myqueue]]" as="item" selection-enabled scroll-target="threshold">
                             <template>
                                 <div class="divSeparator">
-                                    <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                                    <div class$="[[getClassForItem(item.isNext, item.isQueue)]]" tabindex$="[[tabIndex]]">
+                                        <div style="font-size:16px;" class="longText">[[item.queueNo]]</div>
+                                        <div style="padding:6px"></div>
                                         <div>
                                             <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                                         </div>
-                                        <div class="pad" on-tap="_selectThis" id="{{item.personal.name}}">
-                                            <div id="{{item.personal.name}}" style="font-size:11px" class="longText">[[item.no]]</div>
-                                            <div id="{{item.personal.name}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
-                                            <div id="{{item.personal.name}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div>
-                                            <div id="{{item.personal.name}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
-                                            <div id="{{item.personal.name}}" class="longText">[[item.lastchiefcomplaint]]</div>
+                                        <div class="pad" on-tap="_selectThis" id="{{item.$key}}~{{item.personal.name}}~{{item.isNext}}~{{item.isQueue}}">
+                                            <div id="{{item.$key}}~{{item.personal.name}}~{{item.isNext}}~{{item.isQueue}}" style="font-size:11px" class="longText">[[item.no]]</div>
+                                            <div id="{{item.$key}}~{{item.personal.name}}~{{item.isNext}}~{{item.isQueue}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
+                                            <div id="{{item.$key}}~{{item.personal.name}}~{{item.isNext}}~{{item.isQueue}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div>
+                                            <div id="{{item.$key}}~{{item.personal.name}}~{{item.isNext}}~{{item.isQueue}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
+                                            <div id="{{item.$key}}~{{item.personal.name}}~{{item.isNext}}~{{item.isQueue}}" class="longText">[[item.lastchiefcomplaint]]</div>
                                         </div>
-                                        <a id="open" href="{{route.prefix}}/visit/new"></a>
+                                        <a id="openVisitNew" href="{{route.prefix}}/visit/new"></a>
+                                        <a id="openPatientEdit" href="{{route.prefix}}/patient/edit/{{item.$key}}"></a>
+                                        <a id="openPatientView" href="{{route.prefix}}/patient/detail/{{item.$key}}"></a>
                                         <div style="padding:10px"> </div>
                                     </div>
                                 </div>
@@ -178,16 +226,29 @@
                 <div name="/new">
                     <div id="patientsnew"></div>
                     <my-patients-new id="d23" my-location="{{myLocation}}" my-lastname="{{myLastname}}" prev-route="{{route.prefix}}" my-role="{{myRole}}"
-                        my-key="{{myKey}}"></my-patients-new>
+                        my-key="{{myKey}}" my-queue="yes"></my-patients-new>
                 </div>
 
                 <div name="view404">Not found.</div>
             </iron-pages>
         </div>
 
-        <div hidden$="{{!qVisitsActive}}">
+        <div hidden$="{{!qVisitNewActive}}">
             <div id="newcase"></div>
-            <my-visits-new id="d23" my-limit="1" my-key='{{myKey}}' my-location="{{myLocation}}" filter-value="{{filterValue}}" prev-route="{{route.prefix}}"></my-visits-new>
+            <my-visits-new id="d23" my-limit="1" my-queue="yes" my-key='{{myKey}}' my-location="{{myLocation}}" filter-value="{{filterValue}}"
+                prev-route="{{route.prefix}}"></my-visits-new>
+        </div>
+
+        <div hidden$="{{!qPatientEditActive}}">
+            <div id="patientsedit"></div>
+            <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-lastname="{{myLastname}}" my-role="{{myRole}}" my-key='{{myKey}}'
+                edit-key='{{editData.key}}'></my-patients-edit>
+        </div>
+
+        <div hidden$="{{!qPatientViewActive}}">
+            <div id="patientsview"></div>
+            <my-patients-view my-location="{{myLocation}}" id="d26" my-lastname="{{myLastname}}" my-role="{{myRole}}" my-key='{{myKey}}'
+                view-key='{{detailData.key}}'></my-patients-view>
         </div>
 
         <paper-dialog id="locationDialog" confirm-button="Done">
@@ -198,6 +259,17 @@
                 </div>
             </div>
         </paper-dialog>
+
+        <!-- <paper-dialog id="openDialog" confirm-button="Done">
+            <paper-listbox attr-for-selected="name" selected="{{selectedCMD}}">
+                <paper-item class="itemDialog" name="viewPatient">
+                    <iron-icon icon="my-icons:assignment-ind"></iron-icon> &nbsp; View Patient Detail
+                </paper-item>
+                <paper-item class="itemDialog" name="viewVisit">
+                    <iron-icon icon="my-icons:assignment"></iron-icon> &nbsp; View Visit's Detail
+                </paper-item>
+            </paper-listbox>
+        </paper-dialog> -->
 
     </template>
     <script>
@@ -210,18 +282,30 @@
                 route: String,
                 myLastname: String,
                 filterValue: String,
+                noOfPatients: {
+                    type: Number,
+                    value: 0,
+                    notify: true
+                },
                 items: {
                     type: Array,
                     value: []
                 },
             },
 
+            ready() {
+                this.$.messaging.requestPermission();
+            },
+
             observers: [
-                '_myqueueChanged(myqueue.*)'
+                '_myqueueChanged(myqueue.*)',
+                '_noOfPatientsChanged(noOfPatients)'
             ],
 
-            getClassForItem(item, selected) {
-                return selected ? 'item expanded' : 'item';
+            getClassForItem(isNext, isQueue) {
+                if (isNext === false && isQueue === false) return 'item_D';
+                else if (isNext === false && isQueue === true) return 'item_N';
+                else return 'item';
             },
 
             loadMoreData() {
@@ -231,6 +315,7 @@
 
             _myqueueChanged() {
                 if (this.myqueue.length > 0) {
+                    this.noOfPatients = this.myqueue.length;
                     Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
                 }
                 else {
@@ -239,35 +324,122 @@
                 }
             },
 
+            _noOfPatientsChanged(e) {
+                if (e > 0) {
+                    if (this.token) {
+                        var token = this.token;
+                        firebase.database().ref("/" + this.myKey + "/patients").orderByChild("isQueue").equalTo(true)
+                            .once('value').then(function (data) {
+                                _handleSend(data.numChildren(), token, window.location.host);
+                            });
+                    }
+
+                    function _handleSend(NoPatients, token, action) {
+                        var key = 'AAAAevULLrY:APA91bEDdvrl9xFBHsKwRPmiTvBfMx_5TwGR1rhMstS9v6RD_TZC-BHiHMMx_5KKtBPHLXvUQH92M2Bu-CT2Mko-mLaQ0mpjl2wjbadZzk90oi3KmiH_7SChuBtHPTkWQLZUp4tlAZjV';
+                        var to = token;
+                        var notification = {
+                            'title': 'BaseEMR',
+                            'body': 'You have ' + NoPatients + ' patients waiting in queue.',
+                            'icon': '../images/icon.png',
+                            'click_action': 'https://emr-dev-c3005.firebaseapp.com/queue'
+                            // 'click_action': 'localhost:8081/queue'
+                        };
+
+                        fetch('https://fcm.googleapis.com/fcm/send', {
+                            'method': 'POST',
+                            'headers': {
+                                'Authorization': 'key=' + key,
+                                'Content-Type': 'application/json'
+                            },
+                            'body': JSON.stringify({
+                                'notification': notification,
+                                'to': to
+                            })
+                        }).then(function (response) {
+                            console.log(response);
+                        }).catch(function (error) {
+                            console.error(error);
+                        });
+                    }
+                }
+            },
+
             _fetching() {
                 this.record = 'Loading data . . .';
                 setTimeout((e) => {
-                    this.record = 'No record found.';
+                    this.record = 'No patients in queue.';
                 }, 3000);
             },
 
             _selectThis(e) {
                 var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
-                var node = Polymer.dom(this.root).querySelector("#newcase");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
+                var [key, name, isNext, isQueue] = data_args.split('~');
+
+                if (isNext === "false" && isQueue === "false") {
+                    var node = Polymer.dom(this.root).querySelector("#patientsview");
+                    if (node) {
+                        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
+                        if (oldDiv) {
+                            Polymer.dom(node.parentNode).removeChild(oldDiv);
+                        }
+                        var newDiv = document.createElement("my-patients-view");
+                        newDiv.setAttribute("id", "d26");
+                        newDiv.setAttribute("my-role", this.myRole);
+                        newDiv.setAttribute("my-lastname", this.myLastname);
+                        newDiv.setAttribute("my-location", this.myLocation);
+                        newDiv.setAttribute("view-key", key);
+                        newDiv.setAttribute("my-key", this.myKey);
+                        newDiv.setAttribute("prev-route", this.route.prefix);
+                        Polymer.dom(this.root).querySelector("#openPatientView").click();
+                        //if open existing
+                        var currentDiv = document.getElementById("patientsview");
+                        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
                     }
-                    var newDiv = document.createElement("my-visits-new");
-                    newDiv.setAttribute("filter-value", data_args);
-                    newDiv.setAttribute("my-limit", 1);
-                    newDiv.setAttribute("my-key", this.myKey);
-                    newDiv.setAttribute("my-location", this.myLocation);
-                    newDiv.setAttribute("id", "d23");
-                    newDiv.setAttribute("prev-route", this.route.prefix);
-                    Polymer.dom(this.root).querySelector("#open").click();
-                    //if open existing
-                    var currentDiv = document.getElementById("newcase");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                }
+                else if (isNext === "false" && isQueue === "true") {
+                    var node = Polymer.dom(this.root).querySelector("#patientsedit");
+                    if (node) {
+                        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
+                        if (oldDiv) {
+                            Polymer.dom(node.parentNode).removeChild(oldDiv);
+                        }
+                        var newDiv = document.createElement("my-patients-edit");
+                        newDiv.setAttribute("id", "d25");
+                        newDiv.setAttribute("my-role", this.myRole);
+                        newDiv.setAttribute("my-lastname", this.myLastname);
+                        newDiv.setAttribute("edit-key", key);
+                        newDiv.setAttribute("my-key", this.myKey);
+                        newDiv.setAttribute("prev-route", this.route.prefix);
+                        Polymer.dom(this.root).querySelector("#openPatientEdit").click();
+                        // window.location = '/patients/edit/' + data_args;
+                        //if open existing
+                        var currentDiv = document.getElementById("patientsedit");
+                        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                    }
+                }
+                else {
+                    var node = Polymer.dom(this.root).querySelector("#newcase");
+                    if (node) {
+                        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+                        if (oldDiv) {
+                            Polymer.dom(node.parentNode).removeChild(oldDiv);
+                        }
+                        var newDiv = document.createElement("my-visits-new");
+                        newDiv.setAttribute("filter-value", name);
+                        newDiv.setAttribute("prev-route", this.route.prefix);
+                        newDiv.setAttribute("my-key", this.myKey);
+                        newDiv.setAttribute("my-location", this.myLocation);
+                        newDiv.setAttribute("my-limit", 1);
+                        newDiv.setAttribute("my-queue", "yes");
+                        newDiv.setAttribute("id", "d23");
+                        Polymer.dom(this.root).querySelector("#openVisitNew").click();
+                        //if open existing
+                        var currentDiv = document.getElementById("newcase");
+                        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                    }
                 }
             },
-            
+
             _queueNew() {
                 if (this.myLocation == '(not set)') {
                     Polymer.dom(this.root).querySelector("#locationDialog").open();
@@ -286,6 +458,7 @@
                         newDiv.setAttribute("my-lastname", this.myLastname);
                         newDiv.setAttribute("my-location", this.myLocation);
                         newDiv.setAttribute("my-key", this.myKey);
+                        newDiv.setAttribute("my-queue", "yes");
                         newDiv.setAttribute("id", "d23");
                         //if open existing
                         var currentDiv = document.getElementById("patientsnew");

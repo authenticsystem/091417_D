@@ -492,6 +492,7 @@
                     notify: true
                 },
                 myLocation: String,
+                myQueue: String,
                 prevRoute: String,
                 filterValue: String,
                 myKey: String,
@@ -917,6 +918,7 @@
                         var timestamp = firebase.database.ServerValue.TIMESTAMP;
                         var order = firebase.database.ServerValue.TIMESTAMP;
                         var newPushKey;
+                        var myQueue = this.myQueue;
 
                         if (today < this.formatTodayDate(new Date())) {
                             newPushKey = this.generatePushID(today);
@@ -960,11 +962,19 @@
 
                                     if (fbPushKey) {
 
-                                        firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/profile").set(patient.val().profile);
-                                        firebase.database().ref("/" + mykey + "/patients/" + key + "/isQueue").set(false);
-                                        firebase.database().ref("/" + mykey + "/patients/" + key + "/isQueue_location").set(false + '_' + myLocation);
                                         _updateOrder(mykey, fbPushKey);
                                         _reportsUpdate(today, mykey);
+
+                                        firebase.database().ref("/" + mykey + "/patients/" + fbPushKey + "/profile").set(patient.val().profile);
+
+                                        if (myQueue) {
+                                            firebase.database().ref("/" + mykey + "/patients/" + key).update({
+                                                isQueue: false,
+                                                isNext: false
+                                            });
+
+                                            _locateNextQueue(mykey);
+                                        }
 
                                         if (myattachment) {
                                             saveRun.style.display = 'block';
@@ -995,10 +1005,17 @@
 
                                     if (fbPushKey) {
 
-                                        firebase.database().ref("/" + mykey + "/patients/" + key + "/isQueue").set(false);
-                                        firebase.database().ref("/" + mykey + "/patients/" + key + "/isQueue_location").set(false + '_' + myLocation);
                                         _updateOrder(mykey, fbPushKey);
                                         _reportsUpdate(today, mykey);
+
+                                        if (myQueue) {
+                                            firebase.database().ref("/" + mykey + "/patients/" + key).update({
+                                                isQueue: false,
+                                                isNext: false
+                                            });
+
+                                            _locateNextQueue(mykey);
+                                        }
 
                                         if (myattachment) {
                                             saveRun.style.display = 'block';
@@ -1048,6 +1065,16 @@
                     this.selectedPage = 0;
                     this.favlefthide = true;
                     this.favrighthide = true;
+                }
+
+                function _locateNextQueue(mykey) {
+                    var ref = firebase.database().ref("/" + mykey + "/patients");
+                    ref.orderByChild("isQueue").equalTo(true).limitToFirst(1).once('value')
+                        .then(function (snapshot) {
+                            if (snapshot.exists()) {
+                                ref.child(Object.keys(snapshot.val())[0]).update({ isNext: true });
+                            }
+                        });
                 }
 
                 function _reportsUpdate(today, mykey) {

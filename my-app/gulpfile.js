@@ -26,6 +26,7 @@ const imagemin = require('gulp-imagemin');
 // const htmlMinifier = require('gulp-html-minifier');
 
 const swPrecacheConfig = require('./sw-precache-config.js');
+const firebaseMessagingSw = require('./firebase-messaging-sw.js');
 const polymerJson = require('./polymer.json');
 const polymerProject = new polymerBuild.PolymerProject(polymerJson);
 const buildDirectory = 'build';
@@ -114,7 +115,8 @@ function build() {
           project: polymerProject,
           buildRoot: buildDirectory,
           bundled: true,
-          swPrecacheConfig: swPrecacheConfig
+          swPrecacheConfig: swPrecacheConfig,
+          firebaseMessagingSw: firebaseMessagingSw
         });
       })
       .then(() => {

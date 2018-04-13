@@ -244,7 +244,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-header-layout id="appheader" has-scrolling-region>
         <app-header fixed slot="header">
           <app-toolbar>
-            <a href="/patients">
+            <a href="{{prevRoute}}">
               <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
             </a>
             <div main-title>{{no}}</div>
@@ -537,7 +537,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </app-drawer-layout>
 
-    <firebase-query disabled="{{isSelectDoc}}" path="/{{myKey}}/doctors" data="{{mydoctors}}"></firebase-query>
+    <!-- <firebase-query disabled="{{isSelectDoc}}" path="/{{myKey}}/doctors" data="{{mydoctors}}"></firebase-query>
     <paper-dialog id="selectDialog" confirm-button="Done">
       <h3>Add queue to</h3>
       <paper-dropdown-menu style="cursor:pointer; margin-top:-26px" label="Select doctor">
@@ -553,7 +553,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-button id="addQueBTN" dialog-confirm on-tap="_addQueuePatient" toggles class="custom green">OK</paper-button>
         </div>
       </div>
-    </paper-dialog>
+    </paper-dialog> -->
 
     <paper-dialog id="addDialog" confirm-button="Done">
       <h3>Add this patient to queue?</h3>
@@ -566,8 +566,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </paper-dialog>
 
     <paper-dialog id="queInfoDialog" confirm-button="Done">
-      <h3 style="font-weight:400">Currently queued to
-        <b>[[queTo]]</b>.</h3>
+      <h3 style="font-weight:400">Currently in queue.</h3>
+      <!-- d to<b>[[queTo]]</b> -->
       <div class="buttons">
         <div class="action">
           <paper-button toggles dialog-confirm class="custom green">OK</paper-button>
@@ -604,6 +604,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           notify: true
         },
+        prevRoute: String,
         myLocation: String,
         myKey: String,
         myLastname: String,
@@ -627,14 +628,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         emergency: Object,
         insurance: Object,
         personal: Object,
-        doc: String
+        // doc: String
       },
 
       observers: [
         'mypatientChanged(mypatient.*)',
         'mycaseChanged(mycases)',
         'selectedPageChanged(selectedPage)',
-        '_docSelectChanged(docSelect)'
+        // '_docSelectChanged(docSelect)'
       ],
 
       _roleChecked(e) {
@@ -642,106 +643,142 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else return 'display:block';
       },
 
-      _docSelectChanged(e) {
-        if (e) Polymer.dom(this.root).querySelector("#addQueBTN").disabled = false;
-        else Polymer.dom(this.root).querySelector("#addQueBTN").disabled = true;
-      },
+      // _docSelectChanged(e) {
+      //   if (e) Polymer.dom(this.root).querySelector("#addQueBTN").disabled = false;
+      //   else Polymer.dom(this.root).querySelector("#addQueBTN").disabled = true;
+      // },
 
-      _canselAddQueuePatient() {
-        this.docSelect = null;
-      },
+      // _canselAddQueuePatient() {
+      //   this.docSelect = null;
+      // },
 
-      _addQueuePatient() {
-        Polymer.dom(this.root).querySelector("#selectDialog").close();
-        var mykey = this.myKey;
-        var [docselect, doclastname] = this.docSelect.split('~');
-        var viewkey = this.viewKey;
-        var emerg = this.emergency, insure = this.insurance, person = this.personal;
-        var myLocation = this.myLocation;
-        var today = this.formatTodayDate(new Date());
-        var confirmDialog = Polymer.dom(this.root).querySelector("#confirmDialog");
+      // _addQueuePatient() {
+      //   Polymer.dom(this.root).querySelector("#selectDialog").close();
+      //   var mykey = this.myKey;
+      //   var [docselect, doclastname] = this.docSelect.split('~');
+      //   var viewkey = this.viewKey;
+      //   var emerg = this.emergency, insure = this.insurance, person = this.personal;
+      //   var myLocation = this.myLocation;
+      //   var today = this.formatTodayDate(new Date());
+      //   var confirmDialog = Polymer.dom(this.root).querySelector("#confirmDialog");
 
-        firebase.database().ref("/" + mykey + "/patients/" + viewkey + "/isQueue").set(true);
-        firebase.database().ref("/" + mykey + "/patients/" + viewkey + "/queueTo").set(doclastname);
-        firebase.database().ref("/" + docselect + "/patients").orderByChild('patient_ref').equalTo(viewkey)
-          .once('value').then(function (data) {
-            if (!data.val()) {
-              var ref = firebase.database().ref("/" + docselect + "/patients");
-              var push = ref.push({
-                personal: person,
-                insurance: insure,
-                emergency: emerg,
-                created: today,
-                isQueue: true,
-                isQueue_location: true + '_' + myLocation,
-                queueTo: doclastname,
-                patient_ref: viewkey
-              });
+      //   firebase.database().ref("/" + mykey + "/patients/" + viewkey + "/isQueue").set(true);
+      //   firebase.database().ref("/" + mykey + "/patients/" + viewkey + "/queueTo").set(doclastname);
+      //   firebase.database().ref("/" + docselect + "/patients").orderByChild('patient_ref').equalTo(viewkey)
+      //     .once('value').then(function (data) {
+      //       if (!data.exists()) {
+      //         var ref = firebase.database().ref("/" + docselect + "/patients");
+      //         var push = ref.push({
+      //           personal: person,
+      //           insurance: insure,
+      //           emergency: emerg,
+      //           created: today,
+      //           isQueue: true,
+      //           queueLocation: myLocation,
+      //           queueTo: doclastname,
+      //           patient_ref: viewkey
+      //         });
 
-              if (push.key) {
-                ref.once('value').then(function (dataNum) {
-                  var num = dataNum.numChildren() ? dataNum.numChildren() : 1;
-                  _patientsNoUpdate(num, docselect, push.key);
-                  _reportsUpdate(today, docselect);
-                });
-                confirmDialog.open();
-              }
-            }
-            else {
-              firebase.database().ref("/" + docselect + "/patients/" + Object.keys(data.val())[0] + "/isQueue").set(true);
-              firebase.database().ref("/" + docselect + "/patients/" + Object.keys(data.val())[0] + "/isQueue_location").set(true + '_' + myLocation);
-              confirmDialog.open();
-            }
-          });
+      //         if (push.key) {
+      //           ref.once('value').then(function (dataNum) {
+      //             var num = dataNum.numChildren() ? dataNum.numChildren() : 1;
+      //             _patientsNoUpdate(num, docselect, push.key);
+      //             _reportsUpdate(today, docselect);
+      //           });
+      //           confirmDialog.open();
+      //         }
+      //       }
+      //       else {
+      //         firebase.database().ref("/" + docselect + "/patients/" + Object.keys(data.val())[0] + "/isQueue").update({
+      //           isQueue: true,
+      //           queueLocation: myLocation,
+      //           isNext: true
+      //         });
+      //         confirmDialog.open();
+      //       }
+      //     });
 
-        function _patientsNoUpdate(num, mykey, pushkey) {
-          if (num > 0 && num < 10) {
-            num = '000' + num;
-          }
-          else if (num > 9 && num < 100) {
-            num = '00' + num;
-          }
-          else if (num > 99 && num < 1000) {
-            num = '0' + num;
-          }
-          else if (num > 999) {
-            num = num;
-          }
-          else {
-            num = '0000';
-          }
+      //   function _locateNextQueue(mykey) {
+      //     var ref = firebase.database().ref("/" + mykey + "/patients");
+      //     ref.orderByChild("isNext").equalTo("true").once('value')
+      //       .then(function (snapshot) {
+      //         if (snapshot.exists()) {
 
-          firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
-        }
+      //           console.log(snapshot.val());
+      //         }
+      //       });
+      //   }
 
-        function _reportsUpdate(today, mykey) {
-          var mm = today.substring(0, 7);
-          var yy = today.substring(0, 4);
+      //   function _patientsNoUpdate(num, mykey, pushkey) {
+      //     if (num > 0 && num < 10) {
+      //       num = '000' + num;
+      //     }
+      //     else if (num > 9 && num < 100) {
+      //       num = '00' + num;
+      //     }
+      //     else if (num > 99 && num < 1000) {
+      //       num = '0' + num;
+      //     }
+      //     else if (num > 999) {
+      //       num = num;
+      //     }
+      //     else {
+      //       num = '0000';
+      //     }
 
-          var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
-          dayRef.once('value').then(function (snapshot) {
-            dayRef.set(snapshot.val() + 1);
-          });
+      //     firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
+      //   }
 
-          var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
-          yearRef.once('value').then(function (snapshot) {
-            yearRef.set(snapshot.val() + 1);
-          });
+      //   function _reportsUpdate(today, mykey) {
+      //     var mm = today.substring(0, 7);
+      //     var yy = today.substring(0, 4);
 
-          var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
-          monthRef.once('value').then(function (snapshot) {
-            monthRef.set(snapshot.val() + 1);
-          });
-        }
+      //     var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/patients');
+      //     dayRef.once('value').then(function (snapshot) {
+      //       dayRef.set(snapshot.val() + 1);
+      //     });
 
-        this.isSelectDoc = true;
-      },
+      //     var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/patients');
+      //     yearRef.once('value').then(function (snapshot) {
+      //       yearRef.set(snapshot.val() + 1);
+      //     });
+
+      //     var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/patients');
+      //     monthRef.once('value').then(function (snapshot) {
+      //       monthRef.set(snapshot.val() + 1);
+      //     });
+      //   }
+
+      //   this.isSelectDoc = true;
+      // },
 
       _addQueue2Patient() {
-        firebase.database().ref("/" + this.myKey + "/patients/" + this.viewKey + "/isQueue").set(true);
-        firebase.database().ref("/" + this.myKey + "/patients/" + this.viewKey + "/queueTo").set(this.myLastname);
-        firebase.database().ref("/" + this.myKey + "/patients/" + this.viewKey + "/isQueue_location").set(true + '_' + this.myLocation);
+        this._locateNextQueue(this.myKey, this.viewKey, this.myLocation, this.myLastname);
         Polymer.dom(this.root).querySelector("#confirmDialog").open();
+      },
+
+      _locateNextQueue(myKey, viewKey, myLocation, myLastname) {
+        var ref = firebase.database().ref("/" + myKey + "/patients");
+        ref.orderByChild("queueLocation").equalTo(myLocation).once('value').then(function (snapshot) {
+          if (snapshot.exists()) {
+            ref.child(viewKey).update({
+              isQueue: true,
+              queueTo: myLastname,
+              queueLocation: myLocation,
+              isNext: false,
+              queueNo: snapshot.numChildren() + 1
+            });
+          }
+          else {
+            ref.child(viewKey).update({
+              isQueue: true,
+              queueTo: myLastname,
+              queueLocation: myLocation,
+              isNext: true,
+              queueNo: 1
+            });
+          }
+        });
       },
 
       _array(e) {
@@ -904,25 +941,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           Polymer.dom(this.root).querySelector("#locationDialog").open();
         }
         else {
-          if (this.myRole == 'Secretary') {
-            this.isSelectDoc = false;
-            Polymer.dom(this.root).querySelector("#selectDialog").open();
-          }
-          else {
-            Polymer.dom(this.root).querySelector("#addDialog").open();
-          }
+          // if (this.myRole == 'Secretary') {
+          //   this.isSelectDoc = false;
+          //   Polymer.dom(this.root).querySelector("#selectDialog").open();
+          // }
+          // else {
+          Polymer.dom(this.root).querySelector("#addDialog").open();
+          // }
         }
       },
 
       _queInfo() {
-        if (this.myRole == 'Secretary') {
-          this.queTo = 'Dr. ' + this.doc;
-          Polymer.dom(this.root).querySelector("#queInfoDialog").open();
-        }
-        else {
-          this.queTo = 'yours';
-          Polymer.dom(this.root).querySelector("#queInfoDialog").open();
-        }
+        Polymer.dom(this.root).querySelector("#queInfoDialog").open();
       },
 
       _showMini() {
@@ -956,7 +986,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         this.selectedPage = 0;
-        Polymer.dom(this.root).querySelector("#addQueBTN").disabled = true;
+        // Polymer.dom(this.root).querySelector("#addQueBTN").disabled = true;
       },
 
       formatTodayDate(date) {

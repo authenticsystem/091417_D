@@ -181,7 +181,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-header-layout id="appheader" has-scrolling-region>
         <app-header fixed slot="header">
           <app-toolbar>
-            <a href="/patients">
+            <a href="{{prevRoute}}">
               <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
             </a>
             <div main-title>{{no}}</div>
@@ -634,6 +634,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           notify: true
         },
+        prevRoute: String,
         myKey: String,
         selectedPage: Number,
         entryanimation: {
