@@ -17,8 +17,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
 
 <link rel="import" href="search-bar.html">
 <link rel="import" href="shared-styles.html">
@@ -99,7 +101,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
             }
 
-            paper-button {
+            /* paper-button {
                 height: 32px;
                 font-size: 12px;
                 font-weight: 400;
@@ -107,7 +109,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 background: rgb(223, 218, 218);
                 color: black;
                 float: right;
-            }
+            } */
 
             paper-icon-button.menu {
                 margin-right: 16px;
@@ -180,7 +182,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             <div id="noRecord">
                 <div class="item">
-                    <div id$="[[_fetching()]]" style="margin:auto">
+                    <div style="margin:auto">
                         {{record}}
                     </div>
                 </div>
@@ -191,8 +193,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div class="divSeparator">
                         <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
                             <paper-avatar class="small" label="[[item.location_name]]"></paper-avatar>
-                            <div class="pad" on-tap="_selectThis" id="[[item.$key]]~[[item.location_name]]">
-                                <div id="[[item.$key]]~[[item.location_name]]">[[item.location_name]]</div>
+                            <div class="pad" on-tap="_selectThis" id="[[item.$key]]~[[item.location_name]]~[[item.location_code]]">
+                                <div id="[[item.$key]]~[[item.location_name]]~[[item.location_code]]">[[item.location_name]]</div>
                             </div>
                             <div style="padding:10px"> </div>
                             <div hidden="{{!item.location_active}}">
@@ -209,35 +211,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         </app-header-layout>
 
-        <paper-dialog id="openDialog" confirm-button="Done">
-            <paper-listbox attr-for-selected="name" selected="{{selectedCMD}}">
-                <paper-item name="set">
-                    <iron-icon icon="my-icons:my-location"></iron-icon> &nbsp; Set as current location?
-                </paper-item>
-                <paper-item style$="{{_access(myRole)}}" name="remove">
-                    <iron-icon icon="my-icons:delete-forever"></iron-icon> &nbsp; Remove location?
-                </paper-item>
-            </paper-listbox>
-        </paper-dialog>
-
-        <paper-dialog id="alertDialog" confirm-button="Done">
-            <h3>Location is in use! Can't remove location!</h3>
+        <salte-dialog no-auto-fullscreen id="openDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
+            <span>
+                <paper-button hidden="{{_access(myRole)}}" on-tap="_removeLocation" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Remove location
+                </paper-button>
+                <paper-button on-tap="_setLocation" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>
+                    Set as current location
+                </paper-button>
+            </span>
             <div class="buttons">
-                <div class="action">
-                    <paper-button dialog-confirm toggles style="background:rgb(207, 206, 206);color:black">Ok</paper-button>
-                </div>
+                <paper-button dialog-dismiss>Close</paper-button>
             </div>
-        </paper-dialog>
+        </salte-dialog>
 
-        <paper-dialog id="removeDialog" confirm-button="Done">
-            <h3>Sure you want to permanently remove this location?</h3>
+        <salte-dialog no-auto-fullscreen id="alertDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #F44336">Request denied!</h2>
+            <span>Can't remove location! This location is currently in use.</span>
             <div class="buttons">
-                <div class="action">
-                    <paper-button dialog-confirm on-tap="removeLocation" toggles style="background:green;color:white">Yes</paper-button>
-                    <paper-button dialog-confirm toggles style="background:rgb(207, 206, 206);color:black">Cancel</paper-button>
-                </div>
+                <paper-button dialog-confirm autofocus>OK</paper-button>
             </div>
-        </paper-dialog>
+        </salte-dialog>
+
+        <salte-dialog no-auto-fullscreen id="removeDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #1E88E5">Confirmation required!</h2>
+            <span>Sure you want to remove this location?
+                <br>This action can't be undone.</span>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus on-tap="_confirmRemoveLocation">Yes</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </salte-dialog>
 
     </template>
 
@@ -251,6 +256,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     myRole: String,
                     location_key: String,
                     location_name: String,
+                    location_code: String,
                     openAdd: {
                         type: Boolean,
                         value: false,
@@ -266,57 +272,56 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             static get observers() {
                 return [
                     '_mysearchChanged(search)',
-                    '_mylocationChanged(mylocation.*)',
-                    '_selectedCMDChanged(selectedCMD)'
+                    '_mylocationChanged(mylocation.*)'
                 ];
             }
 
             _access(e) {
-                if (e != 'Secretary') { return 'display:block'; }
-                else { return 'display:none'; }
+                if (e != 'Secretary') return false;
+                else return true;
             }
 
             _selectThis(e) {
                 var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
                 if (data_args) {
-                    var [key, name] = data_args.split('~');
+                    var [key, name, code] = data_args.split('~');
                     this.location_key = key;
                     this.location_name = name;
-                    this.selectedCMD = '';
+                    this.location_code = code;
                     this.$.openDialog.open();
                 }
             }
 
-            _selectedCMDChanged(e) {
-                if (e) {
-                    var key = this.location_key;
-                    var location_name = this.location_name;
-                    var ref = firebase.database().ref('/' + this.myKey + '/locations');
-                    var accRef = firebase.database().ref('/accounts');
+            _setLocation() {
+                var key = this.location_key;
+                var location_name = this.location_name;
+                var locate_code = this.location_code
+                var ref = firebase.database().ref('/' + this.myKey + '/locations');
+                var accRef = firebase.database().ref('/accounts');
 
-                    if (e == 'set') {
-                        ref.orderByChild('location_active').equalTo(true).once('value').then(function (data) {
-                            if (data.exists()) {
-                                if (key != Object.keys(data.val())[0]) {
-                                    ref.child(Object.keys(data.val())[0]).update({ location_active: false });
-                                }
-                            }
-                        });
-                        ref.child(this.location_key).update({ location_active: true });
-                        accRef.orderByChild('code').equalTo(this.myKey).once('value').then(function (account) {
-                            if (account.exists()) {
-                                accRef.child(Object.keys(account.val())[0]).update({ location: location_name });
-                            }
+                ref.orderByChild('location_active').equalTo(true).once('value').then(function (data) {
+                    if (data.exists()) {
+                        if (key != Object.keys(data.val())[0]) {
+                            ref.child(Object.keys(data.val())[0]).update({ location_active: false });
+                        }
+                    }
+                });
+                ref.child(this.location_key).update({ location_active: true });
+                accRef.orderByChild('code').equalTo(this.myKey).once('value').then(function (account) {
+                    if (account.exists()) {
+                        accRef.child(Object.keys(account.val())[0]).update({
+                            location: location_name,
+                            location_code: locate_code
                         });
                     }
-                    else {
-                        this.$.removeDialog.open();
-                    }
-                    this.$.openDialog.close();
-                }
+                });
             }
 
-            removeLocation() {
+            _removeLocation() {
+                this.$.removeDialog.open();
+            }
+
+            _confirmRemoveLocation() {
                 var key = this.location_key;
                 var ref = firebase.database().ref('/' + this.myKey + '/locations');
                 var alert = Polymer.dom(this.root).querySelector("#alertDialog");
@@ -361,7 +366,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 var ref = firebase.database().ref("/" + this.myKey + "/locations");
                 var push = ref.push({
                     location_name: this.search,
-                    location_active: false
+                    location_active: false,
+                    location_code: this.randomString(7)
                 });
                 if (push.key) this.toggleReturn();
             }
@@ -382,6 +388,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
                 } else {
                     Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
+                    this._fetching();
                 }
             }
 
@@ -390,6 +397,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 return lower.replace(/(^| )(\w)/g, function (x) {
                     return x.toUpperCase();
                 });
+            }
+
+            randomString(n) {
+                var r = "";
+                while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+                return r;
             }
 
             loadMoreData() {

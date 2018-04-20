@@ -139,26 +139,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
         <div class="mnu" role="listbox">
-          <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
-          <!-- on-tap="_selectPage" data-args="1" -->
           <paper-item id="buyersinformation">
             <div class="circle-mini-first">1</div>
             <span>Profile Picture</span>
           </paper-item>
 
-          <!-- on-tap="_selectPage" data-args="2" -->
           <paper-item id="samplecomputation">
             <div class="circle-mini">2</div>
             <span>Basic Information</span>
           </paper-item>
 
-          <!-- on-tap="_selectPage" data-args="3" -->
           <paper-item id="finalize">
             <div class="circle-mini">3</div>
             <span>Insurance</span>
           </paper-item>
 
-          <!-- on-tap="_selectPage" data-args="4" -->
           <paper-item id="complete">
             <div class="circle-mini">4</div>
             <span>In-case of Emergency</span>
@@ -173,7 +168,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="circle-mini-last">6</div>
             <span>Completed</span>
           </paper-item>
-          <!-- </iron-selector> -->
         </div>
       </app-drawer>
 
@@ -185,17 +179,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
             </a>
             <div main-title>{{no}}</div>
-            <!-- <paper-menu-button horizontal-align="right">
-              <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
-              <paper-listbox slot="dropdown-content" style="cursor:pointer">
-                <paper-item>
-                  <a style="text-decoration:none" href="/patients">Discard</a>
-                </paper-item>
-                <paper-item on-tap="_openDelete">Delete</paper-item>
-              </paper-listbox>
-            </paper-menu-button> -->
-            <!-- <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button> -->
-            <!-- <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button> -->
           </app-toolbar>
         </app-header>
 
@@ -350,10 +333,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div class="docu-header">5. Finalize</div>
 
               <div class="details">
-                <!-- <div style="margin-bottom:10px;">Please review the following details:</div> -->
                 <img id="p_profile" src="{{p_profile}}" class="avatar">
 
-                <!-- <div style="font-weight:bold">Basic Information</div> -->
                 <table style="margin-bottom:6px;">
                   <tr>
                     <td>
@@ -556,40 +537,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <td style="color:rgb(37, 37, 37)">{{work_phone}}</td>
                   </tr>
                 </table>
-
-                <!-- <div style="margin-bottom:10px;">Please review the following details:</div>
-                <div style="font-weight:bold">Basic Information</div>
-                <div style="margin-left:10px;">
-                  <div>Email address: {{email}}</div>
-                  <div>Firstname: {{fname}}</div>
-                  <div>Middlename: {{mname}}</div>
-                  <div>Lastname: {{lname}}</div>
-                  <div>Birth date: {{bday}}</div>
-                  <div>Age: {{age}}</div>
-                  <div>Marital Status: {{stat}}</div>
-                  <div>Sex: {{gender}}</div>
-                  <div>Contact no: {{contact}}</div>
-                  <div>Street address: {{address}}</div>
-                  <div>Occupation: {{occupation}}</div>
-                  <div>Employer: {{employer}}</div>
-                  <div>Employer phone no: {{emp_phone}}</div>
-                </div>
-                <div style="font-weight:bold">Insurance</div>
-                <div style="margin-left:10px;">
-                  <div>ID Card no: {{card}}</div>
-                  <div>Birth date: {{bdate}}</div>
-                  <div>address: {{in_address}}</div>
-                  <div>Home phone no: {{home_phone}}</div>
-                  <div>Primary insurance: {{indicate}}</div>
-                  <div>Relationship to patient: {{p_relation}}</div>
-                </div>
-                <div style="font-weight:bold">In-case of emergency</div>
-                <div style="margin-left:10px;">
-                  <div>Name: {{name_e}}</div>
-                  <div>Relationship to patient: {{relation_e}}</div>
-                  <div>Home phone no: {{phone_e}}</div>
-                  <div>Work phone no: {{work_phone}}</div>
-                </div> -->
               </div>
             </div>
             <br>
@@ -636,6 +583,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         prevRoute: String,
         myKey: String,
+        editKey: String,
+        myLocationCode: String,
+        myQueue: String,
+        queueKey: String,
+        queueDate: String,
         selectedPage: Number,
         entryanimation: {
           type: String,
@@ -752,7 +704,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: false
         },
         profile: String,
-        editKey: String,
         personal: Object,
         insurance: Object,
         emergency: Object,
@@ -1028,7 +979,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             referred: refer,
             doctor: doctor,
             hospital: hospital_name,
-            name: lname + ', ' + fname + ' ' + mname
+            name: lname + ', ' + fname + ' ' + mname,
+            locationCode_name: this.myLocationCode + '_' + lname + ', ' + fname + ' ' + mname
           }
         }
       },
@@ -1166,52 +1118,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
 
-          // if (parseInt(this.selectedPage) == 1) {
-          //   if (!this.card || !this.bdate || !this.in_address || !this.home_phone || !this.indicate || !this.p_relation) {
-          //     this.favlefthide = false;
-          //     this.favrighthide = true;
-          //   }
-          //   else {
-          //     this.favlefthide = false;
-          //     this.favrighthide = false;
-          //   }
-          // }
-
-          // if (parseInt(this.selectedPage) == 2) {
-          //   if (!this.name_e || !this.relation_e || !this.phone_e || !this.work_phone) {
-          //     this.favlefthide = false;
-          //     this.favrighthide = true;
-          //   }
-          //   else {
-          //     this.favlefthide = false;
-          //     this.favrighthide = false;
-          //   }
-          // }
-
           if (parseInt(this.selectedPage) == 4) {
             //complete
-            var info = this.personal, insure = this.insurance, emerg = this.emergency, key = this.editKey;
+            var info = this.personal, insure = this.insurance, emerg = this.emergency;
+            var key = this.editKey;
             var mykey = this.myKey;
+            var queueKey = this.queueKey;
             var today = this.todayDate;
+            var isQueue = this.myQueue;
+            var locationCode = this.myLocationCode;
+            var queueDate = this.queueDate;
+
+            var personalQueue = {
+              firstname: this.personal.firstname,
+              middlename: this.personal.middlename,
+              lastname: this.personal.lastname,
+              birthday: this.personal.birthday,
+              sex: this.personal.sex,
+              name: this.personal.name,
+              hmo: this.insurance.primary_insurance
+            }
 
             var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
             var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+            var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
+            var queueRef = firebase.database().ref("/" + mykey + "/queue/" + locationCode + "/" + queueDate);
+
+            saveLoad.style.display = 'block';
+            ref.update({
+              personal: info,
+              insurance: insure,
+              emergency: emerg,
+              created: today
+            }).then(function () {
+              saveLoad.style.display = 'none';
+              saveSucc.style.display = 'block';
+            });
+
+            if (isQueue) {
+              queueRef.child(queueKey).update({ patient_info: personalQueue });
+            }
 
             if (this.profile) {
-              saveLoad.style.display = 'block';
-
               var ext = this.profile.type.substring(6);
               var pic_name = this.randomString(8) + '.' + ext;
-
               var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
 
               if (this.profile.size > 9999) {
-
                 ImageTools.resize(this.profile, {
                   width: 440, // maximum width
                   height: 400 // maximum height
                 }, function (blob, didItResize) {
-
                   var uploadTask = storageRef.put(blob);
                   firebase.database().ref('/' + mykey + '/patients/' + key)
                     .once('value').then(function (patient) {
@@ -1223,17 +1180,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 var downLoadURL = uploadTask.snapshot.downloadURL;
                                 if (downLoadURL) {
 
-                                  var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-                                  var push = ref.update({
-                                    personal: info,
-                                    insurance: insure,
-                                    emergency: emerg,
-                                    profile: downLoadURL,
-                                    created: today
-                                  }).then(function () {
-                                    saveLoad.style.display = 'none';
-                                    saveSucc.style.display = 'block';
-                                  });
+                                  ref.update({ profile: downLoadURL });
+                                  if (isQueue) {
+                                    queueRef.child(queueKey).update({ profile: downLoadURL });
+                                  }
                                 }
                               });
                           });
@@ -1245,17 +1195,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             var downLoadURL = uploadTask.snapshot.downloadURL;
                             if (downLoadURL) {
 
-                              var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-                              var push = ref.update({
-                                personal: info,
-                                insurance: insure,
-                                emergency: emerg,
-                                profile: downLoadURL,
-                                created: today
-                              }).then(function () {
-                                saveLoad.style.display = 'none';
-                                saveSucc.style.display = 'block';
-                              });
+                              ref.update({ profile: downLoadURL });
+                              if (isQueue) {
+                                queueRef.child(queueKey).update({ profile: downLoadURL });
+                              }
                             }
                           });
                       }
@@ -1275,17 +1218,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                               var downLoadURL = uploadTask.snapshot.downloadURL;
                               if (downLoadURL) {
 
-                                var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-                                var push = ref.update({
-                                  personal: info,
-                                  insurance: insure,
-                                  emergency: emerg,
-                                  profile: downLoadURL,
-                                  created: today
-                                }).then(function () {
-                                  saveLoad.style.display = 'none';
-                                  saveSucc.style.display = 'block';
-                                });
+                                ref.update({ profile: downLoadURL });
+                                if (isQueue) {
+                                  queueRef.child(queueKey).update({ profile: downLoadURL });
+                                }
                               }
                             });
                         });
@@ -1296,35 +1232,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                           var downLoadURL = uploadTask.snapshot.downloadURL;
                           if (downLoadURL) {
 
-                            var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-                            var push = ref.update({
-                              personal: info,
-                              insurance: insure,
-                              emergency: emerg,
-                              profile: downLoadURL,
-                              created: today
-                            }).then(function () {
-                              saveLoad.style.display = 'none';
-                              saveSucc.style.display = 'block';
-                            });
+                            ref.update({ profile: downLoadURL });
+                            if (isQueue) {
+                              queueRef.child(queueKey).update({ profile: downLoadURL });
+                            }
                           }
                         });
                     }
                   });
               }
-            }
-            else {
-              saveLoad.style.display = 'block';
-              var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-              var push = ref.update({
-                personal: info,
-                insurance: insure,
-                emergency: emerg,
-                created: today
-              }).then(function () {
-                saveLoad.style.display = 'none';
-                saveSucc.style.display = 'block';
-              });
             }
 
             if (this.isDateChanged === true) {

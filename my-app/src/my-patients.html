@@ -44,13 +44,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <template is="dom-if" if="{{myRole}}">
       <template is="dom-if" if="{{_secretary(myRole)}}">
-        <my-patients-secretary route="[[route]]" my-role="[[myRole]]" my-key="[[myKey]]" my-lastname="[[myLastname]]" my-location="[[myLocation]]"
-          user-uid="[[userUid]]"></my-patients-secretary>
+        <my-patients-secretary route="[[route]]" my-role="[[myRole]]" my-key="[[myKey]]" my-location-code="[[myLocationCode]]" my-location="[[myLocation]]"></my-patients-secretary>
       </template>
 
       <template is="dom-if" if="{{_notSecretary(myRole)}}">
-        <my-patients-doctor route="[[route]]" my-role="[[myRole]]" my-key="[[myKey]]" my-lastname="[[myLastname]]" my-location="[[myLocation]]"
-          user-uid="[[userUid]]"></my-patients-doctor>
+        <my-patients-doctor route="[[route]]" my-role="[[myRole]]" my-key="[[myKey]]" my-location-code="[[myLocationCode]]" my-location="[[myLocation]]"></my-patients-doctor>
       </template>
     </template>
 
@@ -61,11 +59,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       is: 'my-patients',
 
       properties: {
-        route: String,
+        route: Object,
         myLocation: String,
+        myLocationCode: String,
         myKey: String,
-        myLastname: String,
-        userUid: String,
         myRole: String,
       },
 

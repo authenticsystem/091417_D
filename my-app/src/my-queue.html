@@ -34,11 +34,13 @@
 
         <template is="dom-if" if="{{myRole}}">
             <template is="dom-if" if="{{_secretary(myRole)}}">
-                <my-queue-secretary route="{{route}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-role="{{myRole}}"></my-queue-secretary>
+                <my-queue-secretary route="{{route}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
+                    my-role="{{myRole}}"></my-queue-secretary>
             </template>
 
             <template is="dom-if" if="{{_notSecretary(myRole)}}">
-                <my-queue-doctor route="{{route}}" my-lastname="{{myLastname}}" my-location="{{myLocation}}" my-key="{{myKey}}" my-role="{{myRole}}"></my-queue-doctor>
+                <my-queue-doctor route="{{route}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
+                    my-role="{{myRole}}"></my-queue-doctor>
             </template>
         </template>
 
@@ -49,9 +51,9 @@
             properties: {
                 myKey: String,
                 myRole: String,
-                myLastname: String,
                 myLocation: String,
-                route: String
+                myLocationCode: String,
+                route: Object
             },
 
             _secretary(e) {

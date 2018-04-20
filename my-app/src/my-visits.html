@@ -262,7 +262,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             <div id="noRecord">
               <div class="item" style="padding:15px">
-                <div id$="[[_fetching()]]" style="margin:auto">
+                <div style="margin:auto">
                   {{record}}
                 </div>
               </div>
@@ -352,7 +352,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div name="/new">
           <div id="newcase"></div>
-          <my-visits-new id="d23" my-location="{{myLocation}}" my-key='{{myKey}}' path="" prev-route="{{route.prefix}}"></my-visits-new>
+          <my-visits-new id="d23" my-key='{{myKey}}' path="" prev-route="{{route.prefix}}"></my-visits-new>
         </div>
 
         <div name="view404">Not found.</div>
@@ -393,8 +393,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return [];
           }
         },
-        myLocation: String,
-        route: String,
+        route: Object,
         myKey: String,
         narrow: {
           type: Boolean,
@@ -441,6 +440,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
         } else {
           Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
+          this._fetching();
         }
       },
 
@@ -626,7 +626,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           var newDiv = document.createElement("my-visits-new");
           newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("my-location", this.myLocation);
           newDiv.setAttribute("id", "d23");
           newDiv.setAttribute("prev-route", this.route.prefix);
           //if open existing

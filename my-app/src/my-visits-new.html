@@ -352,8 +352,8 @@
                                             <div class="galleryHolder">
                                                 <sl-gallery id="gallery">
                                                     <!-- <template is="dom-repeat" items="{{myimaging}}">
-                                                        <sl-gallery-image src="[[item.url]]" small="[[item.url]]"></sl-gallery-image>
-                                                    </template> -->
+                                                    <sl-gallery-image src="[[item.url]]" small="[[item.url]]"></sl-gallery-image>
+                                                </template> -->
                                                 </sl-gallery>
                                             </div>
                                         </div>
@@ -491,8 +491,10 @@
                     type: Boolean,
                     notify: true
                 },
-                myLocation: String,
                 myQueue: String,
+                queueKey: String,
+                queueDate: String,
+                myLocationCode: String,
                 prevRoute: String,
                 filterValue: String,
                 myKey: String,
@@ -911,7 +913,6 @@
 
                         var key = this.mykey;
                         var mykey = this.myKey;
-                        var myLocation = this.myLocation;
                         var myattachment = this.attachment;
                         var attachName = this.randomString(8);
                         var today = this.todayDate;
@@ -919,6 +920,7 @@
                         var order = firebase.database.ServerValue.TIMESTAMP;
                         var newPushKey;
                         var myQueue = this.myQueue;
+                        var queueKey = this.queueKey, myLocationCode = this.myLocationCode, queueDate = this.queueDate;
 
                         if (today < this.formatTodayDate(new Date())) {
                             newPushKey = this.generatePushID(today);
@@ -968,12 +970,8 @@
                                         firebase.database().ref("/" + mykey + "/patients/" + fbPushKey + "/profile").set(patient.val().profile);
 
                                         if (myQueue) {
-                                            firebase.database().ref("/" + mykey + "/patients/" + key).update({
-                                                isQueue: false,
-                                                isNext: false
-                                            });
-
-                                            _locateNextQueue(mykey);
+                                            firebase.database().ref("/" + mykey + "/patients/" + key).update({ isQueue: false });
+                                            _locateNextQueue(mykey, queueKey, myLocationCode, queueDate)
                                         }
 
                                         if (myattachment) {
@@ -1009,12 +1007,8 @@
                                         _reportsUpdate(today, mykey);
 
                                         if (myQueue) {
-                                            firebase.database().ref("/" + mykey + "/patients/" + key).update({
-                                                isQueue: false,
-                                                isNext: false
-                                            });
-
-                                            _locateNextQueue(mykey);
+                                            firebase.database().ref("/" + mykey + "/patients/" + key).update({ isQueue: false });
+                                            _locateNextQueue(mykey, queueKey, myLocationCode, queueDate)
                                         }
 
                                         if (myattachment) {
@@ -1067,14 +1061,19 @@
                     this.favrighthide = true;
                 }
 
-                function _locateNextQueue(mykey) {
-                    var ref = firebase.database().ref("/" + mykey + "/patients");
-                    ref.orderByChild("isQueue").equalTo(true).limitToFirst(1).once('value')
-                        .then(function (snapshot) {
-                            if (snapshot.exists()) {
-                                ref.child(Object.keys(snapshot.val())[0]).update({ isNext: true });
+                function _locateNextQueue(mykey, queueKey, myLocationCode, queueDate) {
+                    var ref = firebase.database().ref("/" + mykey + "/queue/" + myLocationCode + "/" + queueDate);
+                    ref.child(queueKey).update({ isPriority: false, isNext: false, isQueue: false, xy: "x" }).then(function () {
+                        ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
+                            if (!hasNext.exists()) {
+                                ref.orderByChild("xy").startAt("y").limitToFirst(1).once("value").then(function (next) {
+                                    if (next.exists()) {
+                                        ref.child(Object.keys(next.val())[0]).update({ isNext: true });
+                                    }
+                                });
                             }
                         });
+                    })
                 }
 
                 function _reportsUpdate(today, mykey) {
