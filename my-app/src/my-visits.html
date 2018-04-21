@@ -216,6 +216,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: rgb(2, 136, 160);
         /* top: 8px; */
       }
+
+      .clinic {
+        position: absolute;
+        right: 25px;
+        top: 50px;
+        font-size: 14px;
+      }
     </style>
 
     <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
@@ -320,6 +327,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                     </div>
 
+                    <div class="clinic">[[item.clinic_location]]</div>
+
                     <a href$="{{_getEditAppLink(item.$key)}}">
                       <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
                       </paper-icon-button>
@@ -352,7 +361,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div name="/new">
           <div id="newcase"></div>
-          <my-visits-new id="d23" my-key='{{myKey}}' path="" prev-route="{{route.prefix}}"></my-visits-new>
+          <my-visits-new id="d23" my-key='{{myKey}}' path="" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-visits-new>
         </div>
 
         <div name="view404">Not found.</div>
@@ -361,7 +370,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div hidden$="{{!editActive}}">
       <div id="caseedit"></div>
-      <my-visits-edit id="d25" my-key='{{myKey}}' edit-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-visits-edit>
+      <my-visits-edit id="d25" my-key='{{myKey}}' edit-key='{{editData.key}}' prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-visits-edit>
     </div>
 
     <div hidden$="{{!detailActive}}">
@@ -394,6 +403,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         },
         route: Object,
+        myLocation: String,
         myKey: String,
         narrow: {
           type: Boolean,
@@ -611,6 +621,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           newDiv.setAttribute("id", "d25");
           newDiv.setAttribute("edit-key", data_args);
           newDiv.setAttribute("prev-route", this.route.prefix);
+          newDiv.setAttribute("my-location", this.myLocation);
           //if open existing
           var currentDiv = document.getElementById("caseedit");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
@@ -628,6 +639,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           newDiv.setAttribute("my-key", this.myKey);
           newDiv.setAttribute("id", "d23");
           newDiv.setAttribute("prev-route", this.route.prefix);
+          newDiv.setAttribute("my-location", this.myLocation);
           //if open existing
           var currentDiv = document.getElementById("newcase");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);

@@ -22,8 +22,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/neon-animations.html">
 <link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
 
@@ -930,7 +928,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             doctor: doctor,
             hospital: hospital_name,
             name: lname + ', ' + fname + ' ' + mname,
-            locationCode_name: this.myLocationCode + '_' + lname + ', ' + fname + ' ' + mname
+            clinic_location: this.myLocation
           }
         }
       },
@@ -1308,7 +1306,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _locateNextQueue(myKey, queuePushkey, patientPushkey, isQue, myLocation, myLocationCode, pickDate) {
         var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocationCode + "/" + pickDate);
-        ref.orderByChild("queueLocation").equalTo(myLocation).once('value').then(function (snapshot) {
+        ref.once('value').then(function (snapshot) {
           if (snapshot.exists()) {
             ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
               if (hasNext.exists()) {
@@ -1316,11 +1314,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   isQueue: isQue,
                   queueLocation: myLocation,
                   isNext: false,
-                  queueNo: snapshot.numChildren() + 1,
+                  queueNo: snapshot.numChildren(),
                   xy: "y"
                 }).then(function () {
                   firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                    .update({ queueNo: snapshot.numChildren() + 1, queueDate: pickDate, queueLocation: myLocation });
+                    .update({ queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
                 });
               }
               else {
@@ -1328,11 +1326,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   isQueue: isQue,
                   queueLocation: myLocation,
                   isNext: true,
-                  queueNo: snapshot.numChildren() + 1,
+                  queueNo: snapshot.numChildren(),
                   xy: "y"
                 }).then(function () {
                   firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                    .update({ queueNo: snapshot.numChildren() + 1, queueDate: pickDate, queueLocation: myLocation });
+                    .update({ queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
                 });
               }
             });

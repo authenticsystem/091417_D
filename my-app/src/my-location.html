@@ -35,18 +35,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 padding: 10px;
             }
 
-            /* app-header {
+            app-header {
                 color: rgb(255, 255, 255);
                 background-color: #673AB7;
-            } */
-
-            #tool1 {
-                color: rgb(255, 255, 255);
-                background-color: #673AB7;
-            }
-
-            #tool2 {
-                background-color: white;
             }
 
             paper-icon-button.menu {
@@ -101,20 +92,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
             }
 
-            /* paper-button {
-                height: 32px;
-                font-size: 12px;
-                font-weight: 400;
-                width: 80px;
-                background: rgb(223, 218, 218);
-                color: black;
-                float: right;
-            } */
-
-            paper-icon-button.menu {
-                margin-right: 16px;
-            }
-
             #btn-menu {
                 color: gray;
                 position: fixed;
@@ -133,8 +110,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             .pad {
-                margin-left: 4px;
-                padding: 6px;
+                margin-left: 10px;
+                /* padding: 6px; */
                 @apply --layout-flex;
                 @apply --layout-vertical;
             }
@@ -143,40 +120,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 --paper-avatar-width: 35px;
             }
 
-            paper-item:hover {
-                background: rgba(104, 58, 183, 0.26);
-                cursor: pointer;
+            paper-fab.fab-menu {
+                position: fixed;
+                right: 32px;
+                bottom: 32px;
+            }
+
+            .longText {
+                color: gray;
+                /* display: none; */
             }
         </style>
 
 
         <app-header-layout fullbleed has-scrolling-region>
             <app-header fixed slot="header">
-                <template is="dom-if" if="{{!openAdd}}">
-                    <app-toolbar primary id="tool1">
-                        <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                        <div main-title>My Location</div>
-                        <paper-icon-button style$="{{_access(myRole)}}" class="menu" icon="my-icons:add" title="Add new location" drawer-toggle on-tap="toggleAdd"></paper-icon-button>
-                    </app-toolbar>
-                </template>
-
-                <template is="dom-if" if="{{openAdd}}">
-                    <app-toolbar primary id="tool2">
-                        <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                        <paper-search-bar id="search" placeholder="Add new location" query="{{search}}" disable-filter-button></paper-search-bar>
-                        <iron-a11y-keys target="[[target]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
-                        <template is="dom-if" if="{{search}}">
-                            <paper-icon-button id="btn-menu" icon="my-icons:close" title="clear" drawer-toggle on-tap="toggleClear"></paper-icon-button>
-                            <paper-icon-button id="btn-menu2" icon="my-icons:check" title="add" drawer-toggle on-tap="toggleAddLocation"></paper-icon-button>
-                        </template>
-                    </app-toolbar>
-                </template>
+                <app-toolbar primary>
+                    <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                    <div main-title>My Location</div>
+                </app-toolbar>
             </app-header>
-
-            <!-- <div class="input">
-                <paper-input label="New Location" always-float-label></paper-input>
-                <paper-button>Add</paper-button>
-            </div> -->
 
             <firebase-query path="/{{myKey}}/locations" data="{{mylocation}}" order-by-child="location_name"></firebase-query>
 
@@ -193,8 +156,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div class="divSeparator">
                         <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
                             <paper-avatar class="small" label="[[item.location_name]]"></paper-avatar>
-                            <div class="pad" on-tap="_selectThis" id="[[item.$key]]~[[item.location_name]]~[[item.location_code]]">
-                                <div id="[[item.$key]]~[[item.location_name]]~[[item.location_code]]">[[item.location_name]]</div>
+                            <div class="pad" on-tap="_selectThis" id="[[item.$key]]~[[item.location_mini]]~[[item.location_code]]">
+                                <div id="[[item.$key]]~[[item.location_mini]]~[[item.location_code]]" style="font-size:11px" class="longText">[[item.location_mini]]</div>
+                                <div id="[[item.$key]]~[[item.location_mini]]~[[item.location_code]]">[[item.location_name]]</div>
                             </div>
                             <div style="padding:10px"> </div>
                             <div hidden="{{!item.location_active}}">
@@ -209,7 +173,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
             </iron-scroll-threshold>
 
+            <paper-fab hidden$="{{_access(myRole)}}" class="fab-menu" icon="my-icons:add" on-tap="toggleAdd"></paper-fab>
+
         </app-header-layout>
+
+        <salte-dialog no-auto-fullscreen id="addDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #1E88E5">Add new location</h2>
+            <span>
+                <paper-input id="location" label="Location" required auto-validate value="{{location}}" always-float-label></paper-input>
+                <iron-a11y-keys target="[[targetLocation]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
+                <paper-input id="locationMin" label="Location mini name" required auto-validate value="{{locationMinName}}" always-float-label></paper-input>
+                <iron-a11y-keys target="[[targetLocationMin]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
+            </span>
+            <div class="buttons">
+                <paper-button id="onEnter" autofocus on-tap="toggleAddLocation">Confirm</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </salte-dialog>
 
         <salte-dialog no-auto-fullscreen id="openDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
             <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
@@ -228,7 +208,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <salte-dialog no-auto-fullscreen id="alertDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
             <h2 style="font-size: 16px; background: #F44336">Request denied!</h2>
-            <span>Can't remove location! This location is currently in use.</span>
+            <span>{{alertMsg}}</span>
             <div class="buttons">
                 <paper-button dialog-confirm autofocus>OK</paper-button>
             </div>
@@ -271,14 +251,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             static get observers() {
                 return [
-                    '_mysearchChanged(search)',
+                    '_locationChanged(location)',
                     '_mylocationChanged(mylocation.*)'
                 ];
             }
 
-            _access(e) {
-                if (e != 'Secretary') return false;
-                else return true;
+            _locationChanged(e) {
+                if (e) {
+                    this.location = this.convertCase(e);
+                    this.targetLocation = Polymer.dom(this.root).querySelector("#location");
+                    this.targetLocationMin = Polymer.dom(this.root).querySelector("#locationMin");
+                }
+            }
+
+            _mylocationChanged() {
+                if (this.mylocation.length > 0) {
+                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+                } else {
+                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
+                    this._fetching();
+                }
             }
 
             _selectThis(e) {
@@ -325,6 +317,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 var key = this.location_key;
                 var ref = firebase.database().ref('/' + this.myKey + '/locations');
                 var alert = Polymer.dom(this.root).querySelector("#alertDialog");
+                this.alertMsg = "Can't remove location! This location is currently in use.";
 
                 ref.orderByChild('location_active').equalTo(true).once('value').then(function (data) {
                     if (data.exists()) {
@@ -338,24 +331,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 });
             }
 
-            _fetching() {
-                this.record = 'Loading data . . .';
-                setTimeout((e) => {
-                    this.record = 'No record found.';
-                }, 3000);
-            }
-
             toggleAdd() {
-                this.openAdd = true;
-            }
-
-            toggleReturn() {
-                this.openAdd = false;
-                this.search = '';
-            }
-
-            toggleClear() {
-                this.search = '';
+                this.$.addDialog.open();
             }
 
             onEnter() {
@@ -363,33 +340,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             toggleAddLocation() {
-                var ref = firebase.database().ref("/" + this.myKey + "/locations");
-                var push = ref.push({
-                    location_name: this.search,
-                    location_active: false,
-                    location_code: this.randomString(7)
-                });
-                if (push.key) this.toggleReturn();
+                if (!this.location) {
+                    this.alertMsg = "Please enter location name.";
+                    this.$.alertDialog.open();
+                }
+                else if (!this.locationMinName) {
+                    this.alertMsg = "Please enter your desired location abbreviations.";
+                    this.$.alertDialog.open();
+                }
+                else {
+                    var ref = firebase.database().ref("/" + this.myKey + "/locations");
+                    var push = ref.push({
+                        location_name: this.location,
+                        location_mini: this.locationMinName,
+                        location_active: false,
+                        location_code: this.randomString(7)
+                    });
+                    if (push.key) this.$.addDialog.close();
+                }
+            }
+
+            _access(e) {
+                if (e != 'Secretary') return false;
+                else return true;
+            }
+
+            _fetching() {
+                this.record = 'Loading data . . .';
+                setTimeout((e) => {
+                    this.record = 'No record found.';
+                }, 3000);
             }
 
             getClassForItem(item, selected) {
                 return selected ? 'item expanded' : 'item';
-            }
-
-            _mysearchChanged(e) {
-                if (e) {
-                    this.search = this.convertCase(e);
-                    this.target = Polymer.dom(this.root).querySelector("#search");
-                }
-            }
-
-            _mylocationChanged() {
-                if (this.mylocation.length > 0) {
-                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
-                } else {
-                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
-                    this._fetching();
-                }
             }
 
             convertCase(str) {

@@ -407,6 +407,7 @@
                     type: Object,
                     observer: '_onMyaccessChanged'
                 },
+                myLocation: String,
                 myKey: String,
                 narrow: {
                     type: Boolean,
@@ -812,6 +813,7 @@
                         var timestamp = this.timestamp;
                         var order = this.timestamp;
                         var oldPushKey;
+                        var location = this.myLocation;
 
                         if (this.isDateChanged === true) {
                             oldPushKey = this.editKey;
@@ -854,6 +856,7 @@
                                         timestamp: timestamp,
                                         order: order,
                                         created: today,
+                                        clinic_location: location,
                                         patientinfo: {
                                             num: patient.val().no,
                                             birthday: patient.val().personal.birthday,
@@ -894,6 +897,7 @@
                                         timestamp: timestamp,
                                         order: order,
                                         created: today,
+                                        clinic_location: location,
                                         patientinfo: {
                                             num: patient.val().no,
                                             birthday: patient.val().personal.birthday,

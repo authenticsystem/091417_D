@@ -189,6 +189,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-toggle-button-label-spacing: 6px;
         font-size: 16px;
       }
+
+      .clinic {
+        position: absolute;
+        right: 25px;
+        top: 50px;
+        font-size: 14px;
+      }
     </style>
 
     <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
@@ -205,7 +212,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                   <div main-title>Patients</div>
                   <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
-                  <paper-toggle-button class="green" on-tap="_toggleLocation" checked="{{isCheck}}">Location</paper-toggle-button>
+                  <!-- <paper-toggle-button class="green" on-tap="_toggleLocation" checked="{{isCheck}}">Location</paper-toggle-button> -->
                 </app-toolbar>
               </template>
 
@@ -220,7 +227,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
             </app-header>
 
-            <firebase-query id="query" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="{{filterBy}}" start-at="{{_startSearch(myLocationCode,search, isCheck)}}">
+            <firebase-query id="query" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}">
             </firebase-query>
 
             <div id="noRecord">
@@ -246,7 +253,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
                     </div>
 
-                    <div style="padding:10px"> </div>
+                    <div class="clinic">[[item.personal.clinic_location]]</div>
 
                     <a id="open" href$="{{_getViewDetailsLink(e)}}"></a>
 
@@ -279,7 +286,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div hidden$="{{!editActive}}">
       <div id="patientsedit"></div>
-      <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" edit-key="{{editData.key}}" my-location-code="{{myLocationCode}}"></my-patients-edit>
+      <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" edit-key="{{editData.key}}" my-location="{{myLocation}}"
+        my-location-code="{{myLocationCode}}"></my-patients-edit>
     </div>
 
     <div hidden$="{{!detailActive}}">
@@ -323,24 +331,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         '_mypatientsChanged(mypatients.*)'
       ],
 
-      ready() {
-        this.isCheck = true;
-        this.filterBy = 'personal/locationCode_name';
-        this.search = '';
-      },
+      // ready() {
+      //   this.isCheck = true;
+      //   this.filterBy = 'personal/locationCode_name';
+      //   this.search = '';
+      // },
 
       _searchChanged(search) {
         this.search = search.toUpperCase();
       },
 
-      _startSearch(location, search, isCheck) {
-        if (isCheck) {
-          return location + "_" + search;
-        }
-        else {
-          return search;
-        }
-      },
+      // _startSearch(location, search, isCheck) {
+      //   if (isCheck) {
+      //     return location + "_" + search;
+      //   }
+      //   else {
+      //     return search;
+      //   }
+      // },
 
       _mypatientsChanged() {
         if (this.mypatients.length > 0) {
@@ -400,6 +408,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           newDiv.setAttribute("prev-route", this.route.prefix);
           newDiv.setAttribute("my-key", this.myKey);
           newDiv.setAttribute("edit-key", data_args);
+          newDiv.setAttribute("my-location", this.myLocation);
           newDiv.setAttribute("my-location-code", this.myLocationCode);
           //if open existing
           var currentDiv = document.getElementById("patientsedit");
@@ -427,14 +436,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _toggleLocation() {
-        if (this.isCheck) {
-          this.filterBy = 'personal/locationCode_name';
-        }
-        else {
-          this.filterBy = 'personal/name';
-        }
-      },
+      // _toggleLocation() {
+      //   if (this.isCheck) {
+      //     this.filterBy = 'personal/locationCode_name';
+      //   }
+      //   else {
+      //     this.filterBy = 'personal/name';
+      //   }
+      // },
 
       _fetching() {
         this.record = 'Loading data . . .';

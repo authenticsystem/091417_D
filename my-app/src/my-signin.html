@@ -12,6 +12,7 @@
 <link rel="import" href="my-icons.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
 
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
@@ -107,8 +108,10 @@
             <div id="errorMsgDiv" style="display: none;">
                 <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}
             </div>
-            <paper-input label="Email" value="{{email}}" always-float-label required auto-validate error-message=""></paper-input>
-            <paper-input label="Password" type="password" value="{{password}}" always-float-label required auto-validate error-message=""></paper-input>
+            <paper-input id="email" label="Email" value="{{email}}" always-float-label required auto-validate error-message=""></paper-input>
+            <paper-input id="pass" label="Password" type="password" value="{{password}}" always-float-label required auto-validate error-message=""></paper-input>
+            <iron-a11y-keys target="[[targetEmail]]" keys="enter" on-keys-pressed="_onEnter"></iron-a11y-keys>
+            <iron-a11y-keys target="[[targetPass]]" keys="enter" on-keys-pressed="_onEnter"></iron-a11y-keys>
             <br>
             <div class="footer">
                 <div class="moreoption">
@@ -148,6 +151,11 @@
                 }
             },
 
+            ready() {
+                this.targetEmail = this.$.email;
+                this.targetPass = this.$.pass;
+            },
+
             handleError() {
                 Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                 this.validationMessage = 'Invalid email or password.';
@@ -163,6 +171,10 @@
                 Polymer.dom(this.root).querySelector("#spinnerNext").style.display = "none";
                 Polymer.dom(this.root).querySelector("#next").disabled = false;
                 Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
+            },
+
+            _onEnter() {
+                this._signIn();
             },
 
             _signIn() {

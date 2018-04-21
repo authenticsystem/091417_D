@@ -182,7 +182,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-toolbar>
         </app-header>
 
-        <firebase-query id="query" path="{{path}}" order-by-key equal-to="{{editKey}}" data="{{mypatient}}">
+        <firebase-query id="query" path="{{path}}" order-by-key equal-to="{{editKey}}" data="{{mypatient}}" limit-to-first="1">
         </firebase-query>
 
         <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
@@ -584,6 +584,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         prevRoute: String,
         myKey: String,
         editKey: String,
+        myLocation: String,
         myLocationCode: String,
         myQueue: String,
         queueKey: String,
@@ -980,7 +981,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             doctor: doctor,
             hospital: hospital_name,
             name: lname + ', ' + fname + ' ' + mname,
-            locationCode_name: this.myLocationCode + '_' + lname + ', ' + fname + ' ' + mname
+            clinic_location: this.myLocation
           }
         }
       },

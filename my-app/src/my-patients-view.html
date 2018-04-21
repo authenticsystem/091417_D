@@ -268,7 +268,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <neon-animatable>
 
-            <firebase-query id="query" path="/{{myKey}}/patients" order-by-key equal-to="{{viewKey}}" data="{{mypatient}}">
+            <firebase-query id="query" path="/{{myKey}}/patients" order-by-key equal-to="{{viewKey}}" data="{{mypatient}}" limit-to-first="1">
             </firebase-query>
 
             <div class="docu" id="printMe">
@@ -680,7 +680,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _locateNextQueue(myKey, queuePushkey, patientPushkey, myLocation, myLocationCode, pickDate) {
         var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocationCode + "/" + pickDate);
-        ref.orderByChild("queueLocation").equalTo(myLocation).once('value').then(function (snapshot) {
+        ref.then(function (snapshot) {
           if (snapshot.exists()) {
             ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
               if (hasNext.exists()) {
@@ -688,11 +688,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   isQueue: true,
                   queueLocation: myLocation,
                   isNext: false,
-                  queueNo: snapshot.numChildren() + 1,
+                  queueNo: snapshot.numChildren(),
                   xy: "y"
                 }).then(function () {
                   firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                    .update({ isQueue: true, queueNo: snapshot.numChildren() + 1, queueDate: pickDate, queueLocation: myLocation });
+                    .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
                 });
               }
               else {
@@ -700,11 +700,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   isQueue: true,
                   queueLocation: myLocation,
                   isNext: true,
-                  queueNo: snapshot.numChildren() + 1,
+                  queueNo: snapshot.numChildren(),
                   xy: "y"
                 }).then(function () {
                   firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                    .update({ isQueue: true, queueNo: snapshot.numChildren() + 1, queueDate: pickDate, queueLocation: myLocation });
+                    .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
                 });
               }
             });

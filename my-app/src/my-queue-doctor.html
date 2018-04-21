@@ -68,7 +68,7 @@
                 background-color: white;
                 border-bottom: 1px solid #ddd;
                 cursor: pointer;
-                opacity: 0.75;
+                opacity: 0.6;
             }
 
             .item_N:hover,
@@ -275,7 +275,7 @@
         <div hidden$="{{!qPatientEditActive}}">
             <div id="patientsedit"></div>
             <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" edit-key="{{editData.key}}" my-queue="yes" queue-key="{{queueKey}}"
-                queue-date="{{pickDate}}" my-location-code="{{myLocationCode}}"></my-patients-edit>
+                queue-date="{{pickDate}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-edit>
         </div>
 
         <div hidden$="{{!qPatientViewActive}}">
@@ -287,7 +287,7 @@
         <div hidden$="{{!qVisitNewActive}}">
             <div id="newcase"></div>
             <my-visits-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" queue-key="{{queueKey}}" queue-date="{{pickDate}}"
-                my-location-code="{{myLocationCode}}" filter-value="{{filterValue}}" my-limit="1"></my-visits-new>
+                my-location="{{myLocation}}" my-location-code="{{myLocationCode}}" filter-value="{{filterValue}}" my-limit="1"></my-visits-new>
         </div>
 
         <salte-dialog no-auto-fullscreen id="locationDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
@@ -304,7 +304,7 @@
             <span>
                 <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Cancel Queue</paper-button>
                 <paper-button on-tap="_proceedToNext" hidden="{{!isNext}}" style="background: #3F51B5; margin-bottom: 6px; color: white; border-radius: 0;"
-                    dialog-confirm>Proceed to next</paper-button>
+                    dialog-confirm>Proceed to next queue</paper-button>
                 <paper-button on-tap="_changeQueueNo" hidden="{{isNext}}" style="background: #3F51B5; margin-bottom: 6px; color: white; border-radius: 0;"
                     dialog-confirm>Change Queue No</paper-button>
                 <paper-button on-tap="_addVisit" hidden="{{!isNext}}" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
@@ -435,7 +435,7 @@
                 if (e.length > 0) {
                     if (this.selectedData) {
                         var [key, queueNo] = this.selectedData.split('~');
-                        if (e[0].isNext === false && e[0].isQueue === true && e[0].queueNo !== parseInt(queueNo)) {
+                        if (e[0].isNext === false && e[0].isQueue === true && e[0].isPriority === false && e[0].queueNo !== parseInt(queueNo)) {
                             this.$.confirmChangeNoBtn.disabled = false;
                         }
                         else {
@@ -452,7 +452,7 @@
                 if (e > 0) {
                     if (this.token) {
                         var token = this.token;
-                        firebase.database().ref("/" + this.myKey + "/patients").orderByChild("queueLocation").equalTo(this.myLocation)
+                        firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocationCode + "/" + this.pickDate).orderByChild("isQueue").equalTo(true)
                             .once('value').then(function (data) {
                                 if (data.exists()) {
                                     _handleSend(data.numChildren(), token);
@@ -574,6 +574,7 @@
                     newDiv.setAttribute("my-queue", "yes");
                     newDiv.setAttribute("queue-key", this.queueKey);
                     newDiv.setAttribute("queue-date", this.pickDate);
+                    newDiv.setAttribute("my-location", this.myLocation);
                     newDiv.setAttribute("my-location-code", this.myLocationCode);
                     Polymer.dom(this.root).querySelector("#openPatientEdit").click();
                     //if open existing
@@ -596,6 +597,7 @@
                     newDiv.setAttribute("my-queue", "yes");
                     newDiv.setAttribute("queue-key", this.queueKey);
                     newDiv.setAttribute("queue-date", this.pickDate);
+                    newDiv.setAttribute("my-location", this.myLocation);
                     newDiv.setAttribute("my-location-code", this.myLocationCode);
                     newDiv.setAttribute("filter-value", this.filterValue);
                     newDiv.setAttribute("my-limit", 1);

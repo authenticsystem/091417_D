@@ -99,6 +99,14 @@
                     padding: 16px;
                     border: 1px solid gray
                 }
+
+                .div1 {
+                    flex: 1;
+                }
+
+                .divHolder {
+                    display: flex;
+                }
             }
 
             @media (max-width: 800px) {
@@ -126,6 +134,14 @@
                 .galleryHolder {
                     padding: 6px;
                     border: 1px solid gray
+                }
+
+                .div1 {
+                    flex: 1;
+                }
+
+                .divHolder {
+                    display: flex;
                 }
             }
 
@@ -426,6 +442,26 @@
 
                     </neon-animatable>
 
+                    <!-- <neon-animatable>
+                        <div class="divHolder">
+                            <div class="div1" align="center">
+                        <div on-tap="_selectNormal" class="docu" align="center" style="cursor: pointer;">
+                            <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
+                            <h3>Normal</h3>
+                        </div>
+                        </div>
+                            <div class="div1" align="center">
+                        <div on-tap="_selectSOAP" class="docu" align="center" style="cursor: pointer;">
+                            <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
+                            <h3>SOAP</h3>
+                        </div>
+                        </div>
+                        </div>
+                        <br>
+                        <br>
+                        <br>
+                    </neon-animatable> -->
+
                     <neon-animatable>
                         <div class="docu">
                             <div class="details">
@@ -436,17 +472,23 @@
                                     <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
                                 </div>
                                 <!-- <b style="font-size:18px;">Today</b> -->
-                                <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
-                                <paper-textarea label="History" value="{{history}}"></paper-textarea>
-                                <paper-textarea label="Laboratory" value="{{laboratory}}"></paper-textarea>
+                                <paper-textarea hidden="{{soap}}" label="Chief complaint *" value="{{complain}}"></paper-textarea>
+                                <paper-textarea hidden="{{soap}}" label="History" value="{{history}}"></paper-textarea>
+                                <paper-textarea hidden="{{soap}}" label="Laboratory" value="{{laboratory}}"></paper-textarea>
+
+                                <paper-textarea hidden="{{normal}}" label="Subjective" value="{{subjective}}"></paper-textarea>
+                                <paper-textarea hidden="{{normal}}" label="Objective" value="{{objective}}"></paper-textarea>
+                                <paper-textarea hidden="{{normal}}" label="Assessment" value="{{assessment}}"></paper-textarea>
+
                                 <div style="font-size:16px; margin-top:16px;">Imaging</div>
                                 <div style="border:1px solid gray; padding:6px;">
                                     <input on-change="_changeAttach" type="file" id="myFile" accept="image/*" multiple="multiple" />
                                     <output style="font-size:14px;" id="fileList"></output>
                                 </div>
-                                <paper-textarea label="Physical Exam" value="{{pe}}"></paper-textarea>
-                                <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
-                                <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
+                                <paper-textarea hidden="{{soap}}" label="Physical Exam" value="{{pe}}"></paper-textarea>
+                                <paper-textarea hidden="{{soap}}" label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
+                                <paper-textarea hidden="{{soap}}" label="Treatment" value="{{treatment}}"></paper-textarea>
+
                                 <paper-textarea label="Plan" value="{{plan}}"></paper-textarea>
                             </div>
                         </div>
@@ -494,6 +536,7 @@
                 myQueue: String,
                 queueKey: String,
                 queueDate: String,
+                myLocation: String,
                 myLocationCode: String,
                 prevRoute: String,
                 filterValue: String,
@@ -550,6 +593,20 @@
                     type: Object,
                     value: ''
                 },
+
+                subjective: {
+                    type: String,
+                    value: ''
+                },
+                objective: {
+                    type: String,
+                    value: ''
+                },
+                assessment: {
+                    type: String,
+                    value: ''
+                },
+
                 mykey: String,
                 myimage: {
                     type: Object,
@@ -566,7 +623,25 @@
                 },
                 myPatientKey: String,
                 myimaging: Object,
-                mycases: Object
+                mycases: Object,
+                normal: Boolean,
+                soap: Boolean
+            },
+
+            _selectNormal() {
+                this.normal = true;
+                this.soap = false;
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                this.selectedPage = parseInt(this.selectedPage) + 1;
+            },
+
+            _selectSOAP() {
+                this.normal = false;
+                this.soap = true;
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                this.selectedPage = parseInt(this.selectedPage) + 1;
             },
 
             _showAttach() {
@@ -710,6 +785,7 @@
 
             observers: [
                 '_patientChanged(filterValue)',
+                // '_showFab1(subjective, complain, todayDate)',
                 '_showFab1(complain, todayDate)',
                 '_mypatientInfoChanged(patientInfo)',
                 '_myimagingChanged(myimaging)',
@@ -868,6 +944,23 @@
                 }
             },
 
+            // _showFab1(subjective, complain, date) {
+            //     if (this.normal === true) {
+            //         if (!complain || !date) {
+            //             this.favrighthide = true;
+            //         } else {
+            //             this.favrighthide = false;
+            //         }
+            //     }
+            //     else {
+            //         if (!subjective || !date) {
+            //             this.favrighthide = true;
+            //         } else {
+            //             this.favrighthide = false;
+            //         }
+            //     }
+            // },
+
             _select1(e) {
                 this.entryanimation = "slide-from-left-animation";
                 this.exitanimation = "slide-right-animation";
@@ -940,7 +1033,8 @@
                             created: today,
                             laboratory: this.laboratory,
                             pe: this.pe,
-                            plan: this.plan
+                            plan: this.plan,
+                            clinic_location: this.myLocation
                         }
 
                         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
@@ -1043,6 +1137,11 @@
                         this.favlefthide = false;
                         this.favrighthide = true;
                     }
+
+                    // if (this.selectedPage == 2) {
+                    //     this.favlefthide = false;
+                    //     this.favrighthide = true;
+                    // }
 
                     if (parseInt(this.selectedPage) !== 2) {
 
