@@ -291,39 +291,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                           <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                         </div>
                         <div id="{{item.$key}}" style=" margin-left:10px;">
-                          <!-- <div style="font-size:11px" class="longText">[[item.no]]</div> -->
                           <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
                           <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
                           <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}} [[item.patientinfo.gender]]</div>
                           <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
-                          <!-- <div class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div> -->
-                          <!-- <div class="longText">[[_hmo(item.insurance.primary_insurance)]]</div> -->
 
-                          <!-- <div style="padding:16px;"> -->
-                          <!-- <div class="primary">[[item.patient]]</div> -->
-                          <!-- <div class="shortText">{{_date(item.timestamp)}}</div> -->
-                          <div id="{{item.$key}}" style="margin-top:16px;">
+                          <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
                             <span id="{{item.$key}}" class="longText">Chief Complaint</span>
                             <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
-                            <!-- <div hidden$="{{!item.history}}">
-                            <span class="longText">History</span>
-                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.history}}</div>
-                          </div> -->
-                            <!-- <hr> -->
-                            <!-- <div hidden$="{{!item.diagnosis}}">
-                            <span class="longText">Diagnosis</span>
-                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.diagnosis}}</div>
-                          </div> -->
-                            <!-- <hr> -->
-                            <!-- <div hidden$="{{!item.treatment}}">
-                            <span class="longText">Treatment</span>
-                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.treatment}}</div>
-                          </div> -->
+                          </div>
+
+                          <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkSOAP(item.template)}}">
+                            <span id="{{item.$key}}" class="longText">Subjective</span>
+                            <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
                           </div>
 
                         </div>
                       </div>
-                      <!-- </div> -->
 
                     </div>
 
@@ -517,6 +501,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           return '';
         }
+      },
+
+      _checkNormal(e) {
+        if (e === "Normal") return false;
+        else return true;
+      },
+
+      _checkSOAP(e) {
+        if (e === "SOAP") return false;
+        else return true;
       },
 
       _comma(e) {

@@ -1,24 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
-<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
-<link rel="import" href="../bower_components/neon-animation/web-animations.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
-<link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html">
-<link rel="import" href="../bower_components/paper-time-input/paper-time-input.html">
 <link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 
 <!-- <link rel="import" href="short-unique-id.html"> -->
 <!-- <link rel="import" href="video-gallery.html"> -->
@@ -56,107 +39,23 @@
                 margin-right: 15px;
             }
 
-            paper-item {
-                height: 64px;
-            }
-
-            .mnu {
-                padding: 16px;
-            }
-
-            paper-fab {
-                background: #1976d2;
-            }
-
-            .labelitem {
-                padding: 0px;
-                margin: 0;
-            }
-
-
-
             @media (min-width: 800px) {
-                .footer {
-                    position: absolute;
-                    bottom: 16px;
-                    width: 100%;
-                }
-                .paper-fab-0 {
-                    position: absolute;
-                    left: 48px;
-                    bottom: 48px;
-                }
-
-                .paper-fab-1 {
-                    position: absolute;
-                    right: 48px;
-                    bottom: 48px;
-                }
-
-                .vid-6 {
-                    width: 30%;
-                }
-
                 .galleryHolder {
                     padding: 16px;
                     border: 1px solid gray
                 }
-
-                /* .vid-m-6 {
-                    width: 90%;
-                    height: 50%
-                } */
             }
 
             @media (max-width: 800px) {
-                .paper-fab-0 {
-                    position: absolute;
-                    left: 16px;
-                    bottom: 48px;
-                }
-
-                .paper-fab-1 {
-                    position: absolute;
-                    right: 16px;
-                    bottom: 48px;
-                }
-
                 .docu {
                     margin-left: 16px;
                     margin-right: 16px;
-                }
-
-                .vid-s-9 {
-                    width: 90%;
                 }
 
                 .galleryHolder {
                     padding: 6px;
                     border: 1px solid gray
                 }
-            }
-
-            paper-button.green {
-                background-color: var(--paper-green-500);
-                color: white;
-            }
-
-
-            datetime-picker.begin {
-                --datetime-selected-background: #2362EC;
-                --datetime-background: #071533;
-                --datetime-color: #eeeeee;
-            }
-
-            datetime-picker.end {
-                --datetime-selected-background: #CC1C1C;
-                --datetime-background: #071533;
-                --datetime-color: #eeeeee;
-            }
-
-            paper-item:hover {
-                background: rgba(104, 58, 183, 0.26);
-                cursor: pointer;
             }
 
             .avatar {
@@ -171,10 +70,6 @@
                 padding: 0 16px;
                 @apply --layout-flex;
                 @apply --layout-vertical;
-            }
-
-            .col-md {
-                padding: 6px;
             }
 
             .primary {
@@ -192,43 +87,6 @@
                 /* display: none; */
             }
 
-            /* #textera {
-                padding: 16px;
-                font-size: 14px;
-                font-weight: 300;
-                width: 95%;
-                font-family: Arial;
-            } */
-
-            #list {
-                border: 2px solid #ddbff5;
-                padding: 0;
-            }
-
-            #item {
-                height: 0;
-                font-size: 15px;
-            }
-
-            paper-textarea {
-                --paper-input-container: {
-                    background-color: #ede7f1;
-                    /* margin-right: 8px; */
-                }
-
-            }
-
-            #attachment-icon {
-                float: right;
-                cursor: pointer;
-                bottom: 16px;
-                left: 10px;
-            }
-
-            #attachment-icon:hover {
-                color: dimgray;
-            }
-
             #gallery-image:hover {
                 opacity: 0.7;
             }
@@ -238,65 +96,14 @@
             }
         </style>
 
+        <firebase-query id="query" path="/{{myKey}}/cases" order-by-key equal-to="{{viewKey}}" data="{{mycases}}">
+        </firebase-query>
+
+        <firebase-query id="query" path="/{{myKey}}/cases/{{viewKey}}/attachment" data="{{myimaging}}">
+        </firebase-query>
+
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
-            <!-- <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
-                <div class="mnu" role="listbox"> -->
-            <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
-            <!-- on-tap="_selectPage" data-args="0" -->
-            <!-- <paper-item id="chiefComplain" on-tap="{{select(0)}}">
-                        <div class="circle-mini-first">1</div>
-                        <span>Chief Complain</span>
-                    </paper-item> -->
-
-            <!-- on-tap="_selectPage" data-args="1" -->
-            <!-- <paper-item id="history" on-tap="{{select(1)}}">
-                        <div class="circle-mini">2</div>
-                        <span>History</span>
-                    </paper-item> -->
-
-            <!-- on-tap="_selectPage" data-args="2" -->
-            <!-- <paper-item id="diagnosis" on-tap="{{select(2)}}">
-                        <div class="circle-mini">3</div>
-                        <span>Diagnosis</span>
-                    </paper-item> -->
-
-            <!-- on-tap="_selectPage" data-args="3" -->
-            <!-- <paper-item id="treatment" on-tap="{{select(3)}}">
-                        <div class="circle-mini-last">4</div>
-                        <span>Treatment</span>
-                    </paper-item> -->
-
-            <!-- on-tap="_selectPage" data-args="4" -->
-            <!-- <paper-item id="healthRecords" on-tap="{{select(4)}}">
-                        <div class="circle-mini">5</div>
-                        <span>Finalize</span>
-                    </paper-item> -->
-
-            <!-- on-tap="_selectPage" data-args="5" -->
-            <!-- <paper-item id="treatment" on-tap="{{select(5)}}">
-                        <div class="circle-mini-last">6</div>
-                        <span>Complete</span>
-                    </paper-item> -->
-
-            <!-- on-tap="_selectPage" data-args="6" -->
-            <!-- <paper-item id="nextVisit" on-tap="{{select(6)}}">
-                        <div class="circle-mini">7</div>
-                        <span>Next Visit Schedule</span>
-                    </paper-item> -->
-
-            <!-- on-tap="_selectPage" data-args="7" -->
-            <!-- <paper-item id="billing" on-tap="{{select(7)}}">
-                        <div class="circle-mini-last">8</div>
-                        <span>Billing</span>
-                    </paper-item> -->
-            <!-- </iron-selector> -->
-            <!-- </div>
-            </app-drawer> -->
-
             <app-header-layout id="appheader" has-scrolling-region>
-
-                <firebase-query id="query" path="/{{myKey}}/cases" order-by-key equal-to="{{viewKey}}" data="{{mycases}}">
-                </firebase-query>
 
                 <app-header fixed slot="header">
                     <app-toolbar>
@@ -304,23 +111,7 @@
                             <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
                         </a>
                         <div main-title>View Visit</div>
-                        <!-- <paper-menu-button>
-                            <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
-                            <paper-listbox style="cursor:pointer" slot="dropdown-content">
-                                <paper-item>Discard</paper-item>
-                                <paper-item>Delete</paper-item>
-                            </paper-listbox>
-                        </paper-menu-button> -->
-                        <!-- <paper-icon-button noink style="color: white;" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button> -->
                     </app-toolbar>
-                    <!-- <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3.5%;">
-                        <img class="avatar" src="{{profile}}"></img>
-                        <div class="pad">
-                            <div class="primary">{{name}}</div>
-                            <div class="shortText"></div>
-                            <div class="longText"></div>
-                        </div>
-                    </app-toolbar> -->
                 </app-header>
 
                 <div class="docu">
@@ -336,130 +127,78 @@
                     </div>
                 </div>
 
-                <firebase-query id="query" path="/{{myKey}}/cases/{{viewKey}}/attachment" data="{{myimaging}}">
-                </firebase-query>
+                <div class="docu" style="margin-top:-16px;">
+                    <div class="details">
+                        <div style="margin-bottom:16px;">
+                            <iron-icon icon="my-icons:watch-later"></iron-icon>
+                            <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                        </div>
 
-                <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
-                    <neon-animatable>
-                        <div class="docu" style="margin-top:-16px;">
-                            <div class="details">
-                                <div style="margin-bottom:16px;">
-                                    <iron-icon icon="my-icons:watch-later"></iron-icon>
-                                    <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
-                                    <!-- <paper-icon-button on-tap="_showAttach" id="attachment-icon" icon="my-icons:attachment" title="attacments"></paper-icon-button> -->
-                                </div>
+                        <div hidden$="{{!complain}}">
+                            <span class="longText">Chief Complaint</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{complain}}</div>
+                        </div>
 
-                                <span class="longText">Chief Complaint</span>
-                                <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{complain}}</div>
+                        <div hidden$="{{!subjective}}">
+                            <span class="longText">Subjective</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{subjective}}</div>
+                        </div>
 
-                                <div hidden$="{{!history}}">
-                                    <span class="longText">History</span>
-                                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{history}}</div>
-                                </div>
+                        <div hidden$="{{!objective}}">
+                            <span class="longText">Objective</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{objective}}</div>
+                        </div>
 
-                                <div hidden$="{{!laboratory}}">
-                                    <span class="longText">Laboratory</span>
-                                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{laboratory}}</div>
-                                </div>
+                        <div hidden$="{{!assessment}}">
+                            <span class="longText">Assessment</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{assessment}}</div>
+                        </div>
 
-                                <div hidden$="{{!imaging}}">
-                                    <span class="longText">Imaging</span>
-                                    <div class="galleryHolder">
-                                        <sl-gallery id="gallery">
-                                            <!-- <template is="dom-repeat" items="{{myimaging}}">
+                        <div hidden$="{{!history}}">
+                            <span class="longText">History</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{history}}</div>
+                        </div>
+
+                        <div hidden$="{{!laboratory}}">
+                            <span class="longText">Laboratory</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{laboratory}}</div>
+                        </div>
+
+                        <div hidden$="{{!imaging}}">
+                            <span class="longText">Imaging</span>
+                            <div class="galleryHolder">
+                                <sl-gallery id="gallery">
+                                    <!-- <template is="dom-repeat" items="{{myimaging}}">
                                                 <sl-gallery-image src="[[item.url]]" small="[[item.url]]"></sl-gallery-image>
                                             </template> -->
-                                        </sl-gallery>
-                                    </div>
-                                </div>
-                                <br>
-
-                                <div hidden$="{{!pe}}">
-                                    <span class="longText">Physical Exam</span>
-                                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{pe}}</div>
-                                </div>
-
-                                <div hidden$="{{!diagnosis}}">
-                                    <span class="longText">Diagnosis</span>
-                                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{diagnosis}}</div>
-                                </div>
-
-                                <div hidden$="{{!treatment}}">
-                                    <span class="longText">Treatment</span>
-                                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{treatment}}</div>
-                                </div>
-
-                                <div hidden$="{{!plan}}">
-                                    <span class="longText">Plan</span>
-                                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{plan}}</div>
-                                </div>
-
-                                <!-- <firebase-query id="query" path="/{{myKey}}/cases/{{viewKey}}/attachment" data="{{myattachment}}">
-                                </firebase-query>
-
-                                <div id="attach" style="display:none">
-                                    <div style="font-size:14px; margin-top: 6px;">Attachment</div>
-                                    <div style="padding:10px">
-                                        <span class="longText">{{noattch}}</span>
-                                    </div>
-                                    <ul style="margin-top:-10px">
-                                        <template is="dom-repeat" items="[[myattachment]]">
-                                            <li>
-                                                <a href="{{item.url}}" target="_blank">[[item.name]]</a>
-                                            </li>
-                                        </template>
-                                    </ul>
-                                </div>
-                            </div> -->
+                                </sl-gallery>
                             </div>
                         </div>
-                    </neon-animatable>
+                        <br>
 
-                    <!-- <neon-animatable>
-                        <div class="docu" style="margin-top:-16px;">
-                            <div class="details">
-                                <div>
-                                    <paper-icon-button on-tap="_hideAttach" style="bottom:16px; right:16px" icon="my-icons:close" title="close"></paper-icon-button>
-                                </div>
-
-                                <firebase-query id="query" path="/{{myKey}}/cases/{{viewKey}}/attachment" data="{{myimage}}" order-by-child="type" equal-to="image">
-                                </firebase-query>
-                                Images
-                                <div style="padding:16px; text-align:center; border: 1px solid gray">
-                                    {{imageTxt}}
-                                    <sl-gallery>
-                                        <template is="dom-repeat" items="{{myimage}}">
-                                            <sl-gallery-image preload fade src="[[item.url]]" small="[[item.url]]"></sl-gallery-image>
-                                        </template>
-                                    </sl-gallery>
-                                </div>
-                                <br>
-
-                                <firebase-query id="query" path="/{{myKey}}/cases/{{viewKey}}/attachment" data="{{myvideo}}" order-by-child="type" equal-to="video">
-                                </firebase-query>
-                                Videos
-                                <div style="padding:16px; text-align:center; border: 1px solid gray">
-                                    {{videoTxt}}
-                                    <template is="dom-repeat" items="{{myvideo}}">
-                                        <video class="imgh vid-6 vid-s-9" controls preload="auto" id="[[item.url]]" src="[[item.url]]"></video>
-                                    </template>
-                                </div>
-                            </div>
+                        <div hidden$="{{!pe}}">
+                            <span class="longText">Physical Exam</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{pe}}</div>
                         </div>
-                    </neon-animatable> -->
-                </neon-animated-pages>
+
+                        <div hidden$="{{!diagnosis}}">
+                            <span class="longText">Diagnosis</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{diagnosis}}</div>
+                        </div>
+
+                        <div hidden$="{{!treatment}}">
+                            <span class="longText">Treatment</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{treatment}}</div>
+                        </div>
+
+                        <div hidden$="{{!plan}}">
+                            <span class="longText">Plan</span>
+                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{plan}}</div>
+                        </div>
+                    </div>
+                </div>
 
             </app-header-layout>
-
-            <div class="footer">
-                <div hidden$="[[favlefthide]]">
-                    <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
-                </div>
-                <div hidden$="[[favrighthide]]">
-                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
-                </div>
-            </div>
-
         </app-drawer-layout>
 
     </template>
@@ -479,58 +218,9 @@
                     type: Boolean,
                     notify: true
                 },
-                selectedPage: Number,
-                entryanimation: {
-                    type: String,
-                    value: "fade-in-animation"
-                },
-                exitanimation: {
-                    type: String,
-                    value: "fade-out-animation"
-                },
-                favlefthide: {
-                    type: Boolean,
-                    value: true
-                },
-                favrighthide: {
-                    type: Boolean,
-                    value: false
-                },
-                history: {
-                    type: String,
-                    value: ''
-                },
-                laboratory: {
-                    type: String,
-                    value: ''
-                },
                 imaging: {
                     type: Boolean,
                     value: false
-                },
-                pe: {
-                    type: String,
-                    value: ''
-                },
-                diagnosis: {
-                    type: String,
-                    value: ''
-                },
-                treatment: {
-                    type: String,
-                    value: ''
-                },
-                plan: {
-                    type: String,
-                    value: ''
-                },
-                myimage: {
-                    type: Object,
-                    observer: '_myimageChanged'
-                },
-                myvideo: {
-                    type: Object,
-                    observer: '_myvideoChanged'
                 },
                 myimaging: {
                     type: Object,
@@ -549,32 +239,6 @@
                         el.setAttribute('id', 'gallery-image');
                         gallery.appendChild(el);
                     });
-                }
-            },
-
-            _showAttach() {
-                this.selectedPage = 1;
-            },
-
-            _hideAttach() {
-                this.selectedPage = 0;
-            },
-
-            _myvideoChanged(e) {
-                if (e.length > 0) {
-                    this.videoTxt = '';
-                }
-                else {
-                    this.videoTxt = 'No Videos Attach';
-                }
-            },
-
-            _myimageChanged(e) {
-                if (e.length > 0) {
-                    this.imageTxt = '';
-                }
-                else {
-                    this.imageTxt = 'No Images Attach';
                 }
             },
 
@@ -650,6 +314,9 @@
                     this.pe = e[0].pe;
                     this.imaging = e[0].imaging;
                     this.plan = e[0].plan;
+                    this.subjective = e[0].subjective;
+                    this.objective = e[0].objective;
+                    this.assessment = e[0].assessment;
 
                     if (e[0].profile) {
                         this.profile = e[0].profile;
@@ -668,12 +335,6 @@
 
                     this.date = date.toLocaleTimeString("en-us", options);
                 }
-            },
-
-            ready() {
-                this.selectedPage = 0;
-                this.favrighthide = true;
-                this.favlefthide = true;
             },
 
             _timeStampToDateTime(ts) {

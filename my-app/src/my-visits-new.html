@@ -18,6 +18,7 @@
 <link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html">
 <link rel="import" href="../bower_components/paper-time-input/paper-time-input.html">
 <link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
 
 <link rel="import" href="time-element.html">
 <link rel="import" href="shared-styles.html">
@@ -141,10 +142,9 @@
                 }
 
                 .divHolder {
-                    display: flex;
+                    display: block;
                 }
             }
-
 
             paper-button.green {
                 background-color: var(--paper-green-500);
@@ -233,6 +233,19 @@
 
             #gallery-image {
                 transition: 0.3s;
+            }
+
+            .textTemp {
+                color: rgb(100, 100, 100);
+                font-weight: 500;
+                font-size: 14px;
+                margin-top: 32px;
+                margin-left: 16px;
+            }
+
+            .large {
+                --paper-avatar-width: 150px;
+                cursor: pointer;
             }
         </style>
 
@@ -442,25 +455,26 @@
 
                     </neon-animatable>
 
-                    <!-- <neon-animatable>
+                    <neon-animatable>
+                        <div class="textTemp"> Choose a template </div>
                         <div class="divHolder">
                             <div class="div1" align="center">
-                        <div on-tap="_selectNormal" class="docu" align="center" style="cursor: pointer;">
-                            <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
-                            <h3>Normal</h3>
-                        </div>
-                        </div>
+                                <div on-tap="_selectNormal" class="docu2" align="center">
+                                    <paper-avatar class="large" label="Normal"></paper-avatar>
+                                    <h3>Normal</h3>
+                                </div>
+                            </div>
                             <div class="div1" align="center">
-                        <div on-tap="_selectSOAP" class="docu" align="center" style="cursor: pointer;">
-                            <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
-                            <h3>SOAP</h3>
-                        </div>
-                        </div>
+                                <div on-tap="_selectSOAP" class="docu2" align="center">
+                                    <paper-avatar class="large" label="SOAP"></paper-avatar>
+                                    <h3>SOAP</h3>
+                                </div>
+                            </div>
                         </div>
                         <br>
                         <br>
                         <br>
-                    </neon-animatable> -->
+                    </neon-animatable>
 
                     <neon-animatable>
                         <div class="docu">
@@ -476,7 +490,7 @@
                                 <paper-textarea hidden="{{soap}}" label="History" value="{{history}}"></paper-textarea>
                                 <paper-textarea hidden="{{soap}}" label="Laboratory" value="{{laboratory}}"></paper-textarea>
 
-                                <paper-textarea hidden="{{normal}}" label="Subjective" value="{{subjective}}"></paper-textarea>
+                                <paper-textarea hidden="{{normal}}" label="Subjective *" value="{{subjective}}"></paper-textarea>
                                 <paper-textarea hidden="{{normal}}" label="Objective" value="{{objective}}"></paper-textarea>
                                 <paper-textarea hidden="{{normal}}" label="Assessment" value="{{assessment}}"></paper-textarea>
 
@@ -563,7 +577,8 @@
                     value: true
                 },
                 complain: {
-                    type: String
+                    type: String,
+                    value: ''
                 },
                 history: {
                     type: String,
@@ -625,12 +640,14 @@
                 myimaging: Object,
                 mycases: Object,
                 normal: Boolean,
-                soap: Boolean
+                soap: Boolean,
+                template: String
             },
 
             _selectNormal() {
                 this.normal = true;
                 this.soap = false;
+                this.template = 'Normal';
                 this.entryanimation = "slide-from-right-animation";
                 this.exitanimation = "slide-left-animation";
                 this.selectedPage = parseInt(this.selectedPage) + 1;
@@ -639,6 +656,7 @@
             _selectSOAP() {
                 this.normal = false;
                 this.soap = true;
+                this.template = 'SOAP';
                 this.entryanimation = "slide-from-right-animation";
                 this.exitanimation = "slide-left-animation";
                 this.selectedPage = parseInt(this.selectedPage) + 1;
@@ -785,8 +803,7 @@
 
             observers: [
                 '_patientChanged(filterValue)',
-                // '_showFab1(subjective, complain, todayDate)',
-                '_showFab1(complain, todayDate)',
+                '_showFab1(subjective, complain, todayDate)',
                 '_mypatientInfoChanged(patientInfo)',
                 '_myimagingChanged(myimaging)',
                 '_myattachmentChaged(myattachment)',
@@ -936,48 +953,40 @@
                 }
             },
 
-            _showFab1(complain, date) {
-                if (!complain || !date) {
-                    this.favrighthide = true;
-                } else {
-                    this.favrighthide = false;
+            _showFab1(subjective, complain, date) {
+                if (this.normal === true) {
+                    if (!complain || !date) {
+                        this.favrighthide = true;
+                    } else {
+                        this.favrighthide = false;
+                    }
+                }
+                else {
+                    if (!subjective || !date) {
+                        this.favrighthide = true;
+                    } else {
+                        this.favrighthide = false;
+                    }
                 }
             },
-
-            // _showFab1(subjective, complain, date) {
-            //     if (this.normal === true) {
-            //         if (!complain || !date) {
-            //             this.favrighthide = true;
-            //         } else {
-            //             this.favrighthide = false;
-            //         }
-            //     }
-            //     else {
-            //         if (!subjective || !date) {
-            //             this.favrighthide = true;
-            //         } else {
-            //             this.favrighthide = false;
-            //         }
-            //     }
-            // },
 
             _select1(e) {
                 this.entryanimation = "slide-from-left-animation";
                 this.exitanimation = "slide-right-animation";
 
-                if (parseInt(this.selectedPage) <= 1) {
-                    if (parseInt(this.selectedPage) !== 0) {
-                        this.selectedPage = (parseInt(this.selectedPage) - 1);
+                if (this.selectedPage <= 2) {
+                    if (this.selectedPage != 0) {
+                        this.selectedPage = this.selectedPage - 1;
 
-                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
-                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");;
-
-                        if (this.selectedPage === 0) {
+                        if (this.selectedPage == 0) {
                             this.favlefthide = true;
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
                         }
 
                         if (this.selectedPage == 1) {
-                            this.favrighthide = false;
+                            this.favrighthide = true;
+                            this._clear();
                         }
                         else {
                             this.favrighthide = false;
@@ -990,7 +999,7 @@
                     }
                 }
                 else {
-                    this.selectedPage = 1;
+                    this.selectedPage = 2;
                 }
 
             },
@@ -998,12 +1007,11 @@
             _select2(e) {
                 this.entryanimation = "slide-from-right-animation";
                 this.exitanimation = "slide-left-animation";
-                if (parseInt(this.selectedPage) >= 0) {
+                if (this.selectedPage >= 0) {
 
                     this.favlefthide = false;
 
-                    if (parseInt(this.selectedPage) == 1) {
-
+                    if (this.selectedPage == 2) {
                         var key = this.mykey;
                         var mykey = this.myKey;
                         var myattachment = this.attachment;
@@ -1034,6 +1042,10 @@
                             laboratory: this.laboratory,
                             pe: this.pe,
                             plan: this.plan,
+                            subjective: this.subjective,
+                            objective: this.objective,
+                            assessment: this.assessment,
+                            template: this.template,
                             clinic_location: this.myLocation
                         }
 
@@ -1125,12 +1137,8 @@
                     }
 
                     if (this.selectedPage == 0) {
-                        if (!this.complain) {
-                            this.favrighthide = true;
-                        }
-                        else {
-                            this.favrighthide = false;
-                        }
+                        this.favlefthide = false;
+                        this.favrighthide = true;
                     }
 
                     if (this.selectedPage == 1) {
@@ -1138,16 +1146,16 @@
                         this.favrighthide = true;
                     }
 
-                    // if (this.selectedPage == 2) {
-                    //     this.favlefthide = false;
-                    //     this.favrighthide = true;
-                    // }
+                    if (this.selectedPage == 2) {
+                        this.favlefthide = true;
+                        this.favrighthide = true;
+                    }
 
-                    if (parseInt(this.selectedPage) !== 2) {
+                    if (this.selectedPage != 3) {
 
-                        this.selectedPage = (parseInt(this.selectedPage) + 1);
+                        this.selectedPage = this.selectedPage + 1;
 
-                        if (parseInt(this.selectedPage) == 1) {
+                        if (this.selectedPage == 1) {
                             // this.favrighthide = true;
                             Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
                             Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
@@ -1275,6 +1283,21 @@
                 var r = "";
                 while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
                 return r;
+            },
+
+            _clear() {
+                this.complain = '';
+                this.history = '';
+                this.laboratory = '';
+                this.pe = '';
+                this.diagnosis = '';
+                this.treatment = '';
+                this.plan = '';
+                this.attachment = '';
+
+                this.subjective = '';
+                this.objective = '';
+                this.assessment = '';
             },
 
             // guid: function () {

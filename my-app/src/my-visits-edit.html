@@ -302,17 +302,24 @@
                                 <div style="margin-left:4px;margin-top:-10px;">
                                     <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
                                 </div>
-                                <paper-textarea label="Chief complaint *" value="{{complain}}"></paper-textarea>
-                                <paper-textarea label="History" value="{{history}}"></paper-textarea>
-                                <paper-textarea label="Laboratory" value="{{laboratory}}"></paper-textarea>
+                                <paper-textarea hidden$="{{_checkNormal(template)}}" label="Chief complaint *" value="{{complain}}"></paper-textarea>
+                                <paper-textarea hidden$="{{_checkNormal(template)}}" label="History" value="{{history}}"></paper-textarea>
+                                <paper-textarea hidden$="{{_checkNormal(template)}}" label="Laboratory" value="{{laboratory}}"></paper-textarea>
+
+                                <paper-textarea hidden$="{{_checkSOAP(template)}}" label="Subjective *" value="{{subjective}}"></paper-textarea>
+                                <paper-textarea hidden$="{{_checkSOAP(template)}}" label="Objective" value="{{objective}}"></paper-textarea>
+                                <paper-textarea hidden$="{{_checkSOAP(template)}}" label="Assessment" value="{{assessment}}"></paper-textarea>
+
                                 <div style="font-size:16px; margin-top:16px;">Imaging</div>
                                 <div style="border:1px solid gray; padding:6px;">
                                     <input on-change="_changeAttach" type="file" id="myFile" accept="image/*" multiple="multiple" />
                                     <output style="font-size:14px;" id="fileList"></output>
                                 </div>
-                                <paper-textarea label="Physical Exam" value="{{pe}}"></paper-textarea>
-                                <paper-textarea label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
-                                <paper-textarea label="Treatment" value="{{treatment}}"></paper-textarea>
+
+                                <paper-textarea hidden$="{{_checkNormal(template)}}" label="Physical Exam" value="{{pe}}"></paper-textarea>
+                                <paper-textarea hidden$="{{_checkNormal(template)}}" label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
+                                <paper-textarea hidden$="{{_checkNormal(template)}}" label="Treatment" value="{{treatment}}"></paper-textarea>
+
                                 <paper-textarea label="Plan" value="{{plan}}"></paper-textarea>
                             </div>
                         </div>
@@ -461,6 +468,18 @@
                     type: Object,
                     value: ''
                 },
+                subjective: {
+                    type: String,
+                    value: ''
+                },
+                objective: {
+                    type: String,
+                    value: ''
+                },
+                assessment: {
+                    type: String,
+                    value: ''
+                },
                 mykey: String,
                 myimage: {
                     type: Object,
@@ -487,7 +506,8 @@
                 lastPushTime: {
                     type: Number,
                     value: 0
-                }
+                },
+                template: String
             },
 
             // _removeChanged(e) {
@@ -664,6 +684,11 @@
                     this.mykey = this.mycases[0].patientkey;
                     this.timestamp = this.mycases[0].timestamp;
                     this.todayDate = this.mycases[0].created;
+                    this.subjective = this.mycases[0].subjective;
+                    this.objective = this.mycases[0].objective;
+                    this.assessment = this.mycases[0].assessment;
+                    this.template = this.mycases[0].template;
+
                     if (this.editKey) {
                         this.path = '/' + this.myKey + '/cases';
                         this.myNewPatientKey = this.mycases[0].patientkey;
@@ -684,6 +709,16 @@
                 this.orderby = '/' + this.myKey + '/patients';
             },
 
+            _checkNormal(e) {
+                if (e === "Normal") return false;
+                else return true;
+            },
+
+            _checkSOAP(e) {
+                if (e === "SOAP") return false;
+                else return true;
+            },
+
             _comma(e) {
                 if (e) {
                     return ',';
@@ -699,11 +734,12 @@
             ready() {
                 this.selectedPage = 0;
                 this.favlefthide = true;
+                this.favrighthide = false;
                 this.storeDate = this.todayDate;
             },
 
             observers: [
-                '_showFab1(complain, todayDate)',
+                '_showFab1(subjective, complain, todayDate)',
                 '_todayDateChanged(todayDate)'
             ],
 
@@ -752,11 +788,22 @@
                 }
             },
 
-            _showFab1(complain, date) {
-                if (!complain || !date) {
-                    this.favrighthide = true;
-                } else {
-                    this.favrighthide = false;
+            _showFab1(subjective, complain, date) {
+                if (this.template) {
+                    if (this.template === "Normal") {
+                        if (!complain || !date) {
+                            this.favrighthide = true;
+                        } else {
+                            this.favrighthide = false;
+                        }
+                    }
+                    else {
+                        if (!subjective || !date) {
+                            this.favrighthide = true;
+                        } else {
+                            this.favrighthide = false;
+                        }
+                    }
                 }
             },
 
@@ -814,6 +861,7 @@
                         var order = this.timestamp;
                         var oldPushKey;
                         var location = this.myLocation;
+                        var subjective = this.subjective, objective = this.objective, assessment = this.assessment;
 
                         if (this.isDateChanged === true) {
                             oldPushKey = this.editKey;
@@ -857,6 +905,9 @@
                                         order: order,
                                         created: today,
                                         clinic_location: location,
+                                        subjective: subjective,
+                                        objective: objective,
+                                        assessment: assessment,
                                         patientinfo: {
                                             num: patient.val().no,
                                             birthday: patient.val().personal.birthday,
@@ -898,6 +949,9 @@
                                         order: order,
                                         created: today,
                                         clinic_location: location,
+                                        subjective: subjective,
+                                        objective: objective,
+                                        assessment: assessment,
                                         patientinfo: {
                                             num: patient.val().no,
                                             birthday: patient.val().personal.birthday,
