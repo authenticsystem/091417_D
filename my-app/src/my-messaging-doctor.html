@@ -1,0 +1,257 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-messaging-doctor">
+    <template>
+        <style include="shared-styles">
+            :host {
+                height: 100vh;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            @media (max-width: 768px) {
+                .textArea {
+                    width: 85%;
+                    margin-top: -16px;
+                    margin-bottom: 3px;
+                }
+
+                .footer {
+                    width: 96.7%;
+                }
+            }
+
+            @media (min-width: 768px) {
+                .textArea {
+                    width: 95%;
+                    margin-top: -16px;
+                    margin-bottom: 3px;
+                }
+
+                .footer {
+                    width: 98.6%;
+                }
+
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            app-drawer {
+                --app-drawer-content-container: {
+                    background-color: #F4F5F6;
+                }
+            }
+
+            paper-item {
+                height: 64px;
+                border: 1px solid rgb(135, 177, 219);
+            }
+
+            paper-item:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
+
+            app-drawer-layout:not([narrow]) [drawer-toggle] {
+                display: none;
+            }
+
+            .mnu {
+                padding: 13px;
+                overflow: auto;
+                height: 96%;
+            }
+
+            .footer {
+                position: absolute;
+                bottom: 0;
+                overflow: hidden;
+                background-color: white;
+                color: black;
+                padding: 6px;
+                box-shadow: 3px 3px 50px 1px rgb(155, 155, 155);
+                @apply --layout-horizontal;
+            }
+
+            .messageHolder {
+                padding: 16px;
+                overflow: auto;
+                height: 82%;
+            }
+
+            .me {
+                padding: 10px;
+                font-size: 14px;
+                background: white;
+                border-radius: 6px;
+                margin-top: 6px;
+                /* width: 50%; */
+                float: right;
+                clear: both;
+            }
+
+            .you {
+                padding: 10px;
+                font-size: 14px;
+                background: white;
+                border-radius: 6px;
+                margin-top: 6px;
+                float: left;
+                clear: both;
+                /* width: 50%; */
+            }
+
+            .small {
+                --paper-avatar-width: 30px;
+            }
+        </style>
+
+        <firebase-query id="query" path="/{{myKey}}/secretary" data="{{mySecretary}}"></firebase-query>
+
+        <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+            <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
+                <paper-listbox class="mnu" selected="{{selectedContact}}" attr-for-selected="name">
+                    <template is="dom-repeat" items="[[mySecretary]]">
+                        <paper-item name="[[item.$key]]">
+                            <paper-avatar class="small" label="[[item.name.firstname]]"></paper-avatar>
+                            <span style="margin-left:6px;">[[item.name.firstname]] [[item.name.middlename]] [[item.name.lastname]]</span>
+                        </paper-item>
+                    </template>
+                </paper-listbox>
+            </app-drawer>
+
+            <app-header-layout fullbleed has-scrolling-region>
+                <app-header fixed slot="header">
+                    <app-toolbar primary>
+                        <paper-icon-button class="menu" icon="my-icons:menu" on-tap="toggleDrawer"></paper-icon-button>
+                        <div main-title>Messaging</div>
+                        <paper-icon-button class="menu" icon="my-icons:contacts" drawer-toggle></paper-icon-button>
+                    </app-toolbar>
+                </app-header>
+
+                <firebase-query id="query" path="/{{selectedContact}}/messages/{{myKey}}" data="{{myMessages}}"></firebase-query>
+
+                <div class="messageHolder">
+
+                    <template is="dom-repeat" items="[[myMessages]]">
+                        <div class$="[[_getClass(item.sender)]]">
+                            [[item.message]]
+                            <div style="color:gray; font-size:12px">
+                                <span style$="[[_getStyle(item.sender)]]">[[_getTime(item.time)]]</span>
+                            </div>
+                        </div>
+                    </template>
+
+                </div>
+                <div class="footer">
+                    <paper-textarea id="msgValue" class="textArea" value="{{msg}}" placeholder="Message .."></paper-textarea>
+                    <paper-icon-button id="sendBtn" on-tap="_sendMsg" icon="my-icons:send"></paper-icon-button>
+                </div>
+
+            </app-header-layout>
+        </app-drawer-layout>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'my-messaging-doctor',
+            properties: {
+                myKey: String,
+                myRole: String,
+                myLocation: String,
+                myLocationCode: String,
+                narrow: {
+                    type: Boolean,
+                    notify: true
+                }
+            },
+
+            observers: [
+                '_mySecretaryChanged(mySecretary.*)',
+                '_msgChanged(msg)'
+            ],
+
+            ready() {
+                this.$.sendBtn.disabled = true;
+                this.targetLocation = this.$.msgValue;
+            },
+
+            _msgChanged(e) {
+                if (e) {
+                    this.$.sendBtn.disabled = false;
+                }
+                else {
+                    this.$.sendBtn.disabled = true;
+                }
+            },
+
+            _mySecretaryChanged() {
+                if (this.mySecretary.length > 0) {
+                    this.selectedContact = this.mySecretary[0].code;
+                }
+            },
+
+            _sendMsg() {
+                if (this.msg) {
+                    var push = firebase.database().ref("/" + this.selectedContact + "/messages/" + this.myKey)
+                        .push({
+                            time: firebase.database.ServerValue.TIMESTAMP,
+                            message: this.msg,
+                            sender: this.myKey
+                        });
+                    if (push.key) {
+                        this.msg = '';
+                    }
+                }
+            },
+
+            // onEnter() {
+            //     this._sendMsg();
+            // },
+
+            _getClass(e) {
+                if (e === this.myKey) return 'me';
+                else return 'you';
+            },
+
+            _getStyle(e) {
+                if (e === this.myKey) return 'float: left;';
+                else return 'float: right;';
+            },
+
+            _getTime(e) {
+                var date = new Date(e);
+                return date.getHours() + ":" + date.getMinutes();
+            },
+
+            toggleDrawer() {
+                this.dispatchEvent(new CustomEvent('toggleDrawer', {
+                    bubbles: true, composed: true, detail: {
+                        narrow: this.$.narrow
+                    }
+                }));
+                this.$.narrow = !this.$.narrow;
+            }
+
+        })
+    </script>
+</dom-module>
