@@ -680,7 +680,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _locateNextQueue(myKey, queuePushkey, patientPushkey, myLocation, myLocationCode, pickDate) {
         var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocationCode + "/" + pickDate);
-        ref.then(function (snapshot) {
+        ref.once('value').then(function (snapshot) {
           if (snapshot.exists()) {
             ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
               if (hasNext.exists()) {
