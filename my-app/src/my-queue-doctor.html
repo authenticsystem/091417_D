@@ -305,6 +305,8 @@
                 <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Cancel Queue</paper-button>
                 <paper-button on-tap="_proceedToNext" hidden="{{!isNext}}" style="background: #3F51B5; margin-bottom: 6px; color: white; border-radius: 0;"
                     dialog-confirm>Proceed to next patient</paper-button>
+                <paper-button on-tap="_putToNext" hidden="{{isNext}}" style="background: #3F51B5; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Next</paper-button>
                 <paper-button on-tap="_changeQueueNo" hidden="{{isNext}}" style="background: #3F51B5; margin-bottom: 6px; color: white; border-radius: 0;"
                     dialog-confirm>Change Queue No</paper-button>
                 <paper-button on-tap="_addVisit" hidden="{{!isNext}}" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
@@ -615,14 +617,20 @@
 
                 ref.child(key).update({
                     isNext: false,
-                    isPriority: true,
-                    xy: "z"
+                    isPriority: false,
+                    xy: "z",
+                    queueNo: startNo
                 }).then(function () {
                     ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
                         if (!hasNext.exists()) {
                             ref.orderByChild("xy").startAt("y").limitToFirst(1).once("value").then(function (next) {
                                 if (next.exists()) {
-                                    ref.child(Object.keys(next.val())[0]).update({ isNext: true });
+                                    ref.child(Object.keys(next.val())[0]).update({
+                                        isNext: true,
+                                        queueNo: parseInt(queueNo)
+                                    }).then(function () {
+                                        ref.child(key).update({ xy: "y" });
+                                    });
                                 }
                             });
                         }
@@ -649,7 +657,7 @@
                 }).then(function () {
                     ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
                         if (!hasNext.exists()) {
-                            ref.orderByChild("xy").startAt("y").limitToFirst(1).once("value").then(function (next) {
+                            ref.orderByChild("queueNo").equalTo(startNo).once("value").then(function (next) {
                                 if (next.exists()) {
                                     ref.child(Object.keys(next.val())[0]).update({ isNext: true });
                                 }
@@ -662,6 +670,36 @@
                             patientRef.child(Object.keys(data.val())[0]).update({ isQueue: false });
                         }
                     });
+                });
+            },
+
+            _putToNext() {
+                var [key, queueNo] = this.selectedData.split('~');
+                var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocationCode + "/" + this.pickDate);
+
+                ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
+                    if (hasNext.exists()) {
+                        ref.child(Object.keys(hasNext.val())[0]).update({ isNext: false })
+                            .then(function () {
+                                ref.child(key).update({
+                                    isNext: true,
+                                    queueNo: Object.values(hasNext.val())[0].queueNo
+                                }).then(function () {
+                                    ref.orderByChild("queueNo").startAt(Object.values(hasNext.val())[0].queueNo).endAt(parseInt(queueNo)).once("value").then(function (update) {
+                                        if (update.exists()) {
+                                            update.forEach(element => {
+                                                if (!element.val().isNext) {
+                                                    ref.child(element.key).update({
+                                                        queueNo: element.val().queueNo + 1
+                                                    });
+                                                }
+                                            });
+
+                                        }
+                                    });
+                                });
+                            });
+                    }
                 });
             },
 
@@ -678,20 +716,53 @@
                 var location = this.myLocation;
                 var patientKey = this.editKey;
                 var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocationCode + "/" + this.pickDate);
-                var patientRef = firebase.database().ref("/" + this.myKey + "/patients");
+                // var patientRef = firebase.database().ref("/" + this.myKey + "/patients");
 
-                ref.orderByChild("queueNo").equalTo(parseInt(newQueueNo)).once("value").then(function (data) {
-                    if (data.exists()) {
-                        ref.child(Object.keys(data.val())[0]).update({ queueNo: parseInt(queueNo) })
-                            .then(function () {
-                                patientRef.child(Object.values(data.val())[0].patient_refKey).update({ queueNo: parseInt(queueNo) });
-                                ref.child(key).update({ queueNo: parseInt(newQueueNo) })
-                                    .then(function () {
-                                        patientRef.child(patientKey).update({ queueNo: parseInt(newQueueNo) });
+                if (queueNo > newQueueNo) {
+                    // console.log("daku ang queueNo");
+                    ref.child(key).update({ queueNo: parseInt(newQueueNo), xy: "x" }).then(function () {
+                        ref.orderByChild("queueNo").startAt(parseInt(newQueueNo)).endAt(parseInt(queueNo)).once("value").then(function (change) {
+                            if (change.exists()) {
+                                change.forEach(element => {
+                                    if (element.val().xy === "y") {
+                                        ref.child(element.key).update({ queueNo: element.val().queueNo + 1 });
+                                        // console.log(element.val());
+                                    }
+                                    else {
+                                        ref.child(element.key).update({ xy: 'y' });
+                                    }
+                                });
+                            }
+                        });
+                    });
+                }
+                else {
+                    // console.log("gamay ang queueNo");
+                    ref.orderByChild("queueNo").equalTo(parseInt(newQueueNo)).once("value").then(function (data) {
+                        if (data.exists()) {
+                            ref.child(Object.keys(data.val())[0]).update({ queueNo: parseInt(queueNo), xy: "x" })
+                                .then(function () {
+                                    ref.orderByChild("queueNo").startAt(parseInt(queueNo)).endAt(parseInt(newQueueNo)).once("value").then(function (change) {
+                                        if (change.exists()) {
+                                            change.forEach(element => {
+                                                if (element.val().xy === "y") {
+                                                    ref.child(element.key).update({ queueNo: element.val().queueNo + 1 });
+                                                    // console.log(element.val());
+                                                }
+                                                else {
+                                                    ref.child(element.key).update({ xy: 'y' });
+                                                }
+                                            });
+                                        }
                                     });
-                            });
-                    }
-                });
+                                    // patientRef.child(Object.values(data.val())[0].patient_refKey).update({ queueNo: parseInt(queueNo) });
+                                    // .then(function () {
+                                    //     patientRef.child(patientKey).update({ queueNo: parseInt(newQueueNo) });
+                                    // });
+                                });
+                        }
+                    });
+                }
             },
 
             _cancelChangeNo() {

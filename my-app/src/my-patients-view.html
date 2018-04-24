@@ -253,8 +253,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-menu-button horizontal-align="right">
               <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
               <paper-listbox style="cursor:pointer" slot="dropdown-content">
-                <paper-item hidden$="{{isQue}}" on-tap="_send2Que">Add to queue</paper-item>
-                <paper-item hidden$="{{!isQue}}" on-tap="_queInfo">Queue Info</paper-item>
+                <paper-item on-tap="_send2Que">Add to queue</paper-item>
+                <!-- <paper-item hidden$="{{!isQue}}" on-tap="_queInfo">Queue Info</paper-item> -->
               </paper-listbox>
             </paper-menu-button>
           </app-toolbar>
@@ -585,6 +585,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
     </salte-dialog>
 
+    <salte-dialog no-auto-fullscreen id="errDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2 style="font-size: 16px; background: #F44336">Request denied!</h2>
+      <span>Unable adding patient to queue.
+        <br>Patient already queued on {{doneQueueDate}}.</span>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus>OK</paper-button>
+      </div>
+    </salte-dialog>
+
   </template>
 
   <script>
@@ -616,7 +625,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         viewKey: String,
         personalQueue: Object,
-        filterValue: String
+        filterValue: String,
+        isQue: Boolean
       },
 
       observers: [
@@ -651,18 +661,87 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _addPatient2Queue() {
-        var push = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocationCode + "/" + this.todayDate).push({
-          patient_info: this.personalQueue,
-          patient_refKey: this.viewKey,
-          patient_no: this.no,
-          isCancel: false,
-          isPriority: false
-        });
+        var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocationCode + "/" + this.todayDate);
+        var err = this.$.errDialog;
+        var success = Polymer.dom(this.root).querySelector("#confirmDialog");
+        var personalQueue = this.personalQueue, patient_refKey = this.viewKey, patient_no = this.no;
+        var mykey = this.myKey, location = this.myLocation, location_code = this.myLocationCode;
+        var today = this.todayDate;
+        this.doneQueueDate = this.formatWeekDate(today);
 
-        if (push.key) {
-          this._locateNextQueue(this.myKey, push.key, this.viewKey, this.myLocation, this.myLocationCode, this.todayDate);
-          Polymer.dom(this.root).querySelector("#confirmDialog").open();
-        }
+        ref.orderByChild("patient_no").equalTo(patient_no).once("value").then(function (data) {
+          if (data.exists()) {
+            err.open();
+          }
+          else {
+            var push = ref.push({
+              patient_info: personalQueue,
+              patient_refKey: patient_refKey,
+              patient_no: patient_no,
+              isCancel: false,
+              isPriority: false
+            });
+
+            if (push.key) {
+              _locateNextQueue(mykey, push.key, patient_refKey, location, location_code, today);
+              success.open();
+            }
+          }
+
+          function _locateNextQueue(myKey, queuePushkey, patientPushkey, myLocation, myLocationCode, pickDate) {
+            var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocationCode + "/" + pickDate);
+            ref.once('value').then(function (snapshot) {
+              if (snapshot.exists()) {
+                ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
+                  if (hasNext.exists()) {
+                    ref.child(queuePushkey).update({
+                      isQueue: true,
+                      queueLocation: myLocation,
+                      isNext: false,
+                      queueNo: snapshot.numChildren(),
+                      xy: "y"
+                    }).then(function () {
+                      firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
+                        .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
+                    });
+                  }
+                  else {
+                    ref.child(queuePushkey).update({
+                      isQueue: true,
+                      queueLocation: myLocation,
+                      isNext: true,
+                      queueNo: snapshot.numChildren(),
+                      xy: "y"
+                    }).then(function () {
+                      firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
+                        .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
+                    });
+                  }
+                });
+              }
+              else {
+                ref.child(queuePushkey).update({
+                  isQueue: true,
+                  queueLocation: myLocation,
+                  isNext: true,
+                  queueNo: 1,
+                  xy: "y"
+                }).then(function () {
+                  firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
+                    .update({ isQueue: true, queueNo: 1, queueDate: pickDate, queueLocation: myLocation });
+                });
+              }
+            });
+          }
+
+        });
+        // if (this.isQue) {
+
+        // }
+        // else{
+        //   
+        // }
+
       },
 
       _send2Que() {
@@ -678,51 +757,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         Polymer.dom(this.root).querySelector("#queInfoDialog").open();
       },
 
-      _locateNextQueue(myKey, queuePushkey, patientPushkey, myLocation, myLocationCode, pickDate) {
-        var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocationCode + "/" + pickDate);
-        ref.once('value').then(function (snapshot) {
-          if (snapshot.exists()) {
-            ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
-              if (hasNext.exists()) {
-                ref.child(queuePushkey).update({
-                  isQueue: true,
-                  queueLocation: myLocation,
-                  isNext: false,
-                  queueNo: snapshot.numChildren(),
-                  xy: "y"
-                }).then(function () {
-                  firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                    .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
-                });
-              }
-              else {
-                ref.child(queuePushkey).update({
-                  isQueue: true,
-                  queueLocation: myLocation,
-                  isNext: true,
-                  queueNo: snapshot.numChildren(),
-                  xy: "y"
-                }).then(function () {
-                  firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                    .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
-                });
-              }
-            });
-          }
-          else {
-            ref.child(queuePushkey).update({
-              isQueue: true,
-              queueLocation: myLocation,
-              isNext: true,
-              queueNo: 1,
-              xy: "y"
-            }).then(function () {
-              firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                .update({ isQueue: true, queueNo: 1, queueDate: pickDate, queueLocation: myLocation });
-            });
-          }
-        });
-      },
+
 
       selectedPageChanged(e) {
         if (e == 0) {
