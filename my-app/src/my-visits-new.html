@@ -1021,7 +1021,7 @@
                         var order = firebase.database.ServerValue.TIMESTAMP;
                         var newPushKey;
                         var myQueue = this.myQueue;
-                        var queueKey = this.queueKey, myLocationCode = this.myLocationCode, queueDate = this.queueDate;
+                        var queueKey = this.queueKey, myLocation = this.myLocation, queueDate = this.queueDate;
 
                         if (today < this.formatTodayDate(new Date())) {
                             newPushKey = this.generatePushID(today);
@@ -1077,7 +1077,7 @@
 
                                         if (myQueue) {
                                             firebase.database().ref("/" + mykey + "/patients/" + key).update({ isQueue: false });
-                                            _locateNextQueue(mykey, queueKey, myLocationCode, queueDate)
+                                            _locateNextQueue(mykey, queueKey, myLocation, queueDate)
                                         }
 
                                         if (myattachment) {
@@ -1114,7 +1114,7 @@
 
                                         if (myQueue) {
                                             firebase.database().ref("/" + mykey + "/patients/" + key).update({ isQueue: false });
-                                            _locateNextQueue(mykey, queueKey, myLocationCode, queueDate)
+                                            _locateNextQueue(mykey, queueKey, myLocation, queueDate)
                                         }
 
                                         if (myattachment) {
@@ -1168,8 +1168,8 @@
                     this.favrighthide = true;
                 }
 
-                function _locateNextQueue(mykey, queueKey, myLocationCode, queueDate) {
-                    var ref = firebase.database().ref("/" + mykey + "/queue/" + myLocationCode + "/" + queueDate);
+                function _locateNextQueue(mykey, queueKey, myLocation, queueDate) {
+                    var ref = firebase.database().ref("/" + mykey + "/queue/" + myLocation + "/" + queueDate);
                     ref.child(queueKey).update({ isPriority: false, isNext: false, isQueue: false, xy: "x" }).then(function () {
                         ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
                             if (!hasNext.exists()) {

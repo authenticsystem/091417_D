@@ -1129,6 +1129,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var isQueue = this.myQueue;
             var locationCode = this.myLocationCode;
             var queueDate = this.queueDate;
+            var location = this.myLocation;
 
             var personalQueue = {
               firstname: this.personal.firstname,
@@ -1143,7 +1144,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
             var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
             var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-            var queueRef = firebase.database().ref("/" + mykey + "/queue/" + locationCode + "/" + queueDate);
+            var queueRef = firebase.database().ref("/" + mykey + "/queue/" + location + "/" + queueDate);
 
             saveLoad.style.display = 'block';
             ref.update({

@@ -687,7 +687,12 @@
                     this.subjective = this.mycases[0].subjective;
                     this.objective = this.mycases[0].objective;
                     this.assessment = this.mycases[0].assessment;
-                    this.template = this.mycases[0].template;
+
+                    if (this.mycases[0].template) {
+                        this.template = this.mycases[0].template;
+                    } else {
+                        this.template = "Normal";
+                    }
 
                     if (this.editKey) {
                         this.path = '/' + this.myKey + '/cases';

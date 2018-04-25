@@ -206,14 +206,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </app-route>
 
     <!-- live -->
-    <!-- <firebase-app auth-domain="p123-6256e.firebaseapp.com" database-url="https://p123-6256e.firebaseio.com" api-key="AIzaSyCV24k2Ev083HFXiASIj9g7RhvUi7C9J3w"
-      storage-bucket="p123-6256e.appspot.com">
-    </firebase-app> -->
+    <firebase-app auth-domain="p123-6256e.firebaseapp.com" database-url="https://p123-6256e.firebaseio.com" api-key="AIzaSyCV24k2Ev083HFXiASIj9g7RhvUi7C9J3w"
+      storage-bucket="p123-6256e.appspot.com" messaging-sender-id="291030422568">
+    </firebase-app>
 
     <!-- dev -->
-    <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com" api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ"
+    <!-- <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com" api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ"
       storage-bucket="emr-dev-c3005.appspot.com" messaging-sender-id="528097160886">
-    </firebase-app>
+    </firebase-app> -->
 
     <firebase-auth id="auth" status-known="{{statusKnown}}" user="{{user}}" provider="google" on-error="showError"></firebase-auth>
 
@@ -259,7 +259,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <iron-image preload fade class="avatar" sizing="cover" src$="{{_userImg(user.photoURL)}}"></iron-image>
                     <div class="pad">
                       <div hidden$="{{user.displayName}}" class="primary">{{user.email}}</div>
-                      <div hidden$="{{!user.displayName}}" class="primary">Dr. {{user.displayName}}</div>
+                      <div hidden$="{{!user.displayName}}" class="primary">{{user.displayName}}</div>
                       <div class="shortText">{{drTitle}}</div>
                       <div class="longText"></div>
                     </div>
@@ -364,7 +364,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a> -->
                   <span style="padding:20px; color:gray; font-size:12px;">
-                    v0.6.1
+                    v0.6.21
                   </span>
                 </iron-selector>
               </div>
@@ -421,7 +421,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             value: false
           },
-          mykey: String
+          mykey: String,
+          role: String
         };
       }
 

@@ -475,8 +475,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(caseses.timestamp)}}">{{_timeStampToDateTime(caseses.timestamp)}}</time-ago>
                     <br>
                     <br>
-                    <span class="longText">Chief Complaint</span>
-                    <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.complain}}</div>
+                    <div hidden$="{{!caseses.complain}}">
+                      <span class="longText">Chief Complaint</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.complain}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.subjective}}">
+                      <span class="longText">Subjective</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.subjective}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.objective}}">
+                      <span class="longText">Objective</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.objective}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.assessment}}">
+                      <span class="longText">Assessment</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.assessment}}</div>
+                    </div>
 
                     <div hidden$="{{!caseses.history}}">
                       <span class="longText">History</span>
@@ -661,7 +678,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _addPatient2Queue() {
-        var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocationCode + "/" + this.todayDate);
+        var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.todayDate);
         var err = this.$.errDialog;
         var success = Polymer.dom(this.root).querySelector("#confirmDialog");
         var personalQueue = this.personalQueue, patient_refKey = this.viewKey, patient_no = this.no;
@@ -689,7 +706,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
           function _locateNextQueue(myKey, queuePushkey, patientPushkey, myLocation, myLocationCode, pickDate) {
-            var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocationCode + "/" + pickDate);
+            var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocation + "/" + pickDate);
             ref.once('value').then(function (snapshot) {
               if (snapshot.exists()) {
                 ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {

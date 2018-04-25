@@ -310,13 +310,27 @@
                     this.diagnosis = e[0].diagnosis;
                     this.history = e[0].history;
                     this.treatment = e[0].treatment;
-                    this.laboratory = e[0].laboratory;
-                    this.pe = e[0].pe;
                     this.imaging = e[0].imaging;
-                    this.plan = e[0].plan;
-                    this.subjective = e[0].subjective;
-                    this.objective = e[0].objective;
-                    this.assessment = e[0].assessment;
+
+                    if (e[0].laboratory) this.laboratory = e[0].laboratory;
+                    else this.laboratory = '';
+
+                    if (e[0].pe) this.pe = this.pe = e[0].pe;
+                    else this.pe = '';
+
+                    if (e[0].plan) this.plan = e[0].plan;
+                    else this.plan = '';
+
+                    if (e[0].subjective) {
+                        this.subjective = e[0].subjective;
+                        this.objective = e[0].objective;
+                        this.assessment = e[0].assessment;
+                    }
+                    else {
+                        this.subjective = '';
+                        this.objective = '';
+                        this.assessment = '';
+                    }
 
                     if (e[0].profile) {
                         this.profile = e[0].profile;

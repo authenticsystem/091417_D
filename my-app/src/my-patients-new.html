@@ -1194,7 +1194,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var queuePushKey = '';
 
           if (add2Que) {
-            var queueRef = firebase.database().ref("/" + mykey + "/queue/" + myLocationCode + "/" + pickDate);
+            var queueRef = firebase.database().ref("/" + mykey + "/queue/" + myLocation + "/" + pickDate);
             var queuePush = queueRef.push({
               patient_info: this.personalQueue,
               patient_refKey: push.key,
@@ -1305,7 +1305,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _locateNextQueue(myKey, queuePushkey, patientPushkey, isQue, myLocation, myLocationCode, pickDate) {
-        var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocationCode + "/" + pickDate);
+        var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocation + "/" + pickDate);
         ref.once('value').then(function (snapshot) {
           if (snapshot.exists()) {
             ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
