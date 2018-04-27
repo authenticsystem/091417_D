@@ -58,7 +58,8 @@
     "chartjs-plugin-datalabels": "^0.2.0",
     "web-animations-js": "^2.3.1",
     "paper-avatar": "Abe90/paper-avatar#^1.0.4",
-    "salte-dialog": "salte-io/salte-dialog#^3.0.1"
+    "salte-dialog": "salte-io/salte-dialog#^3.0.1",
+    "vaadin-notification": "vaadin/vaadin-notification#^1.0.0"
   },
   "resolutions": {
     "polymer": "^2.0.0"

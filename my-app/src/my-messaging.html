@@ -34,11 +34,13 @@
 
         <template is="dom-if" if="{{myRole}}">
             <template is="dom-if" if="{{_secretary(myRole)}}">
-                <my-messaging-secretary my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}" my-role="{{myRole}}"></my-messaging-secretary>
+                <my-messaging-secretary route="{{route}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
+                    my-role="{{myRole}}" token="{{token}}"></my-messaging-secretary>
             </template>
 
             <template is="dom-if" if="{{_notSecretary(myRole)}}">
-                <my-messaging-doctor my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}" my-role="{{myRole}}"></my-messaging-doctor>
+                <my-messaging-doctor route="{{route}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
+                    my-role="{{myRole}}" token="{{token}}"></my-messaging-doctor>
             </template>
         </template>
 
@@ -50,7 +52,9 @@
                 myKey: String,
                 myRole: String,
                 myLocation: String,
-                myLocationCode: String
+                myLocationCode: String,
+                token: String,
+                route: Object
             },
 
             _secretary(e) {

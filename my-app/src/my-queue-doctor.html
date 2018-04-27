@@ -7,18 +7,18 @@
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-messaging.html">
 <link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/vaadin-notification/vaadin-notification.html">
 
 <link rel="import" href="my-patients-view.html">
 <link rel="import" href="my-patients-edit.html">
 <link rel="import" href="my-visits-new.html">
+<link rel="import" href="my-queue-patients.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -184,8 +184,6 @@
         <app-route route="{{route}}" pattern="/patient/edit/:key" data="{{editData}}" active="{{qPatientEditActive}}"></app-route>
         <app-route route="{{route}}" pattern="/patient/detail/:key" data="{{detailData}}" active="{{qPatientViewActive}}"></app-route>
 
-        <firebase-messaging id="messaging" token="{{token}}"></firebase-messaging>
-
         <div hidden$="{{!queueActive}}">
             <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
                 <div name="">
@@ -258,7 +256,8 @@
                         </iron-scroll-threshold>
 
                         <a href="/queue/new" id="queAdd"></a>
-                        <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_queueNew"></paper-fab>
+                        <a href="/queue/search" id="queSearch"></a>
+                        <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_openAddNew"></paper-fab>
 
                     </app-header-layout>
                 </div>
@@ -266,6 +265,12 @@
                 <div name="/new">
                     <div id="patientsnew"></div>
                     <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-new>
+                </div>
+
+                <div name="/search">
+                    <div id="patientsearch"></div>
+                    <my-queue-patients id="d24" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" my-location="{{myLocation}}"
+                        my-location-code="{{myLocationCode}}" limit="1"></my-queue-patients>
                 </div>
 
                 <div name="view404">Not found.</div>
@@ -286,7 +291,7 @@
 
         <div hidden$="{{!qVisitNewActive}}">
             <div id="newcase"></div>
-            <my-visits-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" queue-key="{{queueKey}}" queue-date="{{pickDate}}"
+            <my-visits-new id="d27" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" queue-key="{{queueKey}}" queue-date="{{pickDate}}"
                 my-location="{{myLocation}}" my-location-code="{{myLocationCode}}" filter-value="{{filterValue}}" my-limit="1"></my-visits-new>
         </div>
 
@@ -322,9 +327,11 @@
         <salte-dialog no-auto-fullscreen id="priorDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
             <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
             <span>
-                <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Cancel Queue</paper-button>
+                <!-- <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Cancel Queue</paper-button>
                 <paper-button on-tap="_addVisit" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Add Visit</paper-button>
-                <paper-button on-tap="_editPatient" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Edit Patient's Detail</paper-button>
+                <paper-button on-tap="_editPatient" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Edit Patient's Detail</paper-button> -->
+                <paper-button on-tap="_queueSearch" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Search existing patient</paper-button>
+                <paper-button on-tap="_queueNew" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Add new patient</paper-button>
             </span>
             <div class="buttons">
                 <paper-button dialog-dismiss>Close</paper-button>
@@ -353,6 +360,14 @@
             </div>
         </salte-dialog>
 
+        <vaadin-notification id="VQ_notification" duration="5000" position="bottom-end">
+            <template>
+                <div style="padding: 16px;">
+                    New queue added.
+                </div>
+            </template>
+        </vaadin-notification>
+
         <firebase-query path="/{{myKey}}/queue/{{myLocation}}/{{pickDate}}" data="{{checkChange}}" order-by-child="queueNo" equal-to="{{newQueueNoInt}}"
             disabled="{{disabledQry}}" limit-to-first="1">
         </firebase-query>
@@ -367,6 +382,7 @@
                 myLocation: String,
                 myLocationCode: String,
                 route: Object,
+                token: String,
                 filterValue: String,
                 editKey: String,
                 queueKey: String,
@@ -390,7 +406,6 @@
             ready() {
                 this.disabledQry = true;
                 this.$.confirmChangeNoBtn.disabled = true;
-                this.$.messaging.requestPermission();
                 this.pickDate = this.formatTodayDate(new Date());
             },
 
@@ -457,6 +472,9 @@
 
             _noOfPatientsChanged(e) {
                 if (e > 0) {
+                    if (this.route.prefix !== "/queue") {
+                        this.$.VQ_notification.open();
+                    }
                     if (this.token) {
                         var token = this.token;
                         firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.pickDate).orderByChild("isQueue").equalTo(true)
@@ -468,13 +486,17 @@
                     }
 
                     function _handleSend(NoPatients, token) {
+                        //live
                         var key = 'AAAAQ8LD1Cg:APA91bGRSq9El2u5pGd1PsU7b9wwqtq3SNIr6LMXKE344xq7b3fv7_DTaZQNb6-DgSQfkWf5ZAkYF2qD_i_78DwW-24y9hcZlqeQ9xlfP1xmxVTrs3V-bQfkEIYPwqgnIp3tjR6M2Ubu';
+                        //dev
+                        // var key = 'AAAAevULLrY:APA91bEDdvrl9xFBHsKwRPmiTvBfMx_5TwGR1rhMstS9v6RD_TZC-BHiHMMx_5KKtBPHLXvUQH92M2Bu-CT2Mko-mLaQ0mpjl2wjbadZzk90oi3KmiH_7SChuBtHPTkWQLZUp4tlAZjV';
                         var to = token;
                         var notification = {
                             'title': 'BaseEMR',
                             'body': 'You have ' + NoPatients + ' patients waiting in queue.',
                             'icon': '../images/icon.png',
                             'click_action': 'https://pwa.baseph.com/queue'
+                            // 'click_action': ' https://emr-dev-c3005.firebaseapp.com/queue'
                             // 'click_action': 'localhost:8081/queue'
                         };
 
@@ -498,28 +520,45 @@
             },
 
             _queueNew() {
-                if (this.myLocation == '(not set)') {
-                    Polymer.dom(this.root).querySelector("#locationDialog").open();
-                }
-                else {
-                    Polymer.dom(this.root).querySelector("#queAdd").click();
-                    var node = Polymer.dom(this.root).querySelector("#patientsnew");
-                    if (node) {
-                        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
-                        if (oldDiv) {
-                            Polymer.dom(node.parentNode).removeChild(oldDiv);
-                        }
-                        var newDiv = document.createElement("my-patients-new");
-                        newDiv.setAttribute("id", "d23");
-                        newDiv.setAttribute("prev-route", this.route.prefix);
-                        newDiv.setAttribute("my-key", this.myKey);
-                        newDiv.setAttribute("my-queue", "yes");
-                        newDiv.setAttribute("my-location", this.myLocation);
-                        newDiv.setAttribute("my-location-code", this.myLocationCode);
-                        //if open existing
-                        var currentDiv = document.getElementById("patientsnew");
-                        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                Polymer.dom(this.root).querySelector("#queAdd").click();
+                var node = Polymer.dom(this.root).querySelector("#patientsnew");
+                if (node) {
+                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+                    if (oldDiv) {
+                        Polymer.dom(node.parentNode).removeChild(oldDiv);
                     }
+                    var newDiv = document.createElement("my-patients-new");
+                    newDiv.setAttribute("id", "d23");
+                    newDiv.setAttribute("prev-route", this.route.prefix);
+                    newDiv.setAttribute("my-key", this.myKey);
+                    newDiv.setAttribute("my-queue", "yes");
+                    newDiv.setAttribute("my-location", this.myLocation);
+                    newDiv.setAttribute("my-location-code", this.myLocationCode);
+                    //if open existing
+                    var currentDiv = document.getElementById("patientsnew");
+                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                }
+            },
+
+            _queueSearch() {
+                Polymer.dom(this.root).querySelector("#queSearch").click();
+                var node = Polymer.dom(this.root).querySelector("#patientsearch");
+                if (node) {
+                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d24");
+                    if (oldDiv) {
+                        Polymer.dom(node.parentNode).removeChild(oldDiv);
+                    }
+                    var newDiv = document.createElement("my-queue-patients");
+                    newDiv.setAttribute("id", "d24");
+                    newDiv.setAttribute("prev-route", this.route.prefix);
+                    newDiv.setAttribute("my-key", this.myKey);
+                    newDiv.setAttribute("my-queue", "yes");
+                    newDiv.setAttribute("my-location", this.myLocation);
+                    newDiv.setAttribute("my-location-code", this.myLocationCode);
+                    newDiv.setAttribute("limit", "");
+                    //if open existing
+                    var currentDiv = document.getElementById("patientsearch");
+                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
                 }
             },
 
@@ -562,7 +601,7 @@
                 }
                 else {
                     this.isNext = false;
-                    this.$.priorDialog.open();
+                    // this.$.priorDialog.open();
                 }
             },
 
@@ -593,12 +632,12 @@
             _addVisit() {
                 var node = Polymer.dom(this.root).querySelector("#newcase");
                 if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d27");
                     if (oldDiv) {
                         Polymer.dom(node.parentNode).removeChild(oldDiv);
                     }
                     var newDiv = document.createElement("my-visits-new");
-                    newDiv.setAttribute("id", "d23");
+                    newDiv.setAttribute("id", "d27");
                     newDiv.setAttribute("prev-route", this.route.prefix);
                     newDiv.setAttribute("my-key", this.myKey);
                     newDiv.setAttribute("my-queue", "yes");
@@ -612,6 +651,15 @@
                     //if open existing
                     var currentDiv = document.getElementById("newcase");
                     Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                }
+            },
+
+            _openAddNew() {
+                if (this.myLocation == '(not set)') {
+                    Polymer.dom(this.root).querySelector("#locationDialog").open();
+                }
+                else {
+                    this.$.priorDialog.open();
                 }
             },
 

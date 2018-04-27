@@ -18,7 +18,8 @@
     "src/**/*",
     "images/**/*",
     "dist/*.js",
-    "dist/*.json"
+    "dist/*.json",
+    "dist/*.mp3"
   ],
   "extraDependencies": [
     "manifest.json",

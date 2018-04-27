@@ -40,7 +40,7 @@
 
             <template is="dom-if" if="{{_notSecretary(myRole)}}">
                 <my-queue-doctor route="{{route}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
-                    my-role="{{myRole}}"></my-queue-doctor>
+                    my-role="{{myRole}}" token="[[token]]"></my-queue-doctor>
             </template>
         </template>
 
@@ -50,6 +50,7 @@
             is: 'my-queue',
             properties: {
                 myKey: String,
+                token: String,
                 myRole: String,
                 myLocation: String,
                 myLocationCode: String,

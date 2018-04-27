@@ -571,7 +571,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
       </span>
       <div class="buttons">
-        <paper-button dialog-confirm autofocus on-tap="_addPatient2Queue">OK</paper-button>
+        <paper-button autofocus on-tap="_addPatient2Queue">OK</paper-button>
         <paper-button dialog-dismiss>Cancel</paper-button>
       </div>
     </salte-dialog>
@@ -686,24 +686,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var today = this.todayDate;
         this.doneQueueDate = this.formatWeekDate(today);
 
-        ref.orderByChild("patient_no").equalTo(patient_no).once("value").then(function (data) {
-          if (data.exists()) {
-            err.open();
-          }
-          else {
-            var push = ref.push({
-              patient_info: personalQueue,
-              patient_refKey: patient_refKey,
-              patient_no: patient_no,
-              isCancel: false,
-              isPriority: false
-            });
-
-            if (push.key) {
-              _locateNextQueue(mykey, push.key, patient_refKey, location, location_code, today);
-              success.open();
+        if (today) {
+          this.$.dateDialog.close();
+          ref.orderByChild("patient_no").equalTo(patient_no).once("value").then(function (data) {
+            if (data.exists()) {
+              err.open();
             }
-          }
+            else {
+              var push = ref.push({
+                patient_info: personalQueue,
+                patient_refKey: patient_refKey,
+                patient_no: patient_no,
+                isCancel: false,
+                isPriority: false
+              });
+
+              if (push.key) {
+                _locateNextQueue(mykey, push.key, patient_refKey, location, location_code, today);
+                success.open();
+              }
+            }
+          });
 
           function _locateNextQueue(myKey, queuePushkey, patientPushkey, myLocation, myLocationCode, pickDate) {
             var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocation + "/" + pickDate);
@@ -750,15 +753,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               }
             });
           }
-
-        });
-        // if (this.isQue) {
-
-        // }
-        // else{
-        //   
-        // }
-
+        }
       },
 
       _send2Que() {
