@@ -370,9 +370,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 if (today) {
                     this.$.dateDialog.close();
-                    ref.orderByChild("patient_no").equalTo(patient_no).once("value").then(function (data) {
+                    ref.orderByChild("patient_no").equalTo(patient_no).limitToLast(1).once("value").then(function (data) {
                         if (data.exists()) {
-                            err.open();
+                            if (Object.values(data.val())[0].isCancel === true) {
+                                var push = ref.push({
+                                    patient_info: personalQueue,
+                                    patient_refKey: patient_refKey,
+                                    patient_no: patient_no,
+                                    isCancel: false,
+                                    isPriority: false
+                                });
+
+                                if (push.key) {
+                                    _locateNextQueue(mykey, push.key, patient_refKey, location, location_code, today);
+                                    success.open();
+                                }
+                            }
+                            else {
+                                err.open();
+                            }
                         }
                         else {
                             var push = ref.push({

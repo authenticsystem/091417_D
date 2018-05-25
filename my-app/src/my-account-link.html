@@ -155,7 +155,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             <b>{{user.email}}</b> has been verified. Please enter your account code to continue.
                             <!-- <br>Don't have an account code? Contact BaseEMR administrator to get one. -->
                         </span>
-                        <paper-input label="Account code" value="{{mycode}}" on-keyup="_ack" required auto-validate></paper-input>
+                        <paper-input label="Account code *" value="{{mycode}}" on-keyup="_ack" auto-validate></paper-input>
                         <span style="color:red; font-size:12px">{{msg}}</span>
                         <br>
                         <paper-button style="float:right;" raised on-tap="_next">Next</paper-button>
@@ -168,7 +168,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             <b style="font-size:20px;">Verify if it is you</b>
                             <br>Please enter the verification code that was sent on your mobile device, With a phone number {{phone}}
                         </span>
-                        <paper-input label="Verification code" value="{{myphonecode}}" on-keyup="_ack" required auto-validate></paper-input>
+                        <paper-input label="Verification code *" value="{{myphonecode}}" on-keyup="_ack" auto-validate></paper-input>
                         <span style="color:red; font-size:12px">{{msg}}</span>
                         <br>
                         <paper-button style="float:right;" raised on-tap="_verify">Verify</paper-button>

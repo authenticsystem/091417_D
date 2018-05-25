@@ -59,7 +59,10 @@
     "web-animations-js": "^2.3.1",
     "paper-avatar": "Abe90/paper-avatar#^1.0.4",
     "salte-dialog": "salte-io/salte-dialog#^3.0.1",
-    "vaadin-notification": "vaadin/vaadin-notification#^1.0.0"
+    "vaadin-notification": "vaadin/vaadin-notification#^1.0.0",
+    "paper-dropdown-input": "Juravenator/paper-dropdown-input#^2.5.2",
+    "iron-form": "PolymerElements/iron-form#^2.3.0",
+    "simple-grid": "m-mansoor-ali/simple-grid#^1.0.2"
   },
   "resolutions": {
     "polymer": "^2.0.0"

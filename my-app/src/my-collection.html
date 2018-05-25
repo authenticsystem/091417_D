@@ -9,8 +9,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="chartjs.html">
 
 <dom-module id="my-collection">
   <template>
@@ -29,6 +36,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-icon-button.menu {
         margin-right: 16px;
       }
+
+      canvas {
+        width: 100% !important;
+        max-width: 900px;
+        height: auto !important;
+        margin: auto;
+      }
+
+      @media (max-width: 800px) {
+
+        #card1 {
+          margin-top: -10px;
+        }
+
+        .card {
+          margin-left: 10px;
+          margin-right: 10px;
+        }
+      }
+
+      #card1 {
+        margin-top: -10px;
+      }
+
+      .card {
+        text-align: center;
+      }
     </style>
 
 
@@ -41,25 +75,198 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-header>
 
       <div class="card">
-        Content soon.
+        Comming Soon
       </div>
+
+      <!-- <div style="padding:26px; margin-top:-30px">
+        <div style="float:right;">
+          <div style="display:flex;">
+            <iron-icon style="margin-top:30px; margin-right:10px" icon="my-icons:event"></iron-icon>
+            <paper-dropdown-menu style="cursor:pointer">
+              <paper-listbox slot="dropdown-content" selected="{{sectedRange}}">
+                <paper-item>Last 15 days</paper-item>
+                <paper-item>Last 12 months</paper-item>
+                <paper-item>Last 5 years</paper-item>
+              </paper-listbox>
+            </paper-dropdown-menu>
+          </div>
+          <div style="margin-left:34px;margin-top:-10px;">
+            <span style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card1">
+        <canvas id="myChartCollection"></canvas>
+      </div> -->
 
     </app-header-layout>
 
   </template>
 
   <script>
-    class MyCollection extends Polymer.Element {
-      static get is() { return 'my-collection'; }
+    Polymer({
+      is: 'my-collection',
 
-      static get properties() {
-        return {
-          narrow: {
-            type: Boolean,
-            notify: true
+      properties: {
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        myKey: String,
+        myRole: String,
+        // sectedRange: {
+        //   type: Number,
+        //   value: 0,
+        //   observer: '_selectedRangeChanged'
+        // },
+        prevRange: String
+      },
+
+      _selectedRangeChanged() {
+
+        var last, limit, range, text;
+        var date = new Date();
+        var today = this.formatTodayDate(date);
+
+        var monthNames = [
+          "Jan", "Feb", "Mar",
+          "Apr", "May", "Jun", "Jul",
+          "Aug", "Sep", "Oct",
+          "Nov", "Dec"
+        ];
+
+        if (this.sectedRange == 0) {
+          date.setDate(date.getDate() - 14);
+
+          var MM = date.getMonth();
+          var day = date.getDate();
+          var month = date.getMonth() + 1;
+          if (month < 10) { month = '0' + month };
+          if (day < 10) { day = '0' + day };
+
+          this.text = monthNames[MM] + ' ' + day + ' - ' + today;
+          last = date.getFullYear() + '-' + month + '-' + day;
+          range = 'daily';
+          limit = 15;
+          text = 'last 15 days';
+        }
+
+        if (this.sectedRange == 1) {
+          date.setMonth(date.getMonth() - 11);
+
+          var MM = date.getMonth();
+          var month = date.getMonth() + 1;
+          if (month < 10) { month = '0' + month };
+
+          this.text = monthNames[MM] + ' ' + date.getFullYear() + ' - ' + today;
+          last = date.getFullYear() + '-' + month;
+          range = 'monthly';
+          limit = 12;
+          text = 'last 12 months';
+        }
+
+        if (this.sectedRange == 2) {
+          date.setFullYear(date.getFullYear() - 4);
+
+          var year = date.getFullYear();
+
+          this.text = year + ' - ' + today;
+          last = year.toString();
+          range = 'yearly';
+          limit = 5;
+          text = 'last 5 years';
+        }
+
+        var ctx = Polymer.dom(this.root).querySelector("#myChartCollection");
+
+        var myChart = new Chart(ctx, {
+          type: 'line',
+          options: {
+            plugins: {
+              datalabels: {
+                anchor: 'end',
+                align: 'top',
+                backgroundColor: 'rgba(255, 99, 132, 1)',
+                // borderColor: 'rgba(255, 99, 132, 0.2)',
+                borderRadius: 2,
+                borderWidth: 1,
+                color: 'white'
+              }
+            },
+            responsive: true,
+            title: {
+              display: true,
+              text: 'Total collections in the ' + text
+            }
           }
-        };
-      }
+        });
+
+        this.getData(this.myKey, range, last, limit, myChart, monthNames);
+      },
+
+      getData(myKey, range, last, limit, myChart, monthNames) {
+
+        if (this.prevRange) {
+          firebase.database().ref("/" + myKey + "/reports/" + this.prevRange).off();
+        }
+
+        this.prevRange = range;
+
+        firebase.database().ref("/" + myKey + "/reports/" + range).orderByKey().startAt(last).limitToFirst(limit).on("value", function (snapshot) {
+          var returnArr = [];
+          var labelDate = [];
+
+          snapshot.forEach(element => {
+
+            returnArr.push(element.val().patients);
+
+            if (range == 'daily') {
+              var month = new Date(element.key).getMonth();
+              labelDate.push(element.key.substring(8, 10));
+            }
+
+            if (range == 'monthly') {
+              var month = new Date(element.key).getMonth();
+              labelDate.push(monthNames[month]);
+            }
+
+            if (range == 'yearly') {
+              labelDate.push(element.key.substring(0, 4));
+            }
+          });
+
+          var data = {
+            labels: labelDate,
+            datasets: [{
+              label: 'Total Collections',
+              data: returnArr,
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1
+            }],
+          };
+
+          myChart.data = data;
+          myChart.update();
+
+        });
+      },
+
+      formatTodayDate(date) {
+        var monthNames = [
+          "Jan", "Feb", "Mar",
+          "Apr", "May", "Jun", "Jul",
+          "Aug", "Sep", "Oct",
+          "Nov", "Dec"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return monthNames[monthIndex] + ' ' + day + ', ' + year;
+      },
 
       toggleDrawer() {
         this.dispatchEvent(new CustomEvent('toggleDrawer', {
@@ -69,8 +276,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }));
         this.$.narrow = !this.$.narrow;
       }
-    }
 
-    window.customElements.define(MyCollection.is, MyCollection);
+    })
   </script>
 </dom-module>

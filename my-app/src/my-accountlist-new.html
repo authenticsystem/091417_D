@@ -118,13 +118,13 @@
                             <paper-radio-button name="Ms">Ms</paper-radio-button>
                             <paper-radio-button name="Mrs">Mrs</paper-radio-button>
                         </paper-radio-group> -->
-                        <paper-input required auto-validate pattern="[a-zA-Z-.-/ ]*" value="{{prefix}}" always-float-label label="Designatory letters"></paper-input>
-                        <paper-input required auto-validate pattern="[a-zA-Z-. ]*" value="{{firstname}}" always-float-label label="First Name"></paper-input>
+                        <paper-input auto-validate pattern="[a-zA-Z-.-/ ]*" value="{{prefix}}" always-float-label label="Designatory letters *"></paper-input>
+                        <paper-input auto-validate pattern="[a-zA-Z-. ]*" value="{{firstname}}" always-float-label label="First Name *"></paper-input>
                         <paper-input auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{middlename}}" always-float-label label="Middle Name"></paper-input>
-                        <paper-input required auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{lastname}}" always-float-label label="Last Name"></paper-input>
+                        <paper-input auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{lastname}}" always-float-label label="Last Name *"></paper-input>
                         <paper-input auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{suffix}}" always-float-label label="Suffix"></paper-input>
-                        <paper-input required allowed-pattern="[\d]" prevent-invalid-input char-counter maxlength="10" value="{{cellphone}}" always-float-label
-                            label="Cellphone">
+                        <paper-input allowed-pattern="[\d]" prevent-invalid-input char-counter maxlength="10" value="{{cellphone}}" always-float-label
+                            label="Cellphone *">
                             <div slot="prefix">+63</div>
                         </paper-input>
                         <paper-dropdown-menu vertical-align="bottom" style="cursor:pointer; width:100%" label="Role">

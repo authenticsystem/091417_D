@@ -688,9 +688,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         if (today) {
           this.$.dateDialog.close();
-          ref.orderByChild("patient_no").equalTo(patient_no).once("value").then(function (data) {
+          ref.orderByChild("patient_no").equalTo(patient_no).limitToLast(1).once("value").then(function (data) {
             if (data.exists()) {
-              err.open();
+              if (Object.values(data.val())[0].isCancel === true) {
+                var push = ref.push({
+                  patient_info: personalQueue,
+                  patient_refKey: patient_refKey,
+                  patient_no: patient_no,
+                  isCancel: false,
+                  isPriority: false
+                });
+
+                if (push.key) {
+                  _locateNextQueue(mykey, push.key, patient_refKey, location, location_code, today);
+                  success.open();
+                }
+              }
+              else {
+                err.open();
+              }
             }
             else {
               var push = ref.push({
@@ -707,52 +723,52 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               }
             }
           });
+        }
 
-          function _locateNextQueue(myKey, queuePushkey, patientPushkey, myLocation, myLocationCode, pickDate) {
-            var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocation + "/" + pickDate);
-            ref.once('value').then(function (snapshot) {
-              if (snapshot.exists()) {
-                ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
-                  if (hasNext.exists()) {
-                    ref.child(queuePushkey).update({
-                      isQueue: true,
-                      queueLocation: myLocation,
-                      isNext: false,
-                      queueNo: snapshot.numChildren(),
-                      xy: "y"
-                    }).then(function () {
-                      firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                        .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
-                    });
-                  }
-                  else {
-                    ref.child(queuePushkey).update({
-                      isQueue: true,
-                      queueLocation: myLocation,
-                      isNext: true,
-                      queueNo: snapshot.numChildren(),
-                      xy: "y"
-                    }).then(function () {
-                      firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                        .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
-                    });
-                  }
-                });
-              }
-              else {
-                ref.child(queuePushkey).update({
-                  isQueue: true,
-                  queueLocation: myLocation,
-                  isNext: true,
-                  queueNo: 1,
-                  xy: "y"
-                }).then(function () {
-                  firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                    .update({ isQueue: true, queueNo: 1, queueDate: pickDate, queueLocation: myLocation });
-                });
-              }
-            });
-          }
+        function _locateNextQueue(myKey, queuePushkey, patientPushkey, myLocation, myLocationCode, pickDate) {
+          var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocation + "/" + pickDate);
+          ref.once('value').then(function (snapshot) {
+            if (snapshot.exists()) {
+              ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
+                if (hasNext.exists()) {
+                  ref.child(queuePushkey).update({
+                    isQueue: true,
+                    queueLocation: myLocation,
+                    isNext: false,
+                    queueNo: snapshot.numChildren(),
+                    xy: "y"
+                  }).then(function () {
+                    firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
+                      .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
+                  });
+                }
+                else {
+                  ref.child(queuePushkey).update({
+                    isQueue: true,
+                    queueLocation: myLocation,
+                    isNext: true,
+                    queueNo: snapshot.numChildren(),
+                    xy: "y"
+                  }).then(function () {
+                    firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
+                      .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
+                  });
+                }
+              });
+            }
+            else {
+              ref.child(queuePushkey).update({
+                isQueue: true,
+                queueLocation: myLocation,
+                isNext: true,
+                queueNo: 1,
+                xy: "y"
+              }).then(function () {
+                firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
+                  .update({ isQueue: true, queueNo: 1, queueDate: pickDate, queueLocation: myLocation });
+              });
+            }
+          });
         }
       },
 

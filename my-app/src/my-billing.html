@@ -9,57 +9,525 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+
 <link rel="import" href="my-icons.html">
+<link rel="import" href="time-element.html">
+<link rel="import" href="search-bar.html">
+<link rel="import" href="my-billing-new.html">
 
 <dom-module id="my-billing">
   <template>
     <style include="shared-styles">
       :host {
-        display: block;
+        height: 100vh;
+        margin: 0;
 
-        padding: 10px;
+        display: flex;
+        flex-direction: column;
       }
 
-      app-header {
+      .item {
+        @apply --layout-horizontal;
+        /* padding: 20px; */
+        background-color: white;
+        border-bottom: 1px solid #ddd;
+        cursor: pointer;
+        margin-bottom: 10px;
+      }
+
+      .item:hover {
+        box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
+      }
+
+      .avatar {
+        height: 45px;
+        width: 45px;
+        border: 2px solid white;
+        border-radius: 50%;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+
+      .pad {
+        padding: 0 16px;
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
+
+      .primary {
+        font-size: 14px;
+        font-weight: 400;
+      }
+
+      .shortText,
+      .longText {
+        font-size: 14px;
+      }
+
+      .longText {
+        color: gray;
+        /* display: none; */
+      }
+
+      /* .item:hover .shortText::after {
+        content: ' [+]';
+        color: gray;
+      } */
+
+      /* .item.expanded:hover .shortText::after {
+        content: '';
+      } */
+
+      /* .item.expanded .longText {
+        display: block;
+      } */
+
+      /* .item.expanded:hover .longText::after {
+        content: ' [–]';
+      } */
+
+      .spacer {
+        @apply --layout-flex;
+      }
+
+      @media (max-width: 768px) {
+        iron-list {
+          margin: 16px;
+          /* margin-top: 0px; */
+          display: flex;
+          /* height: 100vh; */
+          flex-direction: column;
+          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
+        }
+
+        #noRecord {
+          margin: 16px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        paper-search-bar {
+          margin-left: 80px;
+          width: 50%;
+          color: black;
+        }
+      }
+
+      @media (min-width: 768px) {
+        iron-list {
+          width: 736px;
+          margin: 16px auto;
+          /* margin-top: 0px; */
+          /* height: 100vh; */
+          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
+        }
+
+        #noRecord {
+          width: 736px;
+          margin: 16px auto;
+        }
+
+        paper-search-bar {
+          margin-left: 50px;
+          width: 50%;
+          color: black;
+        }
+
+      }
+
+      #tool1 {
         color: rgb(255, 255, 255);
         background-color: #673AB7;
+      }
+
+      #tool2 {
+        background-color: white;
+      }
+
+      #btn-arrow {
+        position: absolute;
+        color: black;
+      }
+
+      #btn-menu {
+        color: gray;
+        position: fixed;
+        right: 35px;
       }
 
       paper-icon-button.menu {
         margin-right: 16px;
       }
+
+      .clinic {
+        position: absolute;
+        right: 20px;
+        top: 10px;
+        font-size: 14px;
+      }
+
+      .bill {
+        position: absolute;
+        right: 20px;
+        top: 73px;
+        font-size: 14px;
+        color: gray;
+      }
+
+      .collected {
+        /* transform: rotate(-25deg); */
+        position: absolute;
+        right: 20px;
+        top: 127px;
+        color: #F44336;
+        font-size: 14px;
+        padding: 4px;
+        border: 2px solid #F44336;
+        border-radius: 6px;
+      }
+
+      paper-fab.fab-menu {
+        position: fixed;
+        right: 32px;
+        bottom: 32px;
+      }
     </style>
 
+    <!-- <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route> -->
+    <!-- <app-route route="{{route}}" pattern="/detail/:key" tail="{{detailRoute}}" data="{{detailData}}" active="{{detailActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route> -->
 
-    <app-header-layout fullbleed has-scrolling-region>
-      <app-header fixed slot="header">
-        <app-toolbar primary>
-          <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-          <div main-title>Billing</div>
-        </app-toolbar>
-      </app-header>
+    <!-- <div hidden$="{{!applicationActive}}"> -->
+    <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+      <div name="">
+        <app-header-layout fullbleed has-scrolling-region>
+          <app-header fixed slot="header">
+            <template is="dom-if" if="{{!openSearch}}">
+              <app-toolbar primary id="tool1">
+                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                <div main-title>Billing</div>
+                <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+              </app-toolbar>
+            </template>
 
-      <div class="card">
-        Content soon.
+            <template is="dom-if" if="{{openSearch}}">
+              <app-toolbar primary id="tool2">
+                <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
+                <template is="dom-if" if="{{search}}">
+                  <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
+                </template>
+              </app-toolbar>
+            </template>
+          </app-header>
+
+          <firebase-query id="query" path="/{{myKey}}/billing" data="{{myBilling}}" order-by-child="{{order}}" start-at="{{search}}">
+          </firebase-query>
+
+          <div id="noRecord">
+            <div class="item" style="padding:15px">
+              <div style="margin:auto">
+                {{record}}
+              </div>
+            </div>
+          </div>
+
+          <iron-list items="[[myBilling]]" as="item" selection-enabled scroll-target="threshold">
+            <template>
+              <div class="divSeparator">
+                <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+
+                  <div class="card-content" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
+                    <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
+                      <iron-icon icon="my-icons:watch-later"></iron-icon>
+                      <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                    </div>
+                    <div id="{{item.$key}}" style=" padding: 16px; display:flex">
+                      <!-- <div>
+                    <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+                  </div> -->
+                      <div id="{{item.$key}}" style=" margin-left:10px;">
+                        <div id="{{item.$key}}" style="font-size:11px" class="longText">Ref.# [[item.ref]]</div>
+                        <div id="{{item.$key}}" class="primary">[[_manyServices(item.billing_data)]]</div>
+                        <div id="{{item.$key}}" class="primary">“[[item.remarks]]”</div>
+                        <!-- <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
+                    <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
+                    <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}} [[item.patientinfo.gender]]</div>
+                    <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
+
+                    <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
+                      <span id="{{item.$key}}" class="longText">Chief Complaint</span>
+                      <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                    </div>
+
+                    <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkSOAP(item.template)}}">
+                      <span id="{{item.$key}}" class="longText">Subjective</span>
+                      <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div> -->
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <div class="clinic">[[item.clinic_location]]</div>
+                  <div class="bill">Php [[item.billing_total]].00</div>
+
+                </div>
+                <!-- <div hidden$="[[item.collected]]" class="collected">Collected</div> -->
+              </div>
+            </template>
+          </iron-list>
+
+          <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+          </iron-scroll-threshold>
+
+
+        </app-header-layout>
+
+        <a href="/billing/new" style="text-decoration: none;">
+          <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_billingNew"></paper-fab>
+        </a>
       </div>
 
-    </app-header-layout>
+      <div name="/new">
+        <div id="newbill"></div>
+        <my-billing-new id="d23" my-key="{{myKey}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-new>
+      </div>
+
+      <div name="view404">Not found.</div>
+    </iron-pages>
+    <!-- </div> -->
 
   </template>
 
   <script>
-    class MyBilling extends Polymer.Element {
-      static get is() { return 'my-billing'; }
+    Polymer({
+      is: 'my-billing',
 
-      static get properties() {
-        return {
-          narrow: {
-            type: Boolean,
-            notify: true
+      properties: {
+
+        items: {
+          type: Array,
+          value: function () {
+            return [];
           }
-        };
-      }
+        },
+        myKey: String,
+        myLocation: String,
+        route: Object,
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        openSearch: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        order: {
+          type: String,
+          value: 'order'
+        }
+      },
+
+      observers: [
+        '_searchChanged(search)',
+        '_myBillingChanged(myBilling.*)'
+      ],
+
+      _myBillingChanged() {
+        if (this.myBilling.length > 0) {
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+        } else {
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
+          this._fetching();
+        }
+      },
+
+      _billingNew() {
+        var node = Polymer.dom(this.root).querySelector("#newbill");
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-billing-new");
+          newDiv.setAttribute("my-key", this.myKey);
+          newDiv.setAttribute("id", "d23");
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          newDiv.setAttribute("my-location", this.myLocation);
+          //if open existing
+          var currentDiv = document.getElementById("newcase");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
+      },
+
+      _selectThis(e) {
+        // var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+        // var node = Polymer.dom(this.root).querySelector("#casesview");
+        // this.e = data_args;
+        // var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
+        // if (oldDiv) {
+        //   Polymer.dom(node.parentNode).removeChild(oldDiv);
+        // }
+        // var newDiv = document.createElement("my-visits-view");
+        // newDiv.setAttribute("my-key", this.myKey);
+        // newDiv.setAttribute("id", "d26");
+        // newDiv.setAttribute("view-key", data_args);
+        // newDiv.setAttribute("prev-route", this.route.prefix);
+        // Polymer.dom(this.root).querySelector("#open").click();
+
+        // var currentDiv = document.getElementById("casesview");
+        // Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+      },
+
+      _manyServices(e) {
+        if (e.length > 0) {
+          if (e.length > 1) {
+            return e.length + " services";
+          }
+          else {
+            return e.length + " service";
+          }
+        }
+      },
+
+      _timeStampToDateTime(ts) {
+        return new Date(ts);
+      },
+
+      loadMoreData() {
+        // load async stuff. e.g. XHR
+        this.$.threshold.clearTriggers();
+      },
+
+      _fetching() {
+        this.record = 'Loading data . . .';
+        setTimeout((e) => {
+          this.record = 'No record found.';
+        }, 3000);
+      },
+
+      _patientImg(e) {
+        if (e) return e;
+        else return '../images/user.png';
+      },
+
+      _ageCal(bday) {
+        if (bday) {
+
+          var today = new Date();
+          var birthday = new Date(bday);
+
+          var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+          var year_age = Math.floor(differenceInMilisecond / 31536000000);
+          var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+          var month_age = Math.floor(day_age / 30);
+
+          day_age = day_age % 30;
+
+          if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+            console.log('err');
+            // $("#exact_age").text("Invalid birthday - Please try again!");
+          }
+          else {
+            if (year_age > 0) {
+              if (year_age == 1) {
+                return year_age + " year old";
+              }
+              else {
+                return year_age + " years old";
+              }
+            }
+            else if (year_age == 0 && month_age > 0) {
+              if (month_age == 1) {
+                return month_age + " month old";
+              }
+              else {
+                return month_age + " months old";
+              }
+            }
+            else if (year_age == 0 && month_age == 0 && day_age > 0) {
+              if (day_age == 1) {
+                return day_age + " day old";
+              }
+              else {
+                return day_age + " days old";
+              }
+            }
+            else {
+              return year_age + " years " + month_age + " months " + day_age + " days old";
+            }
+          }
+        }
+        else {
+          return '';
+        }
+      },
+
+      _checkNormal(e) {
+        if (e === "Normal") return false;
+        else return true;
+      },
+
+      _checkSOAP(e) {
+        if (e === "SOAP") return false;
+        else return true;
+      },
+
+      _comma(e) {
+        if (e) {
+          return ',';
+        }
+      },
+
+      _hmo(e) {
+        if (e) {
+          return 'HMO: ' + e;
+        }
+      },
+
+      _date(e) {
+        if (e) {
+          var date = new Date(e);
+          var options = {
+            weekday: "long", year: "numeric", month: "short",
+            day: "numeric", hour: "2-digit", minute: "2-digit"
+          };
+
+          return date.toLocaleTimeString("en-us", options);
+        }
+      },
+
+      _searchChanged(search) {
+        if (search) {
+          this.order = 'patient';
+          this.search = search.toUpperCase();
+        }
+        else {
+          this.order = 'order';
+        }
+      },
+
+      getClassForItem(item, selected) {
+        return selected ? 'item expanded' : 'item';
+      },
 
       toggleDrawer() {
         this.dispatchEvent(new CustomEvent('toggleDrawer', {
@@ -68,9 +536,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }));
         this.$.narrow = !this.$.narrow;
-      }
-    }
+      },
 
-    window.customElements.define(MyBilling.is, MyBilling);
+      toggleSearch() {
+        this.openSearch = true;
+      },
+
+      toggleReturn() {
+        this.openSearch = false;
+        this.search = '';
+      },
+
+      toggleClear() {
+        this.search = '';
+      }
+
+    })
   </script>
 </dom-module>

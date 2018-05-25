@@ -770,6 +770,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      // _isTrue(e) {
+      //   console.log(e);
+      // },
+
       _todayDateChanged(date) {
         var monthNames = [
           "January", "February", "March",
@@ -906,7 +910,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         if (!fname || !lname) {
-          this.favrighthide = true;
+          if (this.selectedPage === 1) {
+            this.favrighthide = true;
+          }
         }
         else {
           // console.log(bday);

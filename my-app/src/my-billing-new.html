@@ -1,0 +1,744 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
+
+<link rel="import" href="bwt-datatable-card.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-billing-new">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            app-header paper-icon-button {
+                --paper-icon-button-ink-color: #000000;
+            }
+
+            app-drawer-layout:not([narrow]) [drawer-toggle] {
+                display: none;
+            }
+
+            app-drawer {
+                --app-drawer-content-container: {
+                    background-color: #F4F5F6;
+                }
+            }
+
+            paper-icon-button.menu {
+                margin-right: 15px;
+            }
+
+            paper-item {
+                height: 64px;
+            }
+
+            paper-fab {
+                background: #1976d2;
+            }
+
+            @media (min-width: 800px) {
+                .footer {
+                    position: absolute;
+                    bottom: 16px;
+                    width: 100%;
+                }
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 48px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 48px;
+                    bottom: 48px;
+                }
+            }
+
+            @media (max-width: 800px) {
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 16px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 16px;
+                    bottom: 48px;
+                }
+
+                .docu {
+                    margin-left: 16px;
+                    margin-right: 16px;
+                }
+            }
+
+            paper-item:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
+
+            .primary {
+                font-size: 14px;
+                font-weight: 400;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .longText {
+                color: gray;
+                /* display: none; */
+            }
+
+            .textTemp {
+                color: rgb(100, 100, 100);
+                font-weight: 500;
+                font-size: 14px;
+                margin-top: 32px;
+                margin-left: 16px;
+            }
+
+            .large {
+                --paper-avatar-width: 150px;
+                cursor: pointer;
+            }
+
+            .billBtn {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                background: white;
+                color: black;
+                float: right;
+                margin-top: -30px;
+                margin-right: 16px;
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            }
+
+            .aHref {
+                text-decoration: none;
+                color: #1976d2;
+                font-size: 12px;
+                margin-top: -6px;
+                cursor: pointer;
+                display: none;
+            }
+        </style>
+
+        <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+
+            <app-header-layout id="appheader" has-scrolling-region>
+                <app-header fixed slot="header">
+                    <app-toolbar>
+                        <a href="{{prevRoute}}">
+                            <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
+                        </a>
+                        <div main-title>Add Billing</div>
+                    </app-toolbar>
+                </app-header>
+
+                <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+                    <!-- patient, insurance, hospital // min-width:768px -->
+                    <neon-animatable>
+                        <div class="textTemp"> Billing
+                            <br>
+                            <span style="font-weight: 400; font-size: 12px;">(Ref.# will be generated upon submit) </span>
+                        </div>
+                        <paper-button id="delBTN" style="display:none;" class="billBtn" on-tap="_deleteBill">Delete Bill</paper-button>
+                        <paper-button class="billBtn" on-tap="_showBillDialog">Add Bill</paper-button>
+                        <div id="billHolder">
+                            <div class="docu2">
+                                <paper-input label="Date" type="date" value="{{todayDate}}" style="width:150px">
+                                    <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                                </paper-input>
+                                <div style="margin-left:4px;margin-top:-10px;">
+                                    <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                                </div>
+                                <paper-input style="width:250px" label="Remarks *" value="{{remarks}}" always-float-label></paper-input>
+                                <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed multi-selection selectable selected-items="{{selectedItem}}">
+                                    <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
+                                    <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
+                                    <paper-datatable-column header="Bill To" type="String" property="billTo"></paper-datatable-column>
+                                    <paper-datatable-column header="Amount" type="Number" property="amount"></paper-datatable-column>
+                                </paper-datatable>
+                                <div style="padding: 16px;">
+                                    <div style="float: right; ">TOTAL: {{total}}.00</div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <br>
+                        <br>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="details">
+                                <div id="saveSuccess" style="color: green; display:none">Billing successfully saved.
+                                    <p id="p" style="margin-top:-4px">Billing ref.#&nbsp;</p>
+                                </div>
+                                <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving data.</div>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                </neon-animated-pages>
+
+            </app-header-layout>
+
+            <div class="footer">
+                <div hidden$="[[favlefthide]]">
+                    <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
+                </div>
+                <div hidden$="[[favrighthide]]">
+                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+                </div>
+            </div>
+
+        </app-drawer-layout>
+
+        <firebase-query path="/{{myKey}}/services" data="{{myservices}}" order-by-child="service"></firebase-query>
+        <firebase-query id="hmoQuery" path="/{{myKey}}/hmo" data="{{myhmos}}" order-by-child="name"></firebase-query>
+        <firebase-query id="locationQuery" path="/{{myKey}}/locations" data="{{mylocations}}" order-by-child="location_name"></firebase-query>
+
+        <salte-dialog style="height: 100%;" no-auto-fullscreen id="billingDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #1E88E5">Add Billing</h2>
+            <span>
+                <!-- service -->
+                <paper-dropdown-input id="dropdService" label="Service *" items="[[myservices]]" filter-property="service" value="{{service}}"
+                    selected-item="{{selectedService}}">
+                    <template>
+                        <template is="dom-repeat" items="[[items]]" as="item">
+                            <paper-item id="[[item.rate]]">[[item.service]]</paper-item>
+                        </template>
+                    </template>
+                </paper-dropdown-input>
+                <!-- amount -->
+                <paper-input id="amount" label="Amount" allowed-pattern="[\d]" prevent-invalid-input value="{{amount}}"></paper-input>
+                <!-- bill to -->
+                <paper-dropdown-menu label="Bill to">
+                    <paper-listbox id="dropdSelectedBillTo" slot="dropdown-content" attr-for-selected="name" selected="{{selectedBillTo}}">
+                        <paper-item name="patient">Patient</paper-item>
+                        <paper-item name="philhealth">PHILHEALTH</paper-item>
+                        <paper-item name="hmo">HMO</paper-item>
+                        <paper-item name="hospital">Hospital</paper-item>
+                    </paper-listbox>
+                </paper-dropdown-menu>
+                <!-- patient name -->
+                <paper-input id="inPatient" style="display: none" label="Patient" value="{{patient}}"></paper-input>
+                <!-- my hmos select -->
+                <paper-dropdown-input id="dropdHMO" style="display: none" label="HMO" items="[[myhmos]]" filter-property="name" value="{{selectedHMO}}">
+                    <template>
+                        <template is="dom-repeat" items="[[items]]" as="item">
+                            <paper-item>[[item.name]]</paper-item>
+                        </template>
+                    </template>
+                </paper-dropdown-input>
+                <!-- my location select-->
+                <paper-dropdown-input id="dropdHospital" style="display: none" label="Hospital" items="[[mylocations]]" filter-property="location_name"
+                    value="{{location}}">
+                    <template>
+                        <template is="dom-repeat" items="[[items]]" as="item">
+                            <paper-item>[[item.location_name]]</paper-item>
+                        </template>
+                    </template>
+                </paper-dropdown-input>
+                <span style="color: red; font-size: 12px; margin-top:16px; ">{{billErr}}</span>
+            </span>
+            <div class="buttons">
+                <paper-button id="onEnter" autofocus on-tap="_addBilling">ADD</paper-button>
+            </div>
+        </salte-dialog>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-billing-new',
+
+            properties: {
+                narrow: {
+                    type: Boolean,
+                    notify: true
+                },
+                billingData: {
+                    type: Array,
+                    value: [],
+                    notify: true
+                },
+                billingDataTmp: {
+                    type: Array,
+                    value: [],
+                    notify: true
+                },
+                myLocation: String,
+                prevRoute: String,
+                myKey: String,
+                selectedPage: Number,
+                entryanimation: {
+                    type: String,
+                    value: "slide-from-right-animation"
+                },
+                exitanimation: {
+                    type: String,
+                    value: "slide-left-animation"
+                },
+                favlefthide: {
+                    type: Boolean,
+                    value: true
+                },
+                favrighthide: {
+                    type: Boolean,
+                    value: true
+                },
+                todayDate: String,
+                service_no: {
+                    type: Number,
+                    value: 0
+                },
+                service_bill_to: String,
+                selectedItem: Object
+            },
+
+            _showBillDialog() {
+                this.$.billingDialog.open();
+            },
+
+            _deleteBill() {
+                if (this.selectedItem.length > 0) {
+                    function removeByKey(array, params) {
+                        array.some(function (item, index) {
+                            if (array[index][params.key] === params.value) {
+                                // found it!
+                                array.splice(index, 1);
+                                return true; // stops the loop
+                            }
+                            return false;
+                        });
+                        return array;
+                    }
+
+                    var listOfItems = this.billingData;
+                    var deleteList = this.selectedItem;
+
+                    for (var i = 0; i < deleteList.length; ++i) {
+                        removeByKey(listOfItems, {
+                            key: 'num',
+                            value: deleteList[i].num
+                        });
+                    }
+
+                    this.billingData = [];
+                    this.billingData = listOfItems;
+                    Polymer.dom(this.root).querySelector("#billingDatatable").deselectAll();
+                }
+            },
+
+            ready() {
+                this.selectedPage = 0;
+                this.favrighthide = true;
+                this.favlefthide = true;
+                this.todayDate = this.formatTodayDate(new Date());
+                this.$.hmoQuery.disabled = true;
+                this.$.locationQuery.disabled = true;
+                this.billingDataTmp = [];
+                Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+            },
+
+            observers: [
+                '_todayDateChanged(todayDate)',
+                '_amountChanged(amount)',
+                '_selectedServiceChanged(selectedService)',
+                '_selectedBillToChanged(selectedBillTo, selectedHMO, patient, location)',
+                '_billingDataChanged(billingData, remarks)'
+            ],
+
+            _billingDataChanged(e, r) {
+                if (e.length > 0) {
+                    var amounts = [];
+
+                    e.forEach(element => {
+                        amounts.push(parseInt(element.amount));
+                    });
+
+                    function getSum(total, num) {
+                        return total + num;
+                    }
+
+                    function addCommas(intNum) {
+                        return (intNum + '').replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+                    }
+
+                    this.total = addCommas(amounts.reduce(getSum));
+                    Polymer.dom(this.root).querySelector("#delBTN").style.display = "block";
+                    if (r && this.todayDate) {
+                        this.favrighthide = false;
+                    }
+                    else {
+                        this.favrighthide = true;
+                    }
+                }
+                else {
+                    this.total = 0;
+                    this.favrighthide = true;
+                    Polymer.dom(this.root).querySelector("#delBTN").style.display = "none";
+                }
+            },
+
+            _selectedBillToChanged(e, f, g, h) {
+                this.billErr = '';
+                if (e) {
+                    if (e === 'patient') {
+                        this.$.inPatient.style.display = "block";
+                        this.$.dropdHMO.style.display = "none";
+                        this.$.dropdHospital.style.display = "none";
+                        this.$.hmoQuery.disabled = true;
+                        this.$.locationQuery.disabled = true;
+                        this.service_bill_to = g;
+                    }
+                    else if (e === 'philhealth') {
+                        this.$.inPatient.style.display = "none";
+                        this.$.dropdHMO.style.display = "none";
+                        this.$.dropdHospital.style.display = "none";
+                        this.$.hmoQuery.disabled = true;
+                        this.$.locationQuery.disabled = true;
+                        this.service_bill_to = "PHILHEALTH";
+                    }
+                    else if (e === 'hmo') {
+                        this.$.inPatient.style.display = "none";
+                        this.$.dropdHospital.style.display = "none";
+                        this.$.locationQuery.disabled = true;
+                        this.$.dropdHMO.style.display = "block";
+                        this.$.hmoQuery.disabled = false;
+                        this.service_bill_to = f;
+                    }
+                    else {
+                        this.$.dropdHospital.style.display = "block";
+                        this.$.dropdHMO.style.display = "none";
+                        this.$.inPatient.style.display = "none";
+                        this.$.hmoQuery.disabled = true;
+                        this.$.locationQuery.disabled = false;
+                        this.service_bill_to = h;
+                    }
+                }
+                else {
+                    this.$.dropdHospital.style.display = "none";
+                    this.$.dropdHMO.style.display = "none";
+                    this.$.inPatient.style.display = "none";
+                    this.$.hmoQuery.disabled = true;
+                    this.$.locationQuery.disabled = true;
+                    this.service_bill_to = '';
+                }
+            },
+
+            _amountChanged(e) {
+                this.billErr = '';
+            },
+
+            _selectedServiceChanged(e) {
+                this.billErr = '';
+                if (e) {
+                    this.amount = parseInt(e.id);
+                }
+            },
+
+            _todayDateChanged(date) {
+                var monthNames = [
+                    "January", "February", "March",
+                    "April", "May", "June", "July",
+                    "August", "September", "October",
+                    "November", "December"
+                ];
+
+                var d = new Date(date);
+                if (date) {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+                    this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                    if (this.billingData.length > 0 && this.remarks) {
+                        this.favrighthide = false;
+                    }
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+                    this.text = 'Please choose date.';
+                    this.favrighthide = true;
+                }
+            },
+
+            _myattachmentChaged(e) {
+                if (e.length > 0) {
+                    this.attach = 'Attachment';
+                }
+                else {
+                    this.attach = '';
+                }
+            },
+
+            _select1(e) {
+                this.entryanimation = "slide-from-left-animation";
+                this.exitanimation = "slide-right-animation";
+            },
+
+            _select2(e) {
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                if (this.selectedPage != 1) {
+                    this.selectedPage = this.selectedPage + 1;
+                }
+
+                if (this.selectedPage == 1) {
+                    this._submitToFireB();
+                    this.favlefthide = true;
+                    this.favrighthide = true;
+                }
+            },
+
+            _addBilling() {
+                if (this.service && this.amount && this.service_bill_to) {
+                    var number = this.service_no + 1;
+                    this.service_no = number;
+                    this.billingDataTmp.push({
+                        num: number,
+                        service: this.service,
+                        amount: parseInt(this.amount),
+                        billTo: this.service_bill_to
+                    });
+
+                    this.billingData = [];
+                    this.billingData = this.billingDataTmp;
+                    this.$.billingDialog.close();
+
+                    this._clear2();
+                }
+                else {
+                    this.billErr = 'Ops! Dont leave any field empty.';
+                }
+            },
+
+            _submitToFireB() {
+                var mykey = this.myKey;
+                var today = this.todayDate;
+                var timestamp = firebase.database.ServerValue.TIMESTAMP;
+                var order = firebase.database.ServerValue.TIMESTAMP;
+                var newPushKey;
+
+                if (today < this.formatTodayDate(new Date())) {
+                    newPushKey = this.generatePushID(today);
+                    timestamp = this.lastPushTime;
+                    order = this.lastPushTime;
+                }
+
+                var data = {
+                    timestamp: timestamp,
+                    order: order,
+                    created: today,
+                    clinic_location: this.myLocation,
+                    billing_total: this.total,
+                    billing_data: this.billingData,
+                    remarks: this.remarks
+                }
+
+                var p = Polymer.dom(this.root).querySelector("#p");
+                var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+                var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
+                var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
+
+                saveRun.style.display = 'block';
+                if (newPushKey) {
+                    var ref = firebase.database().ref("/" + mykey + "/billing/" + newPushKey);
+                    var push = ref.set(data);
+                    var fbPushKey = newPushKey;
+                }
+                else {
+                    var ref = firebase.database().ref("/" + mykey + "/billing");
+                    var push = ref.push(data);
+                    var fbPushKey = push.key;
+                }
+
+                if (fbPushKey) {
+                    _updateOrder(mykey, fbPushKey);
+                    saveRun.style.display = 'none';
+                    saveSucc.style.display = 'block';
+                }
+                else {
+                    saveErr.style.display = 'block';
+                }
+
+                function _updateOrder(mykey, fbPushKey) {
+                    var postRef = firebase.database().ref('/' + mykey + '/billing/' + fbPushKey);
+                    var billRef = firebase.database().ref('/' + mykey + '/billing');
+                    postRef.once('value').then(function (snapshot) {
+                        var order = snapshot.val().order * -1;
+                        postRef.update({ order: order });
+
+                        billRef.once('value').then(function (data) {
+                            var num = data.numChildren() ? data.numChildren() : 1;
+                            var no = _billingRefNoUpdate(num, mykey, fbPushKey);
+
+                            var b = document.createElement("b");
+                            b.id = "bold";
+                            b.style.color = "blue";
+                            var t = document.createTextNode(no + '.');
+                            b.appendChild(t);
+                            p.appendChild(b);
+                        });
+                    });
+                }
+
+                function _billingRefNoUpdate(num, mykey, pushkey) {
+                    if (num > 0 && num < 10) {
+                        num = '000' + num;
+                    }
+                    else if (num > 9 && num < 100) {
+                        num = '00' + num;
+                    }
+                    else if (num > 99 && num < 1000) {
+                        num = '0' + num;
+                    }
+                    else if (num > 999) {
+                        num = num;
+                    }
+                    else {
+                        num = '0000';
+                    }
+
+                    firebase.database().ref("/" + mykey + "/billing/" + pushkey + "/ref").set(num);
+                    return num;
+                }
+            },
+
+            onEnter() {
+                this.toggleBill();
+            },
+
+            randomString(n) {
+                var r = "";
+                while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+                return r;
+            },
+
+            _clear() {
+                this.complain = '';
+                this.history = '';
+                this.laboratory = '';
+                this.pe = '';
+                this.diagnosis = '';
+                this.treatment = '';
+                this.plan = '';
+                this.attachment = '';
+
+                this.subjective = '';
+                this.objective = '';
+                this.assessment = '';
+
+                this.billingData = [];
+                this.billingDataTmp = [];
+                this._clear2();
+            },
+
+            _clear2() {
+                // set everything to default value
+                this.$.dropdService.value = null;
+                this.$.amount.value = null;
+                this.$.dropdSelectedBillTo.selected = null;
+                this.$.dropdHMO.value = null;
+                this.$.dropdHospital.value = null;
+                this.billErr = '';
+            },
+
+            generatePushID(date) {
+                //reference: https://gist.github.com/mikelehen/3596a30bd69384624c11
+                // Modeled after base64 web-safe chars, but ordered by ASCII.
+                var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+
+                // Timestamp of last push, used to prevent local collisions if you push twice in one ms.
+                // var lastPushTime = 0;
+                // We generate 72-bits of randomness which get turned into 12 characters and appended to the
+                // timestamp to prevent collisions with other clients.  We store the last characters we
+                // generated because in the event of a collision, we'll use those same characters except
+                // "incremented" by one.
+                var lastRandChars = [];
+
+                //check if there's a last push
+                if (this.lastPushTime === 0) {
+                    var now = new Date(date).getTime();
+                }
+                else {
+                    var now = this.lastPushTime + 1000;
+                }
+
+                this.lastPushTime = now;
+
+                var timeStampChars = new Array(8);
+
+                for (var i = 7; i >= 0; i--) {
+                    timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+                    // NOTE: Can't use << here because javascript will convert to int and lose the upper bits.
+                    now = Math.floor(now / 64);
+                }
+
+                if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+
+                var id = timeStampChars.join('');
+
+                for (i = 0; i < 12; i++) {
+                    lastRandChars[i] = Math.floor(Math.random() * 64);
+                }
+
+                for (i = 0; i < 12; i++) {
+                    id += PUSH_CHARS.charAt(lastRandChars[i]);
+                }
+
+                if (id.length != 20) throw new Error('Length should be 20.');
+
+                return id;
+            },
+
+            formatTodayDate(date) {
+                var monthNames = [
+                    "01", "02", "03",
+                    "04", "05", "06", "07",
+                    "08", "09", "10",
+                    "11", "12"
+                ];
+
+                var day = date.getDate();
+                if (day < 10) { day = '0' + day };
+                var monthIndex = date.getMonth();
+                var year = date.getFullYear();
+
+                return year + '-' + monthNames[monthIndex] + '-' + day;
+            }
+
+        })
+
+    </script>
+</dom-module>

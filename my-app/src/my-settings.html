@@ -26,6 +26,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="my-account.html">
 <link rel="import" href="my-secretary.html">
+<link rel="import" href="my-services.html">
+<link rel="import" href="my-hmo.html">
 
 <dom-module id="my-settings">
     <template>
@@ -145,6 +147,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             </a>
                         </div>
                     </div>
+                    <div class="divHolder">
+                        <div class="div1" align="center">
+                            <a href="/settings/services">
+                                <div on-tap="_newServices" class="card">
+                                    <img style="width:150px; height:150px; border-radius:50%;" src="../images/services.png">
+                                    <h3>My Services</h3>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="div1" align="center">
+                            <a href="/settings/hmo">
+                                <div on-tap="_newHMO" class="card">
+                                    <img style="width:150px; height:150px; border-radius:50%;" src="../images/hmo.png">
+                                    <h3>My HMO</h3>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
 
                 </app-header-layout>
             </div>
@@ -157,6 +177,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div name="/secretary">
                 <div id="sec1"></div>
                 <my-secretary id="sec2" my-key="{{myKey}}" my-lastname="{{myLastname}}"></my-secretary>
+            </div>
+
+            <div name="/services">
+                <div id="ser1"></div>
+                <my-services id="ser2" my-key="{{myKey}}" my-role="{{myRole}}"></my-services>
+            </div>
+
+            <div name="/hmo">
+                <div id="hmo1"></div>
+                <my-hmo id="hmo2" my-key="{{myKey}}" my-role="{{myRole}}"></my-hmo>
             </div>
 
             <div name="view404">Not found.</div>
@@ -242,6 +272,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     newDiv.setAttribute("id", "sec2");
                     //if open existing
                     var currentDiv = document.getElementById("sec1");
+                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                }
+            },
+
+            _newServices() {
+                var node = Polymer.dom(this.root).querySelector("#ser1");
+                if (node) {
+                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#ser2");
+                    if (oldDiv) {
+                        Polymer.dom(node.parentNode).removeChild(oldDiv);
+                    }
+                    var newDiv = document.createElement("my-services");
+                    newDiv.setAttribute("my-key", this.myKey);
+                    newDiv.setAttribute("my-role", this.myRole);
+                    newDiv.setAttribute("id", "ser2");
+                    //if open existing
+                    var currentDiv = document.getElementById("ser1");
+                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+                }
+            },
+
+            _newHMO() {
+                var node = Polymer.dom(this.root).querySelector("#hmo1");
+                if (node) {
+                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#hmo2");
+                    if (oldDiv) {
+                        Polymer.dom(node.parentNode).removeChild(oldDiv);
+                    }
+                    var newDiv = document.createElement("my-hmo");
+                    newDiv.setAttribute("my-key", this.myKey);
+                    newDiv.setAttribute("my-role", this.myRole);
+                    newDiv.setAttribute("id", "hmo2");
+                    //if open existing
+                    var currentDiv = document.getElementById("hmo1");
                     Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
                 }
             }

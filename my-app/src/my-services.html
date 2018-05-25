@@ -26,7 +26,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
-<dom-module id="my-location">
+<dom-module id="my-services">
     <template>
         <style include="shared-styles">
             :host {
@@ -136,12 +136,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header-layout fullbleed has-scrolling-region>
             <app-header fixed slot="header">
                 <app-toolbar primary>
-                    <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                    <div main-title>My Location</div>
+                    <a href="/settings">
+                        <paper-icon-button style="color:white" class="menu" icon="my-icons:arrow-back"></paper-icon-button>
+                    </a>
+                    <div main-title>My Services</div>
                 </app-toolbar>
             </app-header>
 
-            <firebase-query path="/{{myKey}}/locations" data="{{mylocation}}" order-by-child="location_name"></firebase-query>
+            <firebase-query path="/{{myKey}}/services" data="{{myservices}}" order-by-child="service"></firebase-query>
 
             <div id="noRecord">
                 <div class="item">
@@ -151,20 +153,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
             </div>
 
-            <iron-list items="[[mylocation]]" as="item" selection-enabled scroll-target="threshold">
+            <iron-list items="[[myservices]]" as="item" selection-enabled scroll-target="threshold">
                 <template>
                     <div class="divSeparator">
                         <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-                            <paper-avatar class="small" label="[[item.location_name]]"></paper-avatar>
-                            <div class="pad" on-tap="_selectThis" id="[[item.$key]]~[[item.location_mini]]~[[item.location_code]]">
-                                <div id="[[item.$key]]~[[item.location_mini]]~[[item.location_code]]" style="font-size:11px" class="longText">[[item.location_mini]]</div>
-                                <div id="[[item.$key]]~[[item.location_mini]]~[[item.location_code]]">[[item.location_name]]</div>
+                            <paper-avatar class="small" label="[[item.service]]"></paper-avatar>
+                            <div class="pad" on-tap="_selectThis">
+                                <div style="font-size:11px" class="longText">Php [[item.rate]].00</div>
+                                <div>[[item.service]]</div>
                             </div>
                             <div style="padding:10px"> </div>
-                            <div hidden="{{!item.location_active}}">
-                                <iron-icon icon="my-icons:my-location" style="display:inline-block;position: absolute;  right: 10px; color: #673AB7; top:18px;">
-                                </iron-icon>
-                            </div>
                         </div>
                     </div>
                 </template>
@@ -178,15 +176,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </app-header-layout>
 
         <salte-dialog no-auto-fullscreen id="addDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
-            <h2 style="font-size: 16px; background: #1E88E5">Add new location</h2>
+            <h2 style="font-size: 16px; background: #1E88E5">Add new service</h2>
             <span>
-                <paper-input id="location" label="Location" auto-validate value="{{location}}" always-float-label></paper-input>
+                <paper-input id="location" label="Service *" auto-validate value="{{service}}" always-float-label></paper-input>
                 <iron-a11y-keys target="[[targetLocation]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
-                <paper-input id="locationMin" label="Location mini name" auto-validate value="{{locationMinName}}" always-float-label></paper-input>
+                <paper-input id="locationMin" label="Rate *"  allowed-pattern="[\d]" prevent-invalid-input auto-validate value="{{rate}}" always-float-label></paper-input>
                 <iron-a11y-keys target="[[targetLocationMin]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
             </span>
             <div class="buttons">
-                <paper-button id="onEnter" autofocus on-tap="toggleAddLocation">Confirm</paper-button>
+                <paper-button id="onEnter" autofocus on-tap="toggleAddService">Confirm</paper-button>
                 <paper-button dialog-dismiss>Cancel</paper-button>
             </div>
         </salte-dialog>
@@ -227,16 +225,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
 
     <script>
-        class MyLocation extends Polymer.Element {
-            static get is() { return 'my-location'; }
+        class MyServices extends Polymer.Element {
+            static get is() { return 'my-services'; }
 
             static get properties() {
                 return {
                     myKey: String,
                     myRole: String,
-                    location_key: String,
-                    location_name: String,
-                    location_code: String,
                     openAdd: {
                         type: Boolean,
                         value: false,
@@ -251,21 +246,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             static get observers() {
                 return [
-                    '_locationChanged(location)',
-                    '_mylocationChanged(mylocation.*)'
+                    '_twoChanged(service, rate)',
+                    '_myservicesChanged(myservices.*)'
                 ];
             }
 
-            _locationChanged(e) {
-                if (e) {
-                    this.location = this.convertCase(e);
+            _twoChanged(e, f) {
+                if (e || f) {
+                    this.service = this.convertCase(e);
                     this.targetLocation = Polymer.dom(this.root).querySelector("#location");
                     this.targetLocationMin = Polymer.dom(this.root).querySelector("#locationMin");
                 }
             }
 
-            _mylocationChanged() {
-                if (this.mylocation.length > 0) {
+            _myservicesChanged() {
+                if (this.myservices.length > 0) {
                     Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
                 } else {
                     Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
@@ -274,39 +269,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             _selectThis(e) {
-                var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
-                if (data_args) {
-                    var [key, name, code] = data_args.split('~');
-                    this.location_key = key;
-                    this.location_name = name;
-                    this.location_code = code;
-                    this.$.openDialog.open();
-                }
-            }
-
-            _setLocation() {
-                var key = this.location_key;
-                var location_name = this.location_name;
-                var locate_code = this.location_code
-                var ref = firebase.database().ref('/' + this.myKey + '/locations');
-                var accRef = firebase.database().ref('/accounts');
-
-                ref.orderByChild('location_active').equalTo(true).once('value').then(function (data) {
-                    if (data.exists()) {
-                        if (key != Object.keys(data.val())[0]) {
-                            ref.child(Object.keys(data.val())[0]).update({ location_active: false });
-                        }
-                    }
-                });
-                ref.child(this.location_key).update({ location_active: true });
-                accRef.orderByChild('code').equalTo(this.myKey).once('value').then(function (account) {
-                    if (account.exists()) {
-                        accRef.child(Object.keys(account.val())[0]).update({
-                            location: location_name,
-                            location_code: locate_code
-                        });
-                    }
-                });
+                // var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+                // if (data_args) {
+                //     var [key, name, code] = data_args.split('~');
+                //     this.location_key = key;
+                //     this.location_name = name;
+                //     this.location_code = code;
+                //     this.$.openDialog.open();
+                // }
             }
 
             _removeLocation() {
@@ -336,25 +306,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             onEnter() {
-                this.toggleAddLocation();
+                this.toggleAddService();
             }
 
-            toggleAddLocation() {
-                if (!this.location) {
-                    this.alertMsg = "Please enter location name.";
+            toggleAddService() {
+                if (!this.service) {
+                    this.alertMsg = "Please enter service name.";
                     this.$.alertDialog.open();
                 }
-                else if (!this.locationMinName) {
-                    this.alertMsg = "Please enter your desired location abbreviations.";
+                else if (!this.rate) {
+                    this.alertMsg = "Please enter service rate.";
                     this.$.alertDialog.open();
                 }
                 else {
-                    var ref = firebase.database().ref("/" + this.myKey + "/locations");
+                    var ref = firebase.database().ref("/" + this.myKey + "/services");
                     var push = ref.push({
-                        location_name: this.location,
-                        location_mini: this.locationMinName,
-                        location_active: false,
-                        location_code: this.randomString(7)
+                        service: this.service,
+                        rate: this.rate
                     });
                     if (push.key) this.$.addDialog.close();
                 }
@@ -394,16 +362,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 Polymer.dom(this.root).querySelector("#threshold").clearTriggers();
             }
 
-            toggleDrawer() {
-                this.dispatchEvent(new CustomEvent('toggleDrawer', {
-                    bubbles: true, composed: true, detail: {
-                        narrow: this.$.narrow
-                    }
-                }));
-                this.$.narrow = !this.$.narrow;
-            }
         }
 
-        window.customElements.define(MyLocation.is, MyLocation);
+        window.customElements.define(MyServices.is, MyServices);
     </script>
 </dom-module>

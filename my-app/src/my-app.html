@@ -46,9 +46,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="my-settings.html">
 <link rel="lazy-import" href="my-queue.html">
 <link rel="lazy-import" href="my-location.html">
+<link rel="lazy-import" href="my-billing.html">
+<link rel="lazy-import" href="my-collection.html">
 <link rel="lazy-import" href="my-messaging.html">
-<!-- <link rel="lazy-import" href="my-billing.html"> -->
-<!-- <link rel="lazy-import" href="my-collection.html"> -->
 <!-- <link rel="lazy-import" href="my-help.html"> -->
 <!-- <link rel="lazy-import" href="my-view2.html"> -->
 <!-- <link rel="lazy-import" href="my-appointments.html"> -->
@@ -199,7 +199,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <paper-icon-button on-tap="_closeToast" class="yellow-button" icon="my-icons:close"></paper-icon-button>
     </paper-toast>
 
-
     <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
     </app-location>
 
@@ -207,14 +206,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </app-route>
 
     <!-- live -->
-    <firebase-app auth-domain="p123-6256e.firebaseapp.com" database-url="https://p123-6256e.firebaseio.com" api-key="AIzaSyCV24k2Ev083HFXiASIj9g7RhvUi7C9J3w"
+    <!-- <firebase-app auth-domain="p123-6256e.firebaseapp.com" database-url="https://p123-6256e.firebaseio.com" api-key="AIzaSyCV24k2Ev083HFXiASIj9g7RhvUi7C9J3w"
       storage-bucket="p123-6256e.appspot.com" messaging-sender-id="291030422568">
-    </firebase-app>
+    </firebase-app> -->
 
     <!-- dev -->
-    <!-- <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com" api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ"
+    <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com" api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ"
       storage-bucket="emr-dev-c3005.appspot.com" messaging-sender-id="528097160886">
-    </firebase-app> -->
+    </firebase-app>
 
     <firebase-auth id="auth" status-known="{{statusKnown}}" user="{{user}}" provider="google" on-error="showError"></firebase-auth>
 
@@ -325,25 +324,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a>
 
+                  <a name="billing" href="[[rootPath]]billing">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:send" slot="item-icon"></iron-icon>
+                      <span>Billing</span>
+                    </paper-icon-item>
+                  </a>
+
+                  <a name="collection" href="[[rootPath]]collection">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:payment" slot="item-icon"></iron-icon>
+                      <span>Collection</span>
+                    </paper-icon-item>
+                  </a>
+
                   <a name="messaging" href="[[rootPath]]messaging">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:chat" slot="item-icon"></iron-icon>
                       <span>Messaging</span>
                     </paper-icon-item>
                   </a>
-                  <!-- <a style="display:none" name="billing" href="[[rootPath]]billing">
-                    <paper-icon-item toggles="true" class="menuSelected">
-                      <iron-icon icon="my-icons:send" slot="item-icon"></iron-icon>
-                      <span>Billing</span>
-                    </paper-icon-item>
-                  </a> -->
-
-                  <!-- <a style="display:none" name="collection" href="[[rootPath]]collection">
-                    <paper-icon-item toggles="true" class="menuSelected">
-                      <iron-icon icon="my-icons:payment" slot="item-icon"></iron-icon>
-                      <span>Collection</span>
-                    </paper-icon-item>
-                  </a> -->
                   <hr>
                   <a name="settings" href="[[rootPath]]settings">
                     <paper-icon-item toggles="true" class="menuSelected">
@@ -366,24 +366,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a> -->
                   <span style="padding:20px; color:gray; font-size:12px;">
-                    v0.6.3
+                    v0.7.0
                   </span>
                 </iron-selector>
               </div>
             </app-drawer>
             <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
               <!-- <my-account user={{user}} name="account"></my-account> -->
-              <my-dashboard name="dashboard" my-role="[[role]]" my-key="[[mykey]]" user="[[user]]"></my-dashboard>
+              <my-dashboard name="dashboard" my-role="[[role]]" my-key="[[mykey]]"></my-dashboard>
               <my-patients name="patients" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]" my-location-code="[[mylocationCode]]"></my-patients>
               <my-queue name="queue" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]" my-location-code="[[mylocationCode]]"
                 token="[[token]]"></my-queue>
               <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" my-location="[[mylocation]]"></my-visits>
               <my-settings name="settings" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[myLastname]]" user="[[user]]"></my-settings>
+              <my-billing name="billing" route="[[subroute]]" my-key="[[mykey]]" my-location="[[mylocation]]"></my-billing>
+              <my-collection name="collection" my-role="[[role]]" my-key="[[mykey]]"></my-collection>
               <my-messaging name="messaging" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]" my-location-code="[[mylocationCode]]"
                 token="[[token]]"></my-messaging>
               <!-- <my-appointments name="appointments"></my-appointments>
-              <my-billing name="billing"></my-billing>
-              <my-collection name="collection"></my-collection>
               <my-help name="help"></my-help>
               <my-view2 name="view2"></my-view2> -->
               <my-location name="location" my-role="[[role]]" my-key="[[mykey]]"></my-location>

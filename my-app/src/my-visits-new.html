@@ -4,22 +4,23 @@
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
 <link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
 <link rel="import" href="../bower_components/neon-animation/neon-animations.html">
 <link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
-<link rel="import" href="../bower_components/titanium-date-input/titanium-date-input.html">
-<link rel="import" href="../bower_components/paper-time-input/paper-time-input.html">
 <link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
 <link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
 
+<link rel="import" href="bwt-datatable-card.html">
 <link rel="import" href="time-element.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
@@ -71,8 +72,6 @@
                 padding: 0px;
                 margin: 0;
             }
-
-
 
             @media (min-width: 800px) {
                 .footer {
@@ -247,6 +246,27 @@
                 --paper-avatar-width: 150px;
                 cursor: pointer;
             }
+
+            .billBtn {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                background: white;
+                color: black;
+                float: right;
+                margin-top: -30px;
+                margin-right: 16px;
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            }
+
+            .aHref {
+                text-decoration: none;
+                color: #1976d2;
+                font-size: 12px;
+                margin-top: -6px;
+                cursor: pointer;
+                display: none;
+            }
         </style>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -258,24 +278,7 @@
                             <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
                         </a>
                         <div main-title>Add Visit</div>
-                        <!-- <paper-menu-button>
-                            <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
-                            <paper-listbox style="cursor:pointer" slot="dropdown-content">
-                                <paper-item>Discard</paper-item>
-                                <paper-item>Delete</paper-item>
-                            </paper-listbox>
-                        </paper-menu-button> -->
-
-                        <!-- <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="toggleDrawer"></paper-icon-button> -->
                     </app-toolbar>
-                    <!-- <app-toolbar style="margin-left:16px; padding:16px; margin-top:-3.5%;">
-                        <img class="avatar" src="../images/user.png"></img>
-                        <div class="pad">
-                            <div class="primary">Dr. Liz Grimes</div>
-                            <div class="shortText">MD</div>
-                            <div class="longText"></div>
-                        </div>
-                    </app-toolbar> -->
                 </app-header>
 
                 <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
@@ -303,27 +306,6 @@
                                         </paper-item>
                                     </template>
                                 </paper-listbox>
-
-                                <!-- <div id="info" style="display:none">
-                                    <paper-input readonly label="Birth date" value="{{bday}}"></paper-input>
-                                    <paper-input readonly label="Age" value="{{age}}"></paper-input>
-                                    <paper-input readonly label="Gender" value="{{sex}}"></paper-input>
-                                    <paper-input readonly label="Marital Status" value="{{status}}"></paper-input>
-                                    <paper-input readonly label="Occupation" value="{{occupation}}"></paper-input>
-                                    <paper-input readonly label="Employer" value="{{employer}}"></paper-input>
-                                    <paper-input readonly label="Referred to clinic by" value="{{referred}}"></paper-input>
-                                </div> -->
-                                <!-- <br>
-                                <div id="insure" style="display:none">
-                                    <b style="font-size:18px;">Insurance Information</b>
-                                    <paper-input readonly label="ID Card Number" value="{{card}}"></paper-input>
-                                    <paper-input readonly label="Birth date" value="{{bdate}}"></paper-input>
-                                    <paper-input readonly label="Address" value="{{address}}"></paper-input>
-                                    <paper-input readonly label="Home phone no" value="{{homephone}}"></paper-input>
-                                    <paper-input readonly label="Primary Insurance" value="{{insurance}}"></paper-input>
-                                    <paper-input readonly label="Relationship to patient" value="{{relation}}"></paper-input>
-                                </div> -->
-
                             </div>
                         </div>
 
@@ -344,7 +326,8 @@
                             limit-to-last="1">
                         </firebase-query>
 
-                        <firebase-query id="query4" path="{{path}}" order-by-child="patientkey" equal-to="{{myNewPatientKey}}" data="{{mytimeCheck}}">
+                        <firebase-query id="query4" path="{{path}}" order-by-child="patientkey" equal-to="{{myNewPatientKey}}" data="{{mytimeCheck}}"
+                            limit-to-last="1">
                         </firebase-query>
 
                         <div id="lastVisit" class="docu" style="margin-top:-16px; display:none">
@@ -379,11 +362,7 @@
                                         <div hidden$="{{!item.imaging}}">
                                             <span class="longText">Imaging</span>
                                             <div class="galleryHolder">
-                                                <sl-gallery id="gallery">
-                                                    <!-- <template is="dom-repeat" items="{{myimaging}}">
-                                                    <sl-gallery-image src="[[item.url]]" small="[[item.url]]"></sl-gallery-image>
-                                                </template> -->
-                                                </sl-gallery>
+                                                <sl-gallery id="gallery"></sl-gallery>
                                             </div>
                                         </div>
 
@@ -409,47 +388,7 @@
                                             <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.plan}}</div>
                                         </div>
                                     </template>
-                                    <!-- <span style="font-size:16px;">{{attach}}</span>
-                                    <firebase-query id="query4" path="/{{myKey}}/cases/{{myAttachKey}}/attachment" data="{{myattachment}}" limit-to-last="1">
-                                    </firebase-query>
-                                    <ul>
-                                        <template is="dom-repeat" items="[[myattachment]]">
-                                            <li>
-                                                <a href="{{item.url}}" target="_blank">[[item.name]]</a>
-                                            </li>
-                                        </template>
-                                    </ul> -->
                                 </div>
-
-                                <!-- <div class="prev" id="show" style="display:none">
-                                    <div>
-                                        <paper-icon-button on-tap="_hideAttach" style="bottom:16px; right:16px" icon="my-icons:close" title="close"></paper-icon-button>
-                                    </div>
-
-                                    <firebase-query id="query" path="/{{myKey}}/cases/{{myAttachKey}}/attachment" data="{{myimage}}" order-by-child="type" equal-to="image">
-                                    </firebase-query>
-                                    Images
-                                    <div style="padding:16px; text-align:center; border: 1px solid gray">
-                                        {{imageTxt}}
-                                        <sl-gallery>
-                                            <template is="dom-repeat" items="{{myimage}}">
-                                                <sl-gallery-image preload fade src="[[item.url]]" small="[[item.url]]"></sl-gallery-image>
-                                            </template>
-                                        </sl-gallery>
-                                    </div>
-                                    <br>
-
-                                    <firebase-query id="query" path="/{{myKey}}/cases/{{myAttachKey}}/attachment" data="{{myvideo}}" order-by-child="type" equal-to="video">
-                                    </firebase-query>
-                                    Videos
-                                    <div style="padding:16px; text-align:center; border: 1px solid gray">
-                                        {{videoTxt}}
-                                        <template is="dom-repeat" items="{{myvideo}}">
-                                            <video class="imgh vid-6 vid-s-9" controls preload="auto" id="[[item.$key]]" src="[[item.url]]"></video>
-                                        </template>
-                                    </div>
-                                </div> -->
-
                             </div>
                         </div>
 
@@ -485,7 +424,6 @@
                                 <div style="margin-left:4px;margin-top:-10px;">
                                     <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
                                 </div>
-                                <!-- <b style="font-size:18px;">Today</b> -->
                                 <paper-textarea hidden="{{soap}}" label="Chief complaint *" value="{{complain}}"></paper-textarea>
                                 <paper-textarea hidden="{{soap}}" label="History" value="{{history}}"></paper-textarea>
                                 <paper-textarea hidden="{{soap}}" label="Laboratory" value="{{laboratory}}"></paper-textarea>
@@ -510,11 +448,39 @@
                         <br>
                         <br>
                     </neon-animatable>
+                    <!-- patient, insurance, hospital // min-width:768px -->
+                    <neon-animatable>
+                        <div class="textTemp"> Billing
+                            <br>
+                            <span style="font-weight: 400; font-size: 12px;">(Ref.# will be generated upon submit) </span>
+                        </div>
+                        <paper-button id="delBTN" style="display:none;" class="billBtn" on-tap="_deleteBill">Delete Bill</paper-button>
+                        <paper-button class="billBtn" on-tap="_showBillDialog">Add Bill</paper-button>
+                        <div id="billHolder">
+                            <div class="docu2">
+                                <paper-input style="width:250px" label="Remarks *" value="{{remarks}}" always-float-label></paper-input>
+                                <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed multi-selection selectable selected-items="{{selectedItem}}">
+                                    <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
+                                    <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
+                                    <paper-datatable-column header="Bill To" type="String" property="billTo"></paper-datatable-column>
+                                    <paper-datatable-column header="Amount" type="Number" property="amount"></paper-datatable-column>
+                                </paper-datatable>
+                                <div style="padding: 16px;">
+                                    <div style="float: right; ">TOTAL: {{total}}.00</div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <br>
+                        <br>
+                    </neon-animatable>
 
                     <neon-animatable>
                         <div class="docu">
                             <div class="details">
-                                <div id="saveSuccess" style="color: green; display:none">Visit successfully saved.</div>
+                                <div id="saveSuccess" style="color: green; display:none">Visit successfully saved.
+                                    <p id="p" style="margin-top:-4px">Billing ref.#&nbsp;</p>
+                                </div>
                                 <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
                                 <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving data.</div>
                             </div>
@@ -536,6 +502,63 @@
 
         </app-drawer-layout>
 
+        <firebase-query path="/{{myKey}}/services" data="{{myservices}}" order-by-child="service"></firebase-query>
+        <firebase-query id="hmoQuery" path="/{{myKey}}/hmo" data="{{myhmos}}" order-by-child="name"></firebase-query>
+        <firebase-query id="locationQuery" path="/{{myKey}}/locations" data="{{mylocations}}" order-by-child="location_name"></firebase-query>
+
+        <salte-dialog style="height: 100%;" no-auto-fullscreen id="billingDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #1E88E5">Add Billing</h2>
+            <span>
+                <!-- service -->
+                <paper-dropdown-input id="dropdService" label="Service *" items="[[myservices]]" filter-property="service" value="{{service}}"
+                    selected-item="{{selectedService}}">
+                    <template>
+                        <template is="dom-repeat" items="[[items]]" as="item">
+                            <paper-item id="[[item.rate]]">[[item.service]]</paper-item>
+                        </template>
+                    </template>
+                </paper-dropdown-input>
+                <!-- amount -->
+                <paper-input id="amount" label="Amount" allowed-pattern="[\d]" prevent-invalid-input value="{{amount}}"></paper-input>
+                <!-- bill to -->
+                <paper-dropdown-menu label="Bill to">
+                    <paper-listbox id="dropdSelectedBillTo" slot="dropdown-content" attr-for-selected="name" selected="{{selectedBillTo}}">
+                        <paper-item name="patient">Patient</paper-item>
+                        <paper-item name="philhealth">PHILHEALTH</paper-item>
+                        <paper-item name="hmo">HMO</paper-item>
+                        <paper-item name="hospital">Hospital</paper-item>
+                    </paper-listbox>
+                </paper-dropdown-menu>
+                <!-- patient name -->
+                <paper-input id="inPatient" readonly style="display: none" label="Patient" value="{{filterValue}}"></paper-input>
+                <!-- has an HMO -->
+                <paper-input id="inHMO" readonly style="display: none" label="HMO" value="{{insurance}}"></paper-input>
+                <a class="aHref" id="href1" on-tap="_changeHMO">Change</a>
+                <!-- my hmos select -->
+                <paper-dropdown-input id="dropdHMO" style="display: none" label="HMO" items="[[myhmos]]" filter-property="name" value="{{selectedHMO}}">
+                    <template>
+                        <template is="dom-repeat" items="[[items]]" as="item">
+                            <paper-item>[[item.name]]</paper-item>
+                        </template>
+                    </template>
+                </paper-dropdown-input>
+                <a class="aHref" id="href2" on-tap="_cancelChangeHMO">Cancel</a>
+                <!-- my location -->
+                <paper-dropdown-input id="dropdHospital" style="display: none" label="Hospital" items="[[mylocations]]" filter-property="location_name"
+                    value="{{location}}">
+                    <template>
+                        <template is="dom-repeat" items="[[items]]" as="item">
+                            <paper-item>[[item.location_name]]</paper-item>
+                        </template>
+                    </template>
+                </paper-dropdown-input>
+                <span style="color: red; font-size: 12px; margin-top:16px; ">{{billErr}}</span>
+            </span>
+            <div class="buttons">
+                <paper-button id="onEnter" autofocus on-tap="_addBilling">ADD</paper-button>
+            </div>
+        </salte-dialog>
+
     </template>
 
     <script>
@@ -547,11 +570,20 @@
                     type: Boolean,
                     notify: true
                 },
+                billingData: {
+                    type: Array,
+                    value: [],
+                    notify: true
+                },
+                billingDataTmp: {
+                    type: Array,
+                    value: [],
+                    notify: true
+                },
                 myQueue: String,
                 queueKey: String,
                 queueDate: String,
                 myLocation: String,
-                myLocationCode: String,
                 prevRoute: String,
                 filterValue: String,
                 myKey: String,
@@ -623,14 +655,6 @@
                 },
 
                 mykey: String,
-                myimage: {
-                    type: Object,
-                    observer: '_myimageChanged'
-                },
-                myvideo: {
-                    type: Object,
-                    observer: '_myvideoChanged'
-                },
                 todayDate: String,
                 lastPushTime: {
                     type: Number,
@@ -641,7 +665,61 @@
                 mycases: Object,
                 normal: Boolean,
                 soap: Boolean,
-                template: String
+                template: String,
+                insurance: String,
+                service_no: {
+                    type: Number,
+                    value: 0
+                },
+                service_bill_to: String,
+                ChangeHMO: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+                selectedItem: Object
+            },
+
+            _changeHMO() {
+                this.ChangeHMO = true;
+            },
+
+            _cancelChangeHMO() {
+                this.ChangeHMO = false;
+            },
+
+            _showBillDialog() {
+                this.$.billingDialog.open();
+            },
+
+            _deleteBill() {
+                if (this.selectedItem.length > 0) {
+                    function removeByKey(array, params) {
+                        array.some(function (item, index) {
+                            if (array[index][params.key] === params.value) {
+                                // found it!
+                                array.splice(index, 1);
+                                return true; // stops the loop
+                            }
+                            return false;
+                        });
+                        return array;
+                    }
+
+                    var listOfItems = this.billingData;
+                    var deleteList = this.selectedItem;
+
+                    for (var i = 0; i < deleteList.length; ++i) {
+                        removeByKey(listOfItems, {
+                            key: 'num',
+                            value: deleteList[i].num
+                        });
+                    }
+
+                    this.billingData = [];
+                    this.billingData = listOfItems;
+                    Polymer.dom(this.root).querySelector("#billingDatatable").deselectAll();
+                }
             },
 
             _selectNormal() {
@@ -661,61 +739,6 @@
                 this.exitanimation = "slide-left-animation";
                 this.selectedPage = parseInt(this.selectedPage) + 1;
             },
-
-            _showAttach() {
-                Polymer.dom(this.root).querySelector("#showed").style.display = 'none';
-                Polymer.dom(this.root).querySelector("#show").style.display = 'block';
-            },
-
-            _hideAttach() {
-                Polymer.dom(this.root).querySelector("#showed").style.display = 'block';
-                Polymer.dom(this.root).querySelector("#show").style.display = 'none';
-            },
-
-            _myvideoChanged(e) {
-                if (e.length > 0) {
-                    this.videoTxt = '';
-                }
-                else {
-                    this.videoTxt = 'No Videos Attach';
-                }
-            },
-
-            _myimageChanged(e) {
-                if (e.length > 0) {
-                    this.imageTxt = '';
-                }
-                else {
-                    this.imageTxt = 'No Images Attach';
-                }
-            },
-
-            // Filter: function (val) {
-            //     if (!val) {
-            //         Polymer.dom(this.root).querySelector("#insure").style.display = 'none';
-            //         Polymer.dom(this.root).querySelector("#info").style.display = 'none';
-            //         Polymer.dom(this.root).querySelector("#list").style.display = 'none';
-            //     }
-            //     else {
-            //         var c = val.toLowerCase().replace(/\b[a-z]/g, function (letter) {
-            //             return letter.toUpperCase();
-            //         });
-            //         val = c;
-            //         this.filterValue = c;
-            //         console.log(val);
-            //         Polymer.dom(this.root).querySelector("#list").style.display = 'block';
-            //     }
-            // return function (person) {
-            //     var name = person.personal.firstname + ' ' + person.personal.middlename + ' ' + person.personal.lastname;
-            //     // console.log(name);
-            //     if (!val) {
-            //         return false;
-            //     }
-            //     else {
-            //         return !name.toLowerCase().indexOf(val.toLowerCase());
-            //     }
-            // };
-            //},
 
             _date(e) {
                 if (e) {
@@ -799,6 +822,9 @@
                 this.favrighthide = true;
                 this.favlefthide = true;
                 this.todayDate = this.formatTodayDate(new Date());
+                this.$.hmoQuery.disabled = true;
+                this.$.locationQuery.disabled = true;
+                this.billingDataTmp = [];
             },
 
             observers: [
@@ -807,8 +833,132 @@
                 '_mypatientInfoChanged(patientInfo)',
                 '_myimagingChanged(myimaging)',
                 '_myattachmentChaged(myattachment)',
-                '_mytimeCheckChanged(mytimeCheck, todayDate, myNewPatientKey)'
+                '_mytimeCheckChanged(mytimeCheck, todayDate, myNewPatientKey)',
+                '_amountChanged(amount)',
+                '_selectedServiceChanged(selectedService)',
+                '_selectedBillToChanged(selectedBillTo, selectedHMO, location, ChangeHMO)',
+                '_billingDataChanged(billingData, remarks)'
             ],
+
+            _billingDataChanged(e, r) {
+                if (e.length > 0) {
+                    var amounts = [];
+
+                    e.forEach(element => {
+                        amounts.push(parseInt(element.amount));
+                    });
+
+                    function getSum(total, num) {
+                        return total + num;
+                    }
+
+                    function addCommas(intNum) {
+                        return (intNum + '').replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+                    }
+
+                    this.total = addCommas(amounts.reduce(getSum));
+                    Polymer.dom(this.root).querySelector("#delBTN").style.display = "block";
+                    if (r) {
+                        this.favrighthide = false;
+                    }
+                    else {
+                        this.favrighthide = true;
+                    }
+                }
+                else {
+                    this.total = 0;
+                    this.favrighthide = true;
+                    Polymer.dom(this.root).querySelector("#delBTN").style.display = "none";
+                }
+            },
+
+            _selectedBillToChanged(e, f, g, h) {
+                this.billErr = '';
+                if (e) {
+                    if (e === 'patient') {
+                        this.$.inPatient.style.display = "block";
+                        this.$.dropdHMO.style.display = "none";
+                        this.$.dropdHospital.style.display = "none";
+                        this.$.hmoQuery.disabled = true;
+                        this.$.locationQuery.disabled = true;
+                        this.$.inHMO.style.display = "none";
+                        this.$.href1.style.display = "none";
+                        this.$.href2.style.display = "none";
+                        this.service_bill_to = this.filterValue;
+                    }
+                    else if (e === 'philhealth') {
+                        this.$.inPatient.style.display = "none";
+                        this.$.dropdHMO.style.display = "none";
+                        this.$.dropdHospital.style.display = "none";
+                        this.$.hmoQuery.disabled = true;
+                        this.$.locationQuery.disabled = true;
+                        this.$.inHMO.style.display = "none";
+                        this.$.href1.style.display = "none";
+                        this.$.href2.style.display = "none";
+                        this.service_bill_to = "PHILHEALTH";
+                    }
+                    else if (e === 'hmo') {
+                        this.$.inPatient.style.display = "none";
+                        this.$.dropdHospital.style.display = "none";
+                        this.$.locationQuery.disabled = true;
+                        if (this.insurance) {
+                            if (h === false) {
+                                this.$.inHMO.style.display = "block";
+                                this.$.href1.style.display = "block";
+                                this.$.href2.style.display = "none";
+                                this.$.dropdHMO.style.display = "none";
+                                this.$.hmoQuery.disabled = true;
+                                this.service_bill_to = this.insurance;
+                            } else {
+                                this.$.inHMO.style.display = "none";
+                                this.$.href1.style.display = "none";
+                                this.$.href2.style.display = "block";
+                                this.$.dropdHMO.style.display = "block";
+                                this.$.hmoQuery.disabled = false;
+                                this.service_bill_to = f;
+                            }
+                        }
+                        else {
+                            this.$.dropdHMO.style.display = "block";
+                            this.$.hmoQuery.disabled = false;
+                            this.service_bill_to = f;
+                        }
+                    }
+                    else {
+                        this.$.dropdHospital.style.display = "block";
+                        this.$.dropdHMO.style.display = "none";
+                        this.$.inPatient.style.display = "none";
+                        this.$.hmoQuery.disabled = true;
+                        this.$.locationQuery.disabled = false;
+                        this.$.inHMO.style.display = "none";
+                        this.$.href1.style.display = "none";
+                        this.$.href2.style.display = "none";
+                        this.service_bill_to = g;
+                    }
+                }
+                else {
+                    this.$.dropdHospital.style.display = "none";
+                    this.$.dropdHMO.style.display = "none";
+                    this.$.inPatient.style.display = "none";
+                    this.$.hmoQuery.disabled = true;
+                    this.$.locationQuery.disabled = true;
+                    this.$.inHMO.style.display = "none";
+                    this.$.href1.style.display = "none";
+                    this.$.href2.style.display = "none";
+                    this.service_bill_to = '';
+                }
+            },
+
+            _amountChanged(e) {
+                this.billErr = '';
+            },
+
+            _selectedServiceChanged(e) {
+                this.billErr = '';
+                if (e) {
+                    this.amount = parseInt(e.id);
+                }
+            },
 
             _mytimeCheckChanged(timeCheck, date, myNewPatientKey) {
                 var monthNames = [
@@ -974,14 +1124,15 @@
                 this.entryanimation = "slide-from-left-animation";
                 this.exitanimation = "slide-right-animation";
 
-                if (this.selectedPage <= 2) {
+                if (this.selectedPage <= 3) {
                     if (this.selectedPage != 0) {
                         this.selectedPage = this.selectedPage - 1;
 
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+
                         if (this.selectedPage == 0) {
                             this.favlefthide = true;
-                            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
-                            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
                         }
 
                         if (this.selectedPage == 1) {
@@ -992,6 +1143,10 @@
                             this.favrighthide = false;
                         }
 
+                        if (this.selectedPage == 2) {
+                            this.favrighthide = false;
+                        }
+
                     }
                     else {
                         this.favlefthide = true;
@@ -999,7 +1154,7 @@
                     }
                 }
                 else {
-                    this.selectedPage = 2;
+                    this.selectedPage = 3;
                 }
 
             },
@@ -1008,158 +1163,42 @@
                 this.entryanimation = "slide-from-right-animation";
                 this.exitanimation = "slide-left-animation";
                 if (this.selectedPage >= 0) {
-
-                    this.favlefthide = false;
-
-                    if (this.selectedPage == 2) {
-                        var key = this.mykey;
-                        var mykey = this.myKey;
-                        var myattachment = this.attachment;
-                        var attachName = this.randomString(8);
-                        var today = this.todayDate;
-                        var timestamp = firebase.database.ServerValue.TIMESTAMP;
-                        var order = firebase.database.ServerValue.TIMESTAMP;
-                        var newPushKey;
-                        var myQueue = this.myQueue;
-                        var queueKey = this.queueKey, myLocation = this.myLocation, queueDate = this.queueDate;
-
-                        if (today < this.formatTodayDate(new Date())) {
-                            newPushKey = this.generatePushID(today);
-                            timestamp = this.lastPushTime;
-                            order = this.lastPushTime;
-                        }
-
-                        var data = {
-                            patient: this.filterValue,
-                            complain: this.complain,
-                            history: this.history,
-                            diagnosis: this.diagnosis,
-                            treatment: this.treatment,
-                            patientkey: key,
-                            timestamp: timestamp,
-                            order: order,
-                            created: today,
-                            laboratory: this.laboratory,
-                            pe: this.pe,
-                            plan: this.plan,
-                            subjective: this.subjective,
-                            objective: this.objective,
-                            assessment: this.assessment,
-                            template: this.template,
-                            clinic_location: this.myLocation
-                        }
-
-                        var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
-                        var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
-                        var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
-
-                        firebase.database().ref('/' + mykey + '/patients/' + key)
-                            .once('value').then(function (patient) {
-                                if (patient.val().profile) {
-
-                                    if (newPushKey) {
-                                        var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
-                                        var push = ref.set(data);
-                                        var fbPushKey = newPushKey;
-                                    }
-                                    else {
-                                        var ref = firebase.database().ref("/" + mykey + "/cases");
-                                        var push = ref.push(data);
-                                        var fbPushKey = push.key;
-                                    }
-
-                                    if (fbPushKey) {
-
-                                        _updateOrder(mykey, fbPushKey);
-                                        _reportsUpdate(today, mykey);
-
-                                        firebase.database().ref("/" + mykey + "/patients/" + fbPushKey + "/profile").set(patient.val().profile);
-
-                                        if (myQueue) {
-                                            firebase.database().ref("/" + mykey + "/patients/" + key).update({ isQueue: false });
-                                            _locateNextQueue(mykey, queueKey, myLocation, queueDate)
-                                        }
-
-                                        if (myattachment) {
-                                            saveRun.style.display = 'block';
-                                            firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(true);
-                                            _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc);
-                                        }
-                                        else {
-                                            firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(false);
-                                            saveRun.style.display = 'none';
-                                            saveSucc.style.display = 'block';
-                                        }
-                                    }
-                                    else {
-                                        saveErr.style.display = 'block';
-                                    }
-                                }
-                                else {
-                                    if (newPushKey) {
-                                        var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
-                                        var push = ref.set(data);
-                                        var fbPushKey = newPushKey;
-                                    }
-                                    else {
-                                        var ref = firebase.database().ref("/" + mykey + "/cases");
-                                        var push = ref.push(data);
-                                        var fbPushKey = push.key;
-                                    }
-
-                                    if (fbPushKey) {
-
-                                        _updateOrder(mykey, fbPushKey);
-                                        _reportsUpdate(today, mykey);
-
-                                        if (myQueue) {
-                                            firebase.database().ref("/" + mykey + "/patients/" + key).update({ isQueue: false });
-                                            _locateNextQueue(mykey, queueKey, myLocation, queueDate)
-                                        }
-
-                                        if (myattachment) {
-                                            saveRun.style.display = 'block';
-                                            firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(true);
-                                            _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc);
-                                        }
-                                        else {
-                                            firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(false);
-                                            saveRun.style.display = 'none';
-                                            saveSucc.style.display = 'block';
-                                        }
-                                    }
-                                    else {
-                                        saveErr.style.display = 'block';
-                                    }
-                                }
-                            });
-
-                    }
-
-                    if (this.selectedPage == 0) {
-                        this.favlefthide = false;
-                        this.favrighthide = true;
-                    }
-
-                    if (this.selectedPage == 1) {
-                        this.favlefthide = false;
-                        this.favrighthide = true;
-                    }
-
-                    if (this.selectedPage == 2) {
-                        this.favlefthide = true;
-                        this.favrighthide = true;
-                    }
-
-                    if (this.selectedPage != 3) {
+                    if (this.selectedPage != 4) {
 
                         this.selectedPage = this.selectedPage + 1;
+                        this.favlefthide = false;
+
+                        if (this.selectedPage == 0) {
+                            this.favlefthide = false;
+                            this.favrighthide = true;
+                        }
 
                         if (this.selectedPage == 1) {
-                            // this.favrighthide = true;
+                            this.favlefthide = false;
+                            this.favrighthide = true;
+                        }
+
+                        if (this.selectedPage == 3) {
+                            if (this.billingData.length > 0) {
+                                this.favrighthide = false;
+                            }
+                            else {
+                                this.favlefthide = false;
+                                this.favrighthide = true;
+                            }
+                            // this.$.billingDialog.open();
+                        }
+
+                        if (this.selectedPage == 3) {
                             Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
                             Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
                         }
+                    }
+
+                    if (this.selectedPage == 4) {
+                        this._submitToFireB();
+                        this.favlefthide = true;
+                        this.favrighthide = true;
                     }
                 }
                 else {
@@ -1167,6 +1206,164 @@
                     this.favlefthide = true;
                     this.favrighthide = true;
                 }
+            },
+
+            _addBilling() {
+                if (this.service && this.amount && this.service_bill_to) {
+                    var number = this.service_no + 1;
+                    this.service_no = number;
+                    this.billingDataTmp.push({
+                        num: number,
+                        service: this.service,
+                        amount: parseInt(this.amount),
+                        billTo: this.service_bill_to
+                    });
+
+                    this.billingData = [];
+                    this.billingData = this.billingDataTmp;
+                    this.$.billingDialog.close();
+
+                    this._clear2();
+                }
+                else {
+                    this.billErr = 'Ops! Dont leave any field empty.';
+                }
+            },
+
+            _submitToFireB() {
+                var key = this.mykey;
+                var mykey = this.myKey;
+                var myattachment = this.attachment;
+                var attachName = this.randomString(8);
+                var today = this.todayDate;
+                var timestamp = firebase.database.ServerValue.TIMESTAMP;
+                var order = firebase.database.ServerValue.TIMESTAMP;
+                var newPushKey;
+                var myQueue = this.myQueue;
+                var queueKey = this.queueKey, myLocation = this.myLocation, queueDate = this.queueDate;
+
+                if (today < this.formatTodayDate(new Date())) {
+                    newPushKey = this.generatePushID(today);
+                    timestamp = this.lastPushTime;
+                    order = this.lastPushTime;
+                }
+
+                var data = {
+                    patient: this.filterValue,
+                    complain: this.complain,
+                    history: this.history,
+                    diagnosis: this.diagnosis,
+                    treatment: this.treatment,
+                    patientkey: key,
+                    timestamp: timestamp,
+                    order: order,
+                    created: today,
+                    laboratory: this.laboratory,
+                    pe: this.pe,
+                    plan: this.plan,
+                    subjective: this.subjective,
+                    objective: this.objective,
+                    assessment: this.assessment,
+                    template: this.template,
+                    clinic_location: this.myLocation
+                }
+
+                var data2 = {
+                    timestamp: timestamp,
+                    order: order,
+                    created: today,
+                    clinic_location: this.myLocation,
+                    billing_total: this.total,
+                    billing_data: this.billingData,
+                    remarks: this.remarks
+                }
+
+                var p = Polymer.dom(this.root).querySelector("#p");
+                var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+                var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
+                var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
+
+                firebase.database().ref('/' + mykey + '/patients/' + key)
+                    .once('value').then(function (patient) {
+                        if (patient.val().profile) {
+
+                            if (newPushKey) {
+                                var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
+                                var push = ref.set(data);
+                                var fbPushKey = newPushKey;
+                            }
+                            else {
+                                var ref = firebase.database().ref("/" + mykey + "/cases");
+                                var push = ref.push(data);
+                                var fbPushKey = push.key;
+                            }
+
+                            if (fbPushKey) {
+
+                                _updateOrder(mykey, fbPushKey, data2);
+                                _reportsUpdate(today, mykey);
+
+                                firebase.database().ref("/" + mykey + "/patients/" + fbPushKey + "/profile").set(patient.val().profile);
+
+                                if (myQueue) {
+                                    firebase.database().ref("/" + mykey + "/patients/" + key).update({ isQueue: false });
+                                    _locateNextQueue(mykey, queueKey, myLocation, queueDate)
+                                }
+
+                                if (myattachment) {
+                                    saveRun.style.display = 'block';
+                                    firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(true);
+                                    _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc);
+                                }
+                                else {
+                                    firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(false);
+                                    saveRun.style.display = 'none';
+                                    saveSucc.style.display = 'block';
+                                }
+                            }
+                            else {
+                                saveErr.style.display = 'block';
+                            }
+                        }
+                        else {
+                            if (newPushKey) {
+                                var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
+                                var push = ref.set(data);
+                                var fbPushKey = newPushKey;
+                            }
+                            else {
+                                var ref = firebase.database().ref("/" + mykey + "/cases");
+                                var push = ref.push(data);
+                                var fbPushKey = push.key;
+                            }
+
+                            if (fbPushKey) {
+
+                                _updateOrder(mykey, fbPushKey, data2);
+                                _reportsUpdate(today, mykey);
+
+                                if (myQueue) {
+                                    firebase.database().ref("/" + mykey + "/patients/" + key).update({ isQueue: false });
+                                    _locateNextQueue(mykey, queueKey, myLocation, queueDate)
+                                }
+
+                                if (myattachment) {
+                                    saveRun.style.display = 'block';
+                                    firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(true);
+                                    _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc);
+                                }
+                                else {
+                                    firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(false);
+                                    saveRun.style.display = 'none';
+                                    saveSucc.style.display = 'block';
+                                }
+                            }
+                            else {
+                                saveErr.style.display = 'block';
+                            }
+                        }
+                    });
+
 
                 function _locateNextQueue(mykey, queueKey, myLocation, queueDate) {
                     var ref = firebase.database().ref("/" + mykey + "/queue/" + myLocation + "/" + queueDate);
@@ -1203,22 +1400,38 @@
                     });
                 }
 
-                function _updateOrder(mykey, fbPushKey) {
+                function _updateOrder(mykey, fbPushKey, data2) {
                     var postRef = firebase.database().ref('/' + mykey + '/cases/' + fbPushKey);
                     postRef.once('value').then(function (snapshot) {
+                        var order = snapshot.val().order * -1;
                         var patientRef = firebase.database().ref('/' + mykey + '/patients/' + snapshot.val().patientkey);
-                        patientRef.once('value').then(function (snapshot) {
+                        var billRef = firebase.database().ref('/' + mykey + '/billing');
+
+                        patientRef.once('value').then(function (snapshot2) {
                             postRef.update({
                                 patientinfo: {
-                                    num: snapshot.val().no,
-                                    birthday: snapshot.val().personal.birthday,
-                                    gender: snapshot.val().personal.sex,
-                                    hmo: snapshot.val().insurance.primary_insurance
+                                    num: snapshot2.val().no,
+                                    birthday: snapshot2.val().personal.birthday,
+                                    gender: snapshot2.val().personal.sex,
+                                    hmo: snapshot2.val().insurance.primary_insurance
                                 },
+                                order: order
                             });
                         });
-                        order = snapshot.val().order * -1;
-                        postRef.update({ order });
+
+                        billRef.child(fbPushKey).set(data2);
+                        billRef.child(fbPushKey).update({ order: order });
+                        billRef.once('value').then(function (data) {
+                            var num = data.numChildren() ? data.numChildren() : 1;
+                            var no = _billingRefNoUpdate(num, mykey, fbPushKey);
+
+                            var b = document.createElement("b");
+                            b.id = "bold";
+                            b.style.color = "blue";
+                            var t = document.createTextNode(no + '.');
+                            b.appendChild(t);
+                            p.appendChild(b);
+                        });
                     });
                 }
 
@@ -1277,6 +1490,30 @@
                     }
                 }
 
+                function _billingRefNoUpdate(num, mykey, pushkey) {
+                    if (num > 0 && num < 10) {
+                        num = '000' + num;
+                    }
+                    else if (num > 9 && num < 100) {
+                        num = '00' + num;
+                    }
+                    else if (num > 99 && num < 1000) {
+                        num = '0' + num;
+                    }
+                    else if (num > 999) {
+                        num = num;
+                    }
+                    else {
+                        num = '0000';
+                    }
+
+                    firebase.database().ref("/" + mykey + "/billing/" + pushkey + "/ref").set(num);
+                    return num;
+                }
+            },
+
+            onEnter() {
+                this.toggleBill();
             },
 
             randomString(n) {
@@ -1298,6 +1535,20 @@
                 this.subjective = '';
                 this.objective = '';
                 this.assessment = '';
+
+                this.billingData = [];
+                this.billingDataTmp = [];
+                this._clear2();
+            },
+
+            _clear2() {
+                // set everything to default value
+                this.$.dropdService.value = null;
+                this.$.amount.value = null;
+                this.$.dropdSelectedBillTo.selected = null;
+                this.$.dropdHMO.value = null;
+                this.$.dropdHospital.value = null;
+                this.billErr = '';
             },
 
             // guid: function () {

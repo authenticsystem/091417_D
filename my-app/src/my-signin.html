@@ -107,8 +107,8 @@
             <div id="errorMsgDiv" style="display: none;">
                 <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}
             </div>
-            <paper-input id="email" label="Email" value="{{email}}" always-float-label required auto-validate error-message=""></paper-input>
-            <paper-input id="pass" label="Password" type="password" value="{{password}}" always-float-label required auto-validate error-message=""></paper-input>
+            <paper-input id="email" label="Email" value="{{email}}" always-float-label auto-validate error-message=""></paper-input>
+            <paper-input id="pass" label="Password" type="password" value="{{password}}" always-float-label auto-validate error-message=""></paper-input>
             <iron-a11y-keys target="[[targetEmail]]" keys="enter" on-keys-pressed="_onEnter"></iron-a11y-keys>
             <iron-a11y-keys target="[[targetPass]]" keys="enter" on-keys-pressed="_onEnter"></iron-a11y-keys>
             <br>
