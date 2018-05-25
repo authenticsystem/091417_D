@@ -450,14 +450,12 @@
                     </neon-animatable>
                     <!-- patient, insurance, hospital // min-width:768px -->
                     <neon-animatable>
-                        <div class="textTemp"> Billing
-                            <br>
-                            <span style="font-weight: 400; font-size: 12px;">(Ref.# will be generated upon submit) </span>
-                        </div>
+                        <div class="textTemp"> Billing </div>
                         <paper-button id="delBTN" style="display:none;" class="billBtn" on-tap="_deleteBill">Delete Bill</paper-button>
                         <paper-button class="billBtn" on-tap="_showBillDialog">Add Bill</paper-button>
                         <div id="billHolder">
                             <div class="docu2">
+                                <span style="font-weight: 400; font-size: 12px; float: right">(Ref.# will be generated upon submit) </span>
                                 <paper-input style="width:250px" label="Remarks *" value="{{remarks}}" always-float-label></paper-input>
                                 <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed multi-selection selectable selected-items="{{selectedItem}}">
                                     <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
@@ -466,7 +464,7 @@
                                     <paper-datatable-column header="Amount" type="Number" property="amount"></paper-datatable-column>
                                 </paper-datatable>
                                 <div style="padding: 16px;">
-                                    <div style="float: right; ">TOTAL: {{total}}.00</div>
+                                    <div style="float: right;" class="primary">TOTAL: {{total}}.00</div>
                                 </div>
                             </div>
                         </div>

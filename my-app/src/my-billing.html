@@ -29,6 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="time-element.html">
 <link rel="import" href="search-bar.html">
 <link rel="import" href="my-billing-new.html">
+<link rel="import" href="my-billing-view.html">
 
 <dom-module id="my-billing">
   <template>
@@ -208,109 +209,98 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <!-- <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route> -->
-    <!-- <app-route route="{{route}}" pattern="/detail/:key" tail="{{detailRoute}}" data="{{detailData}}" active="{{detailActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route> -->
+    <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail/:key" data="{{detailData}}" active="{{detailActive}}"></app-route>
+    <!-- <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route> -->
 
-    <!-- <div hidden$="{{!applicationActive}}"> -->
-    <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
-      <div name="">
-        <app-header-layout fullbleed has-scrolling-region>
-          <app-header fixed slot="header">
-            <template is="dom-if" if="{{!openSearch}}">
-              <app-toolbar primary id="tool1">
-                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                <div main-title>Billing</div>
-                <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
-              </app-toolbar>
-            </template>
+    <div hidden$="{{!applicationActive}}">
+      <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+        <div name="">
+          <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+              <template is="dom-if" if="{{!openSearch}}">
+                <app-toolbar primary id="tool1">
+                  <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                  <div main-title>Billing</div>
+                  <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+                </app-toolbar>
+              </template>
 
-            <template is="dom-if" if="{{openSearch}}">
-              <app-toolbar primary id="tool2">
-                <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
-                <template is="dom-if" if="{{search}}">
-                  <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
-                </template>
-              </app-toolbar>
-            </template>
-          </app-header>
+              <template is="dom-if" if="{{openSearch}}">
+                <app-toolbar primary id="tool2">
+                  <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                  <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
+                  <template is="dom-if" if="{{search}}">
+                    <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
+                  </template>
+                </app-toolbar>
+              </template>
+            </app-header>
 
-          <firebase-query id="query" path="/{{myKey}}/billing" data="{{myBilling}}" order-by-child="{{order}}" start-at="{{search}}">
-          </firebase-query>
+            <firebase-query id="query" path="/{{myKey}}/billing" data="{{myBilling}}" order-by-child="{{order}}" start-at="{{search}}">
+            </firebase-query>
 
-          <div id="noRecord">
-            <div class="item" style="padding:15px">
-              <div style="margin:auto">
-                {{record}}
+            <div id="noRecord">
+              <div class="item" style="padding:15px">
+                <div style="margin:auto">
+                  {{record}}
+                </div>
               </div>
             </div>
-          </div>
 
-          <iron-list items="[[myBilling]]" as="item" selection-enabled scroll-target="threshold">
-            <template>
-              <div class="divSeparator">
-                <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+            <iron-list items="[[myBilling]]" as="item" selection-enabled scroll-target="threshold">
+              <template>
+                <div class="divSeparator">
+                  <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
 
-                  <div class="card-content" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
-                    <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
-                      <iron-icon icon="my-icons:watch-later"></iron-icon>
-                      <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
-                    </div>
-                    <div id="{{item.$key}}" style=" padding: 16px; display:flex">
-                      <!-- <div>
-                    <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
-                  </div> -->
-                      <div id="{{item.$key}}" style=" margin-left:10px;">
-                        <div id="{{item.$key}}" style="font-size:11px" class="longText">Ref.# [[item.ref]]</div>
-                        <div id="{{item.$key}}" class="primary">[[_manyServices(item.billing_data)]]</div>
-                        <div id="{{item.$key}}" class="primary">“[[item.remarks]]”</div>
-                        <!-- <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
-                    <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
-                    <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}} [[item.patientinfo.gender]]</div>
-                    <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
-
-                    <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
-                      <span id="{{item.$key}}" class="longText">Chief Complaint</span>
-                      <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
-                    </div>
-
-                    <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkSOAP(item.template)}}">
-                      <span id="{{item.$key}}" class="longText">Subjective</span>
-                      <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div> -->
+                    <div class="card-content" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
+                      <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
+                        <iron-icon icon="my-icons:watch-later"></iron-icon>
+                        <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
                       </div>
-
+                      <div id="{{item.$key}}" style=" padding: 16px; display:flex">
+                        <div id="{{item.$key}}" style=" margin-left:10px;">
+                          <div id="{{item.$key}}" style="font-size:11px" class="longText">Ref.# [[item.ref]]</div>
+                          <div id="{{item.$key}}" class="primary">[[_manyServices(item.billing_data)]]</div>
+                          <div id="{{item.$key}}" class="primary">“[[item.remarks]]”</div>
+                        </div>
+                      </div>
                     </div>
+
+                    <a id="open" href="billing/detail/{{item.$key}}"></a>
+                    <div class="clinic">[[item.clinic_location]]</div>
+                    <div class="bill">Php [[item.billing_total]].00</div>
+
                   </div>
-
-                  <div class="clinic">[[item.clinic_location]]</div>
-                  <div class="bill">Php [[item.billing_total]].00</div>
-
+                  <!-- <div hidden$="[[item.collected]]" class="collected">Collected</div> -->
                 </div>
-                <!-- <div hidden$="[[item.collected]]" class="collected">Collected</div> -->
-              </div>
-            </template>
-          </iron-list>
+              </template>
+            </iron-list>
 
-          <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
-          </iron-scroll-threshold>
+            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+            </iron-scroll-threshold>
 
 
-        </app-header-layout>
+          </app-header-layout>
 
-        <a href="/billing/new" style="text-decoration: none;">
-          <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_billingNew"></paper-fab>
-        </a>
-      </div>
+          <a href="/billing/new" style="text-decoration: none;">
+            <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_billingNew"></paper-fab>
+          </a>
+        </div>
 
-      <div name="/new">
-        <div id="newbill"></div>
-        <my-billing-new id="d23" my-key="{{myKey}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-new>
-      </div>
+        <div name="/new">
+          <div id="newbill"></div>
+          <my-billing-new id="d23" my-key="{{myKey}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-new>
+        </div>
 
-      <div name="view404">Not found.</div>
-    </iron-pages>
-    <!-- </div> -->
+        <div name="view404">Not found.</div>
+      </iron-pages>
+    </div>
+
+    <div hidden$="{{!detailActive}}">
+      <div id="billview"></div>
+      <my-billing-view id="d26" my-key="{{myKey}}" view-key="{{detailData.key}}" prev-route="{{route.prefix}}"></my-billing-view>
+    </div>
 
   </template>
 
@@ -377,22 +367,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _selectThis(e) {
-        // var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
-        // var node = Polymer.dom(this.root).querySelector("#casesview");
-        // this.e = data_args;
-        // var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
-        // if (oldDiv) {
-        //   Polymer.dom(node.parentNode).removeChild(oldDiv);
-        // }
-        // var newDiv = document.createElement("my-visits-view");
-        // newDiv.setAttribute("my-key", this.myKey);
-        // newDiv.setAttribute("id", "d26");
-        // newDiv.setAttribute("view-key", data_args);
-        // newDiv.setAttribute("prev-route", this.route.prefix);
-        // Polymer.dom(this.root).querySelector("#open").click();
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+        var node = Polymer.dom(this.root).querySelector("#billview");
+        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
+        if (oldDiv) {
+          Polymer.dom(node.parentNode).removeChild(oldDiv);
+        }
+        var newDiv = document.createElement("my-billing-view");
+        newDiv.setAttribute("my-key", this.myKey);
+        newDiv.setAttribute("id", "d26");
+        newDiv.setAttribute("view-key", data_args);
+        newDiv.setAttribute("prev-route", this.route.prefix);
+        Polymer.dom(this.root).querySelector("#open").click();
 
-        // var currentDiv = document.getElementById("casesview");
-        // Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        var currentDiv = document.getElementById("billview");
+        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
       },
 
       _manyServices(e) {

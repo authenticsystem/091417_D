@@ -1,0 +1,177 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
+
+<link rel="import" href="bwt-datatable-card.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="time-element.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-billing-view">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            app-header paper-icon-button {
+                --paper-icon-button-ink-color: #000000;
+            }
+
+            app-drawer-layout:not([narrow]) [drawer-toggle] {
+                display: none;
+            }
+
+            app-drawer {
+                --app-drawer-content-container: {
+                    background-color: #F4F5F6;
+                }
+            }
+
+            paper-icon-button.menu {
+                margin-right: 15px;
+            }
+
+            .primary {
+                font-size: 14px;
+                font-weight: 400;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .longText {
+                color: gray;
+                /* display: none; */
+            }
+
+            .textTemp {
+                color: rgb(100, 100, 100);
+                font-weight: 400;
+                font-size: 14px;
+                margin-top: 32px;
+                margin-left: 16px;
+            }
+
+            .rightText {
+                color: rgb(100, 100, 100);
+                font-weight: 400;
+                font-size: 13px;
+                margin-top: 16px;
+                margin-bottom: -18px;
+                margin-right: 16px;
+            }
+        </style>
+
+        <firebase-query path="/{{myKey}}/billing" order-by-key equal-to="{{viewKey}}" data="{{mybilling}}" limit-to-first="1"></firebase-query>
+
+        <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+
+            <app-header-layout id="appheader" has-scrolling-region>
+                <app-header fixed slot="header">
+                    <app-toolbar>
+                        <a href="{{prevRoute}}">
+                            <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
+                        </a>
+                        <div main-title>Ref.# {{ref}}</div>
+                    </app-toolbar>
+                </app-header>
+
+                <div class="rightText" align="right">
+                    <iron-icon icon="my-icons:watch-later"></iron-icon>
+                    <time-ago datetime$="{{_timeStampToDateTime(timestamp)}}">{{_timeStampToDateTime(timestamp)}}</time-ago>
+                    <br> {{_formatTodayDateFull(date)}}
+                    <br> {{clinic}}
+                </div>
+                <div class="textTemp">“{{remarks}}”</div>
+
+                <div class="docu2">
+                    <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed>
+                        <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
+                        <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
+                        <paper-datatable-column header="Bill To" type="String" property="billTo"></paper-datatable-column>
+                        <paper-datatable-column header="Amount" type="Number" property="amount"></paper-datatable-column>
+                    </paper-datatable>
+                    <div style="padding: 16px;">
+                        <div style="float: right;" class="primary">TOTAL: {{total}}.00</div>
+                    </div>
+                </div>
+            </app-header-layout>
+
+        </app-drawer-layout>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-billing-view',
+
+            properties: {
+                narrow: {
+                    type: Boolean,
+                    notify: true
+                },
+                prevRoute: String,
+                myKey: String,
+                viewKey: String,
+                billingData: {
+                    type: Array,
+                    value: []
+                }
+            },
+
+            observers: [
+                '_mybillingChanged(mybilling)'
+            ],
+
+            _mybillingChanged(e) {
+                if (e.length > 0) {
+                    this.ref = e[0].ref;
+                    this.date = e[0].created;
+                    this.timestamp = e[0].timestamp;
+                    this.remarks = e[0].remarks;
+                    this.billingData = e[0].billing_data;
+                    this.total = e[0].billing_total;
+                    this.clinic = e[0].clinic_location;
+                }
+            },
+
+            _formatTodayDateFull(date) {
+                var monthNames = [
+                    "January", "February", "March",
+                    "April", "May", "June", "July",
+                    "August", "September", "October",
+                    "November", "December"
+                ];
+
+                var d = new Date(date);
+
+                return monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();;
+            },
+
+            _timeStampToDateTime(ts) {
+                return new Date(ts);
+            }
+
+        })
+
+    </script>
+</dom-module>
