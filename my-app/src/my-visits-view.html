@@ -5,6 +5,7 @@
 
 <!-- <link rel="import" href="short-unique-id.html"> -->
 <!-- <link rel="import" href="video-gallery.html"> -->
+<link rel="import" href="bwt-datatable-card.html">
 <link rel="import" href="time-element.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
@@ -96,10 +97,11 @@
             }
         </style>
 
-        <firebase-query id="query" path="/{{myKey}}/cases" order-by-key equal-to="{{viewKey}}" data="{{mycases}}">
-        </firebase-query>
+        <firebase-query path="/{{myKey}}/cases" order-by-key equal-to="{{viewKey}}" data="{{mycases}}" limit-to-first="1"></firebase-query>
 
-        <firebase-query id="query" path="/{{myKey}}/cases/{{viewKey}}/attachment" data="{{myimaging}}">
+        <firebase-query path="/{{myKey}}/billing" order-by-key equal-to="{{viewKey}}" data="{{mybilling}}" limit-to-first="1"></firebase-query>
+
+        <firebase-query path="/{{myKey}}/cases/{{viewKey}}/attachment" data="{{myimaging}}">
         </firebase-query>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -198,6 +200,22 @@
                     </div>
                 </div>
 
+                <div class="docu" style="margin-top:-16px;">
+                    <div class="details">
+                        <div style="font-size: 12px;">Ref. # {{ref}}</div>
+                        <div style="font-size: 14px;">{{remarks}}</div>
+                        <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed>
+                            <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
+                            <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
+                            <paper-datatable-column header="Bill To" type="String" property="billTo"></paper-datatable-column>
+                            <paper-datatable-column header="Amount" type="Number" property="amount"></paper-datatable-column>
+                        </paper-datatable>
+                        <div style="padding: 16px;">
+                            <div style="float: right;" class="primary">TOTAL: {{total}}.00</div>
+                        </div>
+                    </div>
+                </div>
+
             </app-header-layout>
         </app-drawer-layout>
 
@@ -225,6 +243,19 @@
                 myimaging: {
                     type: Object,
                     observer: '_myimagingChanged'
+                },
+                mybilling: {
+                    type: Object,
+                    observer: '_mybillingChanged'
+                }
+            },
+
+            _mybillingChanged() {
+                if (this.mybilling.length > 0) {
+                    this.ref = this.mybilling[0].ref;
+                    this.remarks = "“" + this.mybilling[0].remarks + "”";
+                    this.billingData = this.mybilling[0].billing_data;
+                    this.total = this.mybilling[0].billing_total;
                 }
             },
 

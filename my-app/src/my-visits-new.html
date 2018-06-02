@@ -267,6 +267,24 @@
                 cursor: pointer;
                 display: none;
             }
+
+            .buttonAdd {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                background: green;
+                color: white;
+                float: right;
+            }
+
+            .buttonCancel {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                background: rgb(200, 200, 200);
+                color: black;
+                float: right;
+            }
         </style>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -456,7 +474,7 @@
                         <div id="billHolder">
                             <div class="docu2">
                                 <span style="font-weight: 400; font-size: 12px; float: right">(Ref.# will be generated upon submit) </span>
-                                <paper-input style="width:250px" label="Remarks *" value="{{remarks}}" always-float-label></paper-input>
+                                <paper-input style="width:250px" label="Remarks" value="{{remarks}}" always-float-label></paper-input>
                                 <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed multi-selection selectable selected-items="{{selectedItem}}">
                                     <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
                                     <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
@@ -485,6 +503,65 @@
                         </div>
                     </neon-animatable>
 
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="details">
+                                <span>
+                                    <!-- service -->
+                                    <paper-dropdown-input style="width: 100%" id="dropdService" label="Service *" items="[[myservices]]" filter-property="service"
+                                        value="{{service}}" selected-item="{{selectedService}}">
+                                        <template>
+                                            <template is="dom-repeat" items="[[items]]" as="item">
+                                                <paper-item id="[[item.rate]]">[[item.service]]</paper-item>
+                                            </template>
+                                        </template>
+                                    </paper-dropdown-input>
+                                    <!-- amount -->
+                                    <paper-input id="amount" label="Amount" allowed-pattern="[\d]" prevent-invalid-input value="{{amount}}"></paper-input>
+                                    <!-- bill to -->
+                                    <paper-dropdown-menu style="width: 100%" label="Bill to">
+                                        <paper-listbox id="dropdSelectedBillTo" slot="dropdown-content" attr-for-selected="name" selected="{{selectedBillTo}}">
+                                            <paper-item name="patient">Patient</paper-item>
+                                            <paper-item name="philhealth">PHILHEALTH</paper-item>
+                                            <paper-item name="hmo">HMO</paper-item>
+                                            <paper-item name="hospital">Hospital</paper-item>
+                                        </paper-listbox>
+                                    </paper-dropdown-menu>
+                                    <!-- patient name -->
+                                    <paper-input id="inPatient" readonly style="display: none" label="Patient" value="{{filterValue}}"></paper-input>
+                                    <!-- has an HMO -->
+                                    <paper-input id="inHMO" readonly style="display: none" label="HMO" value="{{insurance}}"></paper-input>
+                                    <a class="aHref" id="href1" on-tap="_changeHMO">Change</a>
+                                    <!-- my hmos select -->
+                                    <paper-dropdown-input style="width: 100%" id="dropdHMO" style="display: none" label="HMO" items="[[myhmos]]" filter-property="name"
+                                        value="{{selectedHMO}}">
+                                        <template>
+                                            <template is="dom-repeat" items="[[items]]" as="item">
+                                                <paper-item>[[item.name]]</paper-item>
+                                            </template>
+                                        </template>
+                                    </paper-dropdown-input>
+                                    <a class="aHref" id="href2" on-tap="_cancelChangeHMO">Cancel</a>
+                                    <!-- my location -->
+                                    <paper-dropdown-input style="width: 100%" id="dropdHospital" style="display: none" label="Hospital" items="[[mylocations]]"
+                                        filter-property="location_name" value="{{location}}">
+                                        <template>
+                                            <template is="dom-repeat" items="[[items]]" as="item">
+                                                <paper-item>[[item.location_name]]</paper-item>
+                                            </template>
+                                        </template>
+                                    </paper-dropdown-input>
+                                    <span style="color: red; font-size: 12px; margin-top:16px; ">{{billErr}}</span>
+                                </span>
+                                <div style="height: 40px; margin-top:16px">
+                                    <paper-button class="buttonCancel" on-tap="_cancelBilling">Cancel</paper-button>
+                                    <paper-button class="buttonAdd" id="onEnter" on-tap="_addBilling">ADD</paper-button>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </neon-animatable>
+
                 </neon-animated-pages>
 
             </app-header-layout>
@@ -503,59 +580,6 @@
         <firebase-query path="/{{myKey}}/services" data="{{myservices}}" order-by-child="service"></firebase-query>
         <firebase-query id="hmoQuery" path="/{{myKey}}/hmo" data="{{myhmos}}" order-by-child="name"></firebase-query>
         <firebase-query id="locationQuery" path="/{{myKey}}/locations" data="{{mylocations}}" order-by-child="location_name"></firebase-query>
-
-        <salte-dialog style="height: 100%;" no-auto-fullscreen id="billingDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
-            <h2 style="font-size: 16px; background: #1E88E5">Add Billing</h2>
-            <span>
-                <!-- service -->
-                <paper-dropdown-input id="dropdService" label="Service *" items="[[myservices]]" filter-property="service" value="{{service}}"
-                    selected-item="{{selectedService}}">
-                    <template>
-                        <template is="dom-repeat" items="[[items]]" as="item">
-                            <paper-item id="[[item.rate]]">[[item.service]]</paper-item>
-                        </template>
-                    </template>
-                </paper-dropdown-input>
-                <!-- amount -->
-                <paper-input id="amount" label="Amount" allowed-pattern="[\d]" prevent-invalid-input value="{{amount}}"></paper-input>
-                <!-- bill to -->
-                <paper-dropdown-menu label="Bill to">
-                    <paper-listbox id="dropdSelectedBillTo" slot="dropdown-content" attr-for-selected="name" selected="{{selectedBillTo}}">
-                        <paper-item name="patient">Patient</paper-item>
-                        <paper-item name="philhealth">PHILHEALTH</paper-item>
-                        <paper-item name="hmo">HMO</paper-item>
-                        <paper-item name="hospital">Hospital</paper-item>
-                    </paper-listbox>
-                </paper-dropdown-menu>
-                <!-- patient name -->
-                <paper-input id="inPatient" readonly style="display: none" label="Patient" value="{{filterValue}}"></paper-input>
-                <!-- has an HMO -->
-                <paper-input id="inHMO" readonly style="display: none" label="HMO" value="{{insurance}}"></paper-input>
-                <a class="aHref" id="href1" on-tap="_changeHMO">Change</a>
-                <!-- my hmos select -->
-                <paper-dropdown-input id="dropdHMO" style="display: none" label="HMO" items="[[myhmos]]" filter-property="name" value="{{selectedHMO}}">
-                    <template>
-                        <template is="dom-repeat" items="[[items]]" as="item">
-                            <paper-item>[[item.name]]</paper-item>
-                        </template>
-                    </template>
-                </paper-dropdown-input>
-                <a class="aHref" id="href2" on-tap="_cancelChangeHMO">Cancel</a>
-                <!-- my location -->
-                <paper-dropdown-input id="dropdHospital" style="display: none" label="Hospital" items="[[mylocations]]" filter-property="location_name"
-                    value="{{location}}">
-                    <template>
-                        <template is="dom-repeat" items="[[items]]" as="item">
-                            <paper-item>[[item.location_name]]</paper-item>
-                        </template>
-                    </template>
-                </paper-dropdown-input>
-                <span style="color: red; font-size: 12px; margin-top:16px; ">{{billErr}}</span>
-            </span>
-            <div class="buttons">
-                <paper-button id="onEnter" autofocus on-tap="_addBilling">ADD</paper-button>
-            </div>
-        </salte-dialog>
 
     </template>
 
@@ -687,7 +711,10 @@
             },
 
             _showBillDialog() {
-                this.$.billingDialog.open();
+                this.entryanimation = 'fade-in-animation';
+                this.exitanimation = 'fade-out-animation';
+                this.selectedPage = 5;
+                // this.$.billingDialog.open();
             },
 
             _deleteBill() {
@@ -835,10 +862,10 @@
                 '_amountChanged(amount)',
                 '_selectedServiceChanged(selectedService)',
                 '_selectedBillToChanged(selectedBillTo, selectedHMO, location, ChangeHMO)',
-                '_billingDataChanged(billingData, remarks)'
+                '_billingDataChanged(billingData)'
             ],
 
-            _billingDataChanged(e, r) {
+            _billingDataChanged(e) {
                 if (e.length > 0) {
                     var amounts = [];
 
@@ -856,12 +883,7 @@
 
                     this.total = addCommas(amounts.reduce(getSum));
                     Polymer.dom(this.root).querySelector("#delBTN").style.display = "block";
-                    if (r) {
-                        this.favrighthide = false;
-                    }
-                    else {
-                        this.favrighthide = true;
-                    }
+                    this.favrighthide = false;
                 }
                 else {
                     this.total = 0;
@@ -1219,13 +1241,19 @@
 
                     this.billingData = [];
                     this.billingData = this.billingDataTmp;
-                    this.$.billingDialog.close();
+                    // this.$.billingDialog.close();
+                    this.selectedPage = 3;
 
                     this._clear2();
                 }
                 else {
                     this.billErr = 'Ops! Dont leave any field empty.';
                 }
+            },
+
+            _cancelBilling() {
+                this.selectedPage = 3;
+                this._clear2();
             },
 
             _submitToFireB() {
@@ -1273,7 +1301,7 @@
                     clinic_location: this.myLocation,
                     billing_total: this.total,
                     billing_data: this.billingData,
-                    remarks: this.remarks
+                    remarks: this.remarks ? this.remarks : "No Remarks"
                 }
 
                 var p = Polymer.dom(this.root).querySelector("#p");
@@ -1281,6 +1309,7 @@
                 var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
                 var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
 
+                saveRun.style.display = 'block';
                 firebase.database().ref('/' + mykey + '/patients/' + key)
                     .once('value').then(function (patient) {
                         if (patient.val().profile) {
@@ -1298,7 +1327,7 @@
 
                             if (fbPushKey) {
 
-                                _updateOrder(mykey, fbPushKey, data2);
+                                _updateOrder(mykey, fbPushKey, data2, saveRun, saveSucc);
                                 _reportsUpdate(today, mykey);
 
                                 firebase.database().ref("/" + mykey + "/patients/" + fbPushKey + "/profile").set(patient.val().profile);
@@ -1309,14 +1338,11 @@
                                 }
 
                                 if (myattachment) {
-                                    saveRun.style.display = 'block';
                                     firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(true);
                                     _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc);
                                 }
                                 else {
                                     firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(false);
-                                    saveRun.style.display = 'none';
-                                    saveSucc.style.display = 'block';
                                 }
                             }
                             else {
@@ -1337,7 +1363,7 @@
 
                             if (fbPushKey) {
 
-                                _updateOrder(mykey, fbPushKey, data2);
+                                _updateOrder(mykey, fbPushKey, data2, saveRun, saveSucc);
                                 _reportsUpdate(today, mykey);
 
                                 if (myQueue) {
@@ -1346,14 +1372,11 @@
                                 }
 
                                 if (myattachment) {
-                                    saveRun.style.display = 'block';
                                     firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(true);
                                     _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc);
                                 }
                                 else {
                                     firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(false);
-                                    saveRun.style.display = 'none';
-                                    saveSucc.style.display = 'block';
                                 }
                             }
                             else {
@@ -1398,7 +1421,7 @@
                     });
                 }
 
-                function _updateOrder(mykey, fbPushKey, data2) {
+                function _updateOrder(mykey, fbPushKey, data2, saveRun, saveSucc) {
                     var postRef = firebase.database().ref('/' + mykey + '/cases/' + fbPushKey);
                     postRef.once('value').then(function (snapshot) {
                         var order = snapshot.val().order * -1;
@@ -1429,6 +1452,8 @@
                             var t = document.createTextNode(no + '.');
                             b.appendChild(t);
                             p.appendChild(b);
+                            saveRun.style.display = 'none';
+                            saveSucc.style.display = 'block';
                         });
                     });
                 }

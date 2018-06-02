@@ -29,6 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="time-element.html">
 <link rel="import" href="search-bar.html">
 <link rel="import" href="my-billing-new.html">
+<link rel="import" href="my-billing-edit.html">
 <link rel="import" href="my-billing-view.html">
 
 <dom-module id="my-billing">
@@ -178,7 +179,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .clinic {
         position: absolute;
         right: 20px;
-        top: 10px;
+        top: 50px;
         font-size: 14px;
       }
 
@@ -211,7 +212,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
     <app-route route="{{route}}" pattern="/detail/:key" data="{{detailData}}" active="{{detailActive}}"></app-route>
-    <!-- <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route> -->
+    <app-route route="{{route}}" pattern="/edit/:key" data="{{editData}}" active="{{editActive}}"></app-route>
 
     <div hidden$="{{!applicationActive}}">
       <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
@@ -229,7 +230,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <template is="dom-if" if="{{openSearch}}">
                 <app-toolbar primary id="tool2">
                   <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                  <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
+                  <paper-search-bar id="search" placeholder="Search reference no .." query="{{search}}" disable-filter-button></paper-search-bar>
                   <template is="dom-if" if="{{search}}">
                     <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
                   </template>
@@ -262,12 +263,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <div id="{{item.$key}}" style=" margin-left:10px;">
                           <div id="{{item.$key}}" style="font-size:11px" class="longText">Ref.# [[item.ref]]</div>
                           <div id="{{item.$key}}" class="primary">[[_manyServices(item.billing_data)]]</div>
-                          <div id="{{item.$key}}" class="primary">“[[item.remarks]]”</div>
+                          <!-- <div id="{{item.$key}}" class="primary">“[[item.remarks]]”</div> -->
                         </div>
                       </div>
                     </div>
 
                     <a id="open" href="billing/detail/{{item.$key}}"></a>
+                    <a href="billing/edit/{{item.$key}}">
+                      <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
+                      </paper-icon-button>
+                    </a>
                     <div class="clinic">[[item.clinic_location]]</div>
                     <div class="bill">Php [[item.billing_total]].00</div>
 
@@ -295,6 +300,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div name="view404">Not found.</div>
       </iron-pages>
+    </div>
+
+    <div hidden$="{{!editActive}}">
+      <div id="billedit"></div>
+      <my-billing-edit id="d25" my-key="{{myKey}}" edit-key="{{editData.key}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-edit>
     </div>
 
     <div hidden$="{{!detailActive}}">
@@ -382,6 +392,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         var currentDiv = document.getElementById("billview");
         Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+      },
+
+      _editThis(e) {
+        var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
+        var node = Polymer.dom(this.root).querySelector("#billedit");
+        if (node) {
+          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
+          if (oldDiv) {
+            Polymer.dom(node.parentNode).removeChild(oldDiv);
+          }
+          var newDiv = document.createElement("my-billing-edit");
+          newDiv.setAttribute("my-key", this.myKey);
+          newDiv.setAttribute("id", "d25");
+          newDiv.setAttribute("edit-key", data_args);
+          newDiv.setAttribute("prev-route", this.route.prefix);
+          newDiv.setAttribute("my-location", this.myLocation);
+          //if open existing
+          var currentDiv = document.getElementById("billedit");
+          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        }
       },
 
       _manyServices(e) {
@@ -506,8 +536,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _searchChanged(search) {
         if (search) {
-          this.order = 'patient';
-          this.search = search.toUpperCase();
+          this.order = 'ref';
         }
         else {
           this.order = 'order';

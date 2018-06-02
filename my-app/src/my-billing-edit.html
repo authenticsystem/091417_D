@@ -20,7 +20,7 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
-<dom-module id="my-billing-new">
+<dom-module id="my-billing-edit">
     <template>
         <style include="shared-styles">
             :host {
@@ -169,6 +169,8 @@
             }
         </style>
 
+        <firebase-query path="/{{myKey}}/billing" order-by-key equal-to="{{editKey}}" data="{{mybilling}}" limit-to-first="1"></firebase-query>
+
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
 
             <app-header-layout id="appheader" has-scrolling-region>
@@ -177,7 +179,7 @@
                         <a href="{{prevRoute}}">
                             <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
                         </a>
-                        <div main-title>Add Billing</div>
+                        <div main-title>Edit Ref. # {{ref}}</div>
                     </app-toolbar>
                 </app-header>
 
@@ -300,61 +302,11 @@
         <firebase-query id="hmoQuery" path="/{{myKey}}/hmo" data="{{myhmos}}" order-by-child="name"></firebase-query>
         <firebase-query id="locationQuery" path="/{{myKey}}/locations" data="{{mylocations}}" order-by-child="location_name"></firebase-query>
 
-        <!-- <salte-dialog style="height: 100%;" id="billingDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
-            <h2 style="font-size: 16px; background: #1E88E5">Add Billing</h2>
-            <span>
-                service
-                <paper-dropdown-input id="dropdService" label="Service *" items="[[myservices]]" filter-property="service" value="{{service}}"
-                    selected-item="{{selectedService}}">
-                    <template>
-                        <template is="dom-repeat" items="[[items]]" as="item">
-                            <paper-item id="[[item.rate]]">[[item.service]]</paper-item>
-                        </template>
-                    </template>
-                </paper-dropdown-input>
-                amount
-                <paper-input id="amount" label="Amount" allowed-pattern="[\d]" prevent-invalid-input value="{{amount}}"></paper-input>
-                bill to
-                <paper-dropdown-menu label="Bill to">
-                    <paper-listbox id="dropdSelectedBillTo" slot="dropdown-content" attr-for-selected="name" selected="{{selectedBillTo}}">
-                        <paper-item name="patient">Patient</paper-item>
-                        <paper-item name="philhealth">PHILHEALTH</paper-item>
-                        <paper-item name="hmo">HMO</paper-item>
-                        <paper-item name="hospital">Hospital</paper-item>
-                    </paper-listbox>
-                </paper-dropdown-menu>
-                patient name
-                <paper-input id="inPatient" style="display: none" label="Patient" value="{{patient}}"></paper-input>
-                my hmos select
-                <paper-dropdown-input id="dropdHMO" style="display: none" label="HMO" items="[[myhmos]]" filter-property="name" value="{{selectedHMO}}">
-                    <template>
-                        <template is="dom-repeat" items="[[items]]" as="item">
-                            <paper-item>[[item.name]]</paper-item>
-                        </template>
-                    </template>
-                </paper-dropdown-input>
-                my location select
-                <paper-dropdown-input id="dropdHospital" style="display: none" label="Hospital" items="[[mylocations]]" filter-property="location_name"
-                    value="{{location}}">
-                    <template>
-                        <template is="dom-repeat" items="[[items]]" as="item">
-                            <paper-item>[[item.location_name]]</paper-item>
-                        </template>
-                    </template>
-                </paper-dropdown-input>
-                <span style="color: red; font-size: 12px; margin-top:16px; ">{{billErr}}</span>
-            </span>
-            <div class="buttons">
-                <paper-button id="onEnter" autofocus on-tap="_addBilling">ADD</paper-button>
-                <paper-button dialog-dismiss>Close</paper-button>
-            </div>
-        </salte-dialog> -->
-
     </template>
 
     <script>
         Polymer({
-            is: 'my-billing-new',
+            is: 'my-billing-edit',
 
             properties: {
                 narrow: {
@@ -371,6 +323,7 @@
                     value: [],
                     notify: true
                 },
+                editKey: String,
                 myLocation: String,
                 prevRoute: String,
                 myKey: String,
@@ -398,6 +351,7 @@
                 },
                 service_bill_to: String,
                 selectedItem: Object,
+                storeDate: String,
                 lastPushTime: {
                     type: Number,
                     value: 0
@@ -445,12 +399,11 @@
                 this.selectedPage = 0;
                 this.favrighthide = true;
                 this.favlefthide = true;
-                this.todayDate = this.formatTodayDate(new Date());
                 this.$.hmoQuery.disabled = true;
                 this.$.locationQuery.disabled = true;
-                this.billingDataTmp = [];
                 Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
                 Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                Polymer.dom(this.root).querySelector("#delBTN").style.display = "block";
             },
 
             observers: [
@@ -458,10 +411,24 @@
                 '_amountChanged(amount)',
                 '_selectedServiceChanged(selectedService)',
                 '_selectedBillToChanged(selectedBillTo, selectedHMO, patient, location)',
-                '_billingDataChanged(billingData)'
+                '_billingDataChanged(billingData, remarks)',
+                '_mybillingChanged(mybilling)'
             ],
 
-            _billingDataChanged(e) {
+            _mybillingChanged(e) {
+                if (e.length > 0) {
+                    this.ref = e[0].ref;
+                    this.todayDate = this.formatTodayDate(new Date(e[0].created));
+                    this.storeDate = this.formatTodayDate(new Date(e[0].created));
+                    this.remarks = e[0].remarks;
+                    this.total = e[0].billing_total;
+                    this.clinic = e[0].clinic_location;
+                    this.billingData = e[0].billing_data;
+                    this.billingDataTmp = e[0].billing_data;
+                }
+            },
+
+            _billingDataChanged(e, r) {
                 if (e.length > 0) {
                     var amounts = [];
 
@@ -636,87 +603,78 @@
                 var timestamp = firebase.database.ServerValue.TIMESTAMP;
                 var order = firebase.database.ServerValue.TIMESTAMP;
                 var newPushKey;
+                var ref_no = this.ref;
 
-                if (today < this.formatTodayDate(new Date())) {
+                var bol = today !== this.storeDate;
+
+                if (bol === false) {
+                    var data = {
+                        clinic_location: this.clinic ? this.clinic : this.myLocation,
+                        billing_total: this.total,
+                        billing_data: this.billingData,
+                        remarks: this.remarks ? this.remarks : "No Remarks"
+                    }
+                }
+                else {
                     newPushKey = this.generatePushID(today);
                     timestamp = this.lastPushTime;
                     order = this.lastPushTime;
-                }
-
-                var data = {
-                    timestamp: timestamp,
-                    order: order,
-                    created: today,
-                    clinic_location: this.myLocation,
-                    billing_total: this.total,
-                    billing_data: this.billingData,
-                    remarks: this.remarks ? this.remarks : "No Remarks"
+                    var data = {
+                        timestamp: timestamp,
+                        order: order,
+                        created: today,
+                        clinic_location: this.clinic ? this.clinic : this.myLocation,
+                        billing_total: this.total,
+                        billing_data: this.billingData,
+                        remarks: this.remarks ? this.remarks : "No Remarks"
+                    }
                 }
 
                 var p = Polymer.dom(this.root).querySelector("#p");
                 var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
                 var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
                 var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
+                var ref = firebase.database().ref("/" + mykey + "/billing");
 
                 saveRun.style.display = 'block';
                 if (newPushKey) {
-                    var ref = firebase.database().ref("/" + mykey + "/billing/" + newPushKey);
-                    var push = ref.set(data);
-                    var fbPushKey = newPushKey;
+                    ref.child(this.editKey).remove().then(function () {
+                        ref.child(newPushKey).set(data).then(function () {
+                            _updateOrder(mykey, newPushKey, saveRun, saveSucc, ref_no);
+                        }).catch(function (error) {
+                            saveErr.style.display = 'block';
+                        });
+                    });
                 }
                 else {
-                    var ref = firebase.database().ref("/" + mykey + "/billing");
-                    var push = ref.push(data);
-                    var fbPushKey = push.key;
+                    ref.child(this.editKey).update(data).then(function () {
+                        saveRun.style.display = 'none';
+                        saveSucc.style.display = 'block';
+                        p.style.display = 'none';
+                    }).catch(function (error) {
+                        saveErr.style.display = 'block';
+                    });
                 }
 
-                if (fbPushKey) {
-                    _updateOrder(mykey, fbPushKey, saveRun, saveSucc);
-                }
-                else {
-                    saveErr.style.display = 'block';
-                }
-
-                function _updateOrder(mykey, fbPushKey, saveRun, saveSucc) {
+                function _updateOrder(mykey, fbPushKey, saveRun, saveSucc, ref_no) {
                     var postRef = firebase.database().ref('/' + mykey + '/billing/' + fbPushKey);
-                    var billRef = firebase.database().ref('/' + mykey + '/billing');
                     postRef.once('value').then(function (snapshot) {
                         var order = snapshot.val().order * -1;
                         postRef.update({ order: order });
+                        var no = _billingRefNoUpdate(ref_no, mykey, fbPushKey);
 
-                        billRef.once('value').then(function (data) {
-                            var num = data.numChildren() ? data.numChildren() : 1;
-                            var no = _billingRefNoUpdate(num, mykey, fbPushKey);
-
-                            var b = document.createElement("b");
-                            b.id = "bold";
-                            b.style.color = "blue";
-                            var t = document.createTextNode(no + '.');
-                            b.appendChild(t);
-                            p.appendChild(b);
-                            saveRun.style.display = 'none';
-                            saveSucc.style.display = 'block';
-                        });
+                        var b = document.createElement("b");
+                        b.id = "bold";
+                        b.style.color = "blue";
+                        var t = document.createTextNode(no + '.');
+                        b.appendChild(t);
+                        p.appendChild(b);
+                        saveRun.style.display = 'none';
+                        saveSucc.style.display = 'block';
                     });
                 }
 
                 function _billingRefNoUpdate(num, mykey, pushkey) {
-                    if (num > 0 && num < 10) {
-                        num = '000' + num;
-                    }
-                    else if (num > 9 && num < 100) {
-                        num = '00' + num;
-                    }
-                    else if (num > 99 && num < 1000) {
-                        num = '0' + num;
-                    }
-                    else if (num > 999) {
-                        num = num;
-                    }
-                    else {
-                        num = '0000';
-                    }
-
                     firebase.database().ref("/" + mykey + "/billing/" + pushkey + "/ref").set(num);
                     return num;
                 }

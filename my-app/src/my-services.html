@@ -158,11 +158,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div class="divSeparator">
                         <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
                             <paper-avatar class="small" label="[[item.service]]"></paper-avatar>
-                            <div class="pad" on-tap="_selectThis">
-                                <div style="font-size:11px" class="longText">Php [[item.rate]].00</div>
-                                <div>[[item.service]]</div>
+                            <div id="[[item.$key]]~[[item.rate]]~[[item.service]]" class="pad" on-tap="_selectThis">
+                                <div id="[[item.$key]]~[[item.rate]]~[[item.service]]" style="font-size:11px" class="longText">Php [[item.rate]].00</div>
+                                <div id="[[item.$key]]~[[item.rate]]~[[item.service]]">[[item.service]]</div>
                             </div>
-                            <div style="padding:10px"> </div>
+                            <div id="[[item.$key]]~[[item.rate]]~[[item.service]]" style="padding:10px"> </div>
                         </div>
                     </div>
                 </template>
@@ -176,30 +176,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </app-header-layout>
 
         <salte-dialog no-auto-fullscreen id="addDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
-            <h2 style="font-size: 16px; background: #1E88E5">Add new service</h2>
+            <h2 style="font-size: 16px; background: #1E88E5">[[header]]</h2>
             <span>
                 <paper-input id="location" label="Service *" auto-validate value="{{service}}" always-float-label></paper-input>
                 <iron-a11y-keys target="[[targetLocation]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
-                <paper-input id="locationMin" label="Rate *"  allowed-pattern="[\d]" prevent-invalid-input auto-validate value="{{rate}}" always-float-label></paper-input>
+                <paper-input id="locationMin" label="Rate *" allowed-pattern="[\d]" prevent-invalid-input auto-validate value="{{rate}}"
+                    always-float-label></paper-input>
                 <iron-a11y-keys target="[[targetLocationMin]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
             </span>
             <div class="buttons">
-                <paper-button id="onEnter" autofocus on-tap="toggleAddService">Confirm</paper-button>
-                <paper-button dialog-dismiss>Cancel</paper-button>
-            </div>
-        </salte-dialog>
-
-        <salte-dialog no-auto-fullscreen id="openDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
-            <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
-            <span>
-                <paper-button hidden="{{_access(myRole)}}" on-tap="_removeLocation" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;"
-                    dialog-confirm>Remove location
-                </paper-button>
-                <paper-button on-tap="_setLocation" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>
-                    Set as current location
-                </paper-button>
-            </span>
-            <div class="buttons">
+                <paper-button id="onEnter" autofocus on-tap="toggleAddService">Save</paper-button>
                 <paper-button dialog-dismiss>Close</paper-button>
             </div>
         </salte-dialog>
@@ -240,7 +226,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     narrow: {
                         type: Boolean,
                         notify: true
-                    }
+                    },
+                    _key: String
                 };
             }
 
@@ -268,17 +255,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
             }
 
-            _selectThis(e) {
-                // var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
-                // if (data_args) {
-                //     var [key, name, code] = data_args.split('~');
-                //     this.location_key = key;
-                //     this.location_name = name;
-                //     this.location_code = code;
-                //     this.$.openDialog.open();
-                // }
-            }
-
             _removeLocation() {
                 this.$.removeDialog.open();
             }
@@ -302,7 +278,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             toggleAdd() {
+                this.header = "Add new service";
+                this._key = null;
+                this.service = '';
+                this.rate = null;
                 this.$.addDialog.open();
+            }
+
+            _selectThis(e) {
+                var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+                if (data_args) {
+                    var [key, rate, service] = data_args.split('~');
+                    this.header = "Edit " + key;
+                    this._key = key;
+                    this.service = service;
+                    this.rate = rate;
+                    this.$.addDialog.open();
+                }
             }
 
             onEnter() {
@@ -320,11 +312,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
                 else {
                     var ref = firebase.database().ref("/" + this.myKey + "/services");
-                    var push = ref.push({
-                        service: this.service,
-                        rate: this.rate
-                    });
-                    if (push.key) this.$.addDialog.close();
+                    if (this._key) {
+                        ref.child(this._key).update({
+                            service: this.service,
+                            rate: this.rate
+                        });
+                        this.$.addDialog.close();
+                    }
+                    else {
+                        var push = ref.push({
+                            service: this.service,
+                            rate: this.rate
+                        });
+                        if (push.key) this.$.addDialog.close();
+                    }
                 }
             }
 
