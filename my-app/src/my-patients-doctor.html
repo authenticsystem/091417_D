@@ -22,6 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="my-patients-new.html">
 <link rel="import" href="my-patients-view.html">
@@ -89,7 +90,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       @media (max-width: 768px) {
-        iron-list {
+        .list {
           margin: 16px;
           display: flex;
           flex-direction: column;
@@ -112,7 +113,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       @media (min-width: 768px) {
-        iron-list {
+        .list {
           width: 736px;
           margin: 16px auto;
           /* margin-top: 0px; */
@@ -191,10 +192,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .clinic {
-        position: absolute;
-        right: 25px;
-        top: 50px;
-        font-size: 14px;
+        font-size: 12px;
+      }
+
+      .pencil {
+        color: #673AB7;
+        bottom: 8px;
+      }
+
+      .loadingIndicator {
+        text-align: center;
+        height: 40px;
+      }
+
+      paper-spinner {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
       }
     </style>
 
@@ -227,48 +241,63 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
             </app-header>
 
-            <firebase-query id="query" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}">
+            <firebase-query disabled id="searchQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name"
+              start-at="{{search}}" limit-to-first="10">
             </firebase-query>
 
-            <div id="noRecord">
-              <div class="item">
-                <div style="margin:auto">
-                  {{record}}
+            <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no" start-at="{{lastkey}}"
+              limit-to-first="10">
+            </firebase-query>
+
+            <!-- <firebase-query id="query" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}"
+              limit-to-first="20">
+            </firebase-query> -->
+
+            <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
+              <div id="noRecord">
+                <div class="item">
+                  <div style="margin:auto">
+                    No data found.
+                  </div>
                 </div>
               </div>
-            </div>
+            </template>
 
-            <iron-list items="[[mypatients]]" as="item" selection-enabled scroll-target="threshold">
-              <template>
-                <div class="divSeparator">
-                  <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+
+            <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+              <!-- <iron-list items="[[mypatients]]" as="item" selection-enabled scroll-target="threshold"> -->
+              <!-- sort="_sort" -->
+              <div class="list">
+                <template is="dom-repeat" items="[[items]]">
+                  <div class$="[[getClassForItem(item, selected)]]">
                     <div>
                       <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                     </div>
                     <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
                       <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
                       <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
-                      <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div>
+                      <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}}
+                        [[item.personal.sex]]
+                      </div>
                       <div id="{{item.$key}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
                       <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
                     </div>
 
                     <div class="clinic">[[item.personal.clinic_location]]</div>
-
                     <a id="open" href$="{{_getViewDetailsLink(e)}}"></a>
-
                     <a href$="{{_getEditAppLink(item.$key)}}">
-                      <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="Edit" style="display:inline-block;position: absolute;  right: 10px; color: #673AB7; top:8px;">
+                      <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="Edit">
                       </paper-icon-button>
                     </a>
                   </div>
-                </div>
-              </template>
-            </iron-list>
+                </template>
+              </div>
 
-            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+              <div class="loadingIndicator">
+                <paper-spinner active="{{loadingPeople}}"></paper-spinner>
+              </div>
+              <!-- </iron-list> -->
             </iron-scroll-threshold>
-
           </app-header-layout>
 
           <a href="/patients/new" id="newPatient"></a>
@@ -306,9 +335,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         items: {
           type: Array,
-          value: function () {
-            return [];
-          }
+          value: [],
+          notify: true
         },
         route: Object,
         myLocation: String,
@@ -323,6 +351,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: false,
           notify: true
+        },
+        lastIndex: {
+          type: Number,
+          value: 9
         }
       },
 
@@ -331,31 +363,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         '_mypatientsChanged(mypatients.*)'
       ],
 
-      // ready() {
-      //   this.isCheck = true;
-      //   this.filterBy = 'personal/locationCode_name';
-      //   this.search = '';
-      // },
-
       _searchChanged(search) {
         this.search = search.toUpperCase();
       },
 
-      // _startSearch(location, search, isCheck) {
-      //   if (isCheck) {
-      //     return location + "_" + search;
-      //   }
-      //   else {
-      //     return search;
-      //   }
-      // },
+      _noDataChanged(e, f) {
+        if (f) return false;
+        else {
+          if (e > 0) return false;
+          else return true;
+        }
+      },
 
-      _mypatientsChanged() {
+      _mypatientsChanged(e) {
         if (this.mypatients.length > 0) {
-          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+          if (e.path === "mypatients") {
+            this.appendToList();
+          } else {
+            this.updateList(e);
+          }
+
+          this.$.threshold.clearTriggers();
+          this.loadingPeople = false;
         } else {
-          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
           this._fetching();
+        }
+      },
+
+      appendToList() {
+        for (var i = 0; i < this.mypatients.length; i++) {
+          var exists = this.items.some(patient => patient['$key'] === this.mypatients[i].$key);
+          if (!exists) {
+            this.items.push(this.mypatients[i]);
+            this.notifyPath('items', this.items.slice());
+          }
+        }
+        this.lastIndex = i - 1;
+      },
+
+      updateList(e) {
+        console.log(e);
+        if (e.path.split(".")[2] === "emergency") {
+          this.set(e.path, e.value);
+        }
+        else if (e.path.split(".")[2] === "insurance") {
+          this.set(e.path, e.value);
+        }
+        else if (e.path.split(".")[2] === "personal") {
+          this.set(e.path, e.value);
         }
       },
 
@@ -436,25 +491,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      // _toggleLocation() {
-      //   if (this.isCheck) {
-      //     this.filterBy = 'personal/locationCode_name';
-      //   }
-      //   else {
-      //     this.filterBy = 'personal/name';
-      //   }
-      // },
-
       _fetching() {
-        this.record = 'Loading data . . .';
         setTimeout((e) => {
-          this.record = 'No record found.';
-        }, 3000);
+          this.loadingPeople = false;
+        }, 5000);
       },
 
       loadMoreData() {
-        // load async stuff. e.g. XHR
-        this.$.threshold.clearTriggers();
+        console.log(this.lastIndex)
+        if (this.mypatients.length > 0) {
+          this.lastkey = this.mypatients[this.lastIndex].no;
+        }
+
+        this.loadingPeople = true;
       },
 
       _ageCal(bday) {
@@ -552,7 +601,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (e) {
           return 'HMO: ' + e;
         }
-      }
+      },
+
+      _sort: function (a, b) {
+        if (a.personal.lastname === b.personal.lastname) return 0;
+        return a.personal.lastname < b.personal.lastname ? -1 : 1;
+      },
 
     })
 

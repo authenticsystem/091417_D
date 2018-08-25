@@ -254,7 +254,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
               <paper-listbox style="cursor:pointer" slot="dropdown-content">
                 <paper-item on-tap="_send2Que">Add to queue</paper-item>
-                <!-- <paper-item hidden$="{{!isQue}}" on-tap="_queInfo">Queue Info</paper-item> -->
               </paper-listbox>
             </paper-menu-button>
           </app-toolbar>
@@ -277,7 +276,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div style="margin-left:10px; padding:8px; font-weight:400; color:black">
                   {{name}}
                   <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}} {{sex}}</span>
-                  <!-- <span class="longText" style="font-weight:400">{{_myAgeSex(age,sex)}}</span> -->
                   <span class="longText" style="font-weight:400;display:block">[[_hmo(indicate)]]</span>
                 </div>
               </div>
@@ -647,7 +645,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       observers: [
-        'mypatientChanged(mypatient.*)',
+        'mypatientChanged(mypatient)',
         'mycaseChanged(mycases)',
         'selectedPageChanged(selectedPage)',
         'todayDateChanged(todayDate)'
@@ -678,98 +676,68 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _addPatient2Queue() {
-        var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.todayDate);
-        var err = this.$.errDialog;
-        var success = Polymer.dom(this.root).querySelector("#confirmDialog");
-        var personalQueue = this.personalQueue, patient_refKey = this.viewKey, patient_no = this.no;
-        var mykey = this.myKey, location = this.myLocation, location_code = this.myLocationCode;
-        var today = this.todayDate;
-        this.doneQueueDate = this.formatWeekDate(today);
+        var mykey = this.myKey;
+        var pickDate = this.todayDate;
+        this.doneQueueDate = this.formatWeekDate(pickDate);
+        var self = this;
 
-        if (today) {
-          this.$.dateDialog.close();
-          ref.orderByChild("patient_no").equalTo(patient_no).limitToLast(1).once("value").then(function (data) {
+        var queueData = {
+          patient_info: this.personalQueue,
+          patient_profile: this.p_profile ? this.p_profile : null,
+          patient_refKey: this.viewKey,
+          patient_no: this.no,
+          queueLocation: this.myLocation,
+          isCancel: false,
+          isQueue: true,
+          isNext: true,
+          queueNo: 1,
+          xy: "y"
+        }
+
+        if (pickDate) {
+          self.$.dateDialog.close();
+          var queueRef = firebase.database().ref("/" + mykey + "/queue/" + queueData.queueLocation + "/" + pickDate);
+          queueRef.orderByChild("patient_no").equalTo(self.no).limitToLast(1).once("value").then(function (data) {
             if (data.exists()) {
               if (Object.values(data.val())[0].isCancel === true) {
-                var push = ref.push({
-                  patient_info: personalQueue,
-                  patient_refKey: patient_refKey,
-                  patient_no: patient_no,
-                  isCancel: false,
-                  isPriority: false
-                });
-
-                if (push.key) {
-                  _locateNextQueue(mykey, push.key, patient_refKey, location, location_code, today);
-                  success.open();
-                }
+                self._locateNextQueue(mykey, queueData, pickDate, self, queueRef);
               }
               else {
-                err.open();
+                self.$.errDialog.open();
               }
             }
             else {
-              var push = ref.push({
-                patient_info: personalQueue,
-                patient_refKey: patient_refKey,
-                patient_no: patient_no,
-                isCancel: false,
-                isPriority: false
-              });
+              self._locateNextQueue(mykey, queueData, pickDate, self, queueRef);
+            }
+          });
+        }
+      },
 
-              if (push.key) {
-                _locateNextQueue(mykey, push.key, patient_refKey, location, location_code, today);
-                success.open();
+      _locateNextQueue(mykey, queueData, pickDate, self, queueRef) {
+        queueRef.once('value').then(function (snapshot) {
+          if (snapshot.exists()) {
+            queueRef.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
+              if (hasNext.exists()) {
+                queueData.isNext = false;
+                queueData.queueNo = snapshot.numChildren() + 1;
+                queueRef.push(queueData).then(function () {
+                  self.$.confirmDialog.open();
+                });
               }
-            }
-          });
-        }
-
-        function _locateNextQueue(myKey, queuePushkey, patientPushkey, myLocation, myLocationCode, pickDate) {
-          var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocation + "/" + pickDate);
-          ref.once('value').then(function (snapshot) {
-            if (snapshot.exists()) {
-              ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
-                if (hasNext.exists()) {
-                  ref.child(queuePushkey).update({
-                    isQueue: true,
-                    queueLocation: myLocation,
-                    isNext: false,
-                    queueNo: snapshot.numChildren(),
-                    xy: "y"
-                  }).then(function () {
-                    firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                      .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
-                  });
-                }
-                else {
-                  ref.child(queuePushkey).update({
-                    isQueue: true,
-                    queueLocation: myLocation,
-                    isNext: true,
-                    queueNo: snapshot.numChildren(),
-                    xy: "y"
-                  }).then(function () {
-                    firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                      .update({ isQueue: true, queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
-                  });
-                }
-              });
-            }
-            else {
-              ref.child(queuePushkey).update({
-                isQueue: true,
-                queueLocation: myLocation,
-                isNext: true,
-                queueNo: 1,
-                xy: "y"
-              }).then(function () {
-                firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                  .update({ isQueue: true, queueNo: 1, queueDate: pickDate, queueLocation: myLocation });
-              });
-            }
-          });
-        }
+              else {
+                queueData.queueNo = snapshot.numChildren() + 1;
+                queueRef.push(queueData).then(function () {
+                  self.$.confirmDialog.open();
+                });
+              }
+            });
+          }
+          else {
+            queueRef.push(queueData).then(function () {
+              self.$.confirmDialog.open();
+            });
+          }
+        });
       },
 
       _send2Que() {
@@ -847,11 +815,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             day_age = day_age % 30;
 
-            if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
-              console.log('err');
-              // $("#exact_age").text("Invalid birthday - Please try again!");
-            }
-            else {
+            if (!isNaN(year_age) || !isNaN(month_age) || !isNaN(day_age)) {
               if (year_age > 0) {
                 if (year_age == 1) {
                   this.age = year_age + " year old";
@@ -886,10 +850,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
           this.email = this.mypatient[0].personal.email;
-          this.fname = this.mypatient[0].personal.firstname;
-          this.mname = this.mypatient[0].personal.middlename;
-          this.lname = this.mypatient[0].personal.lastname;
-          // this.bday = this.mypatient[0].personal.birthday;
           this.contact = this.mypatient[0].personal.contact;
           this.address = this.mypatient[0].personal.address;
           this.occupation = this.mypatient[0].personal.occupation;
@@ -897,9 +857,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.emp_phone = this.mypatient[0].personal.emp_phone;
           this.sex = this.mypatient[0].personal.sex;
           this.status = this.mypatient[0].personal.status;
-          this.name = this.mypatient[0].personal.lastname + ', ' + this.mypatient[0].personal.firstname + ' ' + this.mypatient[0].personal.middlename;
+          this.name = this.mypatient[0].personal.name;
+          this.filterValue = this.mypatient[0].personal.name;
           this.no = this.mypatient[0].no;
-          this.filterValue = this.mypatient[0].name;
 
           this.card = this.mypatient[0].insurance.card;
           this.bdate = this.mypatient[0].insurance.birthday;
@@ -912,11 +872,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.relation_e = this.mypatient[0].emergency.relationship;
           this.phone_e = this.mypatient[0].emergency.home_phone;
           this.work_phone = this.mypatient[0].emergency.work_phone;
-
-          this.isQue = this.mypatient[0].isQueue;
-          this.queueNo = this.mypatient[0].queueNo;
-          this.queueDate = this.formatWeekDate(this.mypatient[0].queueDate);
-          this.queueLocation = this.mypatient[0].queueLocation;
 
           this.personalQueue = {
             firstname: this.mypatient[0].personal.firstname,
@@ -932,9 +887,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _print() {
         var content = Polymer.dom(this.root).querySelector("#printMe").innerHTML;
-        var mywindow = window.open('', 'Print', 'height=600,width=800');
+        var mywindow = window.open('', 'Print', 'height=600,width=800,resizable=no');
         mywindow.document.write(content);
         mywindow.print();
+        mywindow.close();
       },
 
       _roleChecked(e) {

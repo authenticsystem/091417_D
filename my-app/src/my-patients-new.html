@@ -233,18 +233,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
                 <div id="info">
                   <paper-dropdown-menu label="Marital Status" style="width:100%; margin-right:10px">
-                    <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{status}}" class="dropdown-content">
-                      <paper-item id="item">Single</paper-item>
-                      <paper-item id="item">Married</paper-item>
-                      <paper-item id="item">Divorced</paper-item>
-                      <paper-item id="item">Separated</paper-item>
-                      <paper-item id="item">Widowed</paper-item>
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" attr-for-selected="name" selected="{{status}}" class="dropdown-content">
+                      <paper-item id="item" name="Single">Single</paper-item>
+                      <paper-item id="item" name="Married">Married</paper-item>
+                      <paper-item id="item" name="Divorced">Divorced</paper-item>
+                      <paper-item id="item" name="Separated">Separated</paper-item>
+                      <paper-item id="item" name="Widowed">Widowed</paper-item>
                     </paper-listbox>
                   </paper-dropdown-menu>
                   <paper-dropdown-menu label="Gender" style="width:100%; margin-right:10px">
-                    <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{sex}}" class="dropdown-content">
-                      <paper-item id="item">Male</paper-item>
-                      <paper-item id="item">Female</paper-item>
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" attr-for-selected="name" selected="{{sex}}" class="dropdown-content">
+                      <paper-item id="item" name="Male">Male</paper-item>
+                      <paper-item id="item" name="Female">Female</paper-item>
                     </paper-listbox>
                   </paper-dropdown-menu>
                   <paper-input type="number" value="{{contact}}" label="Contact Number" style="width:100%;"></paper-input>
@@ -395,7 +395,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </td>
                     <td></td>
                     <td></td>
-                    <td style="color:rgb(37, 37, 37)">{{stat}}</td>
+                    <td style="color:rgb(37, 37, 37)">{{status}}</td>
                   </tr>
                   <tr>
                     <td>
@@ -403,7 +403,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </td>
                     <td></td>
                     <td></td>
-                    <td style="color:rgb(37, 37, 37)">{{gender}}</td>
+                    <td style="color:rgb(37, 37, 37)">{{sex}}</td>
                   </tr>
                   <tr>
                     <td>
@@ -555,7 +555,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <div class="details">
                 <div id="saveSuccess" style="color: green; display:none;">Patient successfully saved.
-                  <p id="p" style="margin-top:-4px">Patient no&nbsp;</p>
+                  <p id="p" style="margin-top:-4px">Patient no: <b style="color:#1976d2">[[patientNo]]</b></p>
                 </div>
                 <div id="saveLoad" style="color: orange; display:none;">Saving patient info.</div>
                 <div id="saveFailed" style="color: red; display:none;">Opps! Something went wrong while saving patient.</div>
@@ -628,10 +628,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           value: "slide-left-animation"
         },
-        isSelectDoc: {
-          type: Boolean,
-          value: true
-        },
         favlefthide: {
           type: Boolean,
           value: true
@@ -640,114 +636,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: true
         },
-        mname: {
-          type: String,
-          value: ''
-        },
-        email: {
-          type: String,
-          value: ''
-        },
-        bday: {
-          type: String,
-          value: ''
-        },
-        age: {
-          type: String,
-          value: ''
-        },
-        contact: {
-          type: String,
-          value: ''
-        },
-        address: {
-          type: String,
-          value: ''
-        },
-        occupation: {
-          type: String,
-          value: ''
-        },
-        employer: {
-          type: String,
-          value: ''
-        },
-        emp_phone: {
-          type: String,
-          value: ''
-        },
-        gender: {
-          type: String,
-          value: ''
-        },
-        stat: {
-          type: String,
-          value: ''
-        },
-        doctor: {
-          type: String,
-          value: ''
-        },
-        hospital_name: {
-          type: String,
-          value: ''
-        },
-
-        card: {
-          type: String,
-          value: ''
-        },
-        bdate: {
-          type: String,
-          value: ''
-        },
-        in_address: {
-          type: String,
-          value: ''
-        },
-        home_phone: {
-          type: String,
-          value: ''
-        },
-        indicate: {
-          type: String,
-          value: ''
-        },
-        p_relation: {
-          type: String,
-          value: ''
-        },
-
-        name_e: {
-          type: String,
-          value: ''
-        },
-        relation_e: {
-          type: String,
-          value: ''
-        },
-        phone_e: {
-          type: String,
-          value: ''
-        },
-        work_phone: {
-          type: String,
-          value: ''
-        },
         profile: String,
-        personal: Object,
-        personalQueue: Object,
-        insurance: Object,
-        emergency: Object,
         patientPushKey: String
       },
 
       observers: [
-        'personalInfoChanged(doctor,refer,hospital_name,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
-        'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
-        'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
+        'personalInfoChanged(fname, mname, lname, bday, age)',
         '_todayDateChanged(todayDate)',
-        '_pickDateChanged(pickDate)'
+        '_pickDateChanged(pickDate)',
+        '_referChanged(refer)'
       ],
 
       ready() {
@@ -770,10 +667,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      // _isTrue(e) {
-      //   console.log(e);
-      // },
-
       _todayDateChanged(date) {
         var monthNames = [
           "January", "February", "March",
@@ -795,20 +688,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      personalInfoChanged(doctor, refer, hospital_name, email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
+      _referChanged(e) {
+        if (e == 'Dr') {
+          Polymer.dom(this.root).querySelector("#doctor").style.display = 'block';
+          Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
+          this.referredby = 'Dr. ' + this.doctor;
+          this.hospital_name = '';
+        }
+        else if (e == 'Hospital') {
+          Polymer.dom(this.root).querySelector("#hospital").style.display = 'block';
+          Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+          this.doctor = '';
+          this.hospital_name = this.hospital_name;
+          this.referredby = this.hospital_name;
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+          Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
+          this.doctor = '';
+          this.hospital_name = ''
+          this.referredby = e;
+        }
+      },
+
+      personalInfoChanged(fname, mname, lname, bday) {
         if (fname) {
           this.fname = fname.toUpperCase();
-          fname = fname.toUpperCase();
         }
 
         if (mname) {
           this.mname = mname.toUpperCase();
-          mname = mname.toUpperCase();
         }
 
         if (lname) {
           this.lname = lname.toUpperCase();
-          lname = lname.toUpperCase();
         }
 
         if (bday) {
@@ -855,124 +768,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.age = '';
         }
 
-        if (refer) {
-          if (refer == 'Dr') {
-            Polymer.dom(this.root).querySelector("#doctor").style.display = 'block';
-            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
-            doctor = doctor;
-            this.referredby = 'Dr. ' + doctor;
-            hospital_name = '';
-            this.hospital_name = '';
-          }
-          else if (refer == 'Hospital') {
-            Polymer.dom(this.root).querySelector("#hospital").style.display = 'block';
-            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
-            this.doctor = '';
-            doctor = '';
-            this.hospital_name = hospital_name;
-            hospital_name = hospital_name;
-            this.referredby = hospital_name;
-          }
-          else {
-            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
-            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
-            this.doctor = '';
-            doctor = '';
-            this.hospital_name = '';
-            hospital_name = '';
-            this.referredby = refer;
-          }
-        }
-        else {
-          refer = '';
-        }
-
-        if (sex == 0) {
-          this.gender = 'Male';
-        }
-        if (sex == 1) {
-          this.gender = 'Female';
-        }
-        if (status == 0) {
-          this.stat = 'Single';
-        }
-        if (status == 1) {
-          this.stat = 'Married';
-        }
-        if (status == 2) {
-          this.stat = 'Divorced'
-        }
-        if (status == 3) {
-          this.stat = 'Separated';
-        }
-        if (status == 4) {
-          this.stat = 'Widowed';
-        }
-
         if (!fname || !lname) {
           if (this.selectedPage === 1) {
             this.favrighthide = true;
           }
         }
         else {
-          // console.log(bday);
           this.favrighthide = false;
-          this.personal = {
-            email: email,
-            firstname: fname,
-            middlename: mname,
-            lastname: lname,
-            birthday: bday,
-            status: this.stat,
-            sex: this.gender,
-            contact: contact,
-            address: address,
-            occupation: occupation,
-            employer: employer,
-            emp_phone: emp_phone,
-            referred: refer,
-            doctor: doctor,
-            hospital: hospital_name,
-            name: lname + ', ' + fname + ' ' + mname,
-            clinic_location: this.myLocation
-          }
-        }
-      },
-
-      insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation) {
-        var date = '';
-        if (bdate) {
-          var dateformat = /^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$/;
-          if (bdate.match(dateformat)) {
-            this.ibd = bdate;
-            date = bdate;
-          }
-          else {
-            this.ibd = '';
-            date = '';
-          }
-        }
-        else {
-          this.ibd = '';
-          date = '';
-        }
-
-        this.insurance = {
-          card: card,
-          birthday: bdate,
-          address: in_address,
-          home_phone: home_phone,
-          primary_insurance: indicate,
-          relationship: p_relation
-        }
-      },
-
-      emergencyChanged(name_e, relation_e, phone_e, work_phone) {
-        this.emergency = {
-          name: name_e,
-          relationship: relation_e,
-          home_phone: phone_e,
-          work_phone: work_phone
         }
       },
 
@@ -985,16 +787,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var img = Polymer.dom(this.root).querySelector("#profilePic");
           var i = Polymer.dom(this.root).querySelector("#p_profile");
 
-          this.profile = e.target.files[0];
-
           var reader = new FileReader();
           reader.onload = function (e) {
             img.src = e.target.result;
             i.src = e.target.result;
           };
           reader.readAsDataURL(e.target.files[0]);
+
+          var profile = e.target.files[0];
+          var pic_name = new Date().getTime() + '.' + profile.type.substring(6);
+          var self = this;
+
+          if (profile.size > 9999) {
+            ImageTools.resize(profile, { width: 440, height: 400 }, function (blob, didItResize) {
+              self.profile = { name: pic_name, blob: blob }
+            });
+          }
+          else {
+            self.profile = { name: pic_name, blob: profile }
+          }
         }
         else {
+          this.profile = null;
           Polymer.dom(this.root).querySelector("#profilePic").src = '../images/user.png';
           Polymer.dom(this.root).querySelector("#p_profile").src = '../images/user.png';
         }
@@ -1105,24 +919,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           if (parseInt(this.selectedPage) == 4) {
 
-            this.personalQueue = {
-              firstname: this.personal.firstname,
-              middlename: this.personal.middlename,
-              lastname: this.personal.lastname,
-              birthday: this.personal.birthday,
-              sex: this.personal.sex,
-              name: this.personal.name,
-              hmo: this.insurance.primary_insurance
-            }
-
             if (!this.myQueue) {
               if (this.myLocation == "(not set)") {
                 this._insertNewPatient(false, this.myKey, '', '', '', '');
-                if (this.patientPushKey) {
-                  this.selectedPage = (parseInt(this.selectedPage) + 1);
-                  this.favlefthide = true;
-                  this.favrighthide = true;
-                }
               }
               else {
                 Polymer.dom(this.root).querySelector("#queueDialog").open();
@@ -1130,12 +929,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
             else {
               this.$.dateDialog.open();
-              // this._insertNewPatient(true, this.myKey, this.myLocation, this.myQueue);
-              // if (this.patientPushKey) {
-              //   this.selectedPage = (parseInt(this.selectedPage) + 1);
-              //   this.favlefthide = true;
-              //   this.favrighthide = true;
-              // }
             }
           }
 
@@ -1184,110 +977,119 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
         var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
         var today = this.todayDate;
+        var self = this;
+
+        var ref = firebase.database().ref("/" + mykey + "/patients");
+        var noRef = firebase.database().ref("/" + mykey + "/uniqueId/patients");
 
         saveLoad.style.display = 'block';
-        var ref = firebase.database().ref("/" + mykey + "/patients");
-        var push = ref.push({
-          personal: this.personal,
-          insurance: this.insurance,
-          emergency: this.emergency,
-          created: today,
-          isQueue: isQue
-        });
+        noRef.once('value').then(function (data) {
+          var num = (data.val() ? data.val() : 0) + 1;
+          var no = self._patientsNoUpdate(num);
 
-        if (push.key) {
-          this.patientPushKey = push.key;
-          var queuePushKey = '';
-
-          if (add2Que) {
-            var queueRef = firebase.database().ref("/" + mykey + "/queue/" + myLocation + "/" + pickDate);
-            var queuePush = queueRef.push({
-              patient_info: this.personalQueue,
-              patient_refKey: push.key,
-              isCancel: false,
-              isPriority: false
-            });
-            queuePushKey = queuePush.key;
-          }
-
-          if (queuePushKey) {
-            this._locateNextQueue(mykey, queuePushKey, push.key, isQue, myLocation, myLocationCode, pickDate);
-          }
-
-          ref.once('value').then(function (data) {
-            var num = data.numChildren() ? data.numChildren() : 1;
-            var no = _patientsNoUpdate(num, mykey, push.key);
-
-            if (queuePushKey) {
-              queueRef.child(queuePushKey).update({ patient_no: no });
-            }
-
-            var b = document.createElement("b");
-            b.id = "bold";
-            b.style.color = "blue";
-            var t = document.createTextNode(no + '.');
-            b.appendChild(t);
-            p.appendChild(b);
+          var push = ref.push({
+            personal: {
+              email: self.email,
+              firstname: self.fname,
+              middlename: self.mname,
+              lastname: self.lname,
+              birthday: self.bday,
+              status: self.status ? self.status : "",
+              sex: self.sex ? self.sex : "",
+              contact: self.contact,
+              address: self.address,
+              occupation: self.occupation,
+              employer: self.employer,
+              emp_phone: self.emp_phone,
+              referred: self.refer ? self.refer : "",
+              doctor: self.doctor,
+              hospital: self.hospital_name,
+              name: self.lname + ', ' + self.fname + ' ' + self.mname,
+              clinic_location: self.myLocation
+            },
+            insurance: {
+              card: self.card,
+              birthday: self.bdate,
+              address: self.in_address,
+              home_phone: self.home_phone,
+              primary_insurance: self.indicate,
+              relationship: self.p_relation
+            },
+            emergency: {
+              name: self.name_e,
+              relationship: self.relation_e,
+              home_phone: self.phone_e,
+              work_phone: self.work_phone
+            },
+            created: today,
+            no: no
           });
 
-          this._reportsUpdate(today, mykey);
+          if (push.key) {
+            noRef.set(num);
+            self.patientNo = no;
+            self._reportsUpdate(today, mykey);
 
-          if (this.profile) {
-            var ext = this.profile.type.substring(6);
-            var pic_name = this.randomString(8) + '.' + ext;
-            var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
-
-            if (this.profile.size > 9999) {
-              ImageTools.resize(this.profile, {
-                width: 440, // maximum width
-                height: 400 // maximum height
-              }, function (blob, didItResize) {
-                storageRef.put(blob).then(function (snapshot) {
-                  firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
-                  if (queuePushKey) {
-                    queueRef.child(queuePushKey).update({ patient_profile: snapshot.downloadURL });
-                  }
-                });
+            if (self.profile) {
+              var storageRef = firebase.storage().ref('profilePicture/' + self.profile.name);
+              storageRef.put(self.profile.blob).then(function (snapshot) {
+                ref.child(push.key).update({ profile: snapshot.downloadURL });
+                self.downloadURL = snapshot.downloadURL;
               });
             }
-            else {
-              storageRef.put(this.profile).then(function (snapshot) {
-                firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
-                if (queuePushKey) {
-                  queueRef.child(queuePushKey).update({ patient_profile: snapshot.downloadURL });
-                }
-              });
+
+            if (add2Que) {
+              var queueData = {
+                patient_info: {
+                  firstname: self.fname,
+                  middlename: self.mname,
+                  lastname: self.lname,
+                  birthday: self.bday,
+                  sex: self.sex ? self.sex : "",
+                  name: self.lname + ', ' + self.fname + ' ' + self.mname,
+                  hmo: self.indicate
+                },
+                patient_profile: self.downloadURL ? self.downloadURL : null,
+                patient_refKey: push.key,
+                patient_no: no,
+                queueLocation: myLocation,
+                isCancel: false,
+                isQueue: true,
+                isNext: true,
+                queueNo: 1,
+                xy: "y"
+              }
+
+              self._locateNextQueue(mykey, queueData, pickDate);
             }
+
+            saveLoad.style.display = 'none';
+            saveSucc.style.display = 'block';
+          } else {
+            saveLoad.style.display = 'none';
+            saveErr.style.display = 'block';
           }
+        });
+      },
 
-          saveLoad.style.display = 'none';
-          saveSucc.style.display = 'block';
+      _patientsNoUpdate(num) {
+        if (num > 0 && num < 10) {
+          num = '000' + num;
+        }
+        else if (num > 9 && num < 100) {
+          num = '00' + num;
+        }
+        else if (num > 99 && num < 1000) {
+          num = '0' + num;
+        }
+        else if (num > 999) {
+          num = num;
         }
         else {
-          saveLoad.style.display = 'none';
-          saveErr.style.display = 'block';
+          num = '0000';
         }
 
-        function _patientsNoUpdate(num, mykey, pushkey) {
-          if (num > 0 && num < 10) {
-            num = '000' + num;
-          }
-          else if (num > 9 && num < 100) {
-            num = '00' + num;
-          }
-          else if (num > 99 && num < 1000) {
-            num = '0' + num;
-          }
-          else if (num > 999) {
-            num = num;
-          }
-          else {
-            num = '0000';
-          }
-
-          firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
-          return num;
-        }
+        return num;
       },
 
       _reportsUpdate(today, mykey) {
@@ -1310,57 +1112,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       },
 
-      _locateNextQueue(myKey, queuePushkey, patientPushkey, isQue, myLocation, myLocationCode, pickDate) {
-        var ref = firebase.database().ref("/" + myKey + "/queue/" + myLocation + "/" + pickDate);
-        ref.once('value').then(function (snapshot) {
+      _locateNextQueue(mykey, queueData, pickDate) {
+        var queueRef = firebase.database().ref("/" + mykey + "/queue/" + queueData.queueLocation + "/" + pickDate);
+        queueRef.once('value').then(function (snapshot) {
           if (snapshot.exists()) {
-            ref.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
+            queueRef.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
               if (hasNext.exists()) {
-                ref.child(queuePushkey).update({
-                  isQueue: isQue,
-                  queueLocation: myLocation,
-                  isNext: false,
-                  queueNo: snapshot.numChildren(),
-                  xy: "y"
-                }).then(function () {
-                  firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                    .update({ queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
-                });
+                queueData.isNext = false;
+                queueData.queueNo = snapshot.numChildren() + 1;
+                queueRef.push(queueData);
               }
               else {
-                ref.child(queuePushkey).update({
-                  isQueue: isQue,
-                  queueLocation: myLocation,
-                  isNext: true,
-                  queueNo: snapshot.numChildren(),
-                  xy: "y"
-                }).then(function () {
-                  firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                    .update({ queueNo: snapshot.numChildren(), queueDate: pickDate, queueLocation: myLocation });
-                });
+                queueData.queueNo = snapshot.numChildren() + 1;
+                queueRef.push(queueData);
               }
             });
           }
           else {
-            ref.child(queuePushkey).update({
-              isQueue: isQue,
-              queueLocation: myLocation,
-              isNext: true,
-              queueNo: 1,
-              xy: "y"
-            }).then(function () {
-              firebase.database().ref("/" + myKey + "/patients").child(patientPushkey)
-                .update({ queueNo: 1, queueDate: pickDate, queueLocation: myLocation });
-            });
+            queueRef.push(queueData);
           }
         });
       },
-
-      randomString(n) {
-        var r = "";
-        while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
-        return r;
-      }
 
     })
   </script>
