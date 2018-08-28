@@ -798,13 +798,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             var today = new Date();
             var birthday = new Date(this.mypatient[0].personal.birthday);
-            var mdate = this.mypatient[0].personal.birthday.toString();
-
-            var yearThen = parseInt(mdate.substring(0, 4), 10);
-            var monthThen = Date.shortMonths[birthday.getMonth()];
-            var dayThen = parseInt(mdate.substring(8, 10), 10);
-
-            this.bday = dayThen + '-' + monthThen + '-' + yearThen;
+            this.bday = birthday.getDate() + '-' + Date.shortMonths[birthday.getMonth()] + '-' + birthday.getFullYear();
 
             var differenceInMilisecond = today.valueOf() - birthday.valueOf();
 

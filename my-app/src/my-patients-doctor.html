@@ -241,17 +241,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
             </app-header>
 
-            <firebase-query disabled id="searchQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name"
-              start-at="{{search}}" limit-to-first="10">
+            <firebase-query disabled id="searchQuery" path="/{{myKey}}/patients" data="{{items}}" order-by-child="personal/name" start-at="{{search}}"
+              limit-to-first="25">
             </firebase-query>
 
-            <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no" start-at="{{lastkey}}"
-              limit-to-first="10">
+            <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no" start-at="{{lastnum}}"
+              limit-to-first="25">
             </firebase-query>
-
-            <!-- <firebase-query id="query" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}"
-              limit-to-first="20">
-            </firebase-query> -->
 
             <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
               <div id="noRecord">
@@ -262,7 +258,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
               </div>
             </template>
-
 
             <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
               <!-- <iron-list items="[[mypatients]]" as="item" selection-enabled scroll-target="threshold"> -->
@@ -354,7 +349,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         lastIndex: {
           type: Number,
-          value: 9
+          value: 25
         }
       },
 
@@ -364,7 +359,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ],
 
       _searchChanged(search) {
-        this.search = search.toUpperCase();
+        if (search) {
+          this.search = search.toUpperCase();
+          this.$.defaultQuery.disabled = true;
+          this.$.searchQuery.disabled = false;
+        } else {
+          this.$.defaultQuery.disabled = false;
+          this.$.searchQuery.disabled = true;
+        }
+
+        this.loadingPeople = true;
       },
 
       _noDataChanged(e, f) {
@@ -377,10 +381,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _mypatientsChanged(e) {
         if (this.mypatients.length > 0) {
-          if (e.path === "mypatients") {
+          if (e.path === "mypatients" || e.path === "mypatients.splices") {
             this.appendToList();
-          } else {
-            this.updateList(e);
+          }
+
+          if (e.path !== "mypatients" && e.path !== "mypatients.splices" && e.path !== "mypatients.length") {
+            this.items = [];
+            this.lastnum = "";
           }
 
           this.$.threshold.clearTriggers();
@@ -399,19 +406,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }
         this.lastIndex = i - 1;
-      },
-
-      updateList(e) {
-        console.log(e);
-        if (e.path.split(".")[2] === "emergency") {
-          this.set(e.path, e.value);
-        }
-        else if (e.path.split(".")[2] === "insurance") {
-          this.set(e.path, e.value);
-        }
-        else if (e.path.split(".")[2] === "personal") {
-          this.set(e.path, e.value);
-        }
       },
 
       _getViewDetailsLink(e) {
@@ -498,9 +492,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       loadMoreData() {
-        console.log(this.lastIndex)
         if (this.mypatients.length > 0) {
-          this.lastkey = this.mypatients[this.lastIndex].no;
+          this.lastnum = this.mypatients[this.lastIndex].no;
         }
 
         this.loadingPeople = true;
@@ -521,11 +514,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           day_age = day_age % 30;
 
-          if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
-            console.log('err');
-            // $("#exact_age").text("Invalid birthday - Please try again!");
-          }
-          else {
+          if (!isNaN(year_age) || !isNaN(month_age) || !isNaN(day_age)) {
             if (year_age > 0) {
               if (year_age == 1) {
                 return year_age + " year old";

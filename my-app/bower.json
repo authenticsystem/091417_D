@@ -62,7 +62,8 @@
     "vaadin-notification": "vaadin/vaadin-notification#^1.0.0",
     "paper-dropdown-input": "Juravenator/paper-dropdown-input#^2.5.2",
     "iron-form": "PolymerElements/iron-form#^2.3.0",
-    "simple-grid": "m-mansoor-ali/simple-grid#^1.0.2"
+    "simple-grid": "m-mansoor-ali/simple-grid#^1.0.2",
+    "sortable-list": "sharedlabs/sortable-list#^1.0.2"
   },
   "resolutions": {
     "polymer": "^2.0.0"

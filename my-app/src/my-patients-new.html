@@ -227,8 +227,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
                 <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
                 <div id="info">
-                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$" auto-validate
-                    error-message="Invalid date format!" value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
+                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$" error-message="Invalid date format!"
+                    value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
                   <paper-input value="{{age}}" label="Age" style="width:100%;"></paper-input>
                 </div>
                 <div id="info">
@@ -284,7 +284,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div id="info">
                   <paper-input value="{{card}}" Label="ID Card Number" style="width:100%; margin-right:10px"></paper-input>
                   <paper-input value="{{bdate}}" placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$"
-                    auto-validate error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
+                    error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
                 </div>
                 <paper-input value="{{in_address}}" Label="Address (If different)"></paper-input>
                 <paper-input value="{{home_phone}}" type="number" Label="Home phone no."></paper-input>
@@ -435,7 +435,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </td>
                     <td></td>
                     <td></td>
-                    <td style="color:rgb(37, 37, 37)">{{occupation}}</td>
+                    <td style="color:rgb(37, 37, 37)">{{employer}}</td>
                   </tr>
                   <tr>
                     <td>
@@ -712,53 +712,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       personalInfoChanged(fname, mname, lname, bday) {
-        if (fname) {
-          this.fname = fname.toUpperCase();
-        }
-
-        if (mname) {
-          this.mname = mname.toUpperCase();
-        }
-
-        if (lname) {
-          this.lname = lname.toUpperCase();
-        }
+        if (fname) this.fname = fname.toUpperCase();
+        if (mname) this.mname = mname.toUpperCase();
+        if (lname) this.lname = lname.toUpperCase();
 
         if (bday) {
-          var dateformat = /^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$/;
-          if (bday.match(dateformat)) {
-
-            var mdate = bday.toString();
-
-            var monthThen = parseInt(mdate.substring(0, 2), 10);
-            var dayThen = parseInt(mdate.substring(3, 5), 10);
-            var yearThen = parseInt(mdate.substring(6, 10), 10);
-
-            // yyyy-mm-dd
-            bday = yearThen + '-' + monthThen + '-' + dayThen;
-
-            var daysBetweenDates;
-            daysBetweenDates = function (d1, d2) {
-              var diffDays, oneDay;
-              oneDay = 24 * 60 * 60 * 1000;
-              diffDays = (d2 - Date.parse(d1)) / oneDay;
-              return diffDays;
-            };
-
-            var ageNum = daysBetweenDates(bday, new Date()) / 365;
-
-            function N(num, places) {
-              return +(Math.round(num + "e+" + places) + "e-" + places);
-            }
-
-            var x = N(ageNum, 3);
-
-            if (x <= 0) {
-              this.age = 0;
-            }
-            else {
-              this.age = x;
-            }
+          var newdateformat = /^([0-9]{4})[\/\-](0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])$/;
+          bday = this._formatToGDate(bday);
+          if (bday.match(newdateformat)) {
+            this.age = this._calculateAge(bday);
           }
           else {
             this.age = '';
@@ -776,6 +738,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           this.favrighthide = false;
         }
+      },
+
+      _formatToGDate(date) {
+        // var [month, day, year] = date.split(/[\/\-]/);
+        if (date) {
+          var x = new Date(date);
+          return x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2) + '-' + ('0' + x.getDate()).slice(-2);
+        } else {
+          return "";
+        }
+      },
+
+      _calculateAge(bday) {
+        var daysBetweenDates;
+        daysBetweenDates = function (d1, d2) {
+          var diffDays, oneDay;
+          oneDay = 24 * 60 * 60 * 1000;
+          diffDays = (d2 - Date.parse(d1)) / oneDay;
+          return diffDays;
+        };
+
+        var ageNum = daysBetweenDates(bday, new Date()) / 365;
+
+        function N(num, places) {
+          return +(Math.round(num + "e+" + places) + "e-" + places);
+        }
+
+        var x = N(ageNum, 3);
+
+        if (x <= 0) return 0;
+        else return x;
       },
 
       _label(e) {
@@ -973,7 +966,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _insertNewPatient(isQue, mykey, myLocation, myLocationCode, add2Que, pickDate) {
         var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
-        var p = Polymer.dom(this.root).querySelector("#p");
         var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
         var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
         var today = this.todayDate;
@@ -993,7 +985,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               firstname: self.fname,
               middlename: self.mname,
               lastname: self.lname,
-              birthday: self.bday,
+              birthday: self._formatToGDate(self.bday),
               status: self.status ? self.status : "",
               sex: self.sex ? self.sex : "",
               contact: self.contact,
@@ -1009,7 +1001,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
             insurance: {
               card: self.card,
-              birthday: self.bdate,
+              birthday: self._formatToGDate(self.bdate),
               address: self.in_address,
               home_phone: self.home_phone,
               primary_insurance: self.indicate,
@@ -1044,7 +1036,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   firstname: self.fname,
                   middlename: self.mname,
                   lastname: self.lname,
-                  birthday: self.bday,
+                  birthday: self._formatToGDate(self.bday),
                   sex: self.sex ? self.sex : "",
                   name: self.lname + ', ' + self.fname + ' ' + self.mname,
                   hmo: self.indicate
