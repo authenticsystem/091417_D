@@ -19,6 +19,9 @@
 <link rel="import" href="my-patients-edit.html">
 <link rel="import" href="my-visits-new.html">
 <link rel="import" href="my-queue-patients.html">
+<link rel="import" href="my-queue-card.html">
+
+<link rel="import" href="sortable-list.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -30,19 +33,6 @@
                 margin: 0;
                 display: flex;
                 flex-direction: column;
-
-            }
-
-            .item {
-                @apply --layout-horizontal;
-                padding: 15px;
-                background-color: white;
-                border-bottom: 1px solid #ddd;
-                cursor: pointer;
-                box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
-                /* counter-reset: section; */
-                /* opacity: 0.5; */
-                /* margin-bottom: 5px; */
             }
 
             .itemNoRecord {
@@ -53,67 +43,19 @@
                 cursor: pointer;
             }
 
-            .item_D {
-                @apply --layout-horizontal;
-                padding: 15px;
-                background-color: white;
-                border-bottom: 1px solid #ddd;
-                cursor: pointer;
-                opacity: 0.3;
-            }
-
-            .item_N {
-                @apply --layout-horizontal;
-                padding: 15px;
-                background-color: white;
-                border-bottom: 1px solid #ddd;
-                cursor: pointer;
-                opacity: 0.6;
-            }
-
-            .item_N:hover,
-            .item_D:hover {
-                opacity: 1;
-                box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
-            }
-
-            .avatar {
-                height: 45px;
-                width: 45px;
-                border: 2px solid white;
-                border-radius: 50%;
-                box-sizing: border-box;
-                background-color: #DDD;
-            }
-
-            .pad {
-                /* border-left: 6px solid rgb(208, 137, 236); */
-                margin-left: 10px;
-                /* padding: 10px; */
-                @apply --layout-flex;
-                @apply --layout-vertical;
-            }
-
-            .primary {
-                font-size: 14px;
-                font-weight: 400;
-            }
-
-            .shortText,
-            .longText {
-                font-size: 14px;
-            }
-
-            .longText {
-                color: gray;
-                /* display: none; */
-            }
-
             @media (max-width: 768px) {
-                iron-list {
+                .list {
                     margin: 16px;
                     display: flex;
                     flex-direction: column;
+                    margin-bottom: -16px;
+                }
+
+                .list2 {
+                    margin: 16px;
+                    display: flex;
+                    flex-direction: column;
+                    margin-bottom: -16px;
                 }
 
                 #noRecord {
@@ -124,9 +66,16 @@
             }
 
             @media (min-width: 768px) {
-                iron-list {
+                .list {
                     width: 736px;
                     margin: 16px auto;
+                    margin-bottom: -16px;
+                }
+
+                .list2 {
+                    width: 736px;
+                    margin: 16px auto;
+                    margin-bottom: -16px;
                 }
 
                 #noRecord {
@@ -157,25 +106,17 @@
                 cursor: pointer;
             }
 
-            .cancel {
-                transform: rotate(-25deg);
-                display: none;
-                position: absolute;
-                right: 27px;
-                top: 27px;
-                color: #F44336;
-                font-size: 14px;
-                padding: 4px;
-                border: 2px solid #F44336;
-                border-radius: 6px;
-            }
-
             .dateInput {
                 --paper-input-container-input-color: white;
                 --paper-input-container-color: white;
                 --paper-input-container-focus-color: white;
                 font-size: 10px;
                 width: 145px;
+            }
+
+            .sortList {
+                position: relative;
+                margin-bottom: 30px;
             }
         </style>
 
@@ -215,44 +156,25 @@
                             </div>
                         </div>
 
-                        <iron-list items="[[myqueue]]" as="item" selection-enabled scroll-target="threshold">
-                            <template>
-                                <div class="divSeparator">
-                                    <div class$="[[getClassForItem(item.isNext, item.isQueue)]]" tabindex$="[[tabIndex]]">
-                                        <div style="font-size:16px;" class="longText">[[item.queueNo]]</div>
-                                        <div style="padding:6px"></div>
-                                        <div>
-                                            <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
-                                        </div>
-                                        <div class="pad" on-tap="_selectThis" id="{{item.$key}}~{{item.patient_refKey}}~{{item.patient_info.name}}~{{item.isNext}}~{{item.isQueue}}~{{item.isPriority}}~{{item.queueNo}}">
-                                            <div id="{{item.$key}}~{{item.patient_refKey}}~{{item.patient_info.name}}~{{item.isNext}}~{{item.isQueue}}~{{item.isPriority}}~{{item.queueNo}}"
-                                                style="font-size:11px" class="longText">
-                                                [[item.patient_no]]
-                                            </div>
-                                            <div id="{{item.$key}}~{{item.patient_refKey}}~{{item.patient_info.name}}~{{item.isNext}}~{{item.isQueue}}~{{item.isPriority}}~{{item.queueNo}}"
-                                                class="primary">[[item.patient_info.lastname]], [[item.patient_info.firstname]] [[item.patient_info.middlename]]
-                                            </div>
-                                            <div id="{{item.$key}}~{{item.patient_refKey}}~{{item.patient_info.name}}~{{item.isNext}}~{{item.isQueue}}~{{item.isPriority}}~{{item.queueNo}}"
-                                                class="longText">{{_ageCal(item.patient_info.birthday)}}{{_comma(item.patient_info.birthday)}}
-                                                [[item.patient_info.sex]]
-                                            </div>
-                                            <div id="{{item.$key}}~{{item.patient_refKey}}~{{item.patient_info.name}}~{{item.isNext}}~{{item.isQueue}}~{{item.isPriority}}~{{item.queueNo}}"
-                                                class="longText">[[_hmo(item.patient_info.hmo)]]
-                                            </div>
-                                        </div>
+                        <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+                            <div class="list2">
+                                <template is="dom-repeat" items="[[excetionItems]]">
+                                    <my-queue-card item="[[item]]"></my-queue-card>
+                                    <a id="openVisitNew" href="{{route.prefix}}/visit/new"></a>
+                                    <a id="openPatientEdit" href="{{route.prefix}}/patient/edit/{{item.patient_refKey}}"></a>
+                                    <a id="openPatientView" href="{{route.prefix}}/patient/detail/{{item.patient_refKey}}"></a>
+                                </template>
+                            </div>
+                            <sortable-list class="sortList" sortable=".list" all-data="[[includedItems]]" on-select="_selectedIndex" on-drop="_dropIndex">
+                                <template id="includedTemplate" is="dom-repeat" items="[[includedItems]]">
+                                    <div on-tap="_selectThis" class="list">
+                                        <my-queue-card item="[[item]]"></my-queue-card>
                                         <a id="openVisitNew" href="{{route.prefix}}/visit/new"></a>
                                         <a id="openPatientEdit" href="{{route.prefix}}/patient/edit/{{item.patient_refKey}}"></a>
                                         <a id="openPatientView" href="{{route.prefix}}/patient/detail/{{item.patient_refKey}}"></a>
-                                        <div style$="{{_isCancel(item.isCancel)}}" class="cancel">Cancelled</div>
-                                        <paper-icon-button hidden="{{!item.isPriority}}" icon="my-icons:priority-high" alt="{{item.$key}}" title="Priority high"
-                                            style="display:inline-block;position: absolute;  right: 10px; color: #673AB7; top:8px;">
-                                        </paper-icon-button>
                                     </div>
-                                </div>
-                            </template>
-                        </iron-list>
-
-                        <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+                                </template>
+                            </sortable-list>
                         </iron-scroll-threshold>
 
                         <a href="/queue/new" id="queAdd"></a>
@@ -292,7 +214,8 @@
         <div hidden$="{{!qVisitNewActive}}">
             <div id="newcase"></div>
             <my-visits-new id="d27" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" queue-key="{{queueKey}}" queue-date="{{pickDate}}"
-                my-location="{{myLocation}}" my-location-code="{{myLocationCode}}" filter-value="{{filterValue}}" my-limit="1"></my-visits-new>
+                my-location="{{myLocation}}" my-location-code="{{myLocationCode}}" filter-value="{{selectedData.patient_info.name}}"
+                my-limit="1"></my-visits-new>
         </div>
 
         <salte-dialog no-auto-fullscreen id="locationDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
@@ -307,13 +230,9 @@
         <salte-dialog no-auto-fullscreen id="openDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
             <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
             <span>
-                <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Cancel Queue</paper-button>
-                <paper-button on-tap="_proceedToNext" hidden="{{!isNext}}" style="background: #3F51B5; margin-bottom: 6px; color: white; border-radius: 0;"
-                    dialog-confirm>Proceed to next patient</paper-button>
-                <paper-button on-tap="_putToNext" hidden="{{isNext}}" style="background: #3F51B5; margin-bottom: 6px; color: white; border-radius: 0;"
-                    dialog-confirm>Next</paper-button>
-                <paper-button on-tap="_changeQueueNo" hidden="{{isNext}}" style="background: #3F51B5; margin-bottom: 6px; color: white; border-radius: 0;"
-                    dialog-confirm>Change Queue No</paper-button>
+                <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Cancel
+                    Queue
+                </paper-button>
                 <paper-button on-tap="_addVisit" hidden="{{!isNext}}" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
                     dialog-confirm>Add Visit</paper-button>
                 <paper-button on-tap="_editPatient" hidden="{{isNext}}" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
@@ -327,11 +246,10 @@
         <salte-dialog no-auto-fullscreen id="priorDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
             <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
             <span>
-                <!-- <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Cancel Queue</paper-button>
-                <paper-button on-tap="_addVisit" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Add Visit</paper-button>
-                <paper-button on-tap="_editPatient" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Edit Patient's Detail</paper-button> -->
-                <paper-button on-tap="_queueSearch" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Search existing patient</paper-button>
-                <paper-button on-tap="_queueNew" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Add new patient</paper-button>
+                <paper-button on-tap="_queueSearch" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Search
+                    existing patient</paper-button>
+                <paper-button on-tap="_queueNew" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Add
+                    new patient</paper-button>
             </span>
             <div class="buttons">
                 <paper-button dialog-dismiss>Close</paper-button>
@@ -348,29 +266,13 @@
             </div>
         </salte-dialog>
 
-        <salte-dialog no-auto-fullscreen id="inputDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
-            <h2 style="font-size: 16px; background: #1E88E5">Enter new queue number</h2>
-            <span>
-                <paper-input always-float-label label="New queue no" value="{{newQueueNo}}" required allowed-pattern="[\d]" prevent-invalid-input
-                    maxlength="3"></paper-input>
-            </span>
-            <div class="buttons">
-                <paper-button dialog-confirm id="confirmChangeNoBtn" autofocus on-tap="_confirmChangeNo">Confirm</paper-button>
-                <paper-button dialog-dismiss on-tap="_cancelChangeNo">Cancel</paper-button>
-            </div>
-        </salte-dialog>
-
         <vaadin-notification id="VQ_notification" duration="5000" position="bottom-end">
             <template>
                 <div style="padding: 16px;">
-                    New queue added.
+                    [[noOfPatients]] patient(s) currently in queue.
                 </div>
             </template>
         </vaadin-notification>
-
-        <firebase-query path="/{{myKey}}/queue/{{myLocation}}/{{pickDate}}" data="{{checkChange}}" order-by-child="queueNo" equal-to="{{newQueueNoInt}}"
-            disabled="{{disabledQry}}" limit-to-first="1">
-        </firebase-query>
 
     </template>
     <script>
@@ -383,7 +285,6 @@
                 myLocationCode: String,
                 route: Object,
                 token: String,
-                filterValue: String,
                 editKey: String,
                 queueKey: String,
                 isNext: Boolean,
@@ -393,9 +294,13 @@
                     value: 0,
                     notify: true
                 },
-                items: {
+                includedItems: {
                     type: Array,
-                    value: []
+                    computed: '_returnIncluded(myqueue.*)'
+                },
+                excetionItems: {
+                    type: Array,
+                    computed: '_returnException(myqueue.*)'
                 },
                 loadTime: {
                     type: Number,
@@ -404,16 +309,12 @@
             },
 
             ready() {
-                this.disabledQry = true;
-                this.$.confirmChangeNoBtn.disabled = true;
                 this.pickDate = this.formatTodayDate(new Date());
             },
 
             observers: [
                 '_myqueueChanged(myqueue.*)',
                 '_noOfPatientsChanged(noOfPatients)',
-                '_checkChangeChanged(checkChange)',
-                '_newQueueNoChanged(newQueueNo)',
                 '_pickDateChanged(pickDate)'
             ],
 
@@ -428,45 +329,19 @@
                 }
             },
 
-            _myqueueChanged() {
+            _myqueueChanged(e) {
                 if (this.myqueue.length > 0) {
-                    if (this.myqueue.length > this.noOfPatients) {
-                        this.noOfPatients = this.myqueue.length;
+                    if (e.path !== "myqueue" && e.path !== "myqueue.splices" && e.path !== "myqueue.length") {
+                        this.$.query.disabled = true;
+                        this.$.query.disabled = false;
                     }
+
                     this.loadTime = 3000;
                     Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
                 }
                 else {
                     Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
                     this._fetching();
-                }
-            },
-
-            _newQueueNoChanged(e) {
-                if (e) {
-                    this.disabledQry = false;
-                    this.newQueueNoInt = parseInt(e);
-                }
-                else {
-                    this.disabledQry = true;
-                    this.newQueueNoInt = e;
-                }
-            },
-
-            _checkChangeChanged(e) {
-                if (e.length > 0) {
-                    if (this.selectedData) {
-                        var [key, queueNo] = this.selectedData.split('~');
-                        if (e[0].isNext === false && e[0].isQueue === true && e[0].isPriority === false && e[0].queueNo !== parseInt(queueNo)) {
-                            this.$.confirmChangeNoBtn.disabled = false;
-                        }
-                        else {
-                            this.$.confirmChangeNoBtn.disabled = true;
-                        }
-                    }
-                }
-                else {
-                    this.$.confirmChangeNoBtn.disabled = true;
                 }
             },
 
@@ -477,12 +352,7 @@
                     }
                     if (this.token) {
                         var token = this.token;
-                        firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.pickDate).orderByChild("isQueue").equalTo(true)
-                            .once('value').then(function (data) {
-                                if (data.exists()) {
-                                    _handleSend(data.numChildren(), token);
-                                }
-                            });
+                        _handleSend(e, token);
                     }
 
                     function _handleSend(NoPatients, token) {
@@ -511,9 +381,9 @@
                                 'to': to
                             })
                         }).then(function (response) {
-                            console.log(response);
+                            // console.log(response);
                         }).catch(function (error) {
-                            console.error(error);
+                            console.warn(error);
                         });
                     }
                 }
@@ -551,58 +421,91 @@
                     var newDiv = document.createElement("my-queue-patients");
                     newDiv.setAttribute("id", "d24");
                     newDiv.setAttribute("prev-route", this.route.prefix);
+                    newDiv.setAttribute("route", JSON.stringify(this.route));
                     newDiv.setAttribute("my-key", this.myKey);
                     newDiv.setAttribute("my-queue", "yes");
                     newDiv.setAttribute("my-location", this.myLocation);
                     newDiv.setAttribute("my-location-code", this.myLocationCode);
-                    newDiv.setAttribute("limit", "");
                     //if open existing
                     var currentDiv = document.getElementById("patientsearch");
                     Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
                 }
             },
 
-            _selectThis(e) {
-                var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
-                var [key, patientKey, name, isNext, isQueue, isPriority, queueNo] = data_args.split('~');
-                this.selectedData = key + "~" + queueNo;
-                this.editKey = patientKey;
-                this.queueKey = key;
-                this.filterValue = name;
+            _returnException(e) {
+                return this.myqueue.filter(isExcept);
+                function isExcept(item) {
+                    return !item.isQueue;
+                }
+            },
 
-                if (isNext === "false" && isQueue === "false" && isPriority === "false") {
-                    var node = Polymer.dom(this.root).querySelector("#patientsview");
-                    if (node) {
-                        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
-                        if (oldDiv) {
-                            Polymer.dom(node.parentNode).removeChild(oldDiv);
+            _returnIncluded(e) {
+                var data = this.myqueue.filter(isInclude);
+                if (data.length > this.noOfPatients) {
+                    this.noOfPatients = data.length;
+                }
+
+                return data;
+                function isInclude(item) {
+                    return item.isQueue;
+                }
+            },
+
+            _selectedIndex(e) {
+                this.selectedData = this.includedItems[e.detail];
+            },
+
+            _dropIndex(e) {
+                var droppedData = this.includedItems[e.detail];
+                if (this.selectedData.queueNo !== droppedData.queueNo) {
+                    var self = this;
+                    var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.pickDate);
+
+                    ref.child(self.selectedData.$key).update({
+                        queueNo: droppedData.queueNo,
+                        isNext: droppedData.isNext,
+                        xy: "x"
+                    }).then(function () {
+                        self.$.query.disabled = true;
+                        if (droppedData.queueNo > self.selectedData.queueNo) {
+                            ref.orderByChild("queueNo").startAt(self.selectedData.queueNo).endAt(droppedData.queueNo).once("value").then(function (snapshot) {
+                                if (snapshot.exists()) {
+                                    snapshot.forEach(element => {
+                                        var newQueueNo = element.val().queueNo - 1;
+                                        if (element.val().xy === "y" && newQueueNo === self.selectedData.queueNo) {
+                                            ref.child(element.key).update({ queueNo: newQueueNo, isNext: self.selectedData.isNext });
+                                        } else if (element.val().xy === "y" && newQueueNo !== self.selectedData.queueNo) {
+                                            ref.child(element.key).update({ queueNo: newQueueNo });
+                                        } else if (element.val().xy === "x") {
+                                            ref.child(element.key).update({ xy: 'y' });
+                                        }
+                                    });
+                                }
+                                self.$.query.disabled = false;
+                            });
+                        } else {
+                            ref.orderByChild("queueNo").startAt(droppedData.queueNo).endAt(self.selectedData.queueNo).once("value").then(function (snapshot) {
+                                if (snapshot.exists()) {
+                                    snapshot.forEach(element => {
+                                        var newQueueNo = element.val().queueNo + 1;
+                                        if (element.val().xy === "y") {
+                                            ref.child(element.key).update({ queueNo: newQueueNo, isNext: false });
+                                        } else if (element.val().xy === "x") {
+                                            ref.child(element.key).update({ xy: 'y' });
+                                        }
+                                    });
+                                }
+                                self.$.query.disabled = false;
+                            });
                         }
-                        var newDiv = document.createElement("my-patients-view");
-                        newDiv.setAttribute("id", "d26");
-                        newDiv.setAttribute("prev-route", this.route.prefix);
-                        newDiv.setAttribute("my-key", this.myKey);
-                        newDiv.setAttribute("my-location", this.myLocation);
-                        newDiv.setAttribute("my-location-code", this.myLocationCode);
-                        newDiv.setAttribute("my-role", this.myRole);
-                        newDiv.setAttribute("view-key", patientKey);
-                        Polymer.dom(this.root).querySelector("#openPatientView").click();
-                        //if open existing
-                        var currentDiv = document.getElementById("patientsview");
-                        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-                    }
+                    });
                 }
-                else if (isNext === "false" && isQueue === "true" && isPriority === "false") {
-                    this.isNext = false;
-                    this.$.openDialog.open();
-                }
-                else if (isNext === "true" && isQueue === "true" && isPriority === "false") {
-                    this.isNext = true;
-                    this.$.openDialog.open();
-                }
-                else {
-                    this.isNext = false;
-                    // this.$.priorDialog.open();
-                }
+            },
+
+            _selectThis(e) {
+                this.selectedData = this.$.includedTemplate.itemForElement(e.target);
+                this.isNext = this.selectedData.isNext;
+                this.$.openDialog.open();
             },
 
             _editPatient() {
@@ -645,7 +548,7 @@
                     newDiv.setAttribute("queue-date", this.pickDate);
                     newDiv.setAttribute("my-location", this.myLocation);
                     newDiv.setAttribute("my-location-code", this.myLocationCode);
-                    newDiv.setAttribute("filter-value", this.filterValue);
+                    newDiv.setAttribute("filter-value", this.selectedData.patient_info.name);
                     newDiv.setAttribute("my-limit", 1);
                     Polymer.dom(this.root).querySelector("#openVisitNew").click();
                     //if open existing
@@ -663,193 +566,43 @@
                 }
             },
 
-            _proceedToNext() {
-                var [key, queueNo] = this.selectedData.split('~');
-                var startNo = parseInt(queueNo) + 1;
-                var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.pickDate);
-                var query = this.$.query;
-                this.loadTime = 13000;
-
-                query.disabled = true;
-                ref.child(key).update({
-                    isNext: false,
-                    isPriority: false,
-                    xy: "z",
-                    queueNo: startNo
-                }).then(function () {
-                    ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
-                        if (!hasNext.exists()) {
-                            ref.orderByChild("xy").startAt("y").limitToFirst(1).once("value").then(function (next) {
-                                if (next.exists()) {
-                                    ref.child(Object.keys(next.val())[0]).update({
-                                        isNext: true,
-                                        queueNo: parseInt(queueNo)
-                                    }).then(function () {
-                                        ref.child(key).update({ xy: "y" });
-                                        query.disabled = false;
-                                    });
-                                }
-                            });
-                        }
-                    });
-                });
-            },
-
             _cancelQueue() {
                 this.$.confirmationDialog.open();
             },
 
             _confirmCancel() {
-                var [key, queueNo] = this.selectedData.split('~');
-                var startNo = parseInt(queueNo) + 1;
+                var startNo = this.selectedData.queueNo + 1;
                 var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.pickDate);
-                var patientRef = firebase.database().ref("/" + this.myKey + "/patients");
 
-                ref.child(key).update({
+                ref.child(this.selectedData.$key).update({
                     isQueue: false,
                     isNext: false,
-                    isPriority: false,
                     isCancel: true,
                     xy: "x"
                 }).then(function () {
                     ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
                         if (!hasNext.exists()) {
-                            ref.orderByChild("queueNo").equalTo(startNo).once("value").then(function (next) {
-                                if (next.exists()) {
-                                    ref.child(Object.keys(next.val())[0]).update({ isNext: true });
+                            ref.orderByChild("queueNo").startAt(startNo).once("value").then(function (findNext) {
+                                if (findNext.exists()) {
+                                    var done = false;
+                                    findNext.forEach(element => {
+                                        if (done) return;
+                                        if (!element.val().isCancel) {
+                                            ref.child(element.key).update({ isNext: true });
+                                            done = true;
+                                            return;
+                                        }
+                                    });
                                 }
                             });
                         }
                     });
-
-                    patientRef.orderByChild("queueNo").equalTo(parseInt(queueNo)).once("value").then(function (data) {
-                        if (data.exists()) {
-                            patientRef.child(Object.keys(data.val())[0]).update({ isQueue: false });
-                        }
-                    });
                 });
-            },
-
-            _putToNext() {
-                var [key, queueNo] = this.selectedData.split('~');
-                var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.pickDate);
-                var query = this.$.query;
-                this.loadTime = 13000;
-
-                query.disabled = true;
-                ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
-                    if (hasNext.exists()) {
-                        ref.child(Object.keys(hasNext.val())[0]).update({ isNext: false })
-                            .then(function () {
-                                ref.child(key).update({
-                                    isNext: true,
-                                    queueNo: Object.values(hasNext.val())[0].queueNo
-                                }).then(function () {
-                                    ref.orderByChild("queueNo").startAt(Object.values(hasNext.val())[0].queueNo).endAt(parseInt(queueNo)).once("value").then(function (update) {
-                                        if (update.exists()) {
-                                            update.forEach(element => {
-                                                if (!element.val().isNext) {
-                                                    ref.child(element.key).update({
-                                                        queueNo: element.val().queueNo + 1
-                                                    });
-                                                    query.disabled = false;
-                                                }
-                                            });
-
-                                        }
-                                    });
-                                });
-                            });
-                    }
-                });
-            },
-
-            _changeQueueNo() {
-                this.newQueueNo = '';
-                this.disabledQry = true;
-                this.newQueueNoInt = '';
-                this.$.inputDialog.open();
-            },
-
-            _confirmChangeNo() {
-                var [key, queueNo] = this.selectedData.split('~');
-                var newQueueNo = this.newQueueNo;
-                var location = this.myLocation;
-                var patientKey = this.editKey;
-                var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.pickDate);
-                // var patientRef = firebase.database().ref("/" + this.myKey + "/patients");
-                var query = this.$.query;
-                this.loadTime = 13000;
-
-                query.disabled = true;
-                if (queueNo > newQueueNo) {
-                    // console.log("daku ang queueNo");
-                    ref.child(key).update({ queueNo: parseInt(newQueueNo), xy: "x" }).then(function () {
-                        ref.orderByChild("queueNo").startAt(parseInt(newQueueNo)).endAt(parseInt(queueNo)).once("value").then(function (change) {
-                            if (change.exists()) {
-                                change.forEach(element => {
-                                    if (element.val().xy === "y") {
-                                        ref.child(element.key).update({ queueNo: element.val().queueNo + 1 });
-                                        // console.log(element.val());
-                                    }
-                                    else {
-                                        ref.child(element.key).update({ xy: 'y' });
-                                    }
-                                });
-                                query.disabled = false;
-                            }
-                        });
-                    });
-                }
-                else {
-                    // console.log("gamay ang queueNo");
-                    ref.orderByChild("queueNo").equalTo(parseInt(newQueueNo)).once("value").then(function (data) {
-                        if (data.exists()) {
-                            ref.child(Object.keys(data.val())[0]).update({ queueNo: parseInt(queueNo), xy: "x" })
-                                .then(function () {
-                                    ref.orderByChild("queueNo").startAt(parseInt(queueNo)).endAt(parseInt(newQueueNo)).once("value").then(function (change) {
-                                        if (change.exists()) {
-                                            change.forEach(element => {
-                                                if (element.val().xy === "y") {
-                                                    ref.child(element.key).update({ queueNo: element.val().queueNo + 1 });
-                                                    // console.log(element.val());
-                                                }
-                                                else {
-                                                    ref.child(element.key).update({ xy: 'y' });
-                                                }
-                                            });
-                                            query.disabled = false;
-                                        }
-                                    });
-                                    // patientRef.child(Object.values(data.val())[0].patient_refKey).update({ queueNo: parseInt(queueNo) });
-                                    // .then(function () {
-                                    //     patientRef.child(patientKey).update({ queueNo: parseInt(newQueueNo) });
-                                    // });
-                                });
-                        }
-                    });
-                }
-            },
-
-            _cancelChangeNo() {
-                this.newQueueNo = '';
-                this.disabledQry = true;
-                this.newQueueNoInt = '';
-            },
-
-            _isCancel(e) {
-                if (e) return 'display:inline-block';
-            },
-
-            getClassForItem(isNext, isQueue) {
-                if (isNext === false && isQueue === false) return 'item_D';
-                else if (isNext === false && isQueue === true) return 'item_N';
-                else return 'item';
             },
 
             loadMoreData() {
                 // load async stuff. e.g. XHR
-                this.$.threshold.clearTriggers();
+                // this.$.threshold.clearTriggers();
             },
 
             _fetching() {
@@ -857,60 +610,6 @@
                 setTimeout((e) => {
                     this.record = 'No record found.';
                 }, this.loadTime);
-            },
-
-            _ageCal(bday) {
-                if (bday) {
-
-                    var today = new Date();
-                    var birthday = new Date(bday);
-
-                    var differenceInMilisecond = today.valueOf() - birthday.valueOf();
-
-                    var year_age = Math.floor(differenceInMilisecond / 31536000000);
-                    var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
-
-                    var month_age = Math.floor(day_age / 30);
-
-                    day_age = day_age % 30;
-
-                    if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
-                        console.log('err');
-                        // $("#exact_age").text("Invalid birthday - Please try again!");
-                    }
-                    else {
-                        if (year_age > 0) {
-                            if (year_age == 1) {
-                                return year_age + " year old";
-                            }
-                            else {
-                                return year_age + " years old";
-                            }
-                        }
-                        else if (year_age == 0 && month_age > 0) {
-                            if (month_age == 1) {
-                                return month_age + " month old";
-                            }
-                            else {
-                                return month_age + " months old";
-                            }
-                        }
-                        else if (year_age == 0 && month_age == 0 && day_age > 0) {
-                            if (day_age == 1) {
-                                return day_age + " day old";
-                            }
-                            else {
-                                return day_age + " days old";
-                            }
-                        }
-                        else {
-                            return year_age + " years " + month_age + " months " + day_age + " days old";
-                        }
-                    }
-                }
-                else {
-                    return '';
-                }
             },
 
             formatWeekDate(date) {
@@ -946,23 +645,6 @@
 
             _parseInt(e) {
                 return parseInt(e);
-            },
-
-            _comma(e) {
-                if (e) {
-                    return ',';
-                }
-            },
-
-            _hmo(e) {
-                if (e) {
-                    return 'HMO: ' + e;
-                }
-            },
-
-            _patientImg(e) {
-                if (e) return e;
-                else return '../images/user.png';
             },
 
             toggleDrawer() {

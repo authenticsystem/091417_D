@@ -24,13 +24,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="my-icons.html">
-<link rel="import" href="time-element.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
-<link rel="import" href="search-bar.html">
 <link rel="import" href="my-visits-new.html">
 <link rel="import" href="my-visits-view.html">
 <link rel="import" href="my-visits-edit.html">
+
+<link rel="import" href="my-icons.html">
+<link rel="import" href="time-element.html">
+<link rel="import" href="search-bar.html">
 <!-- <link rel="import" href="shared-styles.html"> -->
 
 <dom-module id="my-visits">
@@ -109,7 +111,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       @media (max-width: 768px) {
-        iron-list {
+        .list {
           margin: 16px;
           /* margin-top: 0px; */
           display: flex;
@@ -132,7 +134,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       @media (min-width: 768px) {
-        iron-list {
+        .list {
           width: 736px;
           margin: 16px auto;
           /* margin-top: 0px; */
@@ -217,10 +219,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .clinic {
-        position: absolute;
-        right: 25px;
-        top: 50px;
-        font-size: 14px;
+        margin-top: 16px;
+        font-size: 12px;
+      }
+
+      .pencil {
+        margin-top: 16px;
+        margin-right: 16px;
+        color: #673AB7;
+        bottom: 8px;
+      }
+
+      .loadingIndicator {
+        text-align: center;
+        height: 40px;
+      }
+
+      paper-spinner {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
       }
     </style>
 
@@ -263,20 +281,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
             </app-header>
 
-            <firebase-query id="query" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="{{order}}" start-at="{{search}}">
+            <firebase-query id="query" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="{{order}}" start-at="{{lastorder}}"
+              limit-to-first="25">
             </firebase-query>
 
-            <div id="noRecord">
-              <div class="item" style="padding:15px">
-                <div style="margin:auto">
-                  {{record}}
+            <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
+              <div id="noRecord">
+                <div class="item" style="padding:15px;">
+                  <div style="margin:auto">
+                    No data found.
+                  </div>
                 </div>
               </div>
-            </div>
+            </template>
 
-            <iron-list items="[[mycases]]" as="item" selection-enabled scroll-target="threshold">
-              <template>
-                <div class="divSeparator">
+            <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+              <!-- <iron-list items="[[mycases]]" as="item" selection-enabled scroll-target="threshold"> -->
+              <div class="list">
+                <template is="dom-repeat" items="[[items]]">
                   <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
 
                     <div class="card-content" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
@@ -292,7 +314,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <div id="{{item.$key}}" style=" margin-left:10px;">
                           <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
                           <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
-                          <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}} [[item.patientinfo.gender]]</div>
+                          <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}}
+                            [[item.patientinfo.gender]]
+                          </div>
                           <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
 
                           <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
@@ -313,7 +337,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div class="clinic">[[item.clinic_location]]</div>
 
                     <a href$="{{_getEditAppLink(item.$key)}}">
-                      <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
+                      <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit">
                       </paper-icon-button>
                     </a>
 
@@ -328,11 +352,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       </paper-listbox>
                     </paper-menu-button> -->
                   </div>
-                </div>
-              </template>
-            </iron-list>
+                </template>
+              </div>
 
-            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+              <div class="loadingIndicator">
+                <paper-spinner active="{{loadingPeople}}"></paper-spinner>
+              </div>
+              <!-- </iron-list> -->
             </iron-scroll-threshold>
 
           </app-header-layout>
@@ -381,9 +407,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         items: {
           type: Array,
-          value: function () {
-            return [];
-          }
+          value: [],
+          notify: true
         },
         route: Object,
         myLocation: String,
@@ -412,8 +437,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       loadMoreData() {
-        // load async stuff. e.g. XHR
-        this.$.threshold.clearTriggers();
+        if (this.items.length > 0) {
+          this.lastorder = this.items[this.items.length - 1].order;
+        }
+
+        this.loadingPeople = true;
       },
 
       observers: [
@@ -422,18 +450,44 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ],
 
       _fetching() {
-        this.record = 'Loading data . . .';
         setTimeout((e) => {
-          this.record = 'No record found.';
-        }, 3000);
+          this.loadingPeople = false;
+        }, 5000);
       },
 
-      _mycasesChanged() {
+      _noDataChanged(e, f) {
+        if (f) return false;
+        else {
+          if (e > 0) return false;
+          else return true;
+        }
+      },
+
+      _mycasesChanged(e) {
         if (this.mycases.length > 0) {
-          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+          if (e.path === "mycases" || e.path === "mycases.splices") {
+            this.appendToList();
+          }
+
+          if (e.path !== "mycases" && e.path !== "mycases.splices" && e.path !== "mycases.length") {
+            this.items = [];
+            this.lastorder = "";
+          }
+
+          this.$.threshold.clearTriggers();
+          this.loadingPeople = false;
         } else {
-          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
           this._fetching();
+        }
+      },
+
+      appendToList() {
+        for (var i = 0; i < this.mycases.length; i++) {
+          var exists = this.items.some(patient => patient['$key'] === this.mycases[i].$key);
+          if (!exists) {
+            this.items.push(this.mycases[i]);
+            this.notifyPath('items', this.items.slice());
+          }
         }
       },
 
@@ -463,11 +517,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           day_age = day_age % 30;
 
-          if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
-            console.log('err');
-            // $("#exact_age").text("Invalid birthday - Please try again!");
-          }
-          else {
+          if (!isNaN(year_age) || !isNaN(month_age) || !isNaN(day_age)) {
             if (year_age > 0) {
               if (year_age == 1) {
                 return year_age + " year old";

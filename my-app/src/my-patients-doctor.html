@@ -27,6 +27,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="my-patients-new.html">
 <link rel="import" href="my-patients-view.html">
 <link rel="import" href="my-patients-edit.html">
+
 <link rel="import" href="search-bar.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
@@ -242,7 +243,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </app-header>
 
             <firebase-query disabled id="searchQuery" path="/{{myKey}}/patients" data="{{items}}" order-by-child="personal/name" start-at="{{search}}"
-              limit-to-first="25">
+              limit-to-first="15">
             </firebase-query>
 
             <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no" start-at="{{lastnum}}"
@@ -346,10 +347,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: false,
           notify: true
-        },
-        lastIndex: {
-          type: Number,
-          value: 25
         }
       },
 
@@ -405,7 +402,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.notifyPath('items', this.items.slice());
           }
         }
-        this.lastIndex = i - 1;
       },
 
       _getViewDetailsLink(e) {
@@ -492,8 +488,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       loadMoreData() {
-        if (this.mypatients.length > 0) {
-          this.lastnum = this.mypatients[this.lastIndex].no;
+        if (this.items.length > 0) {
+          this.lastnum = this.items[this.items.length - 1].no;
         }
 
         this.loadingPeople = true;

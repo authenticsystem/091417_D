@@ -26,6 +26,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
 <!-- <link rel="import" href="my-visits-new.html">
 <link rel="import" href="my-visits-view.html">
@@ -238,6 +239,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-button.green {
         background-color: var(--paper-green-500);
         color: white;
+      }
+
+      paper-spinner {
+        margin-top: 3px;
       }
     </style>
 
@@ -559,9 +564,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </salte-dialog>
 
     <salte-dialog no-auto-fullscreen id="dateDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
-      <h2 style="font-size: 16px; background: #1E88E5">When?</h2>
+      <h2 style="font-size: 16px; background: #1E88E5">Add to queue</h2>
       <span>
-        <paper-input type="date" value="{{todayDate}}" label="Pick a date" always-float-label>
+        <paper-input disabled="[[isLoading]]" type="date" value="{{todayDate}}" label="Pick a date" always-float-label>
           <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
         </paper-input>
         <div style="margin-left:4px;margin-top:-6px;">
@@ -569,8 +574,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
       </span>
       <div class="buttons">
-        <paper-button autofocus on-tap="_addPatient2Queue">OK</paper-button>
-        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-spinner active="[[isLoading]]"></paper-spinner>
+        <paper-button disabled="[[isLoading]]" autofocus on-tap="_addPatient2Queue">OK</paper-button>
+        <paper-button disabled="[[isLoading]]" dialog-dismiss>Cancel</paper-button>
       </div>
     </salte-dialog>
 
@@ -695,14 +701,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         if (pickDate) {
-          self.$.dateDialog.close();
+          self.isLoading = true;
           var queueRef = firebase.database().ref("/" + mykey + "/queue/" + queueData.queueLocation + "/" + pickDate);
           queueRef.orderByChild("patient_no").equalTo(self.no).limitToLast(1).once("value").then(function (data) {
             if (data.exists()) {
-              if (Object.values(data.val())[0].isCancel === true) {
+              if (Object.values(data.val())[0].isCancel) {
                 self._locateNextQueue(mykey, queueData, pickDate, self, queueRef);
               }
               else {
+                self.isLoading = false;
                 self.$.errDialog.open();
               }
             }
@@ -721,12 +728,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 queueData.isNext = false;
                 queueData.queueNo = snapshot.numChildren() + 1;
                 queueRef.push(queueData).then(function () {
+                  self.isLoading = false;
+                  self.$.dateDialog.close();
                   self.$.confirmDialog.open();
                 });
               }
               else {
                 queueData.queueNo = snapshot.numChildren() + 1;
                 queueRef.push(queueData).then(function () {
+                  self.isLoading = false;
+                  self.$.dateDialog.close();
                   self.$.confirmDialog.open();
                 });
               }
@@ -734,6 +745,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           else {
             queueRef.push(queueData).then(function () {
+              self.isLoading = false;
+              self.$.dateDialog.close();
               self.$.confirmDialog.open();
             });
           }

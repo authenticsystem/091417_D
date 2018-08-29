@@ -19,6 +19,7 @@
 <link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
 <link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
 <link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 
 <link rel="import" href="bwt-datatable-card.html">
 <link rel="import" href="time-element.html">
@@ -285,7 +286,22 @@
                 color: black;
                 float: right;
             }
+
+            .billDropdown {
+                width: 100%;
+            }
         </style>
+
+        <firebase-query id="serviceQuery" path="/{{myKey}}/services" data="{{myservices}}" order-by-child="service"></firebase-query>
+        <firebase-query id="hmoQuery" path="/{{myKey}}/hmo" data="{{myhmos}}" order-by-child="name"></firebase-query>
+        <firebase-query id="locationQuery" path="/{{myKey}}/locations" data="{{mylocations}}" order-by-child="location_name"></firebase-query>
+
+        <firebase-query id="filterQuery" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name" start-at="{{filterValue}}"
+            limit-to-first="{{myLimit}}">
+        </firebase-query>
+        <firebase-query id="lastCaseQuery" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}" data="{{mycases}}"
+            limit-to-last="1">
+        </firebase-query>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
 
@@ -302,26 +318,12 @@
                 <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
                     <neon-animatable>
 
-                        <firebase-query id="query1" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name" start-at="{{filterValue}}"
-                            limit-to-first="{{myLimit}}">
-                        </firebase-query>
-
-                        <firebase-query id="query2" path="/{{myKey}}/patients" data="{{patientInfo}}" order-by-key equal-to="{{myPatientKey}}" limit-to-last="1">
-                        </firebase-query>
-
                         <div class="docu">
                             <div class="details">
-
                                 <paper-input on-keyup="_ack" label="Patient *" value="{{filterValue}}" placeholder="Search patient"></paper-input>
                                 <paper-listbox id="list">
-                                    <template is="dom-repeat" items="[[thypatients]]">
-                                        <paper-item on-tap="_bind" id="{{item.$key}} {{item.personal.lastname}}, {{item.personal.firstname}} {{item.personal.middlename}}">
-                                            <paper-item-body two-line>
-                                                <div id="{{item.$key}} {{item.personal.lastname}}, {{item.personal.firstname}} {{item.personal.middlename}}">
-                                                    [[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]
-                                                </div>
-                                            </paper-item-body>
-                                        </paper-item>
+                                    <template id="thypatientTemp" is="dom-repeat" items="[[thypatients]]">
+                                        <paper-item on-tap="_bind">[[item.personal.name]]</paper-item>
                                     </template>
                                 </paper-listbox>
                             </div>
@@ -329,43 +331,39 @@
 
                         <div id="patientProfile" class="docu" style="margin-top:-16px; display:none;">
                             <div class="details" style="display: flex;">
-                                <img class="avatar" src="{{p_profile}}"></img>
+                                <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(selectedPatient.profile)}}"></iron-image>
                                 <div style="margin-left:10px; font-weight:400; color:black">
-                                    <span style="font-size:11px;display:block" class="longText">{{p_num}}</span>
+                                    <span style="font-size:11px;display:block" class="longText">{{selectedPatient.no}}</span>
                                     <span class="primary">{{filterValue}}</span>
-                                    <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}} {{sex}}</span>
-                                    <!-- <span class="longText" style="font-weight:400">{{_myAgeSex(age,sex)}}</span> -->
-                                    <span class="longText" style="font-weight:400;display:block">{{_hmo(insurance)}}</span>
+                                    <span class="longText" style="font-weight:400;display:block">{{_calculate(selectedPatient.personal.birthday)}}
+                                        {{selectedPatient.personal.sex}}
+                                    </span>
+                                    <span class="longText" style="font-weight:400;display:block">{{_hmo(selectedPatient.insurance.primary_insurance)}}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <firebase-query id="query3" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}" data="{{mycases}}"
-                            limit-to-last="1">
-                        </firebase-query>
-
-                        <firebase-query id="query4" path="{{path}}" order-by-child="patientkey" equal-to="{{myNewPatientKey}}" data="{{mytimeCheck}}"
-                            limit-to-last="1">
-                        </firebase-query>
-
                         <div id="lastVisit" class="docu" style="margin-top:-16px; display:none">
                             <div class="details">
                                 <div id="showed" id="prev">
-                                    <!-- <span class="primary" style="color:black; font-weight:400">Last Visit</span> -->
                                     <div>{{noprev}}</div>
                                     <template is="dom-repeat" items="[[mycases]]">
 
-                                        <firebase-query id="query5" path="/{{myKey}}/cases/{{item.$key}}/attachment" data="{{myimaging}}">
+                                        <firebase-query path="/{{myKey}}/cases/{{item.$key}}/attachment" data="{{myimaging}}">
                                         </firebase-query>
 
                                         <div style="margin-bottom:16px;">
-                                            <span class="primary" style="color:black; font-weight:400; margin-right:2px;">Last Visit</span>
+                                            <span class="primary" style="color:black; font-weight:400; margin-right:2px;">Last
+                                                Visit
+                                            </span>
                                             <iron-icon icon="my-icons:watch-later"></iron-icon>
                                             <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
-                                            <!-- <paper-icon-button on-tap="_showAttach" id="attachment-icon" icon="my-icons:attachment" title="attacments"></paper-icon-button> -->
                                         </div>
-                                        <span class="longText">Chief Complaint</span>
-                                        <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+
+                                        <div hidden$="{{!item.complain}}">
+                                            <span class="longText">Chief Complaint</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                                        </div>
 
                                         <div hidden$="{{!item.history}}">
                                             <span class="longText">History</span>
@@ -377,14 +375,28 @@
                                             <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.laboratory}}</div>
                                         </div>
 
+                                        <div hidden$="{{!item.subjective}}">
+                                            <span class="longText">Subjective</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.objective}}">
+                                            <span class="longText">Objective</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.objective}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.assessment}}">
+                                            <span class="longText">Assessment</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.assessment}}</div>
+                                        </div>
+
                                         <div hidden$="{{!item.imaging}}">
                                             <span class="longText">Imaging</span>
                                             <div class="galleryHolder">
                                                 <sl-gallery id="gallery"></sl-gallery>
                                             </div>
+                                            <br>
                                         </div>
-
-                                        <br>
 
                                         <div hidden$="{{!item.pe}}">
                                             <span class="longText">Physical Exam</span>
@@ -466,6 +478,7 @@
                         <br>
                         <br>
                     </neon-animatable>
+
                     <!-- patient, insurance, hospital // min-width:768px -->
                     <neon-animatable>
                         <div class="textTemp"> Billing </div>
@@ -473,7 +486,8 @@
                         <paper-button class="billBtn" on-tap="_showBillDialog">Add Bill</paper-button>
                         <div id="billHolder">
                             <div class="docu2">
-                                <span style="font-weight: 400; font-size: 12px; float: right">(Ref.# will be generated upon submit) </span>
+                                <span style="font-weight: 400; font-size: 12px; float: right">(Ref.# will be generated upon
+                                    submit) </span>
                                 <paper-input style="width:250px" label="Remarks" value="{{remarks}}" always-float-label></paper-input>
                                 <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed multi-selection selectable selected-items="{{selectedItem}}">
                                     <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
@@ -498,7 +512,9 @@
                                     <p id="p" style="margin-top:-4px">Billing ref.#&nbsp;</p>
                                 </div>
                                 <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
-                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving data.</div>
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving
+                                    data.
+                                </div>
                             </div>
                         </div>
                     </neon-animatable>
@@ -527,30 +543,37 @@
                                             <paper-item name="hospital">Hospital</paper-item>
                                         </paper-listbox>
                                     </paper-dropdown-menu>
-                                    <!-- patient name -->
-                                    <paper-input id="inPatient" readonly style="display: none" label="Patient" value="{{filterValue}}"></paper-input>
-                                    <!-- has an HMO -->
-                                    <paper-input id="inHMO" readonly style="display: none" label="HMO" value="{{insurance}}"></paper-input>
-                                    <a class="aHref" id="href1" on-tap="_changeHMO">Change</a>
-                                    <!-- my hmos select -->
-                                    <paper-dropdown-input style="width: 100%" id="dropdHMO" style="display: none" label="HMO" items="[[myhmos]]" filter-property="name"
-                                        value="{{selectedHMO}}">
-                                        <template>
-                                            <template is="dom-repeat" items="[[items]]" as="item">
-                                                <paper-item>[[item.name]]</paper-item>
-                                            </template>
-                                        </template>
-                                    </paper-dropdown-input>
-                                    <a class="aHref" id="href2" on-tap="_cancelChangeHMO">Cancel</a>
-                                    <!-- my location -->
-                                    <paper-dropdown-input style="width: 100%" id="dropdHospital" style="display: none" label="Hospital" items="[[mylocations]]"
-                                        filter-property="location_name" value="{{location}}">
-                                        <template>
-                                            <template is="dom-repeat" items="[[items]]" as="item">
-                                                <paper-item>[[item.location_name]]</paper-item>
-                                            </template>
-                                        </template>
-                                    </paper-dropdown-input>
+                                    <iron-pages attr-for-selected="name" selected="{{selectedBillTo}}">
+                                        <div name="patient">
+                                            <paper-input readonly label="Patient" value="{{filterValue}}"></paper-input>
+                                        </div>
+                                        <div name="hmo">
+                                            <div hidden="[[!hasInsurance]]">
+                                                <paper-input readonly label="HMO" value="{{insurance}}"></paper-input>
+                                                <a class="aHref" style="display: block" id="href1" on-tap="_changeHMO">Change</a>
+                                            </div>
+
+                                            <div hidden="[[hasInsurance]]">
+                                                <paper-dropdown-input class="billDropdown" label="HMO" items="[[myhmos]]" filter-property="name" value="{{selectedHMO}}">
+                                                    <template>
+                                                        <template is="dom-repeat" items="[[items]]" as="item">
+                                                            <paper-item>[[item.name]]</paper-item>
+                                                        </template>
+                                                    </template>
+                                                </paper-dropdown-input>
+                                                <a class="aHref" id="href2" on-tap="_cancelChangeHMO">Cancel</a>
+                                            </div>
+                                        </div>
+                                        <div name="hospital">
+                                            <paper-dropdown-input class="billDropdown" label="Hospital" items="[[mylocations]]" filter-property="location_name" value="{{location}}">
+                                                <template>
+                                                    <template is="dom-repeat" items="[[items]]" as="item">
+                                                        <paper-item>[[item.location_name]]</paper-item>
+                                                    </template>
+                                                </template>
+                                            </paper-dropdown-input>
+                                        </div>
+                                    </iron-pages>
                                     <span style="color: red; font-size: 12px; margin-top:16px; ">{{billErr}}</span>
                                 </span>
                                 <div style="height: 40px; margin-top:16px">
@@ -576,10 +599,6 @@
             </div>
 
         </app-drawer-layout>
-
-        <firebase-query path="/{{myKey}}/services" data="{{myservices}}" order-by-child="service"></firebase-query>
-        <firebase-query id="hmoQuery" path="/{{myKey}}/hmo" data="{{myhmos}}" order-by-child="name"></firebase-query>
-        <firebase-query id="locationQuery" path="/{{myKey}}/locations" data="{{mylocations}}" order-by-child="location_name"></firebase-query>
 
     </template>
 
@@ -630,91 +649,34 @@
                     type: Boolean,
                     value: true
                 },
-                complain: {
-                    type: String,
-                    value: ''
-                },
-                history: {
-                    type: String,
-                    value: ''
-                },
-                laboratory: {
-                    type: String,
-                    value: ''
-                },
-                pe: {
-                    type: String,
-                    value: ''
-                },
-                diagnosis: {
-                    type: String,
-                    value: ''
-                },
-                treatment: {
-                    type: String,
-                    value: ''
-                },
-                plan: {
-                    type: String,
-                    value: ''
-                },
-                attachment: {
-                    type: Object,
-                    value: ''
-                },
-
-                subjective: {
-                    type: String,
-                    value: ''
-                },
-                objective: {
-                    type: String,
-                    value: ''
-                },
-                assessment: {
-                    type: String,
-                    value: ''
-                },
-
-                mykey: String,
                 todayDate: String,
                 lastPushTime: {
                     type: Number,
                     value: 0
                 },
                 myPatientKey: String,
-                myimaging: Object,
-                mycases: Object,
-                normal: Boolean,
-                soap: Boolean,
-                template: String,
-                insurance: String,
                 service_no: {
                     type: Number,
                     value: 0
-                },
-                service_bill_to: String,
-                ChangeHMO: {
-                    type: Boolean,
-                    value: false,
-                    notify: true
-                },
-                selectedItem: Object
+                }
             },
 
             _changeHMO() {
-                this.ChangeHMO = true;
+                this.hasInsurance = false;
+                this.$.href1.style.display = "none";
+                this.$.href2.style.display = "block";
             },
 
             _cancelChangeHMO() {
-                this.ChangeHMO = false;
+                this.hasInsurance = true;
+                this.$.href1.style.display = "block";
+                this.$.href2.style.display = "none";
             },
 
             _showBillDialog() {
                 this.entryanimation = 'fade-in-animation';
                 this.exitanimation = 'fade-out-animation';
                 this.selectedPage = 5;
-                // this.$.billingDialog.open();
             },
 
             _deleteBill() {
@@ -779,23 +741,17 @@
 
             _bind(e) {
                 this.favrighthide = false;
-                var str = Polymer.dom(e).rootTarget.getAttribute("id");
-                var name = str.slice(21);
-                var key = str.slice(0, 20);
+                this.selectedPatient = this.$.thypatientTemp.itemForElement(e.target);
 
-                this.filterValue = name;
-                this.myPatientKey = key;
-                this.mykey = key;
+                this.filterValue = this.selectedPatient.personal.name;
+                this.myPatientKey = this.selectedPatient.$key;
+                this.insurance = this.selectedPatient.insurance.primary_insurance;
+                if (this.insurance) this.hasInsurance = true;
+                else this.hasInsurance = false;
+
                 Polymer.dom(this.root).querySelector("#list").style.display = 'none';
                 Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'block';
                 Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'block';
-
-                if (this.mycases.length > 0) {
-                    this.noprev = '';
-                }
-                else {
-                    this.noprev = 'No previous visit.';
-                }
             },
 
             _myimagingChanged(e) {
@@ -849,19 +805,16 @@
                 this.todayDate = this.formatTodayDate(new Date());
                 this.$.hmoQuery.disabled = true;
                 this.$.locationQuery.disabled = true;
-                this.billingDataTmp = [];
             },
 
             observers: [
                 '_patientChanged(filterValue)',
                 '_showFab1(subjective, complain, todayDate)',
-                '_mypatientInfoChanged(patientInfo)',
                 '_myimagingChanged(myimaging)',
                 '_myattachmentChaged(myattachment)',
-                '_mytimeCheckChanged(mytimeCheck, todayDate, myNewPatientKey)',
-                '_amountChanged(amount)',
+                '_mytimeCheckChanged(mycases, todayDate, myNewPatientKey)',
+                '_clearErr(amount, selectedBillTo)',
                 '_selectedServiceChanged(selectedService)',
-                '_selectedBillToChanged(selectedBillTo, selectedHMO, location, ChangeHMO)',
                 '_billingDataChanged(billingData)'
             ],
 
@@ -892,84 +845,7 @@
                 }
             },
 
-            _selectedBillToChanged(e, f, g, h) {
-                this.billErr = '';
-                if (e) {
-                    if (e === 'patient') {
-                        this.$.inPatient.style.display = "block";
-                        this.$.dropdHMO.style.display = "none";
-                        this.$.dropdHospital.style.display = "none";
-                        this.$.hmoQuery.disabled = true;
-                        this.$.locationQuery.disabled = true;
-                        this.$.inHMO.style.display = "none";
-                        this.$.href1.style.display = "none";
-                        this.$.href2.style.display = "none";
-                        this.service_bill_to = this.filterValue;
-                    }
-                    else if (e === 'philhealth') {
-                        this.$.inPatient.style.display = "none";
-                        this.$.dropdHMO.style.display = "none";
-                        this.$.dropdHospital.style.display = "none";
-                        this.$.hmoQuery.disabled = true;
-                        this.$.locationQuery.disabled = true;
-                        this.$.inHMO.style.display = "none";
-                        this.$.href1.style.display = "none";
-                        this.$.href2.style.display = "none";
-                        this.service_bill_to = "PHILHEALTH";
-                    }
-                    else if (e === 'hmo') {
-                        this.$.inPatient.style.display = "none";
-                        this.$.dropdHospital.style.display = "none";
-                        this.$.locationQuery.disabled = true;
-                        if (this.insurance) {
-                            if (h === false) {
-                                this.$.inHMO.style.display = "block";
-                                this.$.href1.style.display = "block";
-                                this.$.href2.style.display = "none";
-                                this.$.dropdHMO.style.display = "none";
-                                this.$.hmoQuery.disabled = true;
-                                this.service_bill_to = this.insurance;
-                            } else {
-                                this.$.inHMO.style.display = "none";
-                                this.$.href1.style.display = "none";
-                                this.$.href2.style.display = "block";
-                                this.$.dropdHMO.style.display = "block";
-                                this.$.hmoQuery.disabled = false;
-                                this.service_bill_to = f;
-                            }
-                        }
-                        else {
-                            this.$.dropdHMO.style.display = "block";
-                            this.$.hmoQuery.disabled = false;
-                            this.service_bill_to = f;
-                        }
-                    }
-                    else {
-                        this.$.dropdHospital.style.display = "block";
-                        this.$.dropdHMO.style.display = "none";
-                        this.$.inPatient.style.display = "none";
-                        this.$.hmoQuery.disabled = true;
-                        this.$.locationQuery.disabled = false;
-                        this.$.inHMO.style.display = "none";
-                        this.$.href1.style.display = "none";
-                        this.$.href2.style.display = "none";
-                        this.service_bill_to = g;
-                    }
-                }
-                else {
-                    this.$.dropdHospital.style.display = "none";
-                    this.$.dropdHMO.style.display = "none";
-                    this.$.inPatient.style.display = "none";
-                    this.$.hmoQuery.disabled = true;
-                    this.$.locationQuery.disabled = true;
-                    this.$.inHMO.style.display = "none";
-                    this.$.href1.style.display = "none";
-                    this.$.href2.style.display = "none";
-                    this.service_bill_to = '';
-                }
-            },
-
-            _amountChanged(e) {
+            _clearErr() {
                 this.billErr = '';
             },
 
@@ -981,6 +857,9 @@
             },
 
             _mytimeCheckChanged(timeCheck, date, myNewPatientKey) {
+                if (timeCheck.length > 0) this.noprev = '';
+                else this.noprev = 'No previous visit.';
+
                 var monthNames = [
                     "January", "February", "March",
                     "April", "May", "June", "July",
@@ -1025,90 +904,59 @@
                 }
             },
 
-            _mypatientInfoChanged(p) {
-                if (p.length > 0) {
-                    if (p[0].profile) {
-                        this.p_profile = p[0].profile;
-                    }
-                    else {
-                        this.p_profile = '../images/user.png';
-                    }
+            _calculate(e) {
+                if (e) {
 
-                    this.bday = p[0].personal.birthday;
+                    var today = new Date();
+                    var birthday = new Date(e);
 
-                    if (p[0].personal.birthday) {
+                    var differenceInMilisecond = today.valueOf() - birthday.valueOf();
 
-                        var today = new Date();
-                        var birthday = new Date(p[0].personal.birthday);
+                    var year_age = Math.floor(differenceInMilisecond / 31536000000);
+                    var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
 
-                        var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+                    var month_age = Math.floor(day_age / 30);
 
-                        var year_age = Math.floor(differenceInMilisecond / 31536000000);
-                        var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+                    day_age = day_age % 30;
 
-                        var month_age = Math.floor(day_age / 30);
-
-                        day_age = day_age % 30;
-
-                        if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
-                            console.log('err');
-                            // $("#exact_age").text("Invalid birthday - Please try again!");
-                        }
-                        else {
-                            if (year_age > 0) {
-                                if (year_age == 1) {
-                                    this.age = year_age + " year old";
-                                }
-                                else {
-                                    this.age = year_age + " years old";
-                                }
-                            }
-                            else if (year_age == 0 && month_age > 0) {
-                                if (month_age == 1) {
-                                    this.age = month_age + " month old";
-                                }
-                                else {
-                                    this.age = month_age + " months old";
-                                }
-                            }
-                            else if (year_age == 0 && month_age == 0 && day_age > 0) {
-                                if (day_age == 1) {
-                                    this.age = day_age + " day old";
-                                }
-                                else {
-                                    this.age = day_age + " days old";
-                                }
+                    if (!isNaN(year_age) || !isNaN(month_age) || !isNaN(day_age)) {
+                        if (year_age > 0) {
+                            if (year_age == 1) {
+                                return year_age + " year old,";
                             }
                             else {
-                                this.age = year_age + " years " + month_age + " months " + day_age + " days old";
+                                return year_age + " years old,";
                             }
                         }
+                        else if (year_age == 0 && month_age > 0) {
+                            if (month_age == 1) {
+                                return month_age + " month old,";
+                            }
+                            else {
+                                return month_age + " months old,";
+                            }
+                        }
+                        else if (year_age == 0 && month_age == 0 && day_age > 0) {
+                            if (day_age == 1) {
+                                return day_age + " day old,";
+                            }
+                            else {
+                                return day_age + " days old,";
+                            }
+                        }
+                        else {
+                            return year_age + " years " + month_age + " months " + day_age + " days old,";
+                        }
                     }
-                    else {
-                        this.age = '';
-                    }
-
-                    this.p_num = p[0].no;
-
-                    this.sex = p[0].personal.sex;
-                    this.occupation = p[0].personal.occupation;
-                    this.status = p[0].personal.status;
-                    this.employer = p[0].personal.employer;
-
-                    if (p[0].personal.referred == 'Dr') {
-                        this.referred = "Dr. " + p[0].personal.doctor;
-                    }
-                    else {
-                        this.referred = p[0].personal.referred;
-                    }
-
-                    this.card = p[0].insurance.card;
-                    this.bdate = p[0].insurance.birthday;
-                    this.address = p[0].insurance.address;
-                    this.homephone = p[0].insurance.home_phone;
-                    this.insurance = p[0].insurance.primary_insurance;
-                    this.relation = p[0].insurance.relationship;
                 }
+                else {
+                    return '';
+                }
+            },
+
+            _patientImg(e) {
+                if (e) return e;
+                else return '../images/user.png';
             },
 
             _patientChanged(patient) {
@@ -1206,7 +1054,6 @@
                                 this.favlefthide = false;
                                 this.favrighthide = true;
                             }
-                            // this.$.billingDialog.open();
                         }
 
                         if (this.selectedPage == 3) {
@@ -1229,22 +1076,35 @@
             },
 
             _addBilling() {
-                if (this.service && this.amount && this.service_bill_to) {
+                var service_bill_to;
+                switch (this.selectedBillTo) {
+                    case "patient":
+                        service_bill_to = this.filterValue;
+                        break;
+                    case "philhealth":
+                        service_bill_to = "PHILHEALTH";
+                        break;
+                    case "hmo":
+                        service_bill_to = this.hasInsurance ? this.insurance : this.selectedHMO;
+                        break;
+                    case "hospital":
+                        service_bill_to = this.location;
+                        break;
+                }
+
+                if (this.service && this.amount && service_bill_to) {
                     var number = this.service_no + 1;
                     this.service_no = number;
-                    this.billingDataTmp.push({
+                    this.billingData.push({
                         num: number,
                         service: this.service,
                         amount: parseInt(this.amount),
-                        billTo: this.service_bill_to
+                        billTo: service_bill_to
                     });
-
-                    this.billingData = [];
-                    this.billingData = this.billingDataTmp;
-                    // this.$.billingDialog.close();
+                    this.notifyPath("billingData", this.billingData.slice());
                     this.selectedPage = 3;
 
-                    this._clear2();
+                    // this._clear2();
                 }
                 else {
                     this.billErr = 'Ops! Dont leave any field empty.';
@@ -1280,7 +1140,7 @@
                     history: this.history,
                     diagnosis: this.diagnosis,
                     treatment: this.treatment,
-                    patientkey: key,
+                    patientkey: this.selectedData,
                     timestamp: timestamp,
                     order: order,
                     created: today,
@@ -1574,11 +1434,6 @@
                 this.billErr = '';
             },
 
-            // guid: function () {
-            //     var uid = new ShortUniqueId();
-            //     return uid.randomUUID(8);
-            // },
-
             _comma(e) {
                 if (e) {
                     return ',';
@@ -1598,6 +1453,11 @@
 
             _timeStampToDateTime(ts) {
                 return new Date(ts);
+            },
+
+            _checkBillTo(e, f) {
+                console.log("e" + e);
+                console.log("f" + f);
             },
 
             generatePushID(date) {
