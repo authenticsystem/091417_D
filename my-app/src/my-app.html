@@ -54,7 +54,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- <link rel="lazy-import" href="my-appointments.html"> -->
 <link rel="lazy-import" href="my-view404.html">
 
-
 <dom-module id="my-app">
   <template>
     <style include="shared-styles">
@@ -69,11 +68,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: none;
       }
 
-      app-header {
+      /* app-header {
         color: #000000;
         background-color: var(--app-primary-color);
-      }
+      } */
 
+      app-header {
+        background-image: url("../images/h4.jpeg");
+        background-size: cover;
+        color: white;
+      }
 
       app-header paper-icon-button {
         --paper-icon-button-ink-color: #000000;
@@ -93,22 +97,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .drawer-list a:hover {
-        background-color: rgba(0, 0, 0, 0.05);
+        /* background-color: rgba(0, 0, 0, 0.05); */
+        background-color: #eee;
       }
-
-      /* .drawer-list a.iron-selected {
-        color: black;
-        font-weight: bold;
-      } */
 
       app-drawer-layout {
         --app-drawer-layout-content-transition: margin 0.2s;
-      }
-
-      app-drawer {
-        --app-drawer-content-container: {
-          background-color: #F4F5F6;
-        }
       }
 
       .drawer-content {
@@ -122,32 +116,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-weight: bold;
       }
 
-      .header-div {
-        box-shadow: 0px 5px 2px -3px rgba(0, 0, 0, 0.05);
-      }
-
       .avatar {
-        height: 40px;
-        width: 40px;
-        border-radius: 20px;
+        height: 60px;
+        width: 60px;
+        border-radius: 50%;
         box-sizing: border-box;
         background-color: #DDD;
+        border: 2px solid white;
+      }
+
+      app-toolbar {
+        height: 180px;
       }
 
       .pad {
-        padding: 0 16px;
-        @apply --layout-flex;
-        @apply --layout-vertical;
+        margin-top: 36px;
+        margin-bottom: 26px;
       }
 
       .primary {
-        font-size: 14px;
-        font-weight: bold;
+        font-size: 18px;
+        font-weight: 300;
       }
 
       .shortText,
       .longText {
-        font-size: 12px;
+        font-size: 14px;
+        font-weight: 300;
       }
 
       .longText {
@@ -164,7 +159,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .divHeaderLabelLocation {
         /* padding: 0 16px 8px; */
         font-size: 14px;
-        color: rgb(56, 56, 56);
+        color: white;
         @apply --layout-flex;
         @apply --layout-vertical;
       }
@@ -215,7 +210,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       storage-bucket="emr-dev-c3005.appspot.com" messaging-sender-id="528097160886">
     </firebase-app>
 
-    <firebase-auth id="auth" status-known="{{statusKnown}}" user="{{user}}" provider="google" on-error="showError"></firebase-auth>
+    <firebase-auth id="auth" status-known="{{statusKnown}}" user="{{user}}" provider="google"></firebase-auth>
 
     <template is="dom-if" if="{{_needToSignIn(user,statusKnown)}}">
       <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
@@ -251,23 +246,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <firebase-query id="query" path="/accounts" data="{{myaccount}}" order-by-child="uid" equal-to="{{user.uid}}"></firebase-query>
           <firebase-messaging id="messaging" token="{{token}}"></firebase-messaging>
 
-          <app-drawer-layout has-scrolling-region fullbleed narrow="{{narrow}}" id="drawerLayout">
+          <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
             <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
-
-              <div style="height: 100%; overflow: auto;">
-                <app-header fixed>
+              <app-header-layout has-scrolling-region>
+                <app-header fixed slot="header">
                   <app-toolbar>
-                    <iron-image preload fade class="avatar" sizing="cover" src$="{{_userImg(user.photoURL)}}"></iron-image>
                     <div class="pad">
+                      <iron-image preload fade class="avatar" sizing="cover" src$="{{_userImg(user.photoURL)}}"></iron-image>
                       <div hidden$="{{user.displayName}}" class="primary">{{user.email}}</div>
                       <div hidden$="{{!user.displayName}}" class="primary">{{user.displayName}}</div>
                       <div class="shortText">{{drTitle}}</div>
-                      <div class="longText"></div>
+                      <div class="shortText">{{_set(mylocation)}}</div>
                     </div>
-                  </app-toolbar>
-
-                  <app-toolbar>
-                    <div class="divHeaderLabelLocation">Location: {{_set(mylocation)}}</div>
                   </app-toolbar>
                   <a href="/location">
                     <paper-fab mini icon="my-icons:my-location"></paper-fab>
@@ -311,11 +301,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </a>
 
                   <!-- <a name="account" href="[[rootPath]]account">
-              <paper-icon-item toggles="true" class="menuSelected">
-                <iron-icon icon="my-icons:account-circle" slot="item-icon"></iron-icon>
-                <span>My account</span>
-              </paper-icon-item>
-            </a> -->
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:account-circle" slot="item-icon"></iron-icon>
+                      <span>My account</span>
+                    </paper-icon-item>
+                  </a> -->
 
                   <a style$="{{_access(hasAccess)}}" name="visits" href="[[rootPath]]visits">
                     <paper-icon-item toggles="true" class="menuSelected">
@@ -365,12 +355,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <span>Help</span>
                     </paper-icon-item>
                   </a> -->
+
                   <span style="padding:20px; color:gray; font-size:12px;">
                     v0.7.0
                   </span>
                 </iron-selector>
-              </div>
+              </app-header-layout>
             </app-drawer>
+
             <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
               <!-- <my-account user={{user}} name="account"></my-account> -->
               <my-dashboard name="dashboard" my-role="[[role]]" my-key="[[mykey]]"></my-dashboard>
@@ -413,10 +405,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // This shouldn't be neccessary, but the Analyzer isn't picking up
           // Polymer.Element#rootPath
           rootPath: String,
-          headerSearchBarIsHidden: {
-            type: Boolean,
-            value: true
-          },
           narrow: {
             type: Boolean,
             notify: true
@@ -440,7 +428,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         super.ready();
         this.addEventListener('toggleDrawer', (e) => this._onChangeSection(e));
         this.addEventListener('toggleDrawer2', (e) => this._onChangeSection2(e));
-        // this.addEventListener('on-tap', (e) => this._onChangeSection(e));
         // listen for online/offline
         window.addEventListener('online', (e) => this._updateOnlineStatus(e));
         window.addEventListener('offline', (e) => this._updateOnlineStatus(e));
@@ -454,10 +441,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.myLastname = this.myaccount[0].name.lastname;
           this.mylocationCode = this.myaccount[0].location_code;
 
-          if (this.myaccount[0].location) { this.mylocation = this.myaccount[0].location; }
-          else { this.mylocation = '(not set)'; }
+          if (this.myaccount[0].location) this.mylocation = this.myaccount[0].location;
+          else this.mylocation = '(not set)';
 
-          if (this.myaccount[0].role != 'Secretary') { this.hasAccess = true; }
+          if (this.myaccount[0].role != 'Secretary') this.hasAccess = true;
 
           var messaging = Polymer.dom(this.root).querySelector("#messaging");
           if (messaging) {
@@ -467,24 +454,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _access(e) {
-        if (e == true) { return 'display:block'; }
-        else { return 'display:none'; }
+        if (e) return 'display:block';
+        else return 'display:none';
       }
 
       _set(e) {
-        if (e.length > 40) return e.substring(0, 40) + '...';
-        else return e;
+        if (e.length > 40) return "Location: " + e.substring(0, 40) + '...';
+        else return "Location: " + e;
       }
 
       _routePageChanged(page, user, key) {
         if (user) {
           if (user.emailVerified) {
             if (user.phoneNumber) {
-              Polymer.dom(this.root).querySelector("#overlay").style.display = 'flex';
-              Polymer.dom(this.root).querySelector("#spinner").active = true;
+              this._showOverlay();
               if (key) {
-                Polymer.dom(this.root).querySelector("#overlay").style.display = 'none';
-                Polymer.dom(this.root).querySelector("#spinner").active = false;
+                this._hideOverlay();
                 this.page = page || 'dashboard';
                 // Close a non-persistent drawer when the page & route are changed.
                 var drawer = Polymer.dom(this.root).querySelector("#drawer");
@@ -505,7 +490,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         else {
           this.page = page || 'signin';
-          // this.page = page || 'accountlist';
         }
       }
 
@@ -538,23 +522,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _pageChanged(page) {
-        // Polymer.dom(this.root).querySelector("#overlay").style.display = 'flex';
-        // Polymer.dom(this.root).querySelector("#spinner").active = true;
         // Load page import on demand. Show 404 page if fails
-        var loader = Polymer.dom(this.root).querySelector("#overlay");
-        var spinner = Polymer.dom(this.root).querySelector("#spinner");
-        loader.style.display = 'flex';
-        spinner.active = true;
+        var self = this;
+        self._showOverlay();
         var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
         Polymer.importHref(
           resolvedPageUrl,
           function () {
-            loader.style.display = 'none';
-            spinner.active = false;
+            self._hideOverlay();
           },
           this._showPage404.bind(this),
           true);
+      }
 
+      _showOverlay() {
+        Polymer.dom(this.root).querySelector("#overlay").style.display = 'flex';
+      }
+
+      _hideOverlay() {
+        Polymer.dom(this.root).querySelector("#overlay").style.display = 'none';
       }
 
       _showPage404() {
@@ -567,14 +553,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           drawerlayout.forceNarrow = !drawerlayout.forceNarrow;
         } else {
           drawerlayout.toggle();
-        }
-      }
-
-      toggleSearch() {
-        this.headerSearchBarIsHidden = !this.headerSearchBarIsHidden
-
-        if (this.headerSearchBarIsHidden == false) {
-          this.$.searchBox.focus();
         }
       }
 

@@ -9,7 +9,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
@@ -23,17 +22,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="time-element.html">
 
 <link rel="import" href="my-visits-new.html">
 <link rel="import" href="my-visits-view.html">
 <link rel="import" href="my-visits-edit.html">
 
 <link rel="import" href="my-icons.html">
-<link rel="import" href="time-element.html">
 <link rel="import" href="search-bar.html">
-<!-- <link rel="import" href="shared-styles.html"> -->
+<link rel="import" href="shared-styles.html">
 
 <dom-module id="my-visits">
   <template>
@@ -69,7 +67,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .pad {
-        padding: 0 16px;
         @apply --layout-flex;
         @apply --layout-vertical;
       }
@@ -111,7 +108,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       @media (max-width: 768px) {
-        .list {
+        iron-list {
           margin: 16px;
           /* margin-top: 0px; */
           display: flex;
@@ -134,7 +131,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       @media (min-width: 768px) {
-        .list {
+        iron-list {
           width: 736px;
           margin: 16px auto;
           /* margin-top: 0px; */
@@ -211,11 +208,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .b-view {
-        /* display: inline-block;
-        position: absolute;
-        right: 8px; */
         color: rgb(2, 136, 160);
-        /* top: 8px; */
+        /* color: #673AB7; */
       }
 
       .clinic {
@@ -246,7 +240,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-route route="{{route}}" pattern="/detail/:key" tail="{{detailRoute}}" data="{{detailData}}" active="{{detailActive}}"></app-route>
     <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route>
 
-    <!-- <iron-ajax auto url="src/data.json" last-response="{{items}}"></iron-ajax> -->
     <div hidden$="{{!applicationActive}}">
       <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
         <div name="">
@@ -256,7 +249,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <app-toolbar primary id="tool1">
                   <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                   <div main-title>Visits</div>
-                  <!-- <div main-title hidden$="{{access}}">Opps!</div> -->
                   <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
                 </app-toolbar>
               </template>
@@ -268,21 +260,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <template is="dom-if" if="{{search}}">
                     <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
                   </template>
-                  <!-- <paper-menu-button id="btn-menu" horizontal-align="right">
-                    <paper-icon-button slot="dropdown-trigger" icon="my-icons:tune"></paper-icon-button>
-                    <paper-listbox style="cursor:pointer" slot="dropdown-content" selected="{{filterBy}}">
-                      <paper-item style="display:none;">Filter By</paper-item>
-                      <paper-item>By Firstname</paper-item>
-                      <paper-item>By Middlename</paper-item>
-                      <paper-item>By Lastname</paper-item>
-                    </paper-listbox>
-                  </paper-menu-button> -->
                 </app-toolbar>
               </template>
             </app-header>
 
-            <firebase-query id="query" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="{{order}}" start-at="{{lastorder}}"
-              limit-to-first="25">
+            <firebase-query disabled id="searchQuery" path="/{{myKey}}/cases" data="{{items}}" order-by-child="patient" start-at="{{search}}"
+              limit-to-first="15">
+            </firebase-query>
+
+            <firebase-query id="defaultQuery" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="order" start-at="{{lastorder}}"
+              limit-to-first="15">
             </firebase-query>
 
             <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
@@ -296,69 +283,55 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </template>
 
             <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
-              <!-- <iron-list items="[[mycases]]" as="item" selection-enabled scroll-target="threshold"> -->
-              <div class="list">
-                <template is="dom-repeat" items="[[items]]">
-                  <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-
-                    <div class="card-content" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
-                      <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
-                        <iron-icon icon="my-icons:watch-later"></iron-icon>
-                        <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
-                      </div>
-                      <div id="{{item.$key}}" style=" padding: 16px; display:flex">
-
-                        <div>
-                          <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+              <iron-list items="[[items]]" as="item">
+                <template>
+                  <div class="divSeparator">
+                    <div class="item">
+                      <div class="pad" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
+                        <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
+                          <iron-icon icon="my-icons:watch-later"></iron-icon>
+                          <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
                         </div>
-                        <div id="{{item.$key}}" style=" margin-left:10px;">
-                          <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
-                          <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
-                          <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}}
-                            [[item.patientinfo.gender]]
+                        <div id="{{item.$key}}" style=" padding: 16px; display:flex">
+                          <div>
+                            <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                           </div>
-                          <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
+                          <div id="{{item.$key}}" style=" margin-left:10px;">
+                            <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
+                            <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
+                            <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}}
+                              [[item.patientinfo.gender]]
+                            </div>
+                            <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
 
-                          <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
-                            <span id="{{item.$key}}" class="longText">Chief Complaint</span>
-                            <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                            <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
+                              <span id="{{item.$key}}" class="longText">Chief Complaint</span>
+                              <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                            </div>
+
+                            <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkSOAP(item.template)}}">
+                              <span id="{{item.$key}}" class="longText">Subjective</span>
+                              <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
+                            </div>
                           </div>
-
-                          <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkSOAP(item.template)}}">
-                            <span id="{{item.$key}}" class="longText">Subjective</span>
-                            <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
-                          </div>
-
                         </div>
                       </div>
 
+                      <div class="clinic">[[item.clinic_location]]</div>
+
+                      <a id="open" href$="{{_getViewDetailsLink(e)}}"></a>
+                      <a href$="{{_getEditAppLink(item.$key)}}">
+                        <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit">
+                        </paper-icon-button>
+                      </a>
                     </div>
-
-                    <div class="clinic">[[item.clinic_location]]</div>
-
-                    <a href$="{{_getEditAppLink(item.$key)}}">
-                      <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit">
-                      </paper-icon-button>
-                    </a>
-
-                    <!-- <paper-icon-button noink on-tap="_selectThis" icon="my-icons:open-in-new" alt="{{item.$key}}" title="view details" style="display:inline-block;position: absolute; color: #673AB7; right: 10px; top:8px;">
-                      </paper-icon-button> -->
-                    <a id="open" href$="{{_getViewDetailsLink(e)}}"></a>
-                    <!-- <paper-menu-button vertical-align="bottom" horizontal-align="right">
-                      <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
-                      <paper-listbox slot="dropdown-content">
-                        <paper-item on-tap="_editThis" id="{{item.$key}}">Edit</paper-item>
-                        <paper-item on-tap="_openDelete" id="{{item.$key}}">Delete</paper-item>
-                      </paper-listbox>
-                    </paper-menu-button> -->
                   </div>
                 </template>
-              </div>
+              </iron-list>
 
               <div class="loadingIndicator">
                 <paper-spinner active="{{loadingPeople}}"></paper-spinner>
               </div>
-              <!-- </iron-list> -->
             </iron-scroll-threshold>
 
           </app-header-layout>
@@ -387,16 +360,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <my-visits-view id="d26" my-key='{{myKey}}' view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-visits-view>
     </div>
 
-    <paper-dialog id="deleteDialog" confirm-button="Done">
-      <h3>Are you sure you want to delete this case?</h3>
-      <div class="buttons">
-        <div class="action">
-          <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>No</paper-button>
-          <paper-button id="dialBtn" on-tap="_deletePatient" toggles class="custom green">Yes</paper-button>
-        </div>
-      </div>
-    </paper-dialog>
-
   </template>
 
   <script>
@@ -421,27 +384,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: false,
           notify: true
-        },
-        filterBy: {
-          type: Number,
-          value: 1
-        },
-        order: {
-          type: String,
-          value: 'order'
         }
-      },
-
-      _timeStampToDateTime(ts) {
-        return new Date(ts);
-      },
-
-      loadMoreData() {
-        if (this.items.length > 0) {
-          this.lastorder = this.items[this.items.length - 1].order;
-        }
-
-        this.loadingPeople = true;
       },
 
       observers: [
@@ -449,29 +392,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         '_mycasesChanged(mycases.*)'
       ],
 
-      _fetching() {
-        setTimeout((e) => {
-          this.loadingPeople = false;
-        }, 5000);
-      },
-
-      _noDataChanged(e, f) {
-        if (f) return false;
-        else {
-          if (e > 0) return false;
-          else return true;
+      _searchChanged(search) {
+        if (search) {
+          this.search = search.toUpperCase();
+          this.$.defaultQuery.disabled = true;
+          this.$.searchQuery.disabled = false;
+        } else {
+          this.$.defaultQuery.disabled = false;
+          this.$.searchQuery.disabled = true;
         }
+
+        this.loadingPeople = true;
       },
 
       _mycasesChanged(e) {
         if (this.mycases.length > 0) {
-          if (e.path === "mycases" || e.path === "mycases.splices") {
+          if (e.path === "mycases") {
             this.appendToList();
           }
 
-          if (e.path !== "mycases" && e.path !== "mycases.splices" && e.path !== "mycases.length") {
+          if (e.path !== "mycases" && e.path === "mycases.splices" && e.path !== "mycases.length") {
             this.items = [];
             this.lastorder = "";
+            this.$.defaultQuery.disabled = true;
+            this.$.defaultQuery.disabled = false;
           }
 
           this.$.threshold.clearTriggers();
@@ -489,6 +433,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.notifyPath('items', this.items.slice());
           }
         }
+      },
+
+      loadMoreData() {
+        if (this.items.length > 0) {
+          this.lastorder = this.items[this.items.length - 1].order;
+        }
+
+        this.loadingPeople = true;
+      },
+
+      _fetching() {
+        setTimeout((e) => {
+          this.loadingPeople = false;
+        }, 5000);
+      },
+
+      _noDataChanged(e, f) {
+        if (f) return false;
+        else {
+          if (e > 0) return false;
+          else return true;
+        }
+      },
+
+      _timeStampToDateTime(ts) {
+        return new Date(ts);
       },
 
       _patientImg(e) {
@@ -592,16 +562,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _searchChanged(search) {
-        if (search) {
-          this.order = 'patient';
-          this.search = search.toUpperCase();
-        }
-        else {
-          this.order = 'order';
-        }
-      },
-
       iconForItem(item) {
         return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';
       },
@@ -621,6 +581,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       toggleSearch() {
         this.openSearch = true;
+        // this.$.search.focus();
       },
 
       toggleReturn() {
@@ -687,13 +648,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var currentDiv = document.getElementById("newcase");
           Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
         }
-      },
-
-      _openDelete(e) {
-        var d_key = Polymer.dom(e).rootTarget.getAttribute("id");
-        var dialogBtn = Polymer.dom(this.root).querySelector("#dialBtn");
-        dialogBtn.setAttribute('alt', d_key);
-        Polymer.dom(this.root).querySelector("#deleteDialog").open();
       },
 
       _deletePatient(e) {

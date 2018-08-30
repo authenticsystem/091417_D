@@ -91,7 +91,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       @media (max-width: 768px) {
-        .list {
+        iron-list {
           margin: 16px;
           display: flex;
           flex-direction: column;
@@ -114,7 +114,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       @media (min-width: 768px) {
-        .list {
+        iron-list {
           width: 736px;
           margin: 16px auto;
           /* margin-top: 0px; */
@@ -247,7 +247,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </firebase-query>
 
             <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no" start-at="{{lastnum}}"
-              limit-to-first="25">
+              limit-to-first="15">
             </firebase-query>
 
             <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
@@ -261,11 +261,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </template>
 
             <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
-              <!-- <iron-list items="[[mypatients]]" as="item" selection-enabled scroll-target="threshold"> -->
-              <!-- sort="_sort" -->
-              <div class="list">
-                <template is="dom-repeat" items="[[items]]">
-                  <div class$="[[getClassForItem(item, selected)]]">
+              <iron-list items="[[items]]" as="item">
+                <template>
+                  <div class="item">
                     <div>
                       <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                     </div>
@@ -287,13 +285,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </a>
                   </div>
                 </template>
-              </div>
+              </iron-list>
 
               <div class="loadingIndicator">
                 <paper-spinner active="{{loadingPeople}}"></paper-spinner>
               </div>
-              <!-- </iron-list> -->
             </iron-scroll-threshold>
+
           </app-header-layout>
 
           <a href="/patients/new" id="newPatient"></a>
@@ -347,6 +345,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           value: false,
           notify: true
+        },
+        lastnum: {
+          type: String,
+          value: ""
         }
       },
 
@@ -378,13 +380,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _mypatientsChanged(e) {
         if (this.mypatients.length > 0) {
-          if (e.path === "mypatients" || e.path === "mypatients.splices") {
+          if (e.path === "mypatients") {
             this.appendToList();
+          }
+
+          if (e.path === "mypatients.splices") {
+            this.items = [];
+            this.lastnum = "";
+            this.$.defaultQuery.disabled = true;
+            this.$.defaultQuery.disabled = false;
           }
 
           if (e.path !== "mypatients" && e.path !== "mypatients.splices" && e.path !== "mypatients.length") {
             this.items = [];
             this.lastnum = "";
+            this.$.defaultQuery.disabled = true;
+            this.$.defaultQuery.disabled = false;
           }
 
           this.$.threshold.clearTriggers();

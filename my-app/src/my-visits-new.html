@@ -151,19 +151,6 @@
                 color: white;
             }
 
-
-            datetime-picker.begin {
-                --datetime-selected-background: #2362EC;
-                --datetime-background: #071533;
-                --datetime-color: #eeeeee;
-            }
-
-            datetime-picker.end {
-                --datetime-selected-background: #CC1C1C;
-                --datetime-background: #071533;
-                --datetime-color: #eeeeee;
-            }
-
             paper-item:hover {
                 background: rgba(104, 58, 183, 0.26);
                 cursor: pointer;
@@ -292,9 +279,9 @@
             }
         </style>
 
-        <firebase-query id="serviceQuery" path="/{{myKey}}/services" data="{{myservices}}" order-by-child="service"></firebase-query>
-        <firebase-query id="hmoQuery" path="/{{myKey}}/hmo" data="{{myhmos}}" order-by-child="name"></firebase-query>
-        <firebase-query id="locationQuery" path="/{{myKey}}/locations" data="{{mylocations}}" order-by-child="location_name"></firebase-query>
+        <firebase-query disabled id="serviceQuery" path="/{{myKey}}/services" data="{{myservices}}" order-by-child="service"></firebase-query>
+        <firebase-query disabled id="hmoQuery" path="/{{myKey}}/hmo" data="{{myhmos}}" order-by-child="name"></firebase-query>
+        <firebase-query disabled id="locationQuery" path="/{{myKey}}/locations" data="{{mylocations}}" order-by-child="location_name"></firebase-query>
 
         <firebase-query id="filterQuery" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name" start-at="{{filterValue}}"
             limit-to-first="{{myLimit}}">
@@ -509,7 +496,7 @@
                         <div class="docu">
                             <div class="details">
                                 <div id="saveSuccess" style="color: green; display:none">Visit successfully saved.
-                                    <p id="p" style="margin-top:-4px">Billing ref.#&nbsp;</p>
+                                    <p id="p" style="margin-top:-4px">Billing ref.# <b style="color:#1976d2">[[billReference]]</b></p>
                                 </div>
                                 <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
                                 <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving
@@ -523,7 +510,6 @@
                         <div class="docu">
                             <div class="details">
                                 <span>
-                                    <!-- service -->
                                     <paper-dropdown-input style="width: 100%" id="dropdService" label="Service *" items="[[myservices]]" filter-property="service"
                                         value="{{service}}" selected-item="{{selectedService}}">
                                         <template>
@@ -532,10 +518,9 @@
                                             </template>
                                         </template>
                                     </paper-dropdown-input>
-                                    <!-- amount -->
                                     <paper-input id="amount" label="Amount" allowed-pattern="[\d]" prevent-invalid-input value="{{amount}}"></paper-input>
-                                    <!-- bill to -->
-                                    <paper-dropdown-menu style="width: 100%" label="Bill to">
+
+                                    <paper-dropdown-menu class="billDropdown" label="Bill to">
                                         <paper-listbox id="dropdSelectedBillTo" slot="dropdown-content" attr-for-selected="name" selected="{{selectedBillTo}}">
                                             <paper-item name="patient">Patient</paper-item>
                                             <paper-item name="philhealth">PHILHEALTH</paper-item>
@@ -543,18 +528,20 @@
                                             <paper-item name="hospital">Hospital</paper-item>
                                         </paper-listbox>
                                     </paper-dropdown-menu>
+
                                     <iron-pages attr-for-selected="name" selected="{{selectedBillTo}}">
                                         <div name="patient">
                                             <paper-input readonly label="Patient" value="{{filterValue}}"></paper-input>
                                         </div>
+
                                         <div name="hmo">
                                             <div hidden="[[!hasInsurance]]">
-                                                <paper-input readonly label="HMO" value="{{insurance}}"></paper-input>
+                                                <paper-input readonly label="HMO" value="{{selectedPatient.insurance.primary_insurance}}"></paper-input>
                                                 <a class="aHref" style="display: block" id="href1" on-tap="_changeHMO">Change</a>
                                             </div>
 
                                             <div hidden="[[hasInsurance]]">
-                                                <paper-dropdown-input class="billDropdown" label="HMO" items="[[myhmos]]" filter-property="name" value="{{selectedHMO}}">
+                                                <paper-dropdown-input id="dropdHMO" class="billDropdown" label="HMO" items="[[myhmos]]" filter-property="name" value="{{selectedHMO}}">
                                                     <template>
                                                         <template is="dom-repeat" items="[[items]]" as="item">
                                                             <paper-item>[[item.name]]</paper-item>
@@ -564,8 +551,10 @@
                                                 <a class="aHref" id="href2" on-tap="_cancelChangeHMO">Cancel</a>
                                             </div>
                                         </div>
+
                                         <div name="hospital">
-                                            <paper-dropdown-input class="billDropdown" label="Hospital" items="[[mylocations]]" filter-property="location_name" value="{{location}}">
+                                            <paper-dropdown-input id="dropdHospital" class="billDropdown" label="Hospital" items="[[mylocations]]" filter-property="location_name"
+                                                value="{{location}}">
                                                 <template>
                                                     <template is="dom-repeat" items="[[items]]" as="item">
                                                         <paper-item>[[item.location_name]]</paper-item>
@@ -616,19 +605,18 @@
                     value: [],
                     notify: true
                 },
-                billingDataTmp: {
-                    type: Array,
-                    value: [],
-                    notify: true
-                },
                 myQueue: String,
                 queueKey: String,
                 queueDate: String,
+                queueNo: Number,
                 myLocation: String,
                 prevRoute: String,
                 filterValue: String,
                 myKey: String,
-                selectedPage: Number,
+                selectedPage: {
+                    type: Number,
+                    value: 0
+                },
                 myLimit: {
                     type: Number,
                     value: 5
@@ -649,15 +637,143 @@
                     type: Boolean,
                     value: true
                 },
-                todayDate: String,
                 lastPushTime: {
                     type: Number,
                     value: 0
                 },
-                myPatientKey: String,
                 service_no: {
                     type: Number,
                     value: 0
+                },
+                attachment: {
+                    type: Array,
+                    value: []
+                }
+            },
+
+            ready() {
+                this._clear();
+                this.todayDate = this.formatTodayDate(new Date());
+            },
+
+            observers: [
+                '_patientChanged(filterValue)',
+                '_showFab1(subjective, complain, todayDate)',
+                '_myimagingChanged(myimaging)',
+                '_mytimeCheckChanged(mycases, todayDate)',
+                '_clearErr(amount, selectedBillTo)',
+                '_selectedServiceChanged(selectedService)',
+                '_billingDataChanged(billingData)'
+            ],
+
+            _patientChanged(patient) {
+                if (!patient) {
+                    Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                    this.favrighthide = true;
+                } else {
+                    this.filterValue = patient.toUpperCase();
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
+                }
+            },
+
+            _bind(e) {
+                this.favrighthide = false;
+                this.selectedPatient = this.$.thypatientTemp.itemForElement(e.target);
+
+                this.filterValue = this.selectedPatient.personal.name;
+                this.myPatientKey = this.selectedPatient.$key;
+                if (this.selectedPatient.insurance.primary_insurance) this.hasInsurance = true;
+                else this.hasInsurance = false;
+
+                Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'block';
+                Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'block';
+            },
+
+            _myimagingChanged(e) {
+                if (e) {
+                    const gallery = Polymer.dom(this.root).querySelector('#gallery');
+
+                    if (gallery) {
+                        e.forEach(img => {
+                            const el = document.createElement('sl-gallery-image');
+                            el.setAttribute('src', img.url);
+                            el.setAttribute('small', img.url);
+                            el.setAttribute('id', 'gallery-image');
+                            gallery.appendChild(el);
+                        });
+                    }
+                }
+            },
+
+            _mytimeCheckChanged(lastVisit, date) {
+                if (lastVisit.length > 0) this.noprev = '';
+                else this.noprev = 'No previous visit.';
+
+                var monthNames = [
+                    "January", "February", "March",
+                    "April", "May", "June", "July",
+                    "August", "September", "October",
+                    "November", "December"
+                ];
+
+                var d = new Date(date);
+                if (date) {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+                    this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+                    this.text = 'Please choose date.';
+                }
+
+                var x = 0;
+                if (date < this.formatTodayDate(new Date())) {
+                    if (lastVisit.length > 0) {
+                        lastVisit.forEach(element => {
+                            if (date === element.created) {
+                                x = element.timestamp;
+                            }
+                        });
+                        this.lastPushTime = x;
+                    }
+                } else { this.lastPushTime = x; }
+            },
+
+            _selectNormal() {
+                this.normal = true;
+                this.soap = false;
+                this.template = 'Normal';
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                this.selectedPage = parseInt(this.selectedPage) + 1;
+            },
+
+            _selectSOAP() {
+                this.normal = false;
+                this.soap = true;
+                this.template = 'SOAP';
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                this.selectedPage = parseInt(this.selectedPage) + 1;
+            },
+
+            _showFab1(subjective, complain, date) {
+                if (this.normal === true) {
+                    if (!complain || !date) {
+                        this.favrighthide = true;
+                    } else {
+                        this.favrighthide = false;
+                    }
+                }
+                else {
+                    if (!subjective || !date) {
+                        this.favrighthide = true;
+                    } else {
+                        this.favrighthide = false;
+                    }
                 }
             },
 
@@ -709,75 +825,26 @@
                 }
             },
 
-            _selectNormal() {
-                this.normal = true;
-                this.soap = false;
-                this.template = 'Normal';
-                this.entryanimation = "slide-from-right-animation";
-                this.exitanimation = "slide-left-animation";
-                this.selectedPage = parseInt(this.selectedPage) + 1;
-            },
-
-            _selectSOAP() {
-                this.normal = false;
-                this.soap = true;
-                this.template = 'SOAP';
-                this.entryanimation = "slide-from-right-animation";
-                this.exitanimation = "slide-left-animation";
-                this.selectedPage = parseInt(this.selectedPage) + 1;
-            },
-
-            _date(e) {
-                if (e) {
-                    var date = new Date(e);
-                    var options = {
-                        weekday: "long", year: "numeric", month: "short",
-                        day: "numeric", hour: "2-digit", minute: "2-digit"
-                    };
-
-                    return date.toLocaleTimeString("en-us", options);
-                }
-            },
-
-            _bind(e) {
-                this.favrighthide = false;
-                this.selectedPatient = this.$.thypatientTemp.itemForElement(e.target);
-
-                this.filterValue = this.selectedPatient.personal.name;
-                this.myPatientKey = this.selectedPatient.$key;
-                this.insurance = this.selectedPatient.insurance.primary_insurance;
-                if (this.insurance) this.hasInsurance = true;
-                else this.hasInsurance = false;
-
-                Polymer.dom(this.root).querySelector("#list").style.display = 'none';
-                Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'block';
-                Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'block';
-            },
-
-            _myimagingChanged(e) {
-                if (e) {
-                    const gallery = Polymer.dom(this.root).querySelector('#gallery');
-
-                    if (gallery) {
-                        e.forEach(img => {
-                            const el = document.createElement('sl-gallery-image');
-                            el.setAttribute('src', img.url);
-                            el.setAttribute('small', img.url);
-                            el.setAttribute('id', 'gallery-image');
-                            gallery.appendChild(el);
-                        });
-                    }
-                }
-            },
-
             _changeAttach(e) {
                 var list = Polymer.dom(this.root).querySelector("#fileList");
                 if (e.target.files.length > 0) {
 
                     var files = e.target.files;
-                    this.attachment = files;
+                    var self = this;
+                    for (var index = 0, file; file = files[index]; index++) {
+                        if (file.size > 9999) {
+                            ImageTools.resize(file, {
+                                width: 440, // maximum width
+                                height: 400 // maximum height
+                            }, function (blob, didItResize) {
+                                self.attachment.push(blob);
+                            });
+                        } else {
+                            self.attachment.push(file);
+                        }
+                    }
 
-                    if (e.target.files.length > 1) {
+                    if (files.length > 1) {
                         var output = [];
                         for (var i = 0, f; f = files[i]; i++) {
                             output.push('<li>', escape(f.name), '</li>');
@@ -794,29 +861,10 @@
                     }
                 }
                 else {
+                    this.attachment = [];
                     list.innerHTML = '';
                 }
             },
-
-            ready() {
-                this.selectedPage = 0;
-                this.favrighthide = true;
-                this.favlefthide = true;
-                this.todayDate = this.formatTodayDate(new Date());
-                this.$.hmoQuery.disabled = true;
-                this.$.locationQuery.disabled = true;
-            },
-
-            observers: [
-                '_patientChanged(filterValue)',
-                '_showFab1(subjective, complain, todayDate)',
-                '_myimagingChanged(myimaging)',
-                '_myattachmentChaged(myattachment)',
-                '_mytimeCheckChanged(mycases, todayDate, myNewPatientKey)',
-                '_clearErr(amount, selectedBillTo)',
-                '_selectedServiceChanged(selectedService)',
-                '_billingDataChanged(billingData)'
-            ],
 
             _billingDataChanged(e) {
                 if (e.length > 0) {
@@ -853,54 +901,6 @@
                 this.billErr = '';
                 if (e) {
                     this.amount = parseInt(e.id);
-                }
-            },
-
-            _mytimeCheckChanged(timeCheck, date, myNewPatientKey) {
-                if (timeCheck.length > 0) this.noprev = '';
-                else this.noprev = 'No previous visit.';
-
-                var monthNames = [
-                    "January", "February", "March",
-                    "April", "May", "June", "July",
-                    "August", "September", "October",
-                    "November", "December"
-                ];
-
-                var d = new Date(date);
-                if (date) {
-                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
-                    this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
-                }
-                else {
-                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
-                    this.text = 'Please choose date.';
-                }
-
-                var x = 0;
-
-                if (myNewPatientKey) {
-                    this.path = '/' + this.myKey + '/cases';
-                    if (date < this.formatTodayDate(new Date())) {
-                        if (timeCheck.length > 0) {
-                            timeCheck.forEach(element => {
-                                if (date === element.created) {
-                                    x = element.timestamp;
-                                }
-                            });
-                            this.lastPushTime = x;
-                        }
-                    } else { this.lastPushTime = x; }
-                }
-                else { this.myNewPatientKey = this.myPatientKey; }
-            },
-
-            _myattachmentChaged(e) {
-                if (e.length > 0) {
-                    this.attach = 'Attachment';
-                }
-                else {
-                    this.attach = '';
                 }
             },
 
@@ -959,35 +959,6 @@
                 else return '../images/user.png';
             },
 
-            _patientChanged(patient) {
-                if (!patient) {
-                    Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'none';
-                    Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'none';
-                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
-                    this.favrighthide = true;
-                } else {
-                    this.filterValue = patient.toUpperCase();
-                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
-                }
-            },
-
-            _showFab1(subjective, complain, date) {
-                if (this.normal === true) {
-                    if (!complain || !date) {
-                        this.favrighthide = true;
-                    } else {
-                        this.favrighthide = false;
-                    }
-                }
-                else {
-                    if (!subjective || !date) {
-                        this.favrighthide = true;
-                    } else {
-                        this.favrighthide = false;
-                    }
-                }
-            },
-
             _select1(e) {
                 this.entryanimation = "slide-from-left-animation";
                 this.exitanimation = "slide-right-animation";
@@ -1044,6 +1015,9 @@
                         if (this.selectedPage == 1) {
                             this.favlefthide = false;
                             this.favrighthide = true;
+                            this.$.serviceQuery.disabled = false;
+                            this.$.hmoQuery.disabled = false;
+                            this.$.locationQuery.disabled = false;
                         }
 
                         if (this.selectedPage == 3) {
@@ -1085,7 +1059,7 @@
                         service_bill_to = "PHILHEALTH";
                         break;
                     case "hmo":
-                        service_bill_to = this.hasInsurance ? this.insurance : this.selectedHMO;
+                        service_bill_to = this.hasInsurance ? this.selectedPatient.insurance.primary_insurance : this.selectedHMO;
                         break;
                     case "hospital":
                         service_bill_to = this.location;
@@ -1104,7 +1078,7 @@
                     this.notifyPath("billingData", this.billingData.slice());
                     this.selectedPage = 3;
 
-                    // this._clear2();
+                    this._clear2();
                 }
                 else {
                     this.billErr = 'Ops! Dont leave any field empty.';
@@ -1117,16 +1091,13 @@
             },
 
             _submitToFireB() {
-                var key = this.mykey;
                 var mykey = this.myKey;
-                var myattachment = this.attachment;
-                var attachName = this.randomString(8);
                 var today = this.todayDate;
                 var timestamp = firebase.database.ServerValue.TIMESTAMP;
                 var order = firebase.database.ServerValue.TIMESTAMP;
                 var newPushKey;
-                var myQueue = this.myQueue;
-                var queueKey = this.queueKey, myLocation = this.myLocation, queueDate = this.queueDate;
+                var self = this;
+                var ref = firebase.database().ref("/" + mykey + "/cases");
 
                 if (today < this.formatTodayDate(new Date())) {
                     newPushKey = this.generatePushID(today);
@@ -1140,7 +1111,14 @@
                     history: this.history,
                     diagnosis: this.diagnosis,
                     treatment: this.treatment,
-                    patientkey: this.selectedData,
+                    patientkey: this.selectedPatient.$key,
+                    profile: this.selectedPatient.profile ? this.selectedPatient.profile : null,
+                    patientinfo: {
+                        num: this.selectedPatient.no,
+                        birthday: this.selectedPatient.personal.birthday,
+                        gender: this.selectedPatient.personal.sex,
+                        hmo: this.selectedPatient.insurance.primary_insurance
+                    },
                     timestamp: timestamp,
                     order: order,
                     created: today,
@@ -1151,7 +1129,8 @@
                     objective: this.objective,
                     assessment: this.assessment,
                     template: this.template,
-                    clinic_location: this.myLocation
+                    clinic_location: this.myLocation,
+                    imaging: this.attachment.length > 0 ? true : false
                 }
 
                 var data2 = {
@@ -1164,263 +1143,165 @@
                     remarks: this.remarks ? this.remarks : "No Remarks"
                 }
 
-                var p = Polymer.dom(this.root).querySelector("#p");
-                var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
-                var saveRun = Polymer.dom(this.root).querySelector("#saveRunning");
-                var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
-
-                saveRun.style.display = 'block';
-                firebase.database().ref('/' + mykey + '/patients/' + key)
-                    .once('value').then(function (patient) {
-                        if (patient.val().profile) {
-
-                            if (newPushKey) {
-                                var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
-                                var push = ref.set(data);
-                                var fbPushKey = newPushKey;
-                            }
-                            else {
-                                var ref = firebase.database().ref("/" + mykey + "/cases");
-                                var push = ref.push(data);
-                                var fbPushKey = push.key;
-                            }
-
-                            if (fbPushKey) {
-
-                                _updateOrder(mykey, fbPushKey, data2, saveRun, saveSucc);
-                                _reportsUpdate(today, mykey);
-
-                                firebase.database().ref("/" + mykey + "/patients/" + fbPushKey + "/profile").set(patient.val().profile);
-
-                                if (myQueue) {
-                                    firebase.database().ref("/" + mykey + "/patients/" + key).update({ isQueue: false });
-                                    _locateNextQueue(mykey, queueKey, myLocation, queueDate)
-                                }
-
-                                if (myattachment) {
-                                    firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(true);
-                                    _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc);
-                                }
-                                else {
-                                    firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(false);
-                                }
-                            }
-                            else {
-                                saveErr.style.display = 'block';
-                            }
-                        }
-                        else {
-                            if (newPushKey) {
-                                var ref = firebase.database().ref("/" + mykey + "/cases/" + newPushKey);
-                                var push = ref.set(data);
-                                var fbPushKey = newPushKey;
-                            }
-                            else {
-                                var ref = firebase.database().ref("/" + mykey + "/cases");
-                                var push = ref.push(data);
-                                var fbPushKey = push.key;
-                            }
-
-                            if (fbPushKey) {
-
-                                _updateOrder(mykey, fbPushKey, data2, saveRun, saveSucc);
-                                _reportsUpdate(today, mykey);
-
-                                if (myQueue) {
-                                    firebase.database().ref("/" + mykey + "/patients/" + key).update({ isQueue: false });
-                                    _locateNextQueue(mykey, queueKey, myLocation, queueDate)
-                                }
-
-                                if (myattachment) {
-                                    firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(true);
-                                    _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc);
-                                }
-                                else {
-                                    firebase.database().ref("/" + mykey + "/cases/" + fbPushKey + "/imaging").set(false);
-                                }
-                            }
-                            else {
-                                saveErr.style.display = 'block';
-                            }
-                        }
-                    });
-
-
-                function _locateNextQueue(mykey, queueKey, myLocation, queueDate) {
-                    var ref = firebase.database().ref("/" + mykey + "/queue/" + myLocation + "/" + queueDate);
-                    ref.child(queueKey).update({ isPriority: false, isNext: false, isQueue: false, xy: "x" }).then(function () {
-                        ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
-                            if (!hasNext.exists()) {
-                                ref.orderByChild("xy").startAt("y").limitToFirst(1).once("value").then(function (next) {
-                                    if (next.exists()) {
-                                        ref.child(Object.keys(next.val())[0]).update({ isNext: true });
-                                    }
-                                });
-                            }
-                        });
-                    })
+                var fbPushKey;
+                this.$.saveRunning.style.display = 'block';
+                if (newPushKey) {
+                    ref.child(newPushKey).set(data);
+                    var fbPushKey = newPushKey;
+                }
+                else {
+                    var push = ref.push(data);
+                    var fbPushKey = push.key;
                 }
 
-                function _reportsUpdate(today, mykey) {
-                    var mm = today.substring(0, 7);
-                    var yy = today.substring(0, 4);
+                if (fbPushKey) {
+                    self._updateOrder(mykey, fbPushKey, data2, self);
+                    self._reportsUpdate(today, mykey);
 
-                    var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
-                    dayRef.once('value').then(function (snapshot) {
-                        dayRef.set(snapshot.val() + 1);
-                    });
+                    if (self.myQueue) {
+                        self._locateNextQueue(mykey, self.queueKey, self.queueDate, self.queueNo, self.myLocation)
+                    }
 
-                    var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
-                    yearRef.once('value').then(function (snapshot) {
-                        yearRef.set(snapshot.val() + 1);
-                    });
-
-                    var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
-                    monthRef.once('value').then(function (snapshot) {
-                        monthRef.set(snapshot.val() + 1);
-                    });
-                }
-
-                function _updateOrder(mykey, fbPushKey, data2, saveRun, saveSucc) {
-                    var postRef = firebase.database().ref('/' + mykey + '/cases/' + fbPushKey);
-                    postRef.once('value').then(function (snapshot) {
-                        var order = snapshot.val().order * -1;
-                        var patientRef = firebase.database().ref('/' + mykey + '/patients/' + snapshot.val().patientkey);
-                        var billRef = firebase.database().ref('/' + mykey + '/billing');
-
-                        patientRef.once('value').then(function (snapshot2) {
-                            postRef.update({
-                                patientinfo: {
-                                    num: snapshot2.val().no,
-                                    birthday: snapshot2.val().personal.birthday,
-                                    gender: snapshot2.val().personal.sex,
-                                    hmo: snapshot2.val().insurance.primary_insurance
-                                },
-                                order: order
-                            });
-                        });
-
-                        billRef.child(fbPushKey).set(data2);
-                        billRef.child(fbPushKey).update({ order: order });
-                        billRef.once('value').then(function (data) {
-                            var num = data.numChildren() ? data.numChildren() : 1;
-                            var no = _billingRefNoUpdate(num, mykey, fbPushKey);
-
-                            var b = document.createElement("b");
-                            b.id = "bold";
-                            b.style.color = "blue";
-                            var t = document.createTextNode(no + '.');
-                            b.appendChild(t);
-                            p.appendChild(b);
-                            saveRun.style.display = 'none';
-                            saveSucc.style.display = 'block';
-                        });
-                    });
-                }
-
-                function _attachmentUpdate(myattachment, attachName, mykey, fbPushKey, saveRun, saveSucc) {
-                    for (var i = 0; i < myattachment.length; i++) {
-
-                        var attachFile = myattachment[i];
-                        var ext = attachFile.type.substring(6);
-                        var name = attachName + i + '.' + ext;
-                        var myURL = "/" + mykey + "/cases/" + fbPushKey + "/attachment";
-
-                        if (attachFile.type.match(/image.*/) && attachFile.size > 9999) {
-                            ImageTools.resize(attachFile, {
-                                width: 440, // maximum width
-                                height: 400 // maximum height
-                            }, function (blob, didItResize) {
-
-                                var ext = blob.type.substring(6);
-                                var rand = Math.random().toString(36).slice(-8);
-                                var newName = rand + '.' + ext;
-
-                                var storageRef = firebase.storage().ref('attachment/' + newName);
-                                storageRef.put(blob).then(function (snapshot) {
-                                    saveRun.style.display = 'none';
-                                    saveSucc.style.display = 'block';
-
-                                    var type = snapshot.metadata.contentType.slice(0, 5);
-                                    var name = snapshot.metadata.name;
-                                    var ref = firebase.database().ref(myURL);
-
-                                    ref.push({
-                                        url: snapshot.downloadURL,
-                                        type: type,
-                                        name: name
-                                    });
-                                });
-
-                            });
-                        } else {
+                    if (self.attachment.length > 0) {
+                        for (var i = 0, file; file = self.attachment[i]; i++) {
+                            var name = new Date().getTime() + "." + file.type.split("/")[1];
                             var storageRef = firebase.storage().ref('attachment/' + name);
-                            storageRef.put(attachFile).then(function (snapshot) {
-                                saveRun.style.display = 'none';
-                                saveSucc.style.display = 'block';
 
-                                var type = snapshot.metadata.contentType.slice(0, 5);
-                                var name = snapshot.metadata.name;
-                                var ref = firebase.database().ref(myURL);
-
-                                ref.push({
+                            storageRef.put(file).then(function (snapshot) {
+                                ref.child(fbPushKey + "/attachment").push({
                                     url: snapshot.downloadURL,
-                                    type: type,
-                                    name: name
+                                    type: snapshot.metadata.contentType.split("/")[1],
+                                    name: snapshot.metadata.name
                                 });
                             });
                         }
                     }
-                }
 
-                function _billingRefNoUpdate(num, mykey, pushkey) {
-                    if (num > 0 && num < 10) {
-                        num = '000' + num;
-                    }
-                    else if (num > 9 && num < 100) {
-                        num = '00' + num;
-                    }
-                    else if (num > 99 && num < 1000) {
-                        num = '0' + num;
-                    }
-                    else if (num > 999) {
-                        num = num;
-                    }
-                    else {
-                        num = '0000';
-                    }
-
-                    firebase.database().ref("/" + mykey + "/billing/" + pushkey + "/ref").set(num);
-                    return num;
+                    self.$.saveRunning.style.display = 'none';
+                    self.$.saveSuccess.style.display = 'block';
+                } else {
+                    self.$.saveRunning.style.display = 'none';
+                    self.$.saveFailed.style.display = 'block';
                 }
             },
 
+            _updateOrder(mykey, fbPushKey, data2, self) {
+                var postRef = firebase.database().ref("/" + mykey + "/cases/" + fbPushKey);
+                var noRef = firebase.database().ref("/" + mykey + "/uniqueId/billing");
+                var billRef = firebase.database().ref('/' + mykey + '/billing');
+
+                postRef.once('value').then(function (snapshot) {
+                    if (snapshot.exists()) {
+                        var negativeTime = snapshot.val().order * -1;
+                        postRef.update({ order: negativeTime });
+
+                        data2.order = negativeTime;
+                        noRef.once('value').then(function (data) {
+                            var num = (data.val() ? data.val() : 0) + 1;
+                            var no = self._billingRefNoUpdate(num);
+                            data2.ref = no;
+
+                            noRef.set(num);
+                            billRef.child(fbPushKey).set(data2).then(function () {
+                                self.billReference = no;
+                            });
+                        });
+                    }
+                });
+            },
+
+            _billingRefNoUpdate(num) {
+                if (num > 0 && num < 10) {
+                    num = '000' + num;
+                }
+                else if (num > 9 && num < 100) {
+                    num = '00' + num;
+                }
+                else if (num > 99 && num < 1000) {
+                    num = '0' + num;
+                }
+                else if (num > 999) {
+                    num = num;
+                }
+                else {
+                    num = '0000';
+                }
+
+                return num;
+            },
+
+            _reportsUpdate(today, mykey) {
+                var mm = today.substring(0, 7);
+                var yy = today.substring(0, 4);
+
+                var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
+                dayRef.once('value').then(function (snapshot) {
+                    dayRef.set(snapshot.val() + 1);
+                });
+
+                var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
+                yearRef.once('value').then(function (snapshot) {
+                    yearRef.set(snapshot.val() + 1);
+                });
+
+                var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
+                monthRef.once('value').then(function (snapshot) {
+                    monthRef.set(snapshot.val() + 1);
+                });
+            },
+
+            _locateNextQueue(mykey, queueKey, queueDate, queueNo, myLocation) {
+                var ref = firebase.database().ref("/" + mykey + "/queue/" + myLocation + "/" + queueDate);
+                ref.child(queueKey).update({ isNext: false, isQueue: false, xy: "x" }).then(function () {
+                    ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
+                        if (!hasNext.exists()) {
+                            ref.orderByChild("queueNo").startAt(queueNo + 1).once("value").then(function (findNext) {
+                                if (findNext.exists()) {
+                                    var done = false;
+                                    findNext.forEach(element => {
+                                        if (done) return;
+                                        if (!element.val().isCancel && element.val().isQueue) {
+                                            ref.child(element.key).update({ isNext: true });
+                                            done = true;
+                                            return;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                })
+            },
+
             onEnter() {
-                this.toggleBill();
+                this._addBilling();
             },
 
             randomString(n) {
                 var r = "";
                 while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
                 return r;
+
+                // var rand = Math.random().toString(36).slice(-8);
             },
 
             _clear() {
-                this.complain = '';
-                this.history = '';
-                this.laboratory = '';
-                this.pe = '';
-                this.diagnosis = '';
-                this.treatment = '';
-                this.plan = '';
-                this.attachment = '';
+                this.complain = null;
+                this.history = null;
+                this.laboratory = null;
+                this.pe = null;
+                this.diagnosis = null;
+                this.treatment = null;
+                this.plan = null;
+                this.attachment = null;
 
-                this.subjective = '';
-                this.objective = '';
-                this.assessment = '';
+                this.subjective = null;
+                this.objective = null;
+                this.assessment = null;
 
                 this.billingData = [];
-                this.billingDataTmp = [];
+                this.attachment = [];
+                this.$.myFile.value = null;
                 this._clear2();
             },
 
@@ -1431,7 +1312,7 @@
                 this.$.dropdSelectedBillTo.selected = null;
                 this.$.dropdHMO.value = null;
                 this.$.dropdHospital.value = null;
-                this.billErr = '';
+                this.billErr = null;
             },
 
             _comma(e) {
@@ -1453,11 +1334,6 @@
 
             _timeStampToDateTime(ts) {
                 return new Date(ts);
-            },
-
-            _checkBillTo(e, f) {
-                console.log("e" + e);
-                console.log("f" + f);
             },
 
             generatePushID(date) {
