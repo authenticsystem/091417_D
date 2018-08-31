@@ -28,10 +28,7 @@
     "paper-menu-button": "PolymerElements/paper-menu-button#^2.0.0",
     "paper-tooltip": "PolymerElements/paper-tooltip#^2.0.1",
     "paper-radio-group": "PolymerElements/paper-radio-group#^2.0.0",
-    "datetime-picker": "fooloomanzoo/datetime-picker#^2.5.11",
     "paper-toast": "PolymerElements/paper-toast#^2.0.0",
-    "titanium-date-input": "LssPolymerElements/titanium-date-input#^1.0.25",
-    "paper-time-input": "ryanburns23/paper-time-input#^2.0.4",
     "short-unique-id": "hectorsantillan/short-unique-id#1.0.0",
     "neon-animation": "PolymerElements/neon-animation#^2.1.0",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.1",
@@ -39,10 +36,7 @@
     "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.1",
     "paper-tabs": "PolymerElements/paper-tabs#^2.0.0",
     "paper-button": "PolymerElements/paper-button#^2.0.0",
-    "paper-alert-dialog": "Collaborne/paper-alert-dialog#^2.0.1",
-    "paper-suggest-textarea": "Collaborne/paper-suggest-textarea#^2.0.2",
     "paper-spinner": "PolymerElements/paper-spinner#^2.0.0",
-    "mp-calendar": "mpachnis/mp-calendar#^2.0.0",
     "paper-dialog": "PolymerElements/paper-dialog#^2.0.1",
     "paper-chip": "fabbricadigitale/paper-chip#^1.0.0",
     "pf-calendar": "PFElements/pf-calendar#^0.3.0",
@@ -59,11 +53,11 @@
     "web-animations-js": "^2.3.1",
     "paper-avatar": "Abe90/paper-avatar#^1.0.4",
     "salte-dialog": "salte-io/salte-dialog#^3.0.1",
-    "vaadin-notification": "vaadin/vaadin-notification#^1.0.0",
     "paper-dropdown-input": "Juravenator/paper-dropdown-input#^2.5.2",
     "iron-form": "PolymerElements/iron-form#^2.3.0",
-    "simple-grid": "m-mansoor-ali/simple-grid#^1.0.2",
-    "sortable-list": "sharedlabs/sortable-list#^1.0.2"
+    "sortable-list": "sharedlabs/sortable-list#^1.0.2",
+    "vaadin-notification": "vaadin/vaadin-notification#^1.1.0",
+    "iron-a11y-keys": "PolymerElements/iron-a11y-keys#^2.1.2"
   },
   "resolutions": {
     "polymer": "^2.0.0"

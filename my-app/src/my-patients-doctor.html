@@ -24,13 +24,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
-<link rel="import" href="my-patients-new.html">
-<link rel="import" href="my-patients-view.html">
-<link rel="import" href="my-patients-edit.html">
-
 <link rel="import" href="search-bar.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
+
+<link rel="lazy-import" href="my-patients-new.html">
+<link rel="lazy-import" href="my-patients-view.html">
+<link rel="lazy-import" href="my-patients-edit.html">
 
 <dom-module id="my-patients-doctor">
   <template>
@@ -214,8 +214,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/detail/:key" data="{{detailData}}" active="{{detailActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/edit/:key" data="{{editData}}" active="{{editActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail/:key" active="{{detailActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit/:key" active="{{editActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/new" active="{{newActive}}"></app-route>
 
     <div hidden$="{{!applicationActive}}">
       <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
@@ -278,7 +279,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </div>
 
                     <div class="clinic">[[item.personal.clinic_location]]</div>
-                    <a id="open" href$="{{_getViewDetailsLink(e)}}"></a>
+                    <a id="open" href$="{{_getViewDetailsLink(item.$key)}}"></a>
                     <a href$="{{_getEditAppLink(item.$key)}}">
                       <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="Edit">
                       </paper-icon-button>
@@ -299,25 +300,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
 
         <div name="/new">
-          <div id="patientsnew"></div>
-          <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-new>
+          <!-- <div id="patientsnew"></div> -->
+          <template is="dom-if" if="{{newActive}}" restamp>
+            <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-new>
+          </template>
         </div>
 
         <div name="view404">Not found.</div>
       </iron-pages>
     </div>
 
-    <div hidden$="{{!editActive}}">
-      <div id="patientsedit"></div>
-      <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" edit-key="{{editData.key}}" my-location="{{myLocation}}"
+    <!-- <div hidden$="{{!editActive}}">
+      <div id="patientsedit"></div> -->
+    <template is="dom-if" if="{{editActive}}" restamp>
+      <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" edit-key="{{editKey}}" my-location="{{myLocation}}"
         my-location-code="{{myLocationCode}}"></my-patients-edit>
-    </div>
+    </template>
+    <!-- </div> -->
 
-    <div hidden$="{{!detailActive}}">
-      <div id="patientsview"></div>
+    <!-- <div hidden$="{{!detailActive}}">
+      <div id="patientsview"></div> -->
+    <template is="dom-if" if="{{detailActive}}" restamp>
       <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
-        my-role="{{myRole}}" view-key="{{detailData.key}}"></my-patients-view>
-    </div>
+        my-role="{{myRole}}" view-key="{{viewKey}}"></my-patients-view>
+    </template>
+    <!-- </div> -->
 
   </template>
 
@@ -429,67 +436,69 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _selectThis(e) {
         var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
-        var node = Polymer.dom(this.root).querySelector("#patientsview");
-        this.e = data_args;
-        if (node) {
-          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
-          if (oldDiv) {
-            Polymer.dom(node.parentNode).removeChild(oldDiv);
-          }
-          var newDiv = document.createElement("my-patients-view");
-          newDiv.setAttribute("id", "d26");
-          newDiv.setAttribute("prev-route", this.route.prefix);
-          newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("my-location", this.myLocation);
-          newDiv.setAttribute("my-location-code", this.myLocationCode);
-          newDiv.setAttribute("my-role", this.myRole);
-          newDiv.setAttribute("view-key", data_args);
-          Polymer.dom(this.root).querySelector("#open").click();
-          //if open existing
-          var currentDiv = document.getElementById("patientsview");
-          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        }
+        this.viewKey = data_args;
+        // var node = Polymer.dom(this.root).querySelector("#patientsview");
+        // this.e = data_args;
+        // if (node) {
+        //   var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
+        //   if (oldDiv) {
+        //     Polymer.dom(node.parentNode).removeChild(oldDiv);
+        //   }
+        //   var newDiv = document.createElement("my-patients-view");
+        //   newDiv.setAttribute("id", "d26");
+        //   newDiv.setAttribute("prev-route", this.route.prefix);
+        //   newDiv.setAttribute("my-key", this.myKey);
+        //   newDiv.setAttribute("my-location", this.myLocation);
+        //   newDiv.setAttribute("my-location-code", this.myLocationCode);
+        //   newDiv.setAttribute("my-role", this.myRole);
+        //   newDiv.setAttribute("view-key", data_args);
+        Polymer.dom(this.root).querySelector("#open").click();
+        //   //if open existing
+        //   var currentDiv = document.getElementById("patientsview");
+        //   Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        // }
       },
 
       _editThis(e) {
         var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
-        var node = Polymer.dom(this.root).querySelector("#patientsedit");
-        if (node) {
-          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
-          if (oldDiv) {
-            Polymer.dom(node.parentNode).removeChild(oldDiv);
-          }
-          var newDiv = document.createElement("my-patients-edit");
-          newDiv.setAttribute("id", "d25");
-          newDiv.setAttribute("prev-route", this.route.prefix);
-          newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("edit-key", data_args);
-          newDiv.setAttribute("my-location", this.myLocation);
-          newDiv.setAttribute("my-location-code", this.myLocationCode);
-          //if open existing
-          var currentDiv = document.getElementById("patientsedit");
-          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        }
+        this.editKey = data_args;
+        // var node = Polymer.dom(this.root).querySelector("#patientsedit");
+        // if (node) {
+        //   var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
+        //   if (oldDiv) {
+        //     Polymer.dom(node.parentNode).removeChild(oldDiv);
+        //   }
+        //   var newDiv = document.createElement("my-patients-edit");
+        //   newDiv.setAttribute("id", "d25");
+        //   newDiv.setAttribute("prev-route", this.route.prefix);
+        //   newDiv.setAttribute("my-key", this.myKey);
+        //   newDiv.setAttribute("edit-key", data_args);
+        //   newDiv.setAttribute("my-location", this.myLocation);
+        //   newDiv.setAttribute("my-location-code", this.myLocationCode);
+        //   //if open existing
+        //   var currentDiv = document.getElementById("patientsedit");
+        //   Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        // }
       },
 
       _patientsNew() {
         Polymer.dom(this.root).querySelector("#newPatient").click();
-        var node = Polymer.dom(this.root).querySelector("#patientsnew");
-        if (node) {
-          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
-          if (oldDiv) {
-            Polymer.dom(node.parentNode).removeChild(oldDiv);
-          }
-          var newDiv = document.createElement("my-patients-new");
-          newDiv.setAttribute("id", "d23");
-          newDiv.setAttribute("prev-route", this.route.prefix);
-          newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("my-location", this.myLocation);
-          newDiv.setAttribute("my-location-code", this.myLocationCode);
-          //if open existing
-          var currentDiv = document.getElementById("patientsnew");
-          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        }
+        // var node = Polymer.dom(this.root).querySelector("#patientsnew");
+        // if (node) {
+        //   var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
+        //   if (oldDiv) {
+        //     Polymer.dom(node.parentNode).removeChild(oldDiv);
+        //   }
+        //   var newDiv = document.createElement("my-patients-new");
+        //   newDiv.setAttribute("id", "d23");
+        //   newDiv.setAttribute("prev-route", this.route.prefix);
+        //   newDiv.setAttribute("my-key", this.myKey);
+        //   newDiv.setAttribute("my-location", this.myLocation);
+        //   newDiv.setAttribute("my-location-code", this.myLocationCode);
+        //   //if open existing
+        //   var currentDiv = document.getElementById("patientsnew");
+        //   Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        // }
       },
 
       _fetching() {
