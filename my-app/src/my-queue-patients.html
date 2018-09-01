@@ -290,7 +290,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             properties: {
                 prevRoute: String,
-                route: Object,
                 myLocation: String,
                 myLocationCode: String,
                 myKey: String
@@ -300,9 +299,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 '_searchChanged(search)',
                 '_mypatientsChanged(mypatients.*)',
                 'todayDateChanged(todayDate)',
-                '_routeChanged(route)',
                 '_selectedItemChanged(selectedItem)'
             ],
+
+            ready() {
+                this.$.search.focus();
+                this.todayDate = this.formatTodayDate(new Date());
+                this.$.defaultQuery.disabled = false;
+            },
 
             _selectedItemChanged(e) {
                 if (e) {
@@ -321,15 +325,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     this.no = e.no;
                     this.$.dateDialog.open();
                     this.$.ironlist.clearSelection();
-                }
-            },
-
-            _routeChanged(e) {
-                if (e.prefix === "/queue" && e.path === "/search") {
-                    this.todayDate = this.formatTodayDate(new Date());
-                    this.$.defaultQuery.disabled = false;
-                } else {
-                    this.$.defaultQuery.disabled = true;
                 }
             },
 

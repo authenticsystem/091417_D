@@ -74,6 +74,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .card {
         text-align: center;
       }
+
+      #defaultCard {
+        line-height: 200px;
+        height: 200px;
+        text-align: center;
+        color: white;
+        background: #4568DC;
+        /* fallback for old browsers */
+        background: -webkit-linear-gradient(to left, #B06AB3, #4568DC);
+        /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to left, #B06AB3, #4568DC);
+        /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+      }
+
+      .center {
+        line-height: 1.5;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      h1 {
+        color: white;
+        margin-top: -6px;
+        font-weight: 450
+      }
     </style>
 
     <app-header-layout fullbleed has-scrolling-region>
@@ -84,8 +109,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </app-toolbar>
       </app-header>
 
-      <div hidden$="{{_isSecretary(myRole)}}" class="card">
-        Hello!
+      <div hidden$="{{_isSecretary(myRole)}}" class="card" id="defaultCard">
+        <div class="center">
+          <img src="../images/icon.png">
+          <h1>Making it better.</h1>
+        </div>
       </div>
 
       <div hidden$="{{_isDoctor(myRole)}}" style="padding:26px; margin-top:-30px">

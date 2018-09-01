@@ -91,15 +91,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 font-weight: 500; */
             }
 
-            #uploader {
-                -webkit-appearance: none;
-                /* appearance: none; */
-                width: 55%;
-                margin-left: 10px;
-                height: 5px;
-                display: none;
-            }
-
             paper-button {
                 height: 32px;
                 font-size: 12px;
@@ -118,7 +109,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
         </style>
 
-        <firebase-auth id="auth" user="{{user}}" provider="google" on-error="showError"></firebase-auth>
+        <app-route route="{{route}}" pattern="/account" active="{{accountActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/secretary" active="{{secretaryActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/services" active="{{servicesActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/hmo" active="{{hmoActive}}"></app-route>
 
         <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <div name="">
@@ -132,38 +126,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                     <div class="divHolder">
                         <div class="div1" align="center">
-                            <a href="/settings/account">
-                                <div on-tap="_newAccount" class="card">
-                                    <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
-                                    <h3>My Account</h3>
-                                </div>
-                            </a>
+                            <a id="accountHref" href="/settings/account"></a>
+                            <div on-tap="_newAccount" class="card">
+                                <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
+                                <h3>My Account</h3>
+                            </div>
                         </div>
                         <div hidden="{{isSecretary}}" class="div1" align="center">
-                            <a href="/settings/secretary">
-                                <div on-tap="_newSecretary" class="card">
-                                    <img preload style="width:150px; height:150px;" src="../images/secretary.png">
-                                    <h3>My Secretary</h3>
-                                </div>
-                            </a>
+                            <a id="secretaryHref" href="/settings/secretary"></a>
+                            <div on-tap="_newSecretary" class="card">
+                                <img preload style="width:150px; height:150px;" src="../images/secretary.png">
+                                <h3>My Secretary</h3>
+                            </div>
                         </div>
                     </div>
                     <div class="divHolder">
                         <div class="div1" align="center">
-                            <a href="/settings/services">
-                                <div on-tap="_newServices" class="card">
-                                    <img style="width:150px; height:150px; border-radius:50%;" src="../images/services.png">
-                                    <h3>My Services</h3>
-                                </div>
-                            </a>
+                            <a id="serviceHref" href="/settings/services"></a>
+                            <div on-tap="_newServices" class="card">
+                                <img style="width:150px; height:150px; border-radius:50%;" src="../images/services.png">
+                                <h3>My Services</h3>
+                            </div>
                         </div>
                         <div class="div1" align="center">
-                            <a href="/settings/hmo">
-                                <div on-tap="_newHMO" class="card">
-                                    <img style="width:150px; height:150px; border-radius:50%;" src="../images/hmo.png">
-                                    <h3>My HMO</h3>
-                                </div>
-                            </a>
+                            <a id="hmoHref" href="/settings/hmo"></a>
+                            <div on-tap="_newHMO" class="card">
+                                <img style="width:150px; height:150px; border-radius:50%;" src="../images/hmo.png">
+                                <h3>My HMO</h3>
+                            </div>
                         </div>
                     </div>
 
@@ -171,23 +161,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
 
             <div name="/account">
-                <div id="acc1"></div>
-                <my-account id="acc2" user="{{user}}"></my-account>
+                <template is="dom-if" if="{{accountActive}}" restamp>
+                    <my-account id="acc2" user="{{user}}"></my-account>
+                </template>
             </div>
 
             <div name="/secretary">
-                <div id="sec1"></div>
-                <my-secretary id="sec2" my-key="{{myKey}}" my-lastname="{{myLastname}}"></my-secretary>
+                <template is="dom-if" if="{{secretaryActive}}" restamp>
+                    <my-secretary id="sec2" my-key="{{myKey}}" my-lastname="{{myLastname}}"></my-secretary>
+                </template>
             </div>
 
             <div name="/services">
-                <div id="ser1"></div>
-                <my-services id="ser2" my-key="{{myKey}}" my-role="{{myRole}}"></my-services>
+                <template is="dom-if" if="{{servicesActive}}" restamp>
+                    <my-services id="ser2" my-key="{{myKey}}" my-role="{{myRole}}"></my-services>
+                </template>
             </div>
 
             <div name="/hmo">
-                <div id="hmo1"></div>
-                <my-hmo id="hmo2" my-key="{{myKey}}" my-role="{{myRole}}"></my-hmo>
+                <template is="dom-if" if="{{hmoActive}}" restamp>
+                    <my-hmo id="hmo2" my-key="{{myKey}}" my-role="{{myRole}}"></my-hmo>
+                </template>
             </div>
 
             <div name="view404">Not found.</div>
@@ -216,6 +210,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 account: {
                     type: Object,
                 },
+                route: {
+                    type: Object,
+                    observer: '_routeChanged'
+                },
                 user: Object,
                 myKey: String,
                 myLastname: String,
@@ -227,6 +225,47 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     type: Boolean,
                     value: true
                 }
+            },
+
+            _routeChanged(e) {
+                var page;
+                if (this.accountActive) page = "account";
+                else if (this.secretaryActive) page = "secretary";
+                else if (this.servicesActive) page = "services";
+                else if (this.hmoActive) page = "hmo";
+
+                if (page) {
+                    var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+                    Polymer.importHref(resolvedPageUrl);
+                }
+            },
+
+            _newAccount() {
+                this.$.accountHref.click();
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "account"
+                }));
+            },
+
+            _newSecretary() {
+                this.$.secretaryHref.click();
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "secretary"
+                }));
+            },
+
+            _newServices() {
+                this.$.serviceHref.click();
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "services"
+                }));
+            },
+
+            _newHMO() {
+                this.$.hmoHref.click();
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "hmo"
+                }));
             },
 
             _myRoleChanged() {
@@ -241,74 +280,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     }
                 }));
                 this.$.narrow = !this.$.narrow;
-            },
-
-            _newAccount() {
-                var node = Polymer.dom(this.root).querySelector("#acc1");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#acc2");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
-                    }
-                    var newDiv = document.createElement("my-account");
-                    newDiv.setAttribute("user", this.user);
-                    newDiv.setAttribute("id", "acc2");
-                    //if open existing
-                    var currentDiv = document.getElementById("acc1");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-                }
-            },
-
-            _newSecretary() {
-                var node = Polymer.dom(this.root).querySelector("#sec1");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#sec2");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
-                    }
-                    var newDiv = document.createElement("my-secretary");
-                    newDiv.setAttribute("user", this.user);
-                    newDiv.setAttribute("my-key", this.myKey);
-                    newDiv.setAttribute("my-lastname", this.myLastname);
-                    newDiv.setAttribute("id", "sec2");
-                    //if open existing
-                    var currentDiv = document.getElementById("sec1");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-                }
-            },
-
-            _newServices() {
-                var node = Polymer.dom(this.root).querySelector("#ser1");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#ser2");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
-                    }
-                    var newDiv = document.createElement("my-services");
-                    newDiv.setAttribute("my-key", this.myKey);
-                    newDiv.setAttribute("my-role", this.myRole);
-                    newDiv.setAttribute("id", "ser2");
-                    //if open existing
-                    var currentDiv = document.getElementById("ser1");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-                }
-            },
-
-            _newHMO() {
-                var node = Polymer.dom(this.root).querySelector("#hmo1");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#hmo2");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
-                    }
-                    var newDiv = document.createElement("my-hmo");
-                    newDiv.setAttribute("my-key", this.myKey);
-                    newDiv.setAttribute("my-role", this.myRole);
-                    newDiv.setAttribute("id", "hmo2");
-                    //if open existing
-                    var currentDiv = document.getElementById("hmo1");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-                }
             }
         })
 

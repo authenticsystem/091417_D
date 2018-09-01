@@ -458,7 +458,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <neon-animatable>
 
-            <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{viewKey}}" data="{{mycases}}">
+            <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{viewKey}}" data="{{mycases}}"
+              limit-to-first="15">
             </firebase-query>
 
             <div id="noRecord" class="docu1" style="padding:16px;">
@@ -631,7 +632,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         myLocationCode: String,
         myKey: String,
         myRole: String,
-        selectedPage: Number,
+        params: Object,
+        selectedPage: {
+          type: Number,
+          value: 0
+        },
         entryanimation: {
           type: String,
           value: "slide-from-right-animation"
@@ -646,8 +651,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         viewKey: String,
         personalQueue: Object,
-        filterValue: String,
-        isQue: Boolean
+        filterValue: String
       },
 
       observers: [
@@ -658,7 +662,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ],
 
       ready() {
-        this.selectedPage = 0;
+        this.viewKey = this.params.ref;
         this.todayDate = this.formatTodayDate(new Date());
       },
 

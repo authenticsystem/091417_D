@@ -13,8 +13,14 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/vaadin-notification/vaadin-notification.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 
+<link rel="import" href="my-queue-card.html">
 <link rel="import" href="sortable-list.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
@@ -23,7 +29,6 @@
 <link rel="lazy-import" href="my-patients-edit.html">
 <link rel="lazy-import" href="my-visits-new.html">
 <link rel="lazy-import" href="my-queue-patients.html">
-<link rel="lazy-import" href="my-queue-card.html">
 
 <dom-module id="my-queue-doctor">
     <template>
@@ -120,103 +125,108 @@
             }
         </style>
 
-        <app-route route="{{route}}" pattern="" active="{{queueActive}}"></app-route>
-        <app-route route="{{route}}" pattern="/visit/new" active="{{qVisitNewActive}}"></app-route>
-        <app-route route="{{route}}" pattern="/patient/edit/:key" data="{{editData}}" active="{{qPatientEditActive}}"></app-route>
-        <app-route route="{{route}}" pattern="/patient/detail/:key" data="{{detailData}}" active="{{qPatientViewActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/new" active="{{queueNewActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/search" active="{{searchActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/visit/new" active="{{visitNewActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/patient/edit" active="{{patientEditActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/patient/detail" active="{{patientViewActive}}"></app-route>
 
-        <div hidden$="{{!queueActive}}">
-            <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
-                <div name="">
-                    <app-header-layout fullbleed has-scrolling-region>
-                        <app-header fixed slot="header">
-                            <app-toolbar primary>
-                                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                                <div main-title>Queue</div>
-                                <div style="margin-top: -16px; margin-right:10px">
-                                    <paper-input class="dateInput" type="date" value="{{pickDate}}">
-                                        <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
-                                    </paper-input>
-                                    <div style="margin-left:4px;margin-top:-16px;">
-                                        <span id="pickDateText" style="font-size:10px; font-weight:400">{{pickText}}</span>
-                                    </div>
+        <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+            <div name="">
+                <app-header-layout fullbleed has-scrolling-region>
+                    <app-header fixed slot="header">
+                        <app-toolbar primary>
+                            <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                            <div main-title>Queue</div>
+                            <div style="margin-top: -16px; margin-right:10px">
+                                <paper-input class="dateInput" type="date" value="{{pickDate}}">
+                                    <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                                </paper-input>
+                                <div style="margin-left:4px;margin-top:-16px;">
+                                    <span id="pickDateText" style="font-size:10px; font-weight:400">{{pickText}}</span>
                                 </div>
-                            </app-toolbar>
-                        </app-header>
+                            </div>
+                        </app-toolbar>
+                    </app-header>
 
-                        <firebase-query id="query" path="/{{myKey}}/queue/{{myLocation}}/{{pickDate}}" order-by-child="queueNo" start-at="{{_parseInt(1)}}"
-                            data="{{myqueue}}">
-                        </firebase-query>
+                    <firebase-query id="query" path="/{{myKey}}/queue/{{myLocation}}/{{pickDate}}" order-by-child="queueNo" start-at="{{_parseInt(1)}}"
+                        data="{{myqueue}}">
+                    </firebase-query>
 
-                        <div id="noRecord">
-                            <div class="itemNoRecord">
-                                <div style="margin:auto">
-                                    {{record}}
-                                </div>
+                    <div id="noRecord">
+                        <div class="itemNoRecord">
+                            <div style="margin:auto">
+                                {{record}}
                             </div>
                         </div>
+                    </div>
 
-                        <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
-                            <div class="list2">
-                                <template is="dom-repeat" items="[[excetionItems]]">
+                    <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+                        <div class="list2">
+                            <template is="dom-repeat" items="[[excetionItems]]">
+                                <my-queue-card item="[[item]]"></my-queue-card>
+                            </template>
+                        </div>
+                        <sortable-list class="sortList" sortable=".list" all-data="[[includedItems]]" on-select="_selectedIndex" on-drop="_dropIndex">
+                            <template id="includedTemplate" is="dom-repeat" items="[[includedItems]]">
+                                <div on-tap="_selectThis" class="list">
                                     <my-queue-card item="[[item]]"></my-queue-card>
-                                    <a id="openVisitNew" href="{{route.prefix}}/visit/new"></a>
-                                    <a id="openPatientEdit" href="{{route.prefix}}/patient/edit/{{item.patient_refKey}}"></a>
-                                    <a id="openPatientView" href="{{route.prefix}}/patient/detail/{{item.patient_refKey}}"></a>
-                                </template>
-                            </div>
-                            <sortable-list class="sortList" sortable=".list" all-data="[[includedItems]]" on-select="_selectedIndex" on-drop="_dropIndex">
-                                <template id="includedTemplate" is="dom-repeat" items="[[includedItems]]">
-                                    <div on-tap="_selectThis" class="list">
-                                        <my-queue-card item="[[item]]"></my-queue-card>
-                                        <a id="openVisitNew" href="{{route.prefix}}/visit/new"></a>
-                                        <a id="openPatientEdit" href="{{route.prefix}}/patient/edit/{{item.patient_refKey}}"></a>
-                                        <a id="openPatientView" href="{{route.prefix}}/patient/detail/{{item.patient_refKey}}"></a>
-                                    </div>
-                                </template>
-                            </sortable-list>
-                        </iron-scroll-threshold>
+                                </div>
+                            </template>
+                        </sortable-list>
+                    </iron-scroll-threshold>
 
-                        <a href="/queue/new" id="queAdd"></a>
-                        <a href="/queue/search" id="queSearch"></a>
-                        <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_openAddNew"></paper-fab>
+                    <a id="queAdd" href="/queue/new"></a>
+                    <a id="queSearch" href="/queue/search"></a>
+                    <a id="openVisitNew" href="/queue/visit/new?n={{selectedData.patient_info.name}}&q={{selectedData.$key}}&no={{selectedData.queueNo}}&d={{pickDate}}"></a>
+                    <a id="openPatientEdit" href="/queue/patient/edit?e={{selectedData.patient_refKey}}&q={{selectedData.$key}}&d={{pickDate}}"></a>
+                    <a id="openPatientView" href="/queue/patient/detail?e={{selectedData.patient_refKey}}&q={{selectedData.$key}}&d={{pickDate}}"></a>
 
-                    </app-header-layout>
-                </div>
+                    <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_openAddNew"></paper-fab>
 
-                <div name="/new">
-                    <div id="patientsnew"></div>
+                </app-header-layout>
+            </div>
+
+            <div name="/new">
+                <template is="dom-if" if="{{queueNewActive}}" restamp>
                     <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-new>
-                </div>
+                </template>
+            </div>
 
-                <div name="/search">
-                    <div id="patientsearch"></div>
+            <div name="/search">
+                <template is="dom-if" if="{{searchActive}}" restamp>
                     <my-queue-patients id="d24" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" my-location="{{myLocation}}"
-                        my-location-code="{{myLocationCode}}" limit="1"></my-queue-patients>
-                </div>
+                        my-location-code="{{myLocationCode}}">
+                    </my-queue-patients>
+                </template>
+            </div>
 
-                <div name="view404">Not found.</div>
-            </iron-pages>
-        </div>
+            <div name="/patient/detail">
+                <template is="dom-if" if="{{patientViewActive}}" restamp>
+                    <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
+                        my-role="{{myRole}}" view-key="{{detailData.key}}">
+                    </my-patients-view>
+                </template>
+            </div>
 
-        <div hidden$="{{!qPatientEditActive}}">
-            <div id="patientsedit"></div>
-            <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" edit-key="{{editData.key}}" my-queue="yes" queue-key="{{selectedData.$key}}"
-                queue-date="{{pickDate}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-edit>
-        </div>
+            <div name="/patient/edit">
+                <template is="dom-if" if="{{patientEditActive}}" restamp>
+                    <my-patients-edit id="d25" prev-route="{{route.prefix}}" params="{{route.__queryParams}}" my-key="{{myKey}}" my-queue="yes"
+                        my-location="{{myLocation}}" my-location-code="{{myLocationCode}}">
+                    </my-patients-edit>
+                </template>
+            </div>
 
-        <div hidden$="{{!qPatientViewActive}}">
-            <div id="patientsview"></div>
-            <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
-                my-role="{{myRole}}" view-key="{{detailData.key}}"></my-patients-view>
-        </div>
+            <div name="/visit/new">
+                <template is="dom-if" if="{{visitNewActive}}" restamp>
+                    <my-visits-new id="d27" prev-route="{{route.prefix}}" params="{{route.__queryParams}}" my-key="{{myKey}}" my-queue="yes"
+                        my-location="{{myLocation}}" my-location-code="{{myLocationCode}}" my-limit="1">
+                    </my-visits-new>
+                </template>
+            </div>
 
-        <div hidden$="{{!qVisitNewActive}}">
-            <div id="newcase"></div>
-            <my-visits-new id="d27" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" queue-key="{{selectedData.$key}}"
-                queue-date="{{pickDate}}" queue-no="{{selectedData.queueNo}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
-                filter-value="{{selectedData.patient_info.name}}" my-limit="1"></my-visits-new>
-        </div>
+            <div name="view404">Not found.</div>
+        </iron-pages>
 
         <salte-dialog no-auto-fullscreen id="locationDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
             <h2 style="font-size: 16px; background: #F44336">Request denied!</h2>
@@ -312,8 +322,23 @@
             observers: [
                 '_myqueueChanged(myqueue.*)',
                 '_noOfPatientsChanged(noOfPatients)',
-                '_pickDateChanged(pickDate)'
+                '_pickDateChanged(pickDate)',
+                '_routeChanged(route)'
             ],
+
+            _routeChanged(e) {
+                var page;
+                if (this.queueNewActive) page = "patients-new";
+                else if (this.searchActive) page = "queue-patients";
+                else if (this.visitNewActive) page = "visits-new";
+                else if (this.patientEditActive) page = "patients-edit";
+                else if (this.patientViewActive) page = "";
+
+                if (page) {
+                    var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+                    Polymer.importHref(resolvedPageUrl);
+                }
+            },
 
             _pickDateChanged(date) {
                 if (date) {
@@ -383,49 +408,6 @@
                             console.warn(error);
                         });
                     }
-                }
-            },
-
-            _queueNew() {
-                Polymer.dom(this.root).querySelector("#queAdd").click();
-                var node = Polymer.dom(this.root).querySelector("#patientsnew");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
-                    }
-                    var newDiv = document.createElement("my-patients-new");
-                    newDiv.setAttribute("id", "d23");
-                    newDiv.setAttribute("prev-route", this.route.prefix);
-                    newDiv.setAttribute("my-key", this.myKey);
-                    newDiv.setAttribute("my-queue", "yes");
-                    newDiv.setAttribute("my-location", this.myLocation);
-                    newDiv.setAttribute("my-location-code", this.myLocationCode);
-                    //if open existing
-                    var currentDiv = document.getElementById("patientsnew");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-                }
-            },
-
-            _queueSearch() {
-                Polymer.dom(this.root).querySelector("#queSearch").click();
-                var node = Polymer.dom(this.root).querySelector("#patientsearch");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d24");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
-                    }
-                    var newDiv = document.createElement("my-queue-patients");
-                    newDiv.setAttribute("id", "d24");
-                    newDiv.setAttribute("prev-route", this.route.prefix);
-                    newDiv.setAttribute("route", JSON.stringify(this.route));
-                    newDiv.setAttribute("my-key", this.myKey);
-                    newDiv.setAttribute("my-queue", "yes");
-                    newDiv.setAttribute("my-location", this.myLocation);
-                    newDiv.setAttribute("my-location-code", this.myLocationCode);
-                    //if open existing
-                    var currentDiv = document.getElementById("patientsearch");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
                 }
             },
 
@@ -499,62 +481,6 @@
                 }
             },
 
-            _selectThis(e) {
-                this.selectedData = this.$.includedTemplate.itemForElement(e.target);
-                this.isNext = this.selectedData.isNext;
-                this.$.openDialog.open();
-            },
-
-            _editPatient() {
-                var node = Polymer.dom(this.root).querySelector("#patientsedit");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
-                    }
-                    var newDiv = document.createElement("my-patients-edit");
-                    newDiv.setAttribute("id", "d25");
-                    newDiv.setAttribute("prev-route", this.route.prefix);
-                    newDiv.setAttribute("my-key", this.myKey);
-                    newDiv.setAttribute("edit-key", this.selectedData.patient_refKey);
-                    newDiv.setAttribute("my-queue", "yes");
-                    newDiv.setAttribute("queue-key", this.selectedData.$key);
-                    newDiv.setAttribute("queue-date", this.pickDate);
-                    newDiv.setAttribute("my-location", this.myLocation);
-                    newDiv.setAttribute("my-location-code", this.myLocationCode);
-                    Polymer.dom(this.root).querySelector("#openPatientEdit").click();
-                    //if open existing
-                    var currentDiv = document.getElementById("patientsedit");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-                }
-            },
-
-            _addVisit() {
-                var node = Polymer.dom(this.root).querySelector("#newcase");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d27");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
-                    }
-                    var newDiv = document.createElement("my-visits-new");
-                    newDiv.setAttribute("id", "d27");
-                    newDiv.setAttribute("prev-route", this.route.prefix);
-                    newDiv.setAttribute("my-key", this.myKey);
-                    newDiv.setAttribute("my-queue", "yes");
-                    newDiv.setAttribute("queue-key", this.selectedData.$key);
-                    newDiv.setAttribute("queue-date", this.pickDate);
-                    newDiv.setAttribute("queue-no", this.selectedData.queueNo);
-                    newDiv.setAttribute("my-location", this.myLocation);
-                    newDiv.setAttribute("my-location-code", this.myLocationCode);
-                    newDiv.setAttribute("filter-value", this.selectedData.patient_info.name);
-                    newDiv.setAttribute("my-limit", 1);
-                    Polymer.dom(this.root).querySelector("#openVisitNew").click();
-                    //if open existing
-                    var currentDiv = document.getElementById("newcase");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-                }
-            },
-
             _openAddNew() {
                 if (this.myLocation == '(not set)') {
                     Polymer.dom(this.root).querySelector("#locationDialog").open();
@@ -562,6 +488,40 @@
                 else {
                     this.$.priorDialog.open();
                 }
+            },
+
+            _queueNew() {
+                this.$.queAdd.click();
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "patients-new"
+                }));
+            },
+
+            _queueSearch() {
+                this.$.queSearch.click();
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "queue-patients"
+                }));
+            },
+
+            _selectThis(e) {
+                this.selectedData = this.$.includedTemplate.itemForElement(e.target);
+                this.isNext = this.selectedData.isNext;
+                this.$.openDialog.open();
+            },
+
+            _editPatient() {
+                this.$.openPatientEdit.click();
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "patients-edit"
+                }));
+            },
+
+            _addVisit() {
+                this.$.openVisitNew.click();
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "visits-new"
+                }));
             },
 
             _cancelQueue() {

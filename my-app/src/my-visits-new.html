@@ -609,6 +609,7 @@
                 queueKey: String,
                 queueDate: String,
                 queueNo: Number,
+                params: Object,
                 myLocation: String,
                 prevRoute: String,
                 filterValue: String,
@@ -652,6 +653,13 @@
             },
 
             ready() {
+                if (this.myQueue) {
+                    this.filterValue = this.params.n;
+                    this.queueKey = this.params.q;
+                    this.queueDate = this.params.d;
+                    this.queueNo = parseInt(this.params.no);
+                }
+
                 this._clear();
                 this.todayDate = this.formatTodayDate(new Date());
             },

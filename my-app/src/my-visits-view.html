@@ -227,6 +227,7 @@
 
             properties: {
                 viewKey: String,
+                params: Object,
                 mycases: {
                     type: Object,
                     observer: '_myCaseChanged'
@@ -248,6 +249,10 @@
                     type: Object,
                     observer: '_mybillingChanged'
                 }
+            },
+
+            ready() {
+                this.viewKey = this.params.ref;
             },
 
             _mybillingChanged() {

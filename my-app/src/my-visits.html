@@ -236,129 +236,131 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/detail/:key" tail="{{detailRoute}}" data="{{detailData}}" active="{{detailActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail" active="{{detailActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit" active="{{editActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/new" active="{{newActive}}"></app-route>
 
-    <div hidden$="{{!applicationActive}}">
-      <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
-        <div name="">
-          <app-header-layout fullbleed has-scrolling-region>
-            <app-header fixed slot="header">
-              <template is="dom-if" if="{{!openSearch}}">
-                <app-toolbar primary id="tool1">
-                  <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                  <div main-title>Visits</div>
-                  <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
-                </app-toolbar>
-              </template>
-
-              <template is="dom-if" if="{{openSearch}}">
-                <app-toolbar primary id="tool2">
-                  <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                  <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
-                  <template is="dom-if" if="{{search}}">
-                    <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
-                  </template>
-                </app-toolbar>
-              </template>
-            </app-header>
-
-            <firebase-query disabled id="searchQuery" path="/{{myKey}}/cases" data="{{items}}" order-by-child="patient" start-at="{{search}}"
-              limit-to-first="15">
-            </firebase-query>
-
-            <firebase-query id="defaultQuery" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="order" start-at="{{lastorder}}"
-              limit-to-first="15">
-            </firebase-query>
-
-            <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
-              <div id="noRecord">
-                <div class="item" style="padding:15px;">
-                  <div style="margin:auto">
-                    No data found.
-                  </div>
-                </div>
-              </div>
+    <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+      <div name="">
+        <app-header-layout fullbleed has-scrolling-region>
+          <app-header fixed slot="header">
+            <template is="dom-if" if="{{!openSearch}}">
+              <app-toolbar primary id="tool1">
+                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                <div main-title>Visits</div>
+                <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+              </app-toolbar>
             </template>
 
-            <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
-              <iron-list items="[[items]]" as="item">
-                <template>
-                  <div class="divSeparator">
-                    <div class="item">
-                      <div class="pad" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
-                        <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
-                          <iron-icon icon="my-icons:watch-later"></iron-icon>
-                          <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+            <template is="dom-if" if="{{openSearch}}">
+              <app-toolbar primary id="tool2">
+                <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
+                <template is="dom-if" if="{{search}}">
+                  <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
+                </template>
+              </app-toolbar>
+            </template>
+          </app-header>
+
+          <firebase-query disabled id="searchQuery" path="/{{myKey}}/cases" data="{{items}}" order-by-child="patient" start-at="{{search}}"
+            limit-to-first="15">
+          </firebase-query>
+
+          <firebase-query id="defaultQuery" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="order" start-at="{{lastorder}}"
+            limit-to-first="15">
+          </firebase-query>
+
+          <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
+            <div id="noRecord">
+              <div class="item" style="padding:15px;">
+                <div style="margin:auto">
+                  No data found.
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+            <iron-list items="[[items]]" as="item">
+              <template>
+                <div class="divSeparator">
+                  <div class="item">
+                    <div class="pad" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
+                      <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
+                        <iron-icon icon="my-icons:watch-later"></iron-icon>
+                        <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                      </div>
+                      <div id="{{item.$key}}" style=" padding: 16px; display:flex">
+                        <div>
+                          <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                         </div>
-                        <div id="{{item.$key}}" style=" padding: 16px; display:flex">
-                          <div>
-                            <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+                        <div id="{{item.$key}}" style=" margin-left:10px;">
+                          <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
+                          <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
+                          <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}}
+                            [[item.patientinfo.gender]]
                           </div>
-                          <div id="{{item.$key}}" style=" margin-left:10px;">
-                            <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
-                            <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
-                            <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}}
-                              [[item.patientinfo.gender]]
-                            </div>
-                            <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
+                          <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
 
-                            <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
-                              <span id="{{item.$key}}" class="longText">Chief Complaint</span>
-                              <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
-                            </div>
+                          <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
+                            <span id="{{item.$key}}" class="longText">Chief Complaint</span>
+                            <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                          </div>
 
-                            <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkSOAP(item.template)}}">
-                              <span id="{{item.$key}}" class="longText">Subjective</span>
-                              <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
-                            </div>
+                          <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkSOAP(item.template)}}">
+                            <span id="{{item.$key}}" class="longText">Subjective</span>
+                            <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
                           </div>
                         </div>
                       </div>
-
-                      <div class="clinic">[[item.clinic_location]]</div>
-
-                      <a id="open" href$="{{_getViewDetailsLink(e)}}"></a>
-                      <a href$="{{_getEditAppLink(item.$key)}}">
-                        <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit">
-                        </paper-icon-button>
-                      </a>
                     </div>
+
+                    <div class="clinic">[[item.clinic_location]]</div>
+
+                    <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit">
+                    </paper-icon-button>
+
                   </div>
-                </template>
-              </iron-list>
+                </div>
+              </template>
+            </iron-list>
 
-              <div class="loadingIndicator">
-                <paper-spinner active="{{loadingPeople}}"></paper-spinner>
-              </div>
-            </iron-scroll-threshold>
+            <div class="loadingIndicator">
+              <paper-spinner active="{{loadingPeople}}"></paper-spinner>
+            </div>
+          </iron-scroll-threshold>
 
-          </app-header-layout>
+        </app-header-layout>
 
-          <a href="/visits/new" style="text-decoration: none;">
-            <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_caseNew"></paper-fab>
-          </a>
-        </div>
+        <a id="newVisit" href="/visits/new"></a>
+        <a id="openView" href="/visits/detail?ref=[[viewKey]]"></a>
+        <a id="openEdit" href="/visits/edit?ref=[[editKey]]"></a>
 
-        <div name="/new">
-          <div id="newcase"></div>
-          <my-visits-new id="d23" my-key='{{myKey}}' path="" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-visits-new>
-        </div>
+        <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_caseNew"></paper-fab>
 
-        <div name="view404">Not found.</div>
-      </iron-pages>
-    </div>
+      </div>
 
-    <div hidden$="{{!editActive}}">
-      <div id="caseedit"></div>
-      <my-visits-edit id="d25" my-key='{{myKey}}' edit-key='{{editData.key}}' prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-visits-edit>
-    </div>
+      <div name="/new">
+        <template is="dom-if" if="{{newActive}}" restamp>
+          <my-visits-new id="d23" my-key='{{myKey}}' prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-visits-new>
+        </template>
+      </div>
 
-    <div hidden$="{{!detailActive}}">
-      <div id="casesview"></div>
-      <my-visits-view id="d26" my-key='{{myKey}}' view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-visits-view>
-    </div>
+      <div name="/edit">
+        <template is="dom-if" if="{{editActive}}" restamp>
+          <my-visits-edit id="d25" my-key='{{myKey}}' params="{{route.__queryParams}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-visits-edit>
+        </template>
+      </div>
+
+      <div name="/detail">
+        <template is="dom-if" if="{{detailActive}}" restamp>
+          <my-visits-view id="d26" my-key='{{myKey}}' params="{{route.__queryParams}}" prev-route="{{route.prefix}}"></my-visits-view>
+        </template>
+      </div>
+
+      <div name="view404">Not found.</div>
+    </iron-pages>
 
   </template>
 
@@ -389,8 +391,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       observers: [
         '_searchChanged(search)',
-        '_mycasesChanged(mycases.*)'
+        '_mycasesChanged(mycases.*)',
+        '_routeChanged(route)'
       ],
+
+      _routeChanged(e) {
+        var page;
+        if (this.detailActive) page = "visits-view";
+        else if (this.editActive) page = "visits-edit";
+        else if (this.newActive) page = "visits-new";
+
+        if (page) {
+          var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+          Polymer.importHref(resolvedPageUrl);
+        }
+      },
 
       _searchChanged(search) {
         if (search) {
@@ -594,60 +609,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _selectThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
-        var node = Polymer.dom(this.root).querySelector("#casesview");
-        this.e = data_args;
-        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
-        if (oldDiv) {
-          Polymer.dom(node.parentNode).removeChild(oldDiv);
-        }
-        var newDiv = document.createElement("my-visits-view");
-        newDiv.setAttribute("my-key", this.myKey);
-        newDiv.setAttribute("id", "d26");
-        newDiv.setAttribute("view-key", data_args);
-        newDiv.setAttribute("prev-route", this.route.prefix);
-        Polymer.dom(this.root).querySelector("#open").click();
-
-        var currentDiv = document.getElementById("casesview");
-        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        this.viewKey = Polymer.dom(e).rootTarget.getAttribute("id");
+        this.$.openView.click();
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "visits-view"
+        }));
       },
 
       _editThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
-        var node = Polymer.dom(this.root).querySelector("#caseedit");
-        if (node) {
-          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
-          if (oldDiv) {
-            Polymer.dom(node.parentNode).removeChild(oldDiv);
-          }
-          var newDiv = document.createElement("my-visits-edit");
-          newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("id", "d25");
-          newDiv.setAttribute("edit-key", data_args);
-          newDiv.setAttribute("prev-route", this.route.prefix);
-          newDiv.setAttribute("my-location", this.myLocation);
-          //if open existing
-          var currentDiv = document.getElementById("caseedit");
-          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        }
+        this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
+        this.$.openEdit.click();
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "visits-edit"
+        }));
       },
 
       _caseNew() {
-        var node = Polymer.dom(this.root).querySelector("#newcase");
-        if (node) {
-          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
-          if (oldDiv) {
-            Polymer.dom(node.parentNode).removeChild(oldDiv);
-          }
-          var newDiv = document.createElement("my-visits-new");
-          newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("id", "d23");
-          newDiv.setAttribute("prev-route", this.route.prefix);
-          newDiv.setAttribute("my-location", this.myLocation);
-          //if open existing
-          var currentDiv = document.getElementById("newcase");
-          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        }
+        this.$.newVisit.click();
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "visits-new"
+        }));
       },
 
       _deletePatient(e) {

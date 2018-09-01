@@ -57,7 +57,9 @@
     "iron-form": "PolymerElements/iron-form#^2.3.0",
     "sortable-list": "sharedlabs/sortable-list#^1.0.2",
     "vaadin-notification": "vaadin/vaadin-notification#^1.1.0",
-    "iron-a11y-keys": "PolymerElements/iron-a11y-keys#^2.1.2"
+    "iron-a11y-keys": "PolymerElements/iron-a11y-keys#^2.1.2",
+    "timeu-wizard": "timeu/timeu-wizard#^2.0.0",
+    "animated-content-placeholder": "Collaborne/animated-content-placeholder#^1.1.2"
   },
   "resolutions": {
     "polymer": "^2.0.0"

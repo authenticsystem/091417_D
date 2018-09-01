@@ -198,7 +198,8 @@
                         <paper-button class="billBtn" on-tap="_showBillDialog">Add Bill</paper-button>
                         <div id="billHolder">
                             <div class="docu2">
-                                <span style="font-weight: 400; font-size: 12px; float: right">(Ref.# will be generated upon submit) </span>
+                                <span style="font-weight: 400; font-size: 12px; float: right">(Ref.# will be generated upon
+                                    submit) </span>
                                 <paper-input style="width:250px" label="Remarks" value="{{remarks}}" always-float-label></paper-input>
                                 <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed multi-selection selectable selected-items="{{selectedItem}}">
                                     <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
@@ -278,7 +279,9 @@
                                     <p id="p" style="margin-top:-4px">Billing ref.#&nbsp;</p>
                                 </div>
                                 <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
-                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving data.</div>
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving
+                                    data.
+                                </div>
                             </div>
                         </div>
                     </neon-animatable>
@@ -327,7 +330,11 @@
                 myLocation: String,
                 prevRoute: String,
                 myKey: String,
-                selectedPage: Number,
+                params: Object,
+                selectedPage: {
+                    type: Number,
+                    value: 0
+                },
                 entryanimation: {
                     type: String,
                     value: "slide-from-right-animation"
@@ -358,47 +365,8 @@
                 }
             },
 
-            _showBillDialog() {
-                this.entryanimation = 'fade-in-animation';
-                this.exitanimation = 'fade-out-animation';
-                this.selectedPage = 1;
-                // this.$.billingDialog.open();
-            },
-
-            _deleteBill() {
-                if (this.selectedItem.length > 0) {
-                    function removeByKey(array, params) {
-                        array.some(function (item, index) {
-                            if (array[index][params.key] === params.value) {
-                                // found it!
-                                array.splice(index, 1);
-                                return true; // stops the loop
-                            }
-                            return false;
-                        });
-                        return array;
-                    }
-
-                    var listOfItems = this.billingData;
-                    var deleteList = this.selectedItem;
-
-                    for (var i = 0; i < deleteList.length; ++i) {
-                        removeByKey(listOfItems, {
-                            key: 'num',
-                            value: deleteList[i].num
-                        });
-                    }
-
-                    this.billingData = [];
-                    this.billingData = listOfItems;
-                    Polymer.dom(this.root).querySelector("#billingDatatable").deselectAll();
-                }
-            },
-
             ready() {
-                this.selectedPage = 0;
-                this.favrighthide = true;
-                this.favlefthide = true;
+                this.editKey = this.params.ref;
                 this.$.hmoQuery.disabled = true;
                 this.$.locationQuery.disabled = true;
                 Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
@@ -514,6 +482,43 @@
                 this.billErr = '';
                 if (e) {
                     this.amount = parseInt(e.id);
+                }
+            },
+
+            _showBillDialog() {
+                this.entryanimation = 'fade-in-animation';
+                this.exitanimation = 'fade-out-animation';
+                this.selectedPage = 1;
+                // this.$.billingDialog.open();
+            },
+
+            _deleteBill() {
+                if (this.selectedItem.length > 0) {
+                    function removeByKey(array, params) {
+                        array.some(function (item, index) {
+                            if (array[index][params.key] === params.value) {
+                                // found it!
+                                array.splice(index, 1);
+                                return true; // stops the loop
+                            }
+                            return false;
+                        });
+                        return array;
+                    }
+
+                    var listOfItems = this.billingData;
+                    var deleteList = this.selectedItem;
+
+                    for (var i = 0; i < deleteList.length; ++i) {
+                        removeByKey(listOfItems, {
+                            key: 'num',
+                            value: deleteList[i].num
+                        });
+                    }
+
+                    this.billingData = [];
+                    this.billingData = listOfItems;
+                    Polymer.dom(this.root).querySelector("#billingDatatable").deselectAll();
                 }
             },
 

@@ -132,10 +132,15 @@
                 prevRoute: String,
                 myKey: String,
                 viewKey: String,
+                params: Object,
                 billingData: {
                     type: Array,
                     value: []
                 }
+            },
+
+            ready() {
+                this.viewKey = this.params.ref;
             },
 
             observers: [

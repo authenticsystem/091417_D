@@ -387,6 +387,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         super.ready();
         this.addEventListener('toggleDrawer', (e) => this._onChangeSection(e));
         this.addEventListener('toggleDrawer2', (e) => this._onChangeSection2(e));
+        this.addEventListener('loadPage', (e) => this._loadThisPage(e.detail));
         // listen for online/offline
         window.addEventListener('online', (e) => this._updateOnlineStatus(e));
         window.addEventListener('offline', (e) => this._updateOnlineStatus(e));
@@ -481,6 +482,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _pageChanged(page) {
+        this._loadThisPage(page);
+      }
+
+      _loadThisPage(page) {
         // Load page import on demand. Show 404 page if fails
         var self = this;
         self._showOverlay();

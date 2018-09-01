@@ -182,7 +182,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-toolbar>
         </app-header>
 
-        <firebase-query id="query" path="{{path}}" order-by-key equal-to="{{editKey}}" data="{{mypatient}}" limit-to-first="1">
+        <firebase-query id="query" path="/{{myKey}}/patients" order-by-key equal-to="{{editKey}}" data="{{mypatient}}" limit-to-first="1">
         </firebase-query>
 
         <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
@@ -589,7 +589,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         myQueue: String,
         queueKey: String,
         queueDate: String,
-        selectedPage: Number,
+        params: Object,
+        selectedPage: {
+          type: Number,
+          value: 0
+        },
         entryanimation: {
           type: String,
           value: "slide-from-right-animation"
@@ -604,7 +608,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         favrighthide: {
           type: Boolean,
-          value: true
+          value: false
         },
         isDateChanged: {
           type: Boolean,
@@ -620,17 +624,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'personalInfoChanged(fname, mname, lname, bday, age)',
         'mypatientChanged(mypatient)',
         '_todayDateChanged(todayDate)',
-        '_editKeyChanged(editKey)',
         '_referChanged(refer)'
       ],
 
-      _editKeyChanged(e) {
-        if (e) {
-          this.path = '/' + this.myKey + '/patients';
+      ready() {
+       
+        if (this.myQueue) {
+          this.editKey = this.params.e;
+          this.queueKey = this.params.q;
+          this.queueDate = this.params.d;
+        } else {
+          this.editKey = this.params.ref;
         }
-        else {
-          this.path = '';
-        }
+
+        this.storeDate = this.todayDate;
       },
 
       _todayDateChanged(date) {
@@ -836,12 +843,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.narrow = !this.$.narrow;
       },
 
-      ready() {
-        this.selectedPage = 0;
-        this.favrighthide = false;
-        this.storeDate = this.todayDate;
-      },
-
       _select1(e) {
         this.entryanimation = "slide-from-left-animation";
         this.exitanimation = "slide-right-animation";
@@ -971,7 +972,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   sex: self.sex ? self.sex : "",
                   name: self.lname + ', ' + self.fname + ' ' + self.mname,
                   hmo: self.indicate
-                }
+                },
+                profile: self.p_profile ? self.p_profile : null
               });
             }
 

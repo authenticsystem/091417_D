@@ -213,118 +213,113 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/detail/:key" active="{{detailActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/edit/:key" active="{{editActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail" active="{{detailActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit" active="{{editActive}}"></app-route>
     <app-route route="{{route}}" pattern="/new" active="{{newActive}}"></app-route>
 
-    <div hidden$="{{!applicationActive}}">
-      <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
-        <div name="">
-          <app-header-layout fullbleed has-scrolling-region>
-            <app-header fixed slot="header">
-              <template is="dom-if" if="{{!openSearch}}">
-                <app-toolbar primary id="tool1">
-                  <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                  <div main-title>Patients</div>
-                  <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
-                  <!-- <paper-toggle-button class="green" on-tap="_toggleLocation" checked="{{isCheck}}">Location</paper-toggle-button> -->
-                </app-toolbar>
-              </template>
-
-              <template is="dom-if" if="{{openSearch}}">
-                <app-toolbar primary id="tool2">
-                  <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                  <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
-                  <template is="dom-if" if="{{search}}">
-                    <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
-                  </template>
-                </app-toolbar>
-              </template>
-            </app-header>
-
-            <firebase-query disabled id="searchQuery" path="/{{myKey}}/patients" data="{{items}}" order-by-child="personal/name" start-at="{{search}}"
-              limit-to-first="15">
-            </firebase-query>
-
-            <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no" start-at="{{lastnum}}"
-              limit-to-first="15">
-            </firebase-query>
-
-            <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
-              <div id="noRecord">
-                <div class="item">
-                  <div style="margin:auto">
-                    No data found.
-                  </div>
-                </div>
-              </div>
+    <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+      <div name="">
+        <app-header-layout fullbleed has-scrolling-region>
+          <app-header fixed slot="header">
+            <template is="dom-if" if="{{!openSearch}}">
+              <app-toolbar primary id="tool1">
+                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                <div main-title>Patients</div>
+                <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+                <!-- <paper-toggle-button class="green" on-tap="_toggleLocation" checked="{{isCheck}}">Location</paper-toggle-button> -->
+              </app-toolbar>
             </template>
 
-            <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
-              <iron-list items="[[items]]" as="item">
-                <template>
-                  <div class="item">
-                    <div>
-                      <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
-                    </div>
-                    <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
-                      <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
-                      <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
-                      <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}}
-                        [[item.personal.sex]]
-                      </div>
-                      <div id="{{item.$key}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
-                      <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
-                    </div>
-
-                    <div class="clinic">[[item.personal.clinic_location]]</div>
-                    <a id="open" href$="{{_getViewDetailsLink(item.$key)}}"></a>
-                    <a href$="{{_getEditAppLink(item.$key)}}">
-                      <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="Edit">
-                      </paper-icon-button>
-                    </a>
-                  </div>
+            <template is="dom-if" if="{{openSearch}}">
+              <app-toolbar primary id="tool2">
+                <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
+                <template is="dom-if" if="{{search}}">
+                  <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
                 </template>
-              </iron-list>
+              </app-toolbar>
+            </template>
+          </app-header>
 
-              <div class="loadingIndicator">
-                <paper-spinner active="{{loadingPeople}}"></paper-spinner>
+          <firebase-query disabled id="searchQuery" path="/{{myKey}}/patients" data="{{items}}" order-by-child="personal/name" start-at="{{search}}"
+            limit-to-first="15">
+          </firebase-query>
+
+          <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no" start-at="{{lastnum}}"
+            limit-to-first="15">
+          </firebase-query>
+
+          <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
+            <div id="noRecord">
+              <div class="item">
+                <div style="margin:auto">
+                  No data found.
+                </div>
               </div>
-            </iron-scroll-threshold>
-
-          </app-header-layout>
-
-          <a href="/patients/new" id="newPatient"></a>
-          <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_patientsNew"></paper-fab>
-        </div>
-
-        <div name="/new">
-          <!-- <div id="patientsnew"></div> -->
-          <template is="dom-if" if="{{newActive}}" restamp>
-            <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-new>
+            </div>
           </template>
-        </div>
 
-        <div name="view404">Not found.</div>
-      </iron-pages>
-    </div>
+          <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+            <iron-list items="[[items]]" as="item">
+              <template>
+                <div class="item" tabindex$="[[tabIndex]]">
+                  <div>
+                    <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+                  </div>
+                  <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
+                    <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
+                    <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
+                    <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}}
+                      [[item.personal.sex]]
+                    </div>
+                    <div id="{{item.$key}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
+                    <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
+                  </div>
 
-    <!-- <div hidden$="{{!editActive}}">
-      <div id="patientsedit"></div> -->
-    <template is="dom-if" if="{{editActive}}" restamp>
-      <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" edit-key="{{editKey}}" my-location="{{myLocation}}"
-        my-location-code="{{myLocationCode}}"></my-patients-edit>
-    </template>
-    <!-- </div> -->
+                  <div class="clinic">[[item.personal.clinic_location]]</div>
+                  <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="Edit">
+                  </paper-icon-button>
+                </div>
+              </template>
+            </iron-list>
 
-    <!-- <div hidden$="{{!detailActive}}">
-      <div id="patientsview"></div> -->
-    <template is="dom-if" if="{{detailActive}}" restamp>
-      <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
-        my-role="{{myRole}}" view-key="{{viewKey}}"></my-patients-view>
-    </template>
-    <!-- </div> -->
+            <div class="loadingIndicator">
+              <paper-spinner active="{{loadingPeople}}"></paper-spinner>
+            </div>
+          </iron-scroll-threshold>
+
+        </app-header-layout>
+
+        <a id="newPatient" href="/patients/new"></a>
+        <a id="openView" href="/patients/detail?ref=[[viewKey]]"></a>
+        <a id="openEdit" href="/patients/edit?ref=[[editKey]]"></a>
+
+        <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_patientsNew"></paper-fab>
+
+      </div>
+
+      <div name="/new">
+        <template is="dom-if" if="{{newActive}}" restamp>
+          <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-new>
+        </template>
+      </div>
+
+      <div name="/edit">
+        <template is="dom-if" if="{{editActive}}" restamp>
+          <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" params="{{route.__queryParams}}" my-location="{{myLocation}}"
+            my-location-code="{{myLocationCode}}"></my-patients-edit>
+        </template>
+      </div>
+
+      <div name="/detail">
+        <template is="dom-if" if="{{detailActive}}" restamp>
+          <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
+            my-role="{{myRole}}" params="{{route.__queryParams}}"></my-patients-view>
+        </template>
+      </div>
+
+      <div name="view404">Not found.</div>
+    </iron-pages>
 
   </template>
 
@@ -361,8 +356,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       observers: [
         '_searchChanged(search)',
-        '_mypatientsChanged(mypatients.*)'
+        '_mypatientsChanged(mypatients.*)',
+        '_routeChanged(route)'
       ],
+
+      _routeChanged(e) {
+        var page;
+        if (this.detailActive) page = "patients-view";
+        else if (this.editActive) page = "patients-edit";
+        else if (this.newActive) page = "patients-new";
+
+        if (page) {
+          var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+          Polymer.importHref(resolvedPageUrl);
+        }
+      },
 
       _searchChanged(search) {
         if (search) {
@@ -422,83 +430,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _getViewDetailsLink(e) {
-        if (e) {
-          return '/patients/detail/' + e.toString();
-        }
-      },
-
-      _getEditAppLink(e) {
-        if (e) {
-          return '/patients/edit/' + e.toString();
-        }
-      },
-
       _selectThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
-        this.viewKey = data_args;
-        // var node = Polymer.dom(this.root).querySelector("#patientsview");
-        // this.e = data_args;
-        // if (node) {
-        //   var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
-        //   if (oldDiv) {
-        //     Polymer.dom(node.parentNode).removeChild(oldDiv);
-        //   }
-        //   var newDiv = document.createElement("my-patients-view");
-        //   newDiv.setAttribute("id", "d26");
-        //   newDiv.setAttribute("prev-route", this.route.prefix);
-        //   newDiv.setAttribute("my-key", this.myKey);
-        //   newDiv.setAttribute("my-location", this.myLocation);
-        //   newDiv.setAttribute("my-location-code", this.myLocationCode);
-        //   newDiv.setAttribute("my-role", this.myRole);
-        //   newDiv.setAttribute("view-key", data_args);
-        Polymer.dom(this.root).querySelector("#open").click();
-        //   //if open existing
-        //   var currentDiv = document.getElementById("patientsview");
-        //   Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        // }
+        this.viewKey = Polymer.dom(e).rootTarget.getAttribute("id");
+        this.$.openView.click();
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "patients-view"
+        }));
       },
 
       _editThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
-        this.editKey = data_args;
-        // var node = Polymer.dom(this.root).querySelector("#patientsedit");
-        // if (node) {
-        //   var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
-        //   if (oldDiv) {
-        //     Polymer.dom(node.parentNode).removeChild(oldDiv);
-        //   }
-        //   var newDiv = document.createElement("my-patients-edit");
-        //   newDiv.setAttribute("id", "d25");
-        //   newDiv.setAttribute("prev-route", this.route.prefix);
-        //   newDiv.setAttribute("my-key", this.myKey);
-        //   newDiv.setAttribute("edit-key", data_args);
-        //   newDiv.setAttribute("my-location", this.myLocation);
-        //   newDiv.setAttribute("my-location-code", this.myLocationCode);
-        //   //if open existing
-        //   var currentDiv = document.getElementById("patientsedit");
-        //   Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        // }
+        this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
+        this.$.openEdit.click();
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "patients-edit"
+        }));
       },
 
       _patientsNew() {
-        Polymer.dom(this.root).querySelector("#newPatient").click();
-        // var node = Polymer.dom(this.root).querySelector("#patientsnew");
-        // if (node) {
-        //   var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
-        //   if (oldDiv) {
-        //     Polymer.dom(node.parentNode).removeChild(oldDiv);
-        //   }
-        //   var newDiv = document.createElement("my-patients-new");
-        //   newDiv.setAttribute("id", "d23");
-        //   newDiv.setAttribute("prev-route", this.route.prefix);
-        //   newDiv.setAttribute("my-key", this.myKey);
-        //   newDiv.setAttribute("my-location", this.myLocation);
-        //   newDiv.setAttribute("my-location-code", this.myLocationCode);
-        //   //if open existing
-        //   var currentDiv = document.getElementById("patientsnew");
-        //   Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        // }
+        // Polymer.dom(this.root).querySelector("#newPatient").click();
+        this.$.newPatient.click();
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "patients-new"
+        }));
       },
 
       _fetching() {

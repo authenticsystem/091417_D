@@ -211,107 +211,107 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/detail/:key" data="{{detailData}}" active="{{detailActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/edit/:key" data="{{editData}}" active="{{editActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail" active="{{detailActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit" active="{{editActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/new" active="{{newActive}}"></app-route>
 
-    <div hidden$="{{!applicationActive}}">
-      <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
-        <div name="">
-          <app-header-layout fullbleed has-scrolling-region>
-            <app-header fixed slot="header">
-              <template is="dom-if" if="{{!openSearch}}">
-                <app-toolbar primary id="tool1">
-                  <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                  <div main-title>Billing</div>
-                  <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
-                </app-toolbar>
-              </template>
+    <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+      <div name="">
+        <app-header-layout fullbleed has-scrolling-region>
+          <app-header fixed slot="header">
+            <template is="dom-if" if="{{!openSearch}}">
+              <app-toolbar primary id="tool1">
+                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                <div main-title>Billing</div>
+                <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+              </app-toolbar>
+            </template>
 
-              <template is="dom-if" if="{{openSearch}}">
-                <app-toolbar primary id="tool2">
-                  <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                  <paper-search-bar id="search" placeholder="Search reference no .." query="{{search}}" disable-filter-button></paper-search-bar>
-                  <template is="dom-if" if="{{search}}">
-                    <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
-                  </template>
-                </app-toolbar>
-              </template>
-            </app-header>
+            <template is="dom-if" if="{{openSearch}}">
+              <app-toolbar primary id="tool2">
+                <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                <paper-search-bar id="search" placeholder="Search reference no .." query="{{search}}" disable-filter-button></paper-search-bar>
+                <template is="dom-if" if="{{search}}">
+                  <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
+                </template>
+              </app-toolbar>
+            </template>
+          </app-header>
 
-            <firebase-query id="query" path="/{{myKey}}/billing" data="{{myBilling}}" order-by-child="{{order}}" start-at="{{search}}">
-            </firebase-query>
+          <firebase-query id="query" path="/{{myKey}}/billing" data="{{myBilling}}" order-by-child="{{order}}" start-at="{{search}}"
+            limit-to-first="15">
+          </firebase-query>
 
-            <div id="noRecord">
-              <div class="item" style="padding:15px">
-                <div style="margin:auto">
-                  {{record}}
-                </div>
+          <div id="noRecord">
+            <div class="item" style="padding:15px">
+              <div style="margin:auto">
+                {{record}}
               </div>
             </div>
+          </div>
 
-            <iron-list items="[[myBilling]]" as="item" selection-enabled scroll-target="threshold">
-              <template>
-                <div class="divSeparator">
-                  <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-
-                    <div class="card-content" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
-                      <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
-                        <iron-icon icon="my-icons:watch-later"></iron-icon>
-                        <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
-                      </div>
-                      <div id="{{item.$key}}" style=" padding: 16px; display:flex">
-                        <div id="{{item.$key}}" style=" margin-left:10px;">
-                          <div id="{{item.$key}}" style="font-size:11px" class="longText">Ref.# [[item.ref]]</div>
-                          <div id="{{item.$key}}" class="primary">[[_manyServices(item.billing_data)]]</div>
-                          <!-- <div id="{{item.$key}}" class="primary">“[[item.remarks]]”</div> -->
-                        </div>
+          <iron-list items="[[myBilling]]" as="item" selection-enabled scroll-target="threshold">
+            <template>
+              <div class="divSeparator">
+                <div class="item" tabindex$="[[tabIndex]]">
+                  <div class="card-content" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
+                    <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
+                      <iron-icon icon="my-icons:watch-later"></iron-icon>
+                      <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+                    </div>
+                    <div id="{{item.$key}}" style=" padding: 16px; display:flex">
+                      <div id="{{item.$key}}" style=" margin-left:10px;">
+                        <div id="{{item.$key}}" style="font-size:11px" class="longText">Ref.# [[item.ref]]</div>
+                        <div id="{{item.$key}}" class="primary">[[_manyServices(item.billing_data)]]</div>
+                        <!-- <div id="{{item.$key}}" class="primary">“[[item.remarks]]”</div> -->
                       </div>
                     </div>
-
-                    <a id="open" href="billing/detail/{{item.$key}}"></a>
-                    <a href="billing/edit/{{item.$key}}">
-                      <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
-                      </paper-icon-button>
-                    </a>
-                    <div class="clinic">[[item.clinic_location]]</div>
-                    <div class="bill">Php [[item.billing_total]].00</div>
-
                   </div>
-                  <!-- <div hidden$="[[item.collected]]" class="collected">Collected</div> -->
+
+                  <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
+                  </paper-icon-button>
+
+                  <div class="clinic">[[item.clinic_location]]</div>
+                  <div class="bill">Php [[item.billing_total]].00</div>
+
                 </div>
-              </template>
-            </iron-list>
+              </div>
+            </template>
+          </iron-list>
 
-            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
-            </iron-scroll-threshold>
+          <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+          </iron-scroll-threshold>
 
+        </app-header-layout>
 
-          </app-header-layout>
+        <a id="newBilling" href="/billing/new"></a>
+        <a id="openView" href="/billing/detail?ref=[[viewKey]]"></a>
+        <a id="openEdit" href="/billing/edit?ref=[[editKey]]"></a>
 
-          <a href="/billing/new" style="text-decoration: none;">
-            <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_billingNew"></paper-fab>
-          </a>
-        </div>
+        <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_billingNew"></paper-fab>
 
-        <div name="/new">
-          <div id="newbill"></div>
+      </div>
+
+      <div name="/new">
+        <template is="dom-if" if="{{newActive}}" restamp>
           <my-billing-new id="d23" my-key="{{myKey}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-new>
-        </div>
+        </template>
+      </div>
 
-        <div name="view404">Not found.</div>
-      </iron-pages>
-    </div>
+      <div name="/edit">
+        <template is="dom-if" if="{{editActive}}" restamp>
+          <my-billing-edit id="d25" my-key="{{myKey}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-edit>
+        </template>
+      </div>
 
-    <div hidden$="{{!editActive}}">
-      <div id="billedit"></div>
-      <my-billing-edit id="d25" my-key="{{myKey}}" edit-key="{{editData.key}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-edit>
-    </div>
+      <div name="/detail">
+        <template is="dom-if" if="{{detailActive}}" restamp>
+          <my-billing-view id="d26" my-key="{{myKey}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}"></my-billing-view>
+        </template>
+      </div>
 
-    <div hidden$="{{!detailActive}}">
-      <div id="billview"></div>
-      <my-billing-view id="d26" my-key="{{myKey}}" view-key="{{detailData.key}}" prev-route="{{route.prefix}}"></my-billing-view>
-    </div>
+      <div name="view404">Not found.</div>
+    </iron-pages>
 
   </template>
 
@@ -347,8 +347,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       observers: [
         '_searchChanged(search)',
-        '_myBillingChanged(myBilling.*)'
+        '_myBillingChanged(myBilling.*)',
+        '_routeChanged(route)'
       ],
+
+      _routeChanged(e) {
+        var page;
+        if (this.detailActive) page = "billing-view";
+        else if (this.editActive) page = "billing-edit";
+        else if (this.newActive) page = "billing-new";
+
+        if (page) {
+          var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+          Polymer.importHref(resolvedPageUrl);
+        }
+      },
 
       _myBillingChanged() {
         if (this.myBilling.length > 0) {
@@ -360,59 +373,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _billingNew() {
-        var node = Polymer.dom(this.root).querySelector("#newbill");
-        if (node) {
-          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
-          if (oldDiv) {
-            Polymer.dom(node.parentNode).removeChild(oldDiv);
-          }
-          var newDiv = document.createElement("my-billing-new");
-          newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("id", "d23");
-          newDiv.setAttribute("prev-route", this.route.prefix);
-          newDiv.setAttribute("my-location", this.myLocation);
-          //if open existing
-          var currentDiv = document.getElementById("newcase");
-          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        }
+        this.$.newBilling.click();
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "billing-new"
+        }));
       },
 
       _selectThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
-        var node = Polymer.dom(this.root).querySelector("#billview");
-        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
-        if (oldDiv) {
-          Polymer.dom(node.parentNode).removeChild(oldDiv);
-        }
-        var newDiv = document.createElement("my-billing-view");
-        newDiv.setAttribute("my-key", this.myKey);
-        newDiv.setAttribute("id", "d26");
-        newDiv.setAttribute("view-key", data_args);
-        newDiv.setAttribute("prev-route", this.route.prefix);
-        Polymer.dom(this.root).querySelector("#open").click();
-
-        var currentDiv = document.getElementById("billview");
-        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        this.viewKey = Polymer.dom(e).rootTarget.getAttribute("id");
+        this.$.openView.click();
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "billing-view"
+        }));
       },
 
       _editThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
-        var node = Polymer.dom(this.root).querySelector("#billedit");
-        if (node) {
-          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
-          if (oldDiv) {
-            Polymer.dom(node.parentNode).removeChild(oldDiv);
-          }
-          var newDiv = document.createElement("my-billing-edit");
-          newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("id", "d25");
-          newDiv.setAttribute("edit-key", data_args);
-          newDiv.setAttribute("prev-route", this.route.prefix);
-          newDiv.setAttribute("my-location", this.myLocation);
-          //if open existing
-          var currentDiv = document.getElementById("billedit");
-          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        }
+        this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
+        this.$.openEdit.click();
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "billing-edit"
+        }));
       },
 
       _manyServices(e) {
@@ -542,10 +522,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           this.order = 'order';
         }
-      },
-
-      getClassForItem(item, selected) {
-        return selected ? 'item expanded' : 'item';
       },
 
       toggleDrawer() {

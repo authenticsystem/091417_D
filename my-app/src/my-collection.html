@@ -61,7 +61,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .card {
+        line-height: 200px;
+        height: 200px;
         text-align: center;
+        color: white;
+        background: #4568DC;
+        /* fallback for old browsers */
+        background: -webkit-linear-gradient(to left, #B06AB3, #4568DC);
+        /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to left, #B06AB3, #4568DC);
+        /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+      }
+
+      .center {
+        line-height: 1.5;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      h1 {
+        color: white;
+        margin-top: -6px;
+        font-weight: 450 
       }
     </style>
 
@@ -75,7 +96,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-header>
 
       <div class="card">
-        Comming Soon
+        <div class="center">
+          <img src="../images/icon.png">
+          <h1>There's nothing here, yet.</h1>
+        </div>
       </div>
 
       <!-- <div style="padding:26px; margin-top:-30px">
