@@ -144,7 +144,9 @@
                     <template is="dom-repeat" items="[[mySecretary]]">
                         <paper-item name="[[item.code]]">
                             <paper-avatar class="small" label="[[item.name.firstname]]"></paper-avatar>
-                            <div style="margin-left:6px; font-size: 14px;">[[item.name.firstname]] [[item.name.middlename]] [[item.name.lastname]]</div>
+                            <div style="margin-left:6px; font-size: 14px;">[[item.name.firstname]] [[item.name.middlename]]
+                                [[item.name.lastname]]
+                            </div>
                             <div hidden$="{{!item.msg}}" class="badge">{{_msg(item.msg)}}</div>
                         </paper-item>
                     </template>
@@ -160,9 +162,9 @@
                     </app-toolbar>
                 </app-header>
 
-                <firebase-query id="query" path="/{{selectedContact}}/messages/{{myKey}}" data="{{myMessages}}"></firebase-query>
+                <firebase-query id="query" path="/{{selectedContact}}/messages/{{myKey}}" data="{{myMessages}}" limit-to-last="25"></firebase-query>
 
-                <div class="messageHolder">
+                <div class="messageHolder" id="messageHolder">
 
                     <template is="dom-repeat" items="[[myMessages]]">
                         <div class$="[[_getClass(item.sender)]]">
@@ -228,6 +230,9 @@
             ready() {
                 this.$.sendBtn.disabled = true;
                 this.targetLocation = this.$.msgValue;
+                setTimeout((e) => {
+                    this.$.messageHolder.scrollTop = this.$.messageHolder.scrollHeight;
+                }, 1000);
             },
 
             _NoOfMsgChanged(e) {
@@ -329,16 +334,16 @@
 
             _handleSend(token) {
                 //live
-                // var key = 'AAAAQ8LD1Cg:APA91bGRSq9El2u5pGd1PsU7b9wwqtq3SNIr6LMXKE344xq7b3fv7_DTaZQNb6-DgSQfkWf5ZAkYF2qD_i_78DwW-24y9hcZlqeQ9xlfP1xmxVTrs3V-bQfkEIYPwqgnIp3tjR6M2Ubu';
+                var key = 'AAAAQ8LD1Cg:APA91bGRSq9El2u5pGd1PsU7b9wwqtq3SNIr6LMXKE344xq7b3fv7_DTaZQNb6-DgSQfkWf5ZAkYF2qD_i_78DwW-24y9hcZlqeQ9xlfP1xmxVTrs3V-bQfkEIYPwqgnIp3tjR6M2Ubu';
                 //dev
-                var key = 'AAAAevULLrY:APA91bEDdvrl9xFBHsKwRPmiTvBfMx_5TwGR1rhMstS9v6RD_TZC-BHiHMMx_5KKtBPHLXvUQH92M2Bu-CT2Mko-mLaQ0mpjl2wjbadZzk90oi3KmiH_7SChuBtHPTkWQLZUp4tlAZjV';
+                // var key = 'AAAAevULLrY:APA91bEDdvrl9xFBHsKwRPmiTvBfMx_5TwGR1rhMstS9v6RD_TZC-BHiHMMx_5KKtBPHLXvUQH92M2Bu-CT2Mko-mLaQ0mpjl2wjbadZzk90oi3KmiH_7SChuBtHPTkWQLZUp4tlAZjV';
                 var to = token;
                 var notification = {
                     'title': 'BaseEMR',
                     'body': 'You have a new message.',
                     'icon': '../images/icon.png',
-                    // 'click_action': 'https://pwa.baseph.com/messaging'
-                    'click_action': ' https://emr-dev-c3005.firebaseapp.com/messaging'
+                    'click_action': 'https://pwa.baseph.com/messaging'
+                    // 'click_action': ' https://emr-dev-c3005.firebaseapp.com/messaging'
                     // 'click_action': 'localhost:8081/messaging'
                 };
 
@@ -353,9 +358,9 @@
                         'to': to
                     })
                 }).then(function (response) {
-                    console.log(response);
+                    // console.log(response);
                 }).catch(function (error) {
-                    console.error(error);
+                    console.warn(error);
                 });
             },
 
