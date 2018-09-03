@@ -100,6 +100,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
 
+        .ph-item {
+          margin: 16px;
+          padding: 16px;
+        }
+
+        .ph-col-1 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 20%;
+          flex: 0 0 20%
+        }
+
+        .ph-col-10 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 80%;
+          flex: 0 0 80%
+        }
+
+        .ph-col-8 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 80%;
+          flex: 0 0 80%
+        }
+
         #noRecord {
           margin: 16px;
           display: flex;
@@ -120,6 +143,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           /* margin-top: 0px; */
           /* height: 100vh; */
           /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
+        }
+
+        .ph-item {
+          width: 736px;
+          margin: 16px auto;
+          padding: 16px;
         }
 
         #noRecord {
@@ -260,6 +289,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </template>
 
           <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+            <template is="dom-if" if="{{firstLoad}}">
+              <div class="ph-item">
+                <div class="ph-col-1">
+                  <div class="ph-avatar" style="width: 45px;"></div>
+                </div>
+                <div class="ph-col-8">
+                  <div class="ph-row">
+                    <div class="ph-col-1"></div>
+                    <div class="ph-col-10 empty"></div>
+                    <div class="ph-col-8 big"></div>
+                    <div class="ph-col-2 empty"></div>
+                    <div class="ph-col-6"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
             <iron-list items="[[items]]" as="item">
               <template>
                 <div class="item" tabindex$="[[tabIndex]]">
@@ -284,7 +330,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </iron-list>
 
             <div class="loadingIndicator">
-              <paper-spinner active="{{loadingPeople}}"></paper-spinner>
+              <paper-spinner active="{{_loadCheck(loadingPeople, firstLoad)}}"></paper-spinner>
             </div>
           </iron-scroll-threshold>
 
@@ -351,6 +397,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         lastnum: {
           type: String,
           value: ""
+        },
+        firstLoad: {
+          type: Boolean,
+          value: true
         }
       },
 
@@ -393,6 +443,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      _loadCheck(e, l) {
+        if (l) return false;
+        else {
+          return e;
+        }
+      },
+
       _mypatientsChanged(e) {
         if (this.mypatients.length > 0) {
           if (e.path === "mypatients") {
@@ -415,6 +472,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           this.$.threshold.clearTriggers();
           this.loadingPeople = false;
+          this.firstLoad = false;
         } else {
           this._fetching();
         }
@@ -457,6 +515,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _fetching() {
         setTimeout((e) => {
           this.loadingPeople = false;
+          this.firstLoad = false;
         }, 5000);
       },
 

@@ -159,6 +159,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --timeu-wizard-step-font-size: 30px;
         --timeu-wizard-circle-border-size: 2px;
       }
+
+      #vertical {
+        margin-top: 16px;
+      }
     </style>
 
     <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -167,37 +171,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <timeu-wizard id="vertical" steps='["Profile Picture","Basic Information","Insurance","In-case of Emergency","Finalize","Completed"]'
             vertical step="{{selectedStep}}">
           </timeu-wizard>
-
-          <!-- <paper-item id="0">
-            <div class="circle-mini-first" id="0">1</div>
-            <span id="0">Profile Picture</span>
-          </paper-item>
-
-          <paper-item id="1">
-            <div id="1" class="circle-mini">2</div>
-            <span id="1">Basic Information</span>
-          </paper-item>
-
-          <paper-item id="2">
-            <div id="2" class="circle-mini">3</div>
-            <span id="2">Insurance</span>
-          </paper-item>
-
-          <paper-item id="3">
-            <div id="3" class="circle-mini">4</div>
-            <span id="3">In-case of Emergency</span>
-          </paper-item>
-
-          <paper-item id="4">
-            <div id="4" class="circle-mini">5</div>
-            <span id="4">Finalize</span>
-          </paper-item>
-
-          <paper-item>
-            <div class="circle-mini-last">6</div>
-            <span>Completed</span>
-          </paper-item> -->
-
         </div>
       </app-drawer>
 

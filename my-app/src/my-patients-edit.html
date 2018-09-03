@@ -25,6 +25,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/timeu-wizard/timeu-wizard.html">
 
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
@@ -73,6 +74,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .mnu {
         padding: 13px;
+        height: 500px;
       }
 
       @media (min-width: 800px) {
@@ -134,12 +136,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: gray;
         /* display: none; */
       }
+
+      #vertical {
+        margin-top: 16px;
+      }
     </style>
 
     <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
         <div class="mnu" role="listbox">
-          <paper-item id="buyersinformation">
+          <timeu-wizard id="vertical" steps='["Profile Picture","Basic Information","Insurance","In-case of Emergency","Finalize","Completed"]'
+            vertical step="{{selectedStep}}">
+          </timeu-wizard>
+          <!-- <paper-item id="buyersinformation">
             <div class="circle-mini-first">1</div>
             <span>Profile Picture</span>
           </paper-item>
@@ -167,7 +176,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-item id="complete">
             <div class="circle-mini-last">6</div>
             <span>Completed</span>
-          </paper-item>
+          </paper-item> -->
         </div>
       </app-drawer>
 
@@ -622,13 +631,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       observers: [
         'personalInfoChanged(fname, mname, lname, bday, age)',
+        '_selectedPageChanged(selectedPage)',
         'mypatientChanged(mypatient)',
         '_todayDateChanged(todayDate)',
         '_referChanged(refer)'
       ],
 
       ready() {
-       
+
         if (this.myQueue) {
           this.editKey = this.params.e;
           this.queueKey = this.params.q;
@@ -638,6 +648,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         this.storeDate = this.todayDate;
+      },
+
+      _selectedPageChanged(page) {
+        this.selectedStep = page + 1;
       },
 
       _todayDateChanged(date) {

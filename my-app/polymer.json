@@ -10,6 +10,7 @@
     "src/time-element.html",
     "src/chartjs.html",
     "src/image-resize.html",
+    "src/sortable-list.html",
     "dist/image-resize.js",
     "src/my-view2.html",
     "src/my-view404.html"
