@@ -164,13 +164,13 @@
                     <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
                         <div class="list2">
                             <template is="dom-repeat" items="[[excetionItems]]">
-                                <my-queue-card item="[[item]]"></my-queue-card>
+                                <my-queue-card data-item="[[item]]"></my-queue-card>
                             </template>
                         </div>
                         <sortable-list class="sortList" sortable=".list" all-data="[[includedItems]]" on-select="_selectedIndex" on-drop="_dropIndex">
                             <template id="includedTemplate" is="dom-repeat" items="[[includedItems]]">
                                 <div on-tap="_selectThis" class="list">
-                                    <my-queue-card item="[[item]]"></my-queue-card>
+                                    <my-queue-card data-item="[[item]]"></my-queue-card>
                                 </div>
                             </template>
                         </sortable-list>
@@ -357,7 +357,6 @@
                         this.$.query.disabled = true;
                         this.$.query.disabled = false;
                     }
-                    console.log(this.includedItems);
 
                     this.loadTime = 3000;
                     Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
@@ -420,7 +419,6 @@
             },
 
             _returnIncluded(e) {
-                console.log(this.myqueue);
                 var data = this.myqueue.filter(isInclude);
                 if (data.length > this.noOfPatients) {
                     this.noOfPatients = data.length;

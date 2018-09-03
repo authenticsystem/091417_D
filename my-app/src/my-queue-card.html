@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
 
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
@@ -7,7 +8,8 @@
     <template>
         <style include="shared-styles">
             :host {
-                display: block;
+                display: flex;
+                flex-direction: column;
             }
 
             .primary {
@@ -94,22 +96,23 @@
             }
         </style>
 
-        <div class$="[[getClassForItem(item.isNext, item.isQueue)]]" tabindex$="[[tabIndex]]">
-            <div style="font-size:16px;" class="longText">[[item.queueNo]]</div>
+        <div class$="[[getClassForItem(dataItem.isNext, dataItem.isQueue)]]">
+            <div style="font-size:16px;" class="longText">[[dataItem.queueNo]]</div>
             <div style="padding:6px"></div>
             <div>
-                <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.patient_profile)}}"></iron-image>
+                <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(dataItem.patient_profile)}}"></iron-image>
             </div>
             <div class="pad">
-                <div style="font-size:11px" class="longText">[[item.patient_no]]</div>
-                <div class="primary">[[item.patient_info.lastname]], [[item.patient_info.firstname]] [[item.patient_info.middlename]]
+                <div style="font-size:11px" class="longText">[[dataItem.patient_no]]</div>
+                <div class="primary">[[dataItem.patient_info.lastname]], [[dataItem.patient_info.firstname]] [[dataItem.patient_info.middlename]]
                 </div>
-                <div class="longText">{{_ageCal(item.patient_info.birthday)}}{{_comma(item.patient_info.birthday)}} [[item.patient_info.sex]]
+                <div class="longText">{{_ageCal(dataItem.patient_info.birthday)}}{{_comma(dataItem.patient_info.birthday)}}
+                    [[dataItem.patient_info.sex]]
                 </div>
-                <div class="longText">[[_hmo(item.patient_info.hmo)]]</div>
+                <div class="longText">[[_hmo(dataItem.patient_info.hmo)]]</div>
             </div>
 
-            <div style$="{{_isCancel(item.isCancel)}}" class="cancel">Cancelled</div>
+            <div style$="{{_isCancel(dataItem.isCancel)}}" class="cancel">Cancelled</div>
         </div>
 
     </template>
@@ -117,7 +120,7 @@
         Polymer({
             is: 'my-queue-card',
             properties: {
-                item: Object
+                dataItem: Object
             },
 
             getClassForItem(isNext, isQueue) {
