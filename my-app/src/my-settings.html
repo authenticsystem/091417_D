@@ -126,14 +126,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                     <div class="divHolder">
                         <div class="div1" align="center">
-                            <a id="accountHref" href="/settings/account"></a>
                             <div on-tap="_newAccount" class="card">
                                 <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
                                 <h3>My Account</h3>
                             </div>
                         </div>
                         <div hidden="{{isSecretary}}" class="div1" align="center">
-                            <a id="secretaryHref" href="/settings/secretary"></a>
                             <div on-tap="_newSecretary" class="card">
                                 <img preload style="width:150px; height:150px;" src="../images/secretary.png">
                                 <h3>My Secretary</h3>
@@ -142,14 +140,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </div>
                     <div class="divHolder">
                         <div class="div1" align="center">
-                            <a id="serviceHref" href="/settings/services"></a>
                             <div on-tap="_newServices" class="card">
                                 <img style="width:150px; height:150px; border-radius:50%;" src="../images/services.png">
                                 <h3>My Services</h3>
                             </div>
                         </div>
                         <div class="div1" align="center">
-                            <a id="hmoHref" href="/settings/hmo"></a>
                             <div on-tap="_newHMO" class="card">
                                 <img style="width:150px; height:150px; border-radius:50%;" src="../images/hmo.png">
                                 <h3>My HMO</h3>
@@ -241,28 +237,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
 
             _newAccount() {
-                this.$.accountHref.click();
+                window.history.pushState({}, null, '/settings/account');
+                window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
                     bubbles: true, composed: true, detail: "account"
                 }));
             },
 
             _newSecretary() {
-                this.$.secretaryHref.click();
+                window.history.pushState({}, null, '/settings/secretary');
+                window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
                     bubbles: true, composed: true, detail: "secretary"
                 }));
             },
 
             _newServices() {
-                this.$.serviceHref.click();
+                window.history.pushState({}, null, '/settings/services');
+                window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
                     bubbles: true, composed: true, detail: "services"
                 }));
             },
 
             _newHMO() {
-                this.$.hmoHref.click();
+                window.history.pushState({}, null, '/settings/hmo');
+                window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
                     bubbles: true, composed: true, detail: "hmo"
                 }));

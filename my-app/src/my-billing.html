@@ -284,12 +284,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         </app-header-layout>
 
-        <a id="newBilling" href="/billing/new"></a>
-        <a id="openView" href="/billing/detail?ref=[[viewKey]]"></a>
-        <a id="openEdit" href="/billing/edit?ref=[[editKey]]"></a>
-
         <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_billingNew"></paper-fab>
-
       </div>
 
       <div name="/new">
@@ -373,7 +368,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _billingNew() {
-        this.$.newBilling.click();
+        window.history.pushState({}, null, '/billing/new');
+        window.dispatchEvent(new CustomEvent('location-changed'));
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "billing-new"
         }));
@@ -381,7 +377,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _selectThis(e) {
         this.viewKey = Polymer.dom(e).rootTarget.getAttribute("id");
-        this.$.openView.click();
+        window.history.pushState({}, null, '/billing/detail?ref=' + this.viewKey);
+        window.dispatchEvent(new CustomEvent('location-changed'));
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "billing-view"
         }));
@@ -389,7 +386,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _editThis(e) {
         this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
-        this.$.openEdit.click();
+        window.history.pushState({}, null, '/billing/edit?ref=' + this.editKey);
+        window.dispatchEvent(new CustomEvent('location-changed'));
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "billing-edit"
         }));
