@@ -23,8 +23,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
 
-<link rel="import" href="search-bar.html">
+<!-- <link rel="import" href="search-bar.html"> -->
+<link rel="import" href="global-functions.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
 
@@ -102,11 +104,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     flex-direction: column;
                 }
 
-                paper-search-bar {
+                /* paper-search-bar {
                     margin-left: 80px;
                     width: 50%;
                     color: black;
-                }
+                } */
             }
 
             @media (min-width: 768px) {
@@ -123,11 +125,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     margin: 16px auto;
                 }
 
-                paper-search-bar {
+                /* paper-search-bar {
                     margin-left: 50px;
                     width: 50%;
                     color: black;
-                }
+                } */
 
             }
 
@@ -201,14 +203,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <a href="{{prevRoute}}">
                         <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back"></paper-icon-button>
                     </a>
-                    <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
-                    <template is="dom-if" if="{{search}}">
+                    <div style="width:100%">
+                        <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}" disable-filter-button></paper-search-bar>
+                    </div>
+                    <!-- <template is="dom-if" if="{{search}}">
                         <paper-icon-button id="btn-menu" icon="my-icons:close" on-tap="toggleClear"></paper-icon-button>
-                    </template>
+                    </template> -->
                 </app-toolbar>
             </app-header>
 
-            <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}"
+            <firebase-query disabled id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}"
                 limit-to-first="15">
             </firebase-query>
 
@@ -304,7 +308,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             ready() {
                 this.$.search.focus();
-                this.todayDate = this.formatTodayDate(new Date());
+                this.todayDate = formatTodayDate(new Date());
                 this.$.defaultQuery.disabled = false;
             },
 
@@ -331,7 +335,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             todayDateChanged(date) {
                 if (date) {
                     Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
-                    this.text = this.formatWeekDate(date);
+                    this.text = formatWeekDate(date);
                 }
                 else {
                     Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
@@ -355,7 +359,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _addPatient2Queue() {
                 var mykey = this.myKey
                 var pickDate = this.todayDate;
-                this.doneQueueDate = this.formatWeekDate(pickDate);
+                this.doneQueueDate = formatWeekDate(pickDate);
                 var self = this;
 
                 var queueData = {
@@ -439,48 +443,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             _ageCal(bday) {
                 if (bday) {
-
-                    var today = new Date();
-                    var birthday = new Date(bday);
-
-                    var differenceInMilisecond = today.valueOf() - birthday.valueOf();
-
-                    var year_age = Math.floor(differenceInMilisecond / 31536000000);
-                    var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
-
-                    var month_age = Math.floor(day_age / 30);
-
-                    day_age = day_age % 30;
-
-                    if (!isNaN(year_age) || !isNaN(month_age) || !isNaN(day_age)) {
-                        if (year_age > 0) {
-                            if (year_age == 1) {
-                                return year_age + " year old";
-                            }
-                            else {
-                                return year_age + " years old";
-                            }
-                        }
-                        else if (year_age == 0 && month_age > 0) {
-                            if (month_age == 1) {
-                                return month_age + " month old";
-                            }
-                            else {
-                                return month_age + " months old";
-                            }
-                        }
-                        else if (year_age == 0 && month_age == 0 && day_age > 0) {
-                            if (day_age == 1) {
-                                return day_age + " day old";
-                            }
-                            else {
-                                return day_age + " days old";
-                            }
-                        }
-                        else {
-                            return year_age + " years " + month_age + " months " + day_age + " days old";
-                        }
-                    }
+                    return getAge(bday);
                 }
                 else {
                     return '';
@@ -494,37 +457,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             getClassForItem(item, selected) {
                 return selected ? 'item expanded' : 'item';
-            },
-
-            formatWeekDate(date) {
-                var monthNames = [
-                    "Jan", "Feb", "Mar",
-                    "Apr", "May", "Jun", "Jul",
-                    "Aug", "Sep", "Oct",
-                    "Nov", "Dec"
-                ];
-
-                var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                // var now = new Date().toDateString();
-                var d = new Date(date);
-
-                return days[d.getDay()] + ', ' + d.getDate() + ' ' + monthNames[d.getMonth()] + ' ' + d.getFullYear();
-            },
-
-            formatTodayDate(date) {
-                var monthNames = [
-                    "01", "02", "03",
-                    "04", "05", "06", "07",
-                    "08", "09", "10",
-                    "11", "12"
-                ];
-
-                var day = date.getDate();
-                if (day < 10) { day = '0' + day };
-                var monthIndex = date.getMonth();
-                var year = date.getFullYear();
-
-                return year + '-' + monthNames[monthIndex] + '-' + day;
             },
 
             toggleClear() {

@@ -23,8 +23,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
 
-<link rel="import" href="search-bar.html">
+<link rel="import" href="global-functions.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
 
@@ -129,11 +130,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           flex-direction: column;
         }
 
-        paper-search-bar {
+        /* paper-search-bar {
           margin-left: 80px;
           width: 50%;
           color: black;
-        }
+        } */
       }
 
       @media (min-width: 768px) {
@@ -156,12 +157,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 16px auto;
         }
 
-        paper-search-bar {
+        /* paper-search-bar {
           margin-left: 50px;
           width: 50%;
           color: black;
-        }
-
+        } */
       }
 
       #tool1 {
@@ -174,7 +174,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       #btn-arrow {
-        position: absolute;
         color: black;
       }
 
@@ -231,6 +230,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .loadingIndicator {
+        margin-top: 16px;
         text-align: center;
         height: 40px;
       }
@@ -250,24 +250,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div name="">
         <app-header-layout fullbleed has-scrolling-region>
           <app-header fixed slot="header">
-            <template is="dom-if" if="{{!openSearch}}">
+            <div hidden="{{openSearch}}">
               <app-toolbar primary id="tool1">
                 <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                 <div main-title>Patients</div>
                 <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
-                <!-- <paper-toggle-button class="green" on-tap="_toggleLocation" checked="{{isCheck}}">Location</paper-toggle-button> -->
               </app-toolbar>
-            </template>
+            </div>
 
-            <template is="dom-if" if="{{openSearch}}">
+            <div hidden="{{!openSearch}}">
               <app-toolbar primary id="tool2">
                 <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
-                <template is="dom-if" if="{{search}}">
-                  <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
-                </template>
+                <div style="width:100%">
+                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}" disable-filter-button></paper-search-bar>
+                </div>
               </app-toolbar>
-            </template>
+            </div>
           </app-header>
 
           <firebase-query disabled id="searchQuery" path="/{{myKey}}/patients" data="{{items}}" order-by-child="personal/name" start-at="{{search}}"
@@ -277,6 +275,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no" start-at="{{lastnum}}"
             limit-to-first="15">
           </firebase-query>
+
+          <template is="dom-if" if="{{firstLoad}}">
+            <div class="ph-item">
+              <div class="ph-col-1">
+                <div class="ph-avatar" style="width: 45px;"></div>
+              </div>
+              <div class="ph-col-8">
+                <div class="ph-row">
+                  <div class="ph-col-1"></div>
+                  <div class="ph-col-10 empty"></div>
+                  <div class="ph-col-8 big"></div>
+                  <div class="ph-col-2 empty"></div>
+                  <div class="ph-col-6"></div>
+                </div>
+              </div>
+            </div>
+          </template>
 
           <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
             <div id="noRecord">
@@ -289,45 +304,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </template>
 
           <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
-            <template is="dom-if" if="{{firstLoad}}">
-              <div class="ph-item">
-                <div class="ph-col-1">
-                  <div class="ph-avatar" style="width: 45px;"></div>
-                </div>
-                <div class="ph-col-8">
-                  <div class="ph-row">
-                    <div class="ph-col-1"></div>
-                    <div class="ph-col-10 empty"></div>
-                    <div class="ph-col-8 big"></div>
-                    <div class="ph-col-2 empty"></div>
-                    <div class="ph-col-6"></div>
-                  </div>
-                </div>
-              </div>
-            </template>
-
-            <iron-list items="[[items]]" as="item">
-              <template>
-                <div class="item" tabindex$="[[tabIndex]]">
-                  <div>
-                    <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
-                  </div>
-                  <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
-                    <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
-                    <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
-                    <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}}
-                      [[item.personal.sex]]
+            <template is="dom-if" if="{{_hasDataChanged(items.length)}}" restamp>
+              <iron-list items="[[items]]" as="item">
+                <template>
+                  <div class="item" tabindex$="[[tabIndex]]">
+                    <div>
+                      <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                     </div>
-                    <div id="{{item.$key}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
-                    <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
-                  </div>
+                    <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
+                      <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
+                      <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
+                      <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}}
+                        [[item.personal.sex]]
+                      </div>
+                      <div id="{{item.$key}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
+                      <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
+                    </div>
 
-                  <div class="clinic">[[item.personal.clinic_location]]</div>
-                  <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="Edit">
-                  </paper-icon-button>
-                </div>
-              </template>
-            </iron-list>
+                    <div class="clinic">[[item.personal.clinic_location]]</div>
+                    <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="Edit">
+                    </paper-icon-button>
+                  </div>
+                </template>
+              </iron-list>
+            </template>
 
             <div class="loadingIndicator">
               <paper-spinner active="{{_loadCheck(loadingPeople, firstLoad)}}"></paper-spinner>
@@ -445,6 +445,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      _hasDataChanged(e) {
+        if (e > 0) {
+          this.loadingPeople = false;
+          return true;
+        }
+        else {
+          this._fetching();
+          return false;
+        }
+      },
+
       _mypatientsChanged(e) {
         if (this.mypatients.length > 0) {
           if (e.path === "mypatients") {
@@ -526,48 +537,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _ageCal(bday) {
         if (bday) {
-
-          var today = new Date();
-          var birthday = new Date(bday);
-
-          var differenceInMilisecond = today.valueOf() - birthday.valueOf();
-
-          var year_age = Math.floor(differenceInMilisecond / 31536000000);
-          var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
-
-          var month_age = Math.floor(day_age / 30);
-
-          day_age = day_age % 30;
-
-          if (!isNaN(year_age) || !isNaN(month_age) || !isNaN(day_age)) {
-            if (year_age > 0) {
-              if (year_age == 1) {
-                return year_age + " year old";
-              }
-              else {
-                return year_age + " years old";
-              }
-            }
-            else if (year_age == 0 && month_age > 0) {
-              if (month_age == 1) {
-                return month_age + " month old";
-              }
-              else {
-                return month_age + " months old";
-              }
-            }
-            else if (year_age == 0 && month_age == 0 && day_age > 0) {
-              if (day_age == 1) {
-                return day_age + " day old";
-              }
-              else {
-                return day_age + " days old";
-              }
-            }
-            else {
-              return year_age + " years " + month_age + " months " + day_age + " days old";
-            }
-          }
+          return getAge(bday);
         }
         else {
           return '';
@@ -594,14 +564,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       toggleSearch() {
         this.openSearch = true;
+        this.$.search.focus();
       },
 
       toggleReturn() {
         this.openSearch = false;
-        this.search = '';
-      },
-
-      toggleClear() {
         this.search = '';
       },
 

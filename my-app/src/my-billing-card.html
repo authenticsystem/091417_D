@@ -1,0 +1,254 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+
+<link rel="import" href="time-element.html">
+<link rel="import" href="global-functions.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-billing-card">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .avatar {
+                height: 45px;
+                width: 45px;
+                border: 2px solid white;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: #DDD;
+            }
+
+            .pad {
+                padding: 16px;
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .primary {
+                font-size: 14px;
+                font-weight: 400;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .longText {
+                color: gray;
+                /* display: none; */
+            }
+
+            table {
+                border-collapse: collapse;
+                border-spacing: 0;
+                width: 100%;
+                border: 1px solid #ddd;
+                font-size: 12px;
+            }
+
+            th,
+            td {
+                text-align: left;
+                padding: 8px;
+            }
+
+            tr:nth-child(even) {
+                background-color: #f2f2f2
+            }
+
+            /* .item:hover .shortText::after {
+                content: ' [+]';
+                color: gray;
+            } */
+
+            /* .item.expanded:hover .shortText::after {
+                content: '';
+            } */
+
+            /* .item.expanded .longText {
+                display: block;
+            } */
+
+            /* .item.expanded:hover .longText::after {
+                content: ' [–]';
+            } */
+
+            /* table {
+                border-collapse: collapse;
+                border-spacing: 0;
+                width: 100%;
+                border: 1px solid #ddd;
+                font-size: 12px;
+            }
+
+            thead,
+            tbody tr {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
+
+            thead {
+                width: 100%;
+                border-bottom: 1px solid #DDD;
+                background: rgb(253, 253, 253);
+            }
+
+            tbody {
+                display: block;
+                height: 105px;
+                overflow: auto;
+            } */
+
+            /* tbody:hover {
+                overflow: auto;
+            } */
+
+            /* th,
+            td {
+                text-align: left;
+                padding: 8px;
+            }
+
+            tr:nth-child(even) {
+                background-color: #f2f2f2
+            } */
+
+            /* Custom scrollbar */
+            /* ::-webkit-scrollbar {
+                width: 5px;
+            } */
+
+            /*
+            ::-webkit-scrollbar-track {
+                box-shadow: inset 0 0 6px #DDD;
+                border-radius: 10px;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                border-radius: 10px;
+                box-shadow: inset 0 0 6px #DDD;
+            } */
+
+            /* Overflow scroll gradient */
+            /* .overflow-scroll-gradient {
+                position: relative;
+                margin-top: 12px;
+            }
+
+            .overflow-scroll-gradient::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                height: 25px;
+                background: linear-gradient( rgba(255, 255, 255, 0.001), white);
+                pointer-events: none;
+            } */
+        </style>
+
+        <firebase-query path="/{{myKey}}/billing_data" data="{{myBillingData}}" order-by-child="billing_key" equal-to="{{item.$key}}">
+        </firebase-query>
+
+        <div>
+            <div style="padding: 16px; color:gray; margin-bottom:-18px;">
+                <iron-icon icon="my-icons:watch-later"></iron-icon>
+                <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
+            </div>
+
+            <div class="pad">
+                <div style="display:flex">
+                    <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.patientinfo.profile)}}"></iron-image>
+                    <div style=" margin-left:10px;">
+                        <div class="primary">[[item.patientinfo.name]]</div>
+                        <div class="primary" style="color:gray">Ref#: [[item.ref]]</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px;">
+                    <table>
+                        <!-- <thead> -->
+                        <tr>
+                            <th>Services</th>
+                            <th>Bill To</th>
+                            <th>Amount</th>
+                        </tr>
+                        <!-- </thead> -->
+                        <!-- <tbody> -->
+                        <template is="dom-repeat" items="{{myBillingData}}" as="billing">
+                            <tr>
+                                <td>{{billing.service}}</td>
+                                <td>{{billing.billTo}}</td>
+                                <td>{{billing.amount}}</td>
+                            </tr>
+                        </template>
+                        <!-- </tbody> -->
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ₱ -->
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-billing-card',
+
+            properties: {
+                item: Object,
+                myKey: String
+            },
+
+            _timeStampToDateTime(ts) {
+                return new Date(ts);
+            },
+
+            _patientImg(e) {
+                if (e) return e;
+                else return '../images/user.png';
+            },
+
+            _ageCal(bday) {
+                if (bday) {
+                    return getAge(bday);
+                }
+                else {
+                    return '';
+                }
+            },
+
+            _comma(e) {
+                if (e) {
+                    return ',';
+                }
+            },
+
+            _hmo(e) {
+                if (e) {
+                    return 'HMO: ' + e;
+                }
+            },
+
+        })
+    </script>
+</dom-module>

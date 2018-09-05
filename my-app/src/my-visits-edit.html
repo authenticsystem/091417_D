@@ -18,8 +18,11 @@
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
 
+<link rel="import" href="global-functions.html">
 <link rel="import" href="image-resize.html">
 <link rel="import" href="time-element.html">
+<link rel="import" href="my-billing-datatable.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -227,9 +230,35 @@
                 --sl-gallery-gutter: 8px;
                 height: 75%;
             } */
+
+            .textTemp {
+                color: rgb(100, 100, 100);
+                font-weight: 500;
+                font-size: 14px;
+                margin-top: 32px;
+                margin-left: 16px;
+            }
+
+            .billBtn {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                background: white;
+                color: black;
+                float: right;
+                margin-top: -30px;
+                margin-right: 16px;
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            }
         </style>
 
         <firebase-query id="query" path="{{myKey}}/cases" order-by-key equal-to="{{editKey}}" data="{{mycases}}" limit-to-last="1"></firebase-query>
+
+        <firebase-query path="/{{myKey}}/billing" order-by-key equal-to="{{editKey}}" data="{{mybilling}}" limit-to-first="1"></firebase-query>
+
+        <firebase-query disabled id="billingDataQuery" path="/{{myKey}}/billing_data" data="{{billingData}}" order-by-child="billing_key"
+            equal-to="{{editKey}}">
+        </firebase-query>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
 
@@ -339,12 +368,17 @@
                     </neon-animatable>
 
                     <neon-animatable>
+                        <my-billing-datatable id="billingDatatable" my-patient="[[myPatient]]" billing-data="{{newBillingData}}" remarks="{{remarks}}"
+                            total="{{total}}" my-key="{{myKey}}"></my-billing-datatable>
+                    </neon-animatable>
+
+                    <!-- <neon-animatable>
                         <div class="docu">
                             <div class="details">
                                 <div>Save changes ?</div>
                             </div>
                         </div>
-                    </neon-animatable>
+                    </neon-animatable> -->
 
                     <neon-animatable>
                         <div class="docu">
@@ -381,10 +415,7 @@
             is: 'my-visits-edit',
 
             properties: {
-                editKey: {
-                    type: String,
-                    observer: '_onEditKeyChanged'
-                },
+                editKey: String,
                 mycases: {
                     type: Object,
                     observer: '_onMyaccessChanged'
@@ -441,6 +472,14 @@
                 attachment: {
                     type: Array,
                     value: []
+                },
+                mybilling: {
+                    type: Object,
+                    observer: '_mybillingChanged'
+                },
+                billingDataHolder: {
+                    type: Array,
+                    value: []
                 }
             },
 
@@ -451,11 +490,27 @@
 
             observers: [
                 '_showFab1(subjective, complain, todayDate)',
-                '_todayDateChanged(todayDate)'
+                '_todayDateChanged(todayDate)',
+                '_billingDataChanged(billingData)'
             ],
 
-            _onEditKeyChanged() {
-                this._clear();
+            _mybillingChanged() {
+                if (this.mybilling.length > 0) {
+                    this.ref = this.mybilling[0].ref;
+                    if (this.mybilling[0].remarks !== "No Remarks") {
+                        this.remarks = this.mybilling[0].remarks;
+                    }
+                    this.$.billingDataQuery.disabled = false;
+                } else {
+                    this.$.billingDataQuery.disabled = true;
+                }
+            },
+
+            _billingDataChanged(e) {
+                this.newBillingData = e;
+                e.forEach(element => {
+                    this.billingDataHolder.push(element);
+                });
             },
 
             // _removeChanged(e) {
@@ -575,75 +630,35 @@
                         this.p_num = this.mycases[0].patientinfo.num;
 
                         if (this.mycases[0].patientinfo.birthday) {
-
-                            var today = new Date();
-                            var birthday = new Date(this.mycases[0].patientinfo.birthday);
-
-                            var differenceInMilisecond = today.valueOf() - birthday.valueOf();
-
-                            var year_age = Math.floor(differenceInMilisecond / 31536000000);
-                            var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
-
-                            var month_age = Math.floor(day_age / 30);
-
-                            day_age = day_age % 30;
-
-                            if (!isNaN(year_age) || !isNaN(month_age) || !isNaN(day_age)) {
-                                if (year_age > 0) {
-                                    if (year_age == 1) {
-                                        this.age = year_age + " year old";
-                                    }
-                                    else {
-                                        this.age = year_age + " years old";
-                                    }
-                                }
-                                else if (year_age == 0 && month_age > 0) {
-                                    if (month_age == 1) {
-                                        this.age = month_age + " month old";
-                                    }
-                                    else {
-                                        this.age = month_age + " months old";
-                                    }
-                                }
-                                else if (year_age == 0 && month_age == 0 && day_age > 0) {
-                                    if (day_age == 1) {
-                                        this.age = day_age + " day old";
-                                    }
-                                    else {
-                                        this.age = day_age + " days old";
-                                    }
-                                }
-                                else {
-                                    this.age = year_age + " years " + month_age + " months " + day_age + " days old";
-                                }
-                            }
+                            this.age = getAge(this.mycases[0].patientinfo.birthday);
                         }
                         else {
                             this.age = '';
                         }
                     }
 
-                    if (this.mycases[0].profile) {
-                        this.p_profile = this.mycases[0].profile;
-                    }
-                    else {
-                        this.p_profile = '../images/user.png';
-                    }
-
-                    this.filterValue = this.mycases[0].patient;
-                    this.complain = this.mycases[0].complain;
-                    this.diagnosis = this.mycases[0].diagnosis;
-                    this.history = this.mycases[0].history;
-                    this.laboratory = this.mycases[0].laboratory;
-                    this.pe = this.mycases[0].pe;
-                    this.plan = this.mycases[0].plan;
-                    this.treatment = this.mycases[0].treatment;
                     this.patientkey = this.mycases[0].patientkey;
                     this.timestamp = this.mycases[0].timestamp;
                     this.todayDate = this.mycases[0].created;
-                    this.subjective = this.mycases[0].subjective;
-                    this.objective = this.mycases[0].objective;
-                    this.assessment = this.mycases[0].assessment;
+
+                    this.myPatient = {
+                        hmo: this.mycases[0].patientinfo.hmo,
+                        name: this.mycases[0].patient
+                    }
+
+                    this.p_profile = this.mycases[0].profile ? this.mycases[0].profile : '../images/user.png';
+                    this.filterValue = this.mycases[0].patient;
+                    this.complain = this.mycases[0].complain ? this.mycases[0].complain : null;
+                    this.diagnosis = this.mycases[0].diagnosis ? this.mycases[0].diagnosis : null;
+                    this.history = this.mycases[0].history ? this.mycases[0].history : null;
+                    this.laboratory = this.mycases[0].laboratory ? this.mycases[0].laboratory : null;
+                    this.pe = this.mycases[0].pe ? this.mycases[0].pe : null;
+                    this.plan = this.mycases[0].plan ? this.mycases[0].plan : null;
+                    this.treatment = this.mycases[0].treatment ? this.mycases[0].treatment : null;
+
+                    this.subjective = this.mycases[0].subjective ? this.mycases[0].subjective : null;
+                    this.objective = this.mycases[0].objective ? this.mycases[0].objective : null;
+                    this.assessment = this.mycases[0].assessment ? this.mycases[0].assessment : null;
 
                     if (this.mycases[0].template) {
                         this.template = this.mycases[0].template;
@@ -702,7 +717,7 @@
                     if (bol === false) this.isDateChanged = false;
                     else this.isDateChanged = true;
 
-                    if (date < this.formatTodayDate(new Date()) && bol !== false) {
+                    if (date < formatTodayDate(new Date()) && bol !== false) {
                         if (this.mycases.length > 0) {
                             this.mycases.forEach(element => {
                                 if (date === element.created) {
@@ -712,7 +727,7 @@
                             this.lastPushTime = x;
                         }
                         //generate new id
-                        this.generatedID = this.generatePushID(date);
+                        this.generatedID = generatePushID(date, this.lastPushTime);
                     } else { this.lastPushTime = x }
 
                 } else {
@@ -799,7 +814,7 @@
                                 order = this.lastPushTime;
                             }
                             else {
-                                editkey = this.generatePushID(new Date());
+                                editkey = generatePushID(new Date(), this.lastPushTime);
                                 timestamp = firebase.database.ServerValue.TIMESTAMP;
                                 order = firebase.database.ServerValue.TIMESTAMP;
                             }
@@ -811,6 +826,24 @@
 
                         firebase.database().ref('/' + mykey + '/patients/' + this.patientkey).once('value').then(function (patient) {
                             if (patient.exists()) {
+
+                                var data2 = {
+                                    timestamp: timestamp,
+                                    order: order,
+                                    created: today,
+                                    clinic_location: self.myLocation,
+                                    billing_total: self.total,
+                                    patientinfo: {
+                                        name: self.filterValue,
+                                        profile: patient.val().profile ? patient.val().profile : null,
+                                        num: patient.val().no,
+                                        birthday: patient.val().personal.birthday,
+                                        gender: patient.val().personal.sex,
+                                        hmo: patient.val().insurance.primary_insurance
+                                    },
+                                    remarks: self.remarks ? self.remarks : "No Remarks"
+                                }
+
                                 ref.update({
                                     patient: self.filterValue,
                                     complain: self.complain,
@@ -837,11 +870,62 @@
                                     }
                                 }).then(function () {
                                     ref.once('value').then(function (snapshot) {
-                                        order = snapshot.val().order * -1;
+                                        var negativeTime = snapshot.val().order * -1;
+                                        var noRef = firebase.database().ref("/" + mykey + "/uniqueId/billing");
+                                        var billRef = firebase.database().ref('/' + mykey + '/billing');
+                                        var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
+
                                         ref.update({
-                                            order: order,
+                                            order: negativeTime,
                                             imaging: snapshot.val().attachment ? true : false
                                         });
+
+                                        // console.log(self.billingDataHolder);
+                                        // console.log("divide");
+                                        // console.log(self.newBillingData);
+                                        // console.log("up ||");
+
+                                        if (self.newBillingData.length > 0) {
+                                            if (self.mybilling.length > 0) {
+                                                var no = self.mybilling[0].ref;
+                                                saveBillingData();
+                                            } else {
+                                                data2.order = negativeTime;
+                                                noRef.once('value').then(function (data) {
+                                                    var num = (data.val() ? data.val() : 0) + 1;
+                                                    var no = generateUniqueId(num);
+                                                    data2.ref = no;
+
+                                                    billRef.child(editkey).set(data2).then(function () {
+                                                        noRef.set(num);
+                                                        saveBillingData();
+                                                    });
+                                                });
+                                            }
+                                        }
+
+                                        // if (self.billingDataHolder.length > 0) {
+                                        //     self.billingDataHolder.forEach(element => {
+                                        //         billDataRef.child(element.$key).remove();
+                                        //     });
+                                        if (self.newBillingData.length === 0) {
+                                            billRef.child(editkey).remove();
+                                        }
+                                        // }
+
+                                        function saveBillingData() {
+                                            self.newBillingData.forEach(element => {
+                                                if (element.$key) {
+                                                    var key = element.$key;
+                                                    delete element.$key;
+                                                    billDataRef.child(key).update(element);
+                                                } else {
+                                                    element.billing_key = editkey;
+                                                    element.billing_no = no;
+                                                    billDataRef.push(element);
+                                                }
+                                            });
+                                        }
                                     });
 
                                     if (self.attachment.length > 0) {
@@ -936,72 +1020,6 @@
                 }
             },
 
-            _clear() {
-                this.complain = null;
-                this.history = null;
-                this.laboratory = null;
-                this.pe = null;
-                this.diagnosis = null;
-                this.treatment = null;
-                this.plan = null;
-                this.attachment = null;
-
-                this.subjective = null;
-                this.objective = null;
-                this.assessment = null;
-
-                this.attachment = [];
-                this.$.myFile.value = null;
-            },
-
-            generatePushID(date) {
-                //reference: https://gist.github.com/mikelehen/3596a30bd69384624c11
-                // Modeled after base64 web-safe chars, but ordered by ASCII.
-                var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
-
-                // Timestamp of last push, used to prevent local collisions if you push twice in one ms.
-                // var lastPushTime = 0;
-                // We generate 72-bits of randomness which get turned into 12 characters and appended to the
-                // timestamp to prevent collisions with other clients.  We store the last characters we
-                // generated because in the event of a collision, we'll use those same characters except
-                // "incremented" by one.
-                var lastRandChars = [];
-
-                //check if there's a last push
-                if (this.lastPushTime === 0) {
-                    var now = new Date(date).getTime();
-                }
-                else {
-                    var now = this.lastPushTime + 1000;
-                }
-
-                this.lastPushTime = now;
-
-                var timeStampChars = new Array(8);
-
-                for (var i = 7; i >= 0; i--) {
-                    timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
-                    // NOTE: Can't use << here because javascript will convert to int and lose the upper bits.
-                    now = Math.floor(now / 64);
-                }
-
-                if (now !== 0) throw new Error('We should have converted the entire timestamp.');
-
-                var id = timeStampChars.join('');
-
-                for (i = 0; i < 12; i++) {
-                    lastRandChars[i] = Math.floor(Math.random() * 64);
-                }
-
-                for (i = 0; i < 12; i++) {
-                    id += PUSH_CHARS.charAt(lastRandChars[i]);
-                }
-
-                if (id.length != 20) throw new Error('Length should be 20.');
-
-                return id;
-            },
-
             // guid: function () {
             //     var uid = new ShortUniqueId();
             //     return uid.randomUUID(8);
@@ -1010,22 +1028,6 @@
             _timeStampToDateTime(ts) {
                 return new Date(ts);
             },
-
-            formatTodayDate(date) {
-                var monthNames = [
-                    "01", "02", "03",
-                    "04", "05", "06", "07",
-                    "08", "09", "10",
-                    "11", "12"
-                ];
-
-                var day = date.getDate();
-                if (day < 10) { day = '0' + day };
-                var monthIndex = date.getMonth();
-                var year = date.getFullYear();
-
-                return year + '-' + monthNames[monthIndex] + '-' + day;
-            }
 
         })
 

@@ -3,8 +3,7 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
 
-<!-- <link rel="import" href="short-unique-id.html"> -->
-<!-- <link rel="import" href="video-gallery.html"> -->
+<link rel="import" href="global-functions.html">
 <link rel="import" href="bwt-datatable-card.html">
 <link rel="import" href="time-element.html">
 <link rel="import" href="shared-styles.html">
@@ -100,6 +99,10 @@
         <firebase-query path="/{{myKey}}/cases" order-by-key equal-to="{{viewKey}}" data="{{mycases}}" limit-to-first="1"></firebase-query>
 
         <firebase-query path="/{{myKey}}/billing" order-by-key equal-to="{{viewKey}}" data="{{mybilling}}" limit-to-first="1"></firebase-query>
+
+        <firebase-query disabled id="billingDataQuery" path="/{{myKey}}/billing_data" data="{{myBillingData}}" order-by-child="billing_key"
+            equal-to="{{viewKey}}">
+        </firebase-query>
 
         <firebase-query path="/{{myKey}}/cases/{{viewKey}}/attachment" data="{{myimaging}}">
         </firebase-query>
@@ -200,11 +203,11 @@
                     </div>
                 </div>
 
-                <div class="docu" style="margin-top:-16px;">
+                <div hidden="{{noBilling}}" class="docu" style="margin-top:-16px;">
                     <div class="details">
                         <div style="font-size: 12px;">Ref. # {{ref}}</div>
-                        <div style="font-size: 14px;">{{remarks}}</div>
-                        <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed>
+                        <div style="font-size: 14px; padding:6px">{{remarks}}</div>
+                        <paper-datatable id="billingDatatable" data="{{myBillingData}}" header-fixed>
                             <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
                             <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
                             <paper-datatable-column header="Bill To" type="String" property="billTo"></paper-datatable-column>
@@ -248,6 +251,10 @@
                 mybilling: {
                     type: Object,
                     observer: '_mybillingChanged'
+                },
+                noBilling: {
+                    type: Boolean,
+                    value: true
                 }
             },
 
@@ -259,8 +266,12 @@
                 if (this.mybilling.length > 0) {
                     this.ref = this.mybilling[0].ref;
                     this.remarks = "“" + this.mybilling[0].remarks + "”";
-                    this.billingData = this.mybilling[0].billing_data;
                     this.total = this.mybilling[0].billing_total;
+                    this.noBilling = false;
+                    this.$.billingDataQuery.disabled = false;
+                } else {
+                    this.noBilling = true;
+                    this.$.billingDataQuery.disabled = true;
                 }
             },
 
@@ -282,108 +293,35 @@
                 if (e.length > 0) {
 
                     if (e[0].patientinfo) {
-
                         this.insurance = e[0].patientinfo.hmo;
                         this.sex = e[0].patientinfo.gender;
                         this.p_num = e[0].patientinfo.num;
 
                         if (e[0].patientinfo.birthday) {
-                            var today = new Date();
-                            var birthday = new Date(e[0].patientinfo.birthday);
-
-                            var differenceInMilisecond = today.valueOf() - birthday.valueOf();
-
-                            var year_age = Math.floor(differenceInMilisecond / 31536000000);
-                            var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
-
-                            var month_age = Math.floor(day_age / 30);
-
-                            day_age = day_age % 30;
-
-                            if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
-                                console.log('err');
-                                // $("#exact_age").text("Invalid birthday - Please try again!");
-                            }
-                            else {
-                                if (year_age > 0) {
-                                    if (year_age == 1) {
-                                        this.age = year_age + " year old";
-                                    }
-                                    else {
-                                        this.age = year_age + " years old";
-                                    }
-                                }
-                                else if (year_age == 0 && month_age > 0) {
-                                    if (month_age == 1) {
-                                        this.age = month_age + " month old";
-                                    }
-                                    else {
-                                        this.age = month_age + " months old";
-                                    }
-                                }
-                                else if (year_age == 0 && month_age == 0 && day_age > 0) {
-                                    if (day_age == 1) {
-                                        this.age = day_age + " day old";
-                                    }
-                                    else {
-                                        this.age = day_age + " days old";
-                                    }
-                                }
-                                else {
-                                    this.age = year_age + " years " + month_age + " months " + day_age + " days old";
-                                }
-                            }
-
+                            this.age = getAge(e[0].patientinfo.birthday);
                         }
                         else {
                             this.age = '';
                         }
-
                     }
 
                     this.name = e[0].patient;
-                    this.complain = e[0].complain;
-                    this.diagnosis = e[0].diagnosis;
-                    this.history = e[0].history;
-                    this.treatment = e[0].treatment;
+                    this.complain = e[0].complain ? e[0].complain : null;
+                    this.diagnosis = e[0].diagnosis ? e[0].diagnosis : null;
+                    this.history = e[0].history ? e[0].history : null;
+                    this.treatment = e[0].treatment ? e[0].treatment : null;
+
+                    this.laboratory = e[0].laboratory ? e[0].laboratory : null;
+                    this.pe = e[0].pe ? e[0].pe : null;
+                    this.plan = e[0].plan ? e[0].plan : null;
+
+                    this.subjective = e[0].subjective ? e[0].subjective : null;
+                    this.objective = e[0].objective ? e[0].objective : null;
+                    this.assessment = e[0].assessment ? e[0].assessment : null;
+
                     this.imaging = e[0].imaging;
-
-                    if (e[0].laboratory) this.laboratory = e[0].laboratory;
-                    else this.laboratory = '';
-
-                    if (e[0].pe) this.pe = this.pe = e[0].pe;
-                    else this.pe = '';
-
-                    if (e[0].plan) this.plan = e[0].plan;
-                    else this.plan = '';
-
-                    if (e[0].subjective) {
-                        this.subjective = e[0].subjective;
-                        this.objective = e[0].objective;
-                        this.assessment = e[0].assessment;
-                    }
-                    else {
-                        this.subjective = '';
-                        this.objective = '';
-                        this.assessment = '';
-                    }
-
-                    if (e[0].profile) {
-                        this.profile = e[0].profile;
-                    }
-                    else {
-                        this.profile = "../images/user.png";
-                    }
-
+                    this.profile = e[0].profile ? e[0].profile : "../images/user.png";
                     this.timestamp = e[0].timestamp;
-
-                    var date = new Date(e[0].timestamp);
-                    var options = {
-                        weekday: "long", year: "numeric", month: "short",
-                        day: "numeric", hour: "2-digit", minute: "2-digit"
-                    };
-
-                    this.date = date.toLocaleTimeString("en-us", options);
                 }
             },
 

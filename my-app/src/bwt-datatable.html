@@ -687,6 +687,7 @@
 						this._queryAndSetColumns();
 					});
 				},
+				
 				_queryAndSetColumns: function () {
 					var columns = this.queryAllEffectiveChildren('paper-datatable-column');
 					var self = this;
@@ -708,21 +709,23 @@
 				},
 
 				_setRowKeys: function () {
-					var rowKeys = [];
-					this._dataKeyCollection = new CollectionHelpers(this.data);
-					this.data.forEach(function (row) {
-						var key = this._getKeyByItem(row);
-						if ('filter' in this) {
-							if (this.filter(row, key, this.data)) {
+					if (this.data) {
+						var rowKeys = [];
+						this._dataKeyCollection = new CollectionHelpers(this.data);
+						this.data.forEach(function (row) {
+							var key = this._getKeyByItem(row);
+							if ('filter' in this) {
+								if (this.filter(row, key, this.data)) {
+									rowKeys.push(key);
+								}
+							} else {
 								rowKeys.push(key);
 							}
-						} else {
-							rowKeys.push(key);
-						}
-					}.bind(this));
-					this.set("_rowKeys", rowKeys);
-					//why again was this necessary?
-					this._internalSort(this._currentlySortedColumn);
+						}.bind(this));
+						this.set("_rowKeys", rowKeys);
+						//why again was this necessary?
+						this._internalSort(this._currentlySortedColumn);
+					}
 				},
 
 				/**
@@ -878,16 +881,18 @@
 				 * If some or none are checked it will select all items
 				 */
 				toggleAll: function () {
-					var triggeredEvent = this._fireCustomEvent(this, "toggle-all", {});
-					// if(triggeredEvent.defaultPrevented){
-					var allChecked = this._allChecked();
-					this.data.forEach(function (item) {
-						if (allChecked) {
-							this.deselect(item);
-						} else {
-							this.select(item);
-						}
-					}.bind(this));
+					if (this.data) {
+						var triggeredEvent = this._fireCustomEvent(this, "toggle-all", {});
+						// if(triggeredEvent.defaultPrevented){
+						var allChecked = this._allChecked();
+						this.data.forEach(function (item) {
+							if (allChecked) {
+								this.deselect(item);
+							} else {
+								this.select(item);
+							}
+						}.bind(this))
+					};
 					// }
 					// console.log(triggeredEvent);
 				},
@@ -944,14 +949,16 @@
 				},
 
 				_allChecked: function () {
-					var allChecked = true;
-					this.data.forEach(function (item) {
-						var key = this._getKeyByItem(item);
-						if (this.selectedKeys.indexOf(key) == -1) {
-							allChecked = false;
-						}
-					}.bind(this));
-					return allChecked && this.data.length > 0;
+					if (this.data) {
+						var allChecked = true;
+						this.data.forEach(function (item) {
+							var key = this._getKeyByItem(item);
+							if (this.selectedKeys.indexOf(key) == -1) {
+								allChecked = false;
+							}
+						}.bind(this));
+						return allChecked && this.data.length > 0;
+					}
 				},
 
 				_someChecked: function () {

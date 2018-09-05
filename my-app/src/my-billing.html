@@ -24,10 +24,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
+<link rel="import" href="my-billing-card.html">
 <link rel="import" href="my-icons.html">
-<link rel="import" href="time-element.html">
-<link rel="import" href="search-bar.html">
+<link rel="import" href="shared-styles.html">
 
 <link rel="lazy-import" href="my-billing-new.html">
 <link rel="lazy-import" href="my-billing-edit.html">
@@ -45,7 +47,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .item {
-        @apply --layout-horizontal;
+        /* @apply --layout-horizontal; */
         /* padding: 20px; */
         background-color: white;
         border-bottom: 1px solid #ddd;
@@ -55,57 +57,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .item:hover {
         box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
-      }
-
-      .avatar {
-        height: 45px;
-        width: 45px;
-        border: 2px solid white;
-        border-radius: 50%;
-        box-sizing: border-box;
-        background-color: #DDD;
-      }
-
-      .pad {
-        padding: 0 16px;
-        @apply --layout-flex;
-        @apply --layout-vertical;
-      }
-
-      .primary {
-        font-size: 14px;
-        font-weight: 400;
-      }
-
-      .shortText,
-      .longText {
-        font-size: 14px;
-      }
-
-      .longText {
-        color: gray;
-        /* display: none; */
-      }
-
-      /* .item:hover .shortText::after {
-        content: ' [+]';
-        color: gray;
-      } */
-
-      /* .item.expanded:hover .shortText::after {
-        content: '';
-      } */
-
-      /* .item.expanded .longText {
-        display: block;
-      } */
-
-      /* .item.expanded:hover .longText::after {
-        content: ' [–]';
-      } */
-
-      .spacer {
-        @apply --layout-flex;
       }
 
       @media (max-width: 768px) {
@@ -118,16 +69,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
 
+        .ph-item {
+          margin: 16px;
+          padding: 16px;
+        }
+
+        .ph-col-1 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 20%;
+          flex: 0 0 20%
+        }
+
+        .ph-col-10 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 80%;
+          flex: 0 0 80%
+        }
+
+        .ph-col-8 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 80%;
+          flex: 0 0 80%
+        }
+
         #noRecord {
           margin: 16px;
           display: flex;
           flex-direction: column;
-        }
-
-        paper-search-bar {
-          margin-left: 80px;
-          width: 50%;
-          color: black;
         }
       }
 
@@ -140,17 +108,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
 
+        .ph-item {
+          width: 736px;
+          margin: 16px auto;
+          padding: 16px;
+        }
+
         #noRecord {
           width: 736px;
           margin: 16px auto;
         }
-
-        paper-search-bar {
-          margin-left: 50px;
-          width: 50%;
-          color: black;
-        }
-
       }
 
       #tool1 {
@@ -163,7 +130,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       #btn-arrow {
-        position: absolute;
         color: black;
       }
 
@@ -179,35 +145,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .clinic {
         position: absolute;
-        right: 20px;
-        top: 50px;
-        font-size: 14px;
-      }
-
-      .bill {
-        position: absolute;
-        right: 20px;
-        top: 73px;
-        font-size: 14px;
-        color: gray;
-      }
-
-      .collected {
-        /* transform: rotate(-25deg); */
-        position: absolute;
-        right: 20px;
-        top: 127px;
-        color: #F44336;
-        font-size: 14px;
-        padding: 4px;
-        border: 2px solid #F44336;
-        border-radius: 6px;
+        right: 50px;
+        top: 15px;
+        font-size: 12px;
       }
 
       paper-fab.fab-menu {
         position: fixed;
         right: 32px;
         bottom: 32px;
+      }
+
+      .loadingIndicator {
+        text-align: center;
+        height: 40px;
+      }
+
+      paper-spinner {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
       }
     </style>
 
@@ -219,67 +176,76 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div name="">
         <app-header-layout fullbleed has-scrolling-region>
           <app-header fixed slot="header">
-            <template is="dom-if" if="{{!openSearch}}">
+            <div hidden="{{openSearch}}">
               <app-toolbar primary id="tool1">
                 <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                 <div main-title>Billing</div>
                 <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
               </app-toolbar>
-            </template>
+            </div>
 
-            <template is="dom-if" if="{{openSearch}}">
+            <div hidden="{{!openSearch}}">
               <app-toolbar primary id="tool2">
                 <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                <paper-search-bar id="search" placeholder="Search reference no .." query="{{search}}" disable-filter-button></paper-search-bar>
-                <template is="dom-if" if="{{search}}">
-                  <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
-                </template>
+                <div style="width: 100%">
+                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}" disable-filter-button></paper-search-bar>
+                </div>
               </app-toolbar>
-            </template>
+            </div>
           </app-header>
 
-          <firebase-query id="query" path="/{{myKey}}/billing" data="{{myBilling}}" order-by-child="{{order}}" start-at="{{search}}"
+          <firebase-query disabled id="searchQuery" path="/{{myKey}}/billing" data="{{items}}" order-by-child="patientinfo/name" start-at="{{search}}"
             limit-to-first="15">
           </firebase-query>
 
-          <div id="noRecord">
-            <div class="item" style="padding:15px">
-              <div style="margin:auto">
-                {{record}}
+          <firebase-query id="defaultQuery" path="/{{myKey}}/billing" data="{{myBilling}}" order-by-child="order" start-at="{{lastorder}}"
+            limit-to-first="15">
+          </firebase-query>
+
+          <template is="dom-if" if="{{firstLoad}}">
+            <div class="ph-item">
+              <div class="ph-col-1">
+                <div class="ph-avatar" style="width: 45px;"></div>
               </div>
-            </div>
-          </div>
-
-          <iron-list items="[[myBilling]]" as="item" selection-enabled scroll-target="threshold">
-            <template>
-              <div class="divSeparator">
-                <div class="item" tabindex$="[[tabIndex]]">
-                  <div class="card-content" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
-                    <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
-                      <iron-icon icon="my-icons:watch-later"></iron-icon>
-                      <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
-                    </div>
-                    <div id="{{item.$key}}" style=" padding: 16px; display:flex">
-                      <div id="{{item.$key}}" style=" margin-left:10px;">
-                        <div id="{{item.$key}}" style="font-size:11px" class="longText">Ref.# [[item.ref]]</div>
-                        <div id="{{item.$key}}" class="primary">[[_manyServices(item.billing_data)]]</div>
-                        <!-- <div id="{{item.$key}}" class="primary">“[[item.remarks]]”</div> -->
-                      </div>
-                    </div>
-                  </div>
-
-                  <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
-                  </paper-icon-button>
-
-                  <div class="clinic">[[item.clinic_location]]</div>
-                  <div class="bill">Php [[item.billing_total]].00</div>
-
+              <div class="ph-col-8">
+                <div class="ph-row" style="margin-top:6px;">
+                  <div class="ph-col-8 big"></div>
+                  <div class="ph-col-2 empty"></div>
+                  <div class="ph-col-6 big"></div>
                 </div>
               </div>
-            </template>
-          </iron-list>
+            </div>
+          </template>
 
-          <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+          <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
+            <div id="noRecord">
+              <div class="item" style="padding:15px;">
+                <div style="text-align: center">
+                  No data found.
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+            <iron-list id="ironlist" items="[[items]]" as="item">
+              <template>
+                <div class="divSeparator">
+                  <div class="item" tabindex$="[[tabIndex]]">
+                    <my-billing-card item="[[item]]" my-key="[[myKey]]"></my-billing-card>
+
+                    <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
+                    </paper-icon-button>
+
+                    <div class="clinic">[[item.clinic_location]]</div>
+                  </div>
+                </div>
+              </template>
+            </iron-list>
+
+            <div class="loadingIndicator">
+              <paper-spinner active="{{_loadCheck(loadingPeople, firstLoad)}}"></paper-spinner>
+            </div>
           </iron-scroll-threshold>
 
         </app-header-layout>
@@ -318,9 +284,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         items: {
           type: Array,
-          value: function () {
-            return [];
-          }
+          value: [],
+          notify: true
         },
         myKey: String,
         myLocation: String,
@@ -337,14 +302,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         order: {
           type: String,
           value: 'order'
+        },
+        firstLoad: {
+          type: Boolean,
+          value: true
         }
       },
 
       observers: [
         '_searchChanged(search)',
         '_myBillingChanged(myBilling.*)',
-        '_routeChanged(route)'
+        '_routeChanged(route)',
+        '_itemsChanged(items)'
       ],
+
+      _searchChanged(search) {
+        if (search) {
+          this.search = search.toUpperCase();
+          this.$.defaultQuery.disabled = true;
+          this.$.searchQuery.disabled = false;
+        }
+        else {
+          this.$.defaultQuery.disabled = false;
+          this.$.searchQuery.disabled = true;
+        }
+
+        this.loadingPeople = true;
+      },
 
       _routeChanged(e) {
         var page;
@@ -358,12 +342,75 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _myBillingChanged() {
-        if (this.myBilling.length > 0) {
-          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+      _itemsChanged(e) {
+        if (e.length > 0) {
+          this.$.threshold.clearTriggers();
+          this.loadingPeople = false;
+          this.firstLoad = false;
+
+          this.$.ironlist._render();
+          setTimeout((e) => {
+            this.$.ironlist._update();
+          }, 600);
         } else {
-          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
           this._fetching();
+        }
+      },
+
+      _myBillingChanged(e) {
+        if (this.myBilling.length > 0) {
+          if (e.path === "myBilling") {
+            this.appendToList();
+          }
+
+          if (e.path !== "myBilling" && e.path === "myBilling.splices" && e.path !== "myBilling.length") {
+            this.items = [];
+            this.lastorder = "";
+            this.$.defaultQuery.disabled = true;
+            this.$.defaultQuery.disabled = false;
+          }
+        } else {
+          this._fetching();
+        }
+      },
+
+      appendToList() {
+        for (var i = 0; i < this.myBilling.length; i++) {
+          var exists = this.items.some(patient => patient['$key'] === this.myBilling[i].$key);
+          if (!exists) {
+            this.items.push(this.myBilling[i]);
+            this.notifyPath('items', this.items.slice());
+          }
+        }
+      },
+
+      loadMoreData() {
+        if (this.items.length > 0) {
+          this.lastorder = this.items[this.items.length - 1].order;
+        }
+
+        this.loadingPeople = true;
+      },
+
+      _fetching() {
+        setTimeout((e) => {
+          this.loadingPeople = false;
+          this.firstLoad = false;
+        }, 5000);
+      },
+
+      _noDataChanged(e, f) {
+        if (f) return false;
+        else {
+          if (e > 0) return false;
+          else return true;
+        }
+      },
+
+      _loadCheck(e, l) {
+        if (l) return false;
+        else {
+          return e;
         }
       },
 
@@ -393,135 +440,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }));
       },
 
-      _manyServices(e) {
-        if (e.length > 0) {
-          if (e.length > 1) {
-            return e.length + " services";
-          }
-          else {
-            return e.length + " service";
-          }
-        }
-      },
-
-      _timeStampToDateTime(ts) {
-        return new Date(ts);
-      },
-
-      loadMoreData() {
-        // load async stuff. e.g. XHR
-        this.$.threshold.clearTriggers();
-      },
-
-      _fetching() {
-        this.record = 'Loading data . . .';
-        setTimeout((e) => {
-          this.record = 'No record found.';
-        }, 3000);
-      },
-
-      _patientImg(e) {
-        if (e) return e;
-        else return '../images/user.png';
-      },
-
-      _ageCal(bday) {
-        if (bday) {
-
-          var today = new Date();
-          var birthday = new Date(bday);
-
-          var differenceInMilisecond = today.valueOf() - birthday.valueOf();
-
-          var year_age = Math.floor(differenceInMilisecond / 31536000000);
-          var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
-
-          var month_age = Math.floor(day_age / 30);
-
-          day_age = day_age % 30;
-
-          if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
-            console.log('err');
-            // $("#exact_age").text("Invalid birthday - Please try again!");
-          }
-          else {
-            if (year_age > 0) {
-              if (year_age == 1) {
-                return year_age + " year old";
-              }
-              else {
-                return year_age + " years old";
-              }
-            }
-            else if (year_age == 0 && month_age > 0) {
-              if (month_age == 1) {
-                return month_age + " month old";
-              }
-              else {
-                return month_age + " months old";
-              }
-            }
-            else if (year_age == 0 && month_age == 0 && day_age > 0) {
-              if (day_age == 1) {
-                return day_age + " day old";
-              }
-              else {
-                return day_age + " days old";
-              }
-            }
-            else {
-              return year_age + " years " + month_age + " months " + day_age + " days old";
-            }
-          }
-        }
-        else {
-          return '';
-        }
-      },
-
-      _checkNormal(e) {
-        if (e === "Normal") return false;
-        else return true;
-      },
-
-      _checkSOAP(e) {
-        if (e === "SOAP") return false;
-        else return true;
-      },
-
-      _comma(e) {
-        if (e) {
-          return ',';
-        }
-      },
-
-      _hmo(e) {
-        if (e) {
-          return 'HMO: ' + e;
-        }
-      },
-
-      _date(e) {
-        if (e) {
-          var date = new Date(e);
-          var options = {
-            weekday: "long", year: "numeric", month: "short",
-            day: "numeric", hour: "2-digit", minute: "2-digit"
-          };
-
-          return date.toLocaleTimeString("en-us", options);
-        }
-      },
-
-      _searchChanged(search) {
-        if (search) {
-          this.order = 'ref';
-        }
-        else {
-          this.order = 'order';
-        }
-      },
-
       toggleDrawer() {
         this.dispatchEvent(new CustomEvent('toggleDrawer', {
           bubbles: true, composed: true, detail: {
@@ -533,6 +451,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       toggleSearch() {
         this.openSearch = true;
+        this.$.search.focus();
       },
 
       toggleReturn() {

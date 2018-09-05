@@ -1,0 +1,141 @@
+<script>
+    function getAge(date) {
+        var today = new Date();
+        var birthday = new Date(date);
+
+        var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+        var year_age = Math.floor(differenceInMilisecond / 31536000000);
+        var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+        var month_age = Math.floor(day_age / 30);
+
+        day_age = day_age % 30;
+
+        if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+            console.warn('Invalid date format!');
+        }
+        else {
+            if (year_age > 0) {
+                if (year_age == 1) {
+                    return year_age + " year old";
+                }
+                else {
+                    return year_age + " years old";
+                }
+            }
+            else if (year_age == 0 && month_age > 0) {
+                if (month_age == 1) {
+                    return month_age + " month old";
+                }
+                else {
+                    return month_age + " months old";
+                }
+            }
+            else if (year_age == 0 && month_age == 0 && day_age > 0) {
+                if (day_age == 1) {
+                    return day_age + " day old";
+                }
+                else {
+                    return day_age + " days old";
+                }
+            }
+            else {
+                return year_age + " years " + month_age + " months " + day_age + " days old";
+            }
+        }
+    }
+
+    function formatWeekDate(date) {
+        var monthNames = [
+            "Jan", "Feb", "Mar",
+            "Apr", "May", "Jun", "Jul",
+            "Aug", "Sep", "Oct",
+            "Nov", "Dec"
+        ];
+
+        var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        var d = new Date(date);
+
+        return days[d.getDay()] + ', ' + d.getDate() + '-' + monthNames[d.getMonth()] + '-' + d.getFullYear();
+    }
+
+    function formatLocalDateString(date) {
+        var d = new Date(date);
+        // return d.toDateString() + ' at ' + d.toLocaleTimeString().match(/\d{2}:\d{2}|[AMP]+/g).join(' ');
+        return d.toDateString() + ' at ' + d.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+    }
+
+    function formatTodayDate(date) {
+        var d = new Date(date);
+        return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+    }
+
+    function generateUniqueId(num) {
+        if (num > 0 && num < 10) {
+            num = '000' + num;
+        }
+        else if (num > 9 && num < 100) {
+            num = '00' + num;
+        }
+        else if (num > 99 && num < 1000) {
+            num = '0' + num;
+        }
+        else if (num > 999) {
+            num = num;
+        }
+        else {
+            num = '0000';
+        }
+
+        return num.toString();
+    }
+
+    function generatePushID(date, lastPushTime) {
+        //reference: https://gist.github.com/mikelehen/3596a30bd69384624c11
+        // Modeled after base64 web-safe chars, but ordered by ASCII.
+        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+
+        // Timestamp of last push, used to prevent local collisions if you push twice in one ms.
+        // var lastPushTime = 0;
+        // We generate 72-bits of randomness which get turned into 12 characters and appended to the
+        // timestamp to prevent collisions with other clients.  We store the last characters we
+        // generated because in the event of a collision, we'll use those same characters except
+        // "incremented" by one.
+        var lastRandChars = [];
+
+        //check if there's a last push
+        if (lastPushTime === 0) {
+            var now = new Date(date).getTime();
+        }
+        else {
+            var now = lastPushTime + 1000;
+        }
+
+        lastPushTime = now;
+
+        var timeStampChars = new Array(8);
+
+        for (var i = 7; i >= 0; i--) {
+            timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+            // NOTE: Can't use << here because javascript will convert to int and lose the upper bits.
+            now = Math.floor(now / 64);
+        }
+
+        if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+
+        var id = timeStampChars.join('');
+
+        for (i = 0; i < 12; i++) {
+            lastRandChars[i] = Math.floor(Math.random() * 64);
+        }
+
+        for (i = 0; i < 12; i++) {
+            id += PUSH_CHARS.charAt(lastRandChars[i]);
+        }
+
+        if (id.length != 20) throw new Error('Length should be 20.');
+
+        return id;
+    }
+</script>

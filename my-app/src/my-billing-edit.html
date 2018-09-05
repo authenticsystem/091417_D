@@ -16,7 +16,7 @@
 <link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
 <link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
 
-<link rel="import" href="bwt-datatable-card.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -397,35 +397,35 @@
             },
 
             _billingDataChanged(e, r) {
-                if (e.length > 0) {
-                    var amounts = [];
+                // if (e.length > 0) {
+                //     var amounts = [];
 
-                    e.forEach(element => {
-                        amounts.push(parseInt(element.amount));
-                    });
+                //     e.forEach(element => {
+                //         amounts.push(parseInt(element.amount));
+                //     });
 
-                    function getSum(total, num) {
-                        return total + num;
-                    }
+                //     function getSum(total, num) {
+                //         return total + num;
+                //     }
 
-                    function addCommas(intNum) {
-                        return (intNum + '').replace(/(\d)(?=(\d{3})+$)/g, '$1,');
-                    }
+                //     function addCommas(intNum) {
+                //         return (intNum + '').replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+                //     }
 
-                    this.total = addCommas(amounts.reduce(getSum));
-                    Polymer.dom(this.root).querySelector("#delBTN").style.display = "block";
-                    if (this.todayDate) {
-                        this.favrighthide = false;
-                    }
-                    else {
-                        this.favrighthide = true;
-                    }
-                }
-                else {
-                    this.total = 0;
-                    this.favrighthide = true;
-                    Polymer.dom(this.root).querySelector("#delBTN").style.display = "none";
-                }
+                //     this.total = addCommas(amounts.reduce(getSum));
+                //     Polymer.dom(this.root).querySelector("#delBTN").style.display = "block";
+                //     if (this.todayDate) {
+                //         this.favrighthide = false;
+                //     }
+                //     else {
+                //         this.favrighthide = true;
+                //     }
+                // }
+                // else {
+                //     this.total = 0;
+                //     this.favrighthide = true;
+                //     Polymer.dom(this.root).querySelector("#delBTN").style.display = "none";
+                // }
             },
 
             _selectedBillToChanged(e, f, g, h) {

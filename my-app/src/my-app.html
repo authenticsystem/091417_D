@@ -27,6 +27,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+<link rel="import" href="../bower_components/paper-badge/paper-badge.html">
 <link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
@@ -294,7 +295,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                   <a name="messaging" href="[[rootPath]]messaging">
                     <paper-icon-item toggles="true" class="menuSelected">
-                      <iron-icon icon="my-icons:chat" slot="item-icon"></iron-icon>
+                      <iron-icon id="messageIcon" icon="my-icons:chat" slot="item-icon"></iron-icon>
+                      <paper-badge for="messageIcon" label="0"></paper-badge>
                       <span>Messaging</span>
                     </paper-icon-item>
                   </a>

@@ -19,7 +19,9 @@
 <link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
+<link rel="import" href="global-functions.html">
 <link rel="import" href="sortable-list.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
@@ -62,6 +64,29 @@
                     margin-bottom: -16px;
                 }
 
+                .ph-item {
+                    margin: 16px;
+                    padding: 16px;
+                }
+
+                .ph-col-1 {
+                    -webkit-box-flex: 0;
+                    -ms-flex: 0 0 20%;
+                    flex: 0 0 20%
+                }
+
+                .ph-col-10 {
+                    -webkit-box-flex: 0;
+                    -ms-flex: 0 0 80%;
+                    flex: 0 0 80%
+                }
+
+                .ph-col-8 {
+                    -webkit-box-flex: 0;
+                    -ms-flex: 0 0 80%;
+                    flex: 0 0 80%
+                }
+
                 #noRecord {
                     margin: 16px;
                     display: flex;
@@ -80,6 +105,12 @@
                     width: 736px;
                     margin: 16px auto;
                     margin-bottom: -16px;
+                }
+
+                .ph-item {
+                    width: 736px;
+                    margin: 16px auto;
+                    padding: 16px;
                 }
 
                 #noRecord {
@@ -144,7 +175,7 @@
                 background-color: white;
                 border-bottom: 1px solid #ddd;
                 cursor: pointer;
-                opacity: 0.3;
+                opacity: 0.4;
             }
 
             .item_N {
@@ -153,7 +184,7 @@
                 background-color: white;
                 border-bottom: 1px solid #ddd;
                 cursor: pointer;
-                opacity: 0.6;
+                opacity: 0.7;
             }
 
             .item_N:hover,
@@ -205,6 +236,18 @@
                 height: 17px;
                 margin-top: 8px;
             }
+
+            .loadingIndicator {
+                margin-top: 16px;
+                text-align: center;
+                height: 40px;
+            }
+
+            paper-spinner {
+                width: 20px;
+                height: 20px;
+                margin-right: 10px;
+            }
         </style>
 
         <app-route route="{{route}}" pattern="/new" active="{{queueNewActive}}"></app-route>
@@ -235,13 +278,32 @@
                         data="{{myqueue}}">
                     </firebase-query>
 
-                    <div id="noRecord">
-                        <div class="itemNoRecord">
-                            <div style="margin:auto">
-                                {{record}}
+                    <template is="dom-if" if="{{_loadCheck(loadingPeople, firstLoad)}}">
+                        <div class="ph-item">
+                            <div class="ph-col-1">
+                                <div class="ph-avatar" style="width: 45px;"></div>
+                            </div>
+                            <div class="ph-col-8">
+                                <div class="ph-row">
+                                    <div class="ph-col-1"></div>
+                                    <div class="ph-col-10 empty"></div>
+                                    <div class="ph-col-8 big"></div>
+                                    <div class="ph-col-2 empty"></div>
+                                    <div class="ph-col-6"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </template>
+
+                    <template is="dom-if" if="{{_noDataChanged(myqueue.length, loadingPeople)}}">
+                        <div id="noRecord">
+                            <div class="itemNoRecord">
+                                <div style="margin:auto">
+                                    No record found.
+                                </div>
+                            </div>
+                        </div>
+                    </template>
 
                     <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
                         <div class="list2">
@@ -293,6 +355,10 @@
                                 </div>
                             </template>
                         </sortable-list>
+
+                        <!-- <div class="loadingIndicator">
+                            <paper-spinner active="{{_loadCheck(loadingPeople, firstLoad)}}"></paper-spinner>
+                        </div> -->
                     </iron-scroll-threshold>
 
                     <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_openAddNew"></paper-fab>
@@ -421,14 +487,18 @@
                     type: Array,
                     computed: '_returnException(myqueue.*)'
                 },
-                loadTime: {
-                    type: Number,
-                    value: 3000
+                firstLoad: {
+                    type: Boolean,
+                    value: true
+                },
+                loadingPeople: {
+                    type: Boolean,
+                    value: true
                 }
             },
 
             ready() {
-                this.pickDate = this.formatTodayDate(new Date());
+                this.pickDate = formatTodayDate(new Date());
             },
 
             observers: [
@@ -455,12 +525,14 @@
             _pickDateChanged(date) {
                 if (date) {
                     Polymer.dom(this.root).querySelector("#pickDateText").setAttribute('style', 'font-size:14px;color:white');
-                    this.pickText = this.formatWeekDate(date);
+                    this.pickText = formatWeekDate(date);
                 }
                 else {
                     Polymer.dom(this.root).querySelector("#pickDateText").setAttribute('style', 'font-size:12px;color:red');
                     this.pickText = 'Please pick a date.';
                 }
+
+                this.loadingPeople = true;
             },
 
             _myqueueChanged(e) {
@@ -470,11 +542,10 @@
                         this.$.query.disabled = false;
                     }
 
-                    this.loadTime = 3000;
-                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+                    this.loadingPeople = false;
+                    this.firstLoad = false;
                 }
                 else {
-                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
                     this._fetching();
                 }
             },
@@ -689,41 +760,25 @@
             },
 
             _fetching() {
-                this.record = 'Loading data . . .';
                 setTimeout((e) => {
-                    this.record = 'No record found.';
-                }, this.loadTime);
+                    this.firstLoad = false;
+                    this.loadingPeople = false;
+                }, 5000);
             },
 
-            formatWeekDate(date) {
-                var monthNames = [
-                    "Jan", "Feb", "Mar",
-                    "Apr", "May", "Jun", "Jul",
-                    "Aug", "Sep", "Oct",
-                    "Nov", "Dec"
-                ];
-
-                var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                // var now = new Date().toDateString();
-                var d = new Date(date);
-
-                return days[d.getDay()] + ', ' + d.getDate() + ' ' + monthNames[d.getMonth()] + ' ' + d.getFullYear();
+            _noDataChanged(e, f) {
+                if (f) return false;
+                else {
+                    if (e > 0) return false;
+                    else return true;
+                }
             },
 
-            formatTodayDate(date) {
-                var monthNames = [
-                    "01", "02", "03",
-                    "04", "05", "06", "07",
-                    "08", "09", "10",
-                    "11", "12"
-                ];
-
-                var day = date.getDate();
-                if (day < 10) { day = '0' + day };
-                var monthIndex = date.getMonth();
-                var year = date.getFullYear();
-
-                return year + '-' + monthNames[monthIndex] + '-' + day;
+            _loadCheck(e, l) {
+                if (l) return l;
+                else {
+                    return e;
+                }
             },
 
             _parseInt(e) {
@@ -747,48 +802,7 @@
 
             _ageCal(bday) {
                 if (bday) {
-
-                    var today = new Date();
-                    var birthday = new Date(bday);
-
-                    var differenceInMilisecond = today.valueOf() - birthday.valueOf();
-
-                    var year_age = Math.floor(differenceInMilisecond / 31536000000);
-                    var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
-
-                    var month_age = Math.floor(day_age / 30);
-
-                    day_age = day_age % 30;
-
-                    if (!isNaN(year_age) || !isNaN(month_age) || !isNaN(day_age)) {
-                        if (year_age > 0) {
-                            if (year_age == 1) {
-                                return year_age + " year old";
-                            }
-                            else {
-                                return year_age + " years old";
-                            }
-                        }
-                        else if (year_age == 0 && month_age > 0) {
-                            if (month_age == 1) {
-                                return month_age + " month old";
-                            }
-                            else {
-                                return month_age + " months old";
-                            }
-                        }
-                        else if (year_age == 0 && month_age == 0 && day_age > 0) {
-                            if (day_age == 1) {
-                                return day_age + " day old";
-                            }
-                            else {
-                                return day_age + " days old";
-                            }
-                        }
-                        else {
-                            return year_age + " years " + month_age + " months " + day_age + " days old";
-                        }
-                    }
+                    return getAge(bday);
                 }
                 else {
                     return '';

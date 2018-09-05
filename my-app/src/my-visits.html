@@ -23,10 +23,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
 
 <link rel="import" href="time-element.html">
+<link rel="import" href="global-functions.html">
 <link rel="import" href="my-icons.html">
-<link rel="import" href="search-bar.html">
 <link rel="import" href="shared-styles.html">
 
 <link rel="lazy-import" href="my-visits-new.html">
@@ -146,11 +147,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           flex-direction: column;
         }
 
-        paper-search-bar {
+        /* paper-search-bar {
           margin-left: 80px;
           width: 50%;
           color: black;
-        }
+        } */
       }
 
       @media (min-width: 768px) {
@@ -173,11 +174,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 16px auto;
         }
 
-        paper-search-bar {
+        /* paper-search-bar {
           margin-left: 50px;
           width: 50%;
           color: black;
-        }
+        } */
 
       }
 
@@ -191,7 +192,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       #btn-arrow {
-        position: absolute;
         color: black;
       }
 
@@ -254,6 +254,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .loadingIndicator {
+        margin-top: 16px;
         text-align: center;
         height: 40px;
       }
@@ -273,23 +274,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div name="">
         <app-header-layout fullbleed has-scrolling-region>
           <app-header fixed slot="header">
-            <template is="dom-if" if="{{!openSearch}}">
+            <div hidden="{{openSearch}}">
               <app-toolbar primary id="tool1">
                 <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
                 <div main-title>Visits</div>
                 <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
               </app-toolbar>
-            </template>
+            </div>
 
-            <template is="dom-if" if="{{openSearch}}">
+            <div hidden="{{!openSearch}}">
               <app-toolbar primary id="tool2">
                 <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
-                <template is="dom-if" if="{{search}}">
-                  <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
-                </template>
+                <div style="width: 100%">
+                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}" disable-filter-button></paper-search-bar>
+                </div>
               </app-toolbar>
-            </template>
+            </div>
           </app-header>
 
           <firebase-query disabled id="searchQuery" path="/{{myKey}}/cases" data="{{items}}" order-by-child="patient" start-at="{{search}}"
@@ -299,6 +299,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <firebase-query id="defaultQuery" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="order" start-at="{{lastorder}}"
             limit-to-first="15">
           </firebase-query>
+
+          <template is="dom-if" if="{{firstLoad}}">
+            <div class="ph-item">
+              <div class="ph-col-1">
+                <div class="ph-avatar" style="width: 45px;"></div>
+              </div>
+              <div class="ph-col-8">
+                <div class="ph-row">
+                  <div class="ph-col-1"></div>
+                  <div class="ph-col-10 empty"></div>
+                  <div class="ph-col-8 big"></div>
+                  <div class="ph-col-2 empty"></div>
+                  <div class="ph-col-6"></div>
+                  <div class="ph-col-4 empty"></div>
+                  <div class="ph-col-12 empty"></div>
+                  <div class="ph-col-2"></div>
+                  <div class="ph-col-10 empty"></div>
+                  <div class="ph-col-12"></div>
+                  <div class="ph-col-10"></div>
+                </div>
+              </div>
+            </div>
+          </template>
 
           <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
             <div id="noRecord">
@@ -311,72 +334,51 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </template>
 
           <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
-            <template is="dom-if" if="{{firstLoad}}">
-              <div class="ph-item">
-                <div class="ph-col-1">
-                  <div class="ph-avatar" style="width: 45px;"></div>
-                </div>
-                <div class="ph-col-8">
-                  <div class="ph-row">
-                    <div class="ph-col-1"></div>
-                    <div class="ph-col-10 empty"></div>
-                    <div class="ph-col-8 big"></div>
-                    <div class="ph-col-2 empty"></div>
-                    <div class="ph-col-6"></div>
-                    <div class="ph-col-4 empty"></div>
-                    <div class="ph-col-12 empty"></div>
-                    <div class="ph-col-2"></div>
-                    <div class="ph-col-10 empty"></div>
-                    <div class="ph-col-12"></div>
-                    <div class="ph-col-10"></div>
-                  </div>
-                </div>
-              </div>
-            </template>
-
-            <iron-list items="[[items]]" as="item">
-              <template>
-                <div class="divSeparator">
-                  <div class="item">
-                    <div class="pad" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
-                      <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
-                        <iron-icon icon="my-icons:watch-later"></iron-icon>
-                        <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
-                      </div>
-                      <div id="{{item.$key}}" style=" padding: 16px; display:flex">
-                        <div>
-                          <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+            <template is="dom-if" if="{{_hasDataChanged(items.length)}}" restamp>
+              <iron-list items="[[items]]" as="item">
+                <template>
+                  <div class="divSeparator">
+                    <div class="item" tabindex$="[[tabIndex]]">
+                      <div class="pad" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
+                        <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
+                          <iron-icon icon="my-icons:watch-later"></iron-icon>
+                          <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
                         </div>
-                        <div id="{{item.$key}}" style=" margin-left:10px;">
-                          <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
-                          <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
-                          <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}}
-                            [[item.patientinfo.gender]]
+                        <div id="{{item.$key}}" style=" padding: 16px; display:flex">
+                          <div>
+                            <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                           </div>
-                          <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
+                          <div id="{{item.$key}}" style=" margin-left:10px;">
+                            <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
+                            <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
+                            <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}}
+                              [[item.patientinfo.gender]]
+                            </div>
+                            <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
 
-                          <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
-                            <span id="{{item.$key}}" class="longText">Chief Complaint</span>
-                            <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
-                          </div>
+                            <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
+                              <span id="{{item.$key}}" class="longText">Chief Complaint</span>
+                              <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                            </div>
 
-                          <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkSOAP(item.template)}}">
-                            <span id="{{item.$key}}" class="longText">Subjective</span>
-                            <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
+                            <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkSOAP(item.template)}}">
+                              <span id="{{item.$key}}" class="longText">Subjective</span>
+                              <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
+                            </div>
                           </div>
                         </div>
                       </div>
+
+                      <div class="clinic">[[item.clinic_location]]</div>
+
+                      <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit">
+                      </paper-icon-button>
+
                     </div>
-
-                    <div class="clinic">[[item.clinic_location]]</div>
-
-                    <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit">
-                    </paper-icon-button>
-
                   </div>
-                </div>
-              </template>
-            </iron-list>
+                </template>
+              </iron-list>
+            </template>
 
             <div class="loadingIndicator">
               <paper-spinner active="{{_loadCheck(loadingPeople, firstLoad)}}"></paper-spinner>
@@ -431,8 +433,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         openSearch: {
           type: Boolean,
-          value: false,
-          notify: true
+          value: false
         },
         firstLoad: {
           type: Boolean,
@@ -532,6 +533,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      _hasDataChanged(e) {
+        if (e > 0) {
+          this.loadingPeople = false;
+          return true;
+        }
+        else {
+          this._fetching();
+          return false;
+        }
+      },
+
       _timeStampToDateTime(ts) {
         return new Date(ts);
       },
@@ -541,56 +553,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else return '../images/user.png';
       },
 
-      _getViewDetailsLink(e) {
-        if (e) {
-          return '/visits/detail/' + e.toString();
-        }
-      },
-
       _ageCal(bday) {
         if (bday) {
-
-          var today = new Date();
-          var birthday = new Date(bday);
-
-          var differenceInMilisecond = today.valueOf() - birthday.valueOf();
-
-          var year_age = Math.floor(differenceInMilisecond / 31536000000);
-          var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
-
-          var month_age = Math.floor(day_age / 30);
-
-          day_age = day_age % 30;
-
-          if (!isNaN(year_age) || !isNaN(month_age) || !isNaN(day_age)) {
-            if (year_age > 0) {
-              if (year_age == 1) {
-                return year_age + " year old";
-              }
-              else {
-                return year_age + " years old";
-              }
-            }
-            else if (year_age == 0 && month_age > 0) {
-              if (month_age == 1) {
-                return month_age + " month old";
-              }
-              else {
-                return month_age + " months old";
-              }
-            }
-            else if (year_age == 0 && month_age == 0 && day_age > 0) {
-              if (day_age == 1) {
-                return day_age + " day old";
-              }
-              else {
-                return day_age + " days old";
-              }
-            }
-            else {
-              return year_age + " years " + month_age + " months " + day_age + " days old";
-            }
-          }
+          return getAge(bday);
         }
         else {
           return '';
@@ -619,24 +584,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _date(e) {
-        if (e) {
-          var date = new Date(e);
-          var options = {
-            weekday: "long", year: "numeric", month: "short",
-            day: "numeric", hour: "2-digit", minute: "2-digit"
-          };
-
-          return date.toLocaleTimeString("en-us", options);
-        }
-      },
-
-      _getEditAppLink(e) {
-        if (e) {
-          return '/visits/edit/' + e.toString();
-        }
-      },
-
       iconForItem(item) {
         return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';
       },
@@ -656,7 +603,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       toggleSearch() {
         this.openSearch = true;
-        // this.$.search.focus();
+        this.$.search.focus();
       },
 
       toggleReturn() {
