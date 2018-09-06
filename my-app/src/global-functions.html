@@ -67,8 +67,12 @@
     }
 
     function formatTodayDate(date) {
-        var d = new Date(date);
-        return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+        if (date) {
+            var d = new Date(date);
+            return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+        } else {
+            return null;
+        }
     }
 
     function generateUniqueId(num) {
@@ -109,7 +113,7 @@
             var now = new Date(date).getTime();
         }
         else {
-            var now = lastPushTime + 1000;
+            var now = lastPushTime;
         }
 
         lastPushTime = now;
@@ -138,4 +142,23 @@
 
         return id;
     }
+
+    function randomString(n) {
+        var r = "";
+        while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+        return r;
+    }
+
+    function snapshotToArray(snapshot) {
+        var returnArr = [];
+
+        snapshot.forEach(childSnapshot => {
+            var item = childSnapshot.val();
+            item._key = childSnapshot.key;
+            returnArr.push(item);
+        });
+
+        return returnArr;
+    }
+
 </script>

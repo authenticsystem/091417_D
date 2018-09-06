@@ -242,9 +242,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-route route="{{route}}" pattern="/detail" active="{{detailActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/edit" active="{{editActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/new" active="{{newActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail/0/p/" active="{{detail0Active}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit/0/p/" active="{{edit0Active}}"></app-route>
+    <app-route route="{{route}}" pattern="/new/0/p/" active="{{new0Active}}"></app-route>
 
     <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
       <div name="">
@@ -262,18 +262,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <app-toolbar primary id="tool2">
                 <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
                 <div style="width:100%">
-                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}" disable-filter-button></paper-search-bar>
+                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}"
+                    disable-filter-button></paper-search-bar>
                 </div>
               </app-toolbar>
             </div>
           </app-header>
 
-          <firebase-query disabled id="searchQuery" path="/{{myKey}}/patients" data="{{items}}" order-by-child="personal/name" start-at="{{search}}"
-            limit-to-first="15">
+          <firebase-query disabled id="searchQuery" path="/{{myKey}}/patients" data="{{items}}" order-by-child="personal/name"
+            start-at="{{search}}" limit-to-first="15">
           </firebase-query>
 
-          <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no" start-at="{{lastnum}}"
-            limit-to-first="15">
+          <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no"
+            start-at="{{lastnum}}" limit-to-first="15">
           </firebase-query>
 
           <template is="dom-if" if="{{firstLoad}}">
@@ -313,7 +314,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </div>
                     <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
                       <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
-                      <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]</div>
+                      <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]]
+                        [[item.personal.middlename]]</div>
                       <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}}
                         [[item.personal.sex]]
                       </div>
@@ -322,7 +324,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </div>
 
                     <div class="clinic">[[item.personal.clinic_location]]</div>
-                    <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="Edit">
+                    <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}"
+                      title="Edit">
                     </paper-icon-button>
                   </div>
                 </template>
@@ -339,23 +342,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_patientsNew"></paper-fab>
       </div>
 
-      <div name="/new">
-        <template is="dom-if" if="{{newActive}}" restamp>
-          <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-new>
+      <div name="/new/0/p/">
+        <template is="dom-if" if="{{new0Active}}" restamp>
+          <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}"
+            my-location-code="{{myLocationCode}}"></my-patients-new>
         </template>
       </div>
 
-      <div name="/edit">
-        <template is="dom-if" if="{{editActive}}" restamp>
-          <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" params="{{route.__queryParams}}" my-location="{{myLocation}}"
-            my-location-code="{{myLocationCode}}"></my-patients-edit>
+      <div name="/edit/0/p/">
+        <template is="dom-if" if="{{edit0Active}}" restamp>
+          <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" params="{{route.__queryParams}}"
+            my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-edit>
         </template>
       </div>
 
-      <div name="/detail">
-        <template is="dom-if" if="{{detailActive}}" restamp>
-          <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
-            my-role="{{myRole}}" params="{{route.__queryParams}}"></my-patients-view>
+      <div name="/detail/0/p/">
+        <template is="dom-if" if="{{detail0Active}}" restamp>
+          <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}"
+            my-location-code="{{myLocationCode}}" my-role="{{myRole}}" params="{{route.__queryParams}}"></my-patients-view>
         </template>
       </div>
 
@@ -407,9 +411,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _routeChanged(e) {
         var page;
-        if (this.detailActive) page = "patients-view";
-        else if (this.editActive) page = "patients-edit";
-        else if (this.newActive) page = "patients-new";
+        if (this.detail0Active) page = "patients-view";
+        else if (this.edit0Active) page = "patients-edit";
+        else if (this.new0Active) page = "patients-new";
 
         if (page) {
           var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
@@ -496,7 +500,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _selectThis(e) {
         this.viewKey = Polymer.dom(e).rootTarget.getAttribute("id");
-        window.history.pushState({}, null, '/patients/detail?ref=' + this.viewKey);
+        window.history.pushState({}, null, '/patients/detail/0/p/?ref=' + this.viewKey);
         window.dispatchEvent(new CustomEvent('location-changed'));
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "patients-view"
@@ -505,7 +509,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _editThis(e) {
         this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
-        window.history.pushState({}, null, '/patients/edit?ref=' + this.editKey);
+        window.history.pushState({}, null, '/patients/edit/0/p/?ref=' + this.editKey);
         window.dispatchEvent(new CustomEvent('location-changed'));
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "patients-edit"
@@ -514,7 +518,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _patientsNew() {
         var app = document.querySelector('my-app');
-        app.set('route.path', '/patients/new');
+        app.set('route.path', '/patients/new/0/p/');
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "patients-new"
         }));

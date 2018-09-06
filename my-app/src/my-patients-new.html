@@ -26,9 +26,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
 <link rel="import" href="../bower_components/timeu-wizard/timeu-wizard.html">
 
+<link rel="import" href="image-resize.html">
+<link rel="import" href="global-functions.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
-<link rel="import" href="image-resize.html">
 
 <dom-module id="my-patients-new">
   <template>
@@ -219,13 +221,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
                 <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
                 <div id="info">
-                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$" error-message="Invalid date format!"
-                    value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
+                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$"
+                    error-message="Invalid date format!" value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
                   <paper-input value="{{age}}" label="Age" style="width:100%;"></paper-input>
                 </div>
                 <div id="info">
                   <paper-dropdown-menu label="Marital Status" style="width:100%; margin-right:10px">
-                    <paper-listbox slot="dropdown-content" style="cursor:pointer" attr-for-selected="name" selected="{{status}}" class="dropdown-content">
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" attr-for-selected="name" selected="{{status}}"
+                      class="dropdown-content">
                       <paper-item id="item" name="Single">Single</paper-item>
                       <paper-item id="item" name="Married">Married</paper-item>
                       <paper-item id="item" name="Divorced">Divorced</paper-item>
@@ -234,7 +237,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-listbox>
                   </paper-dropdown-menu>
                   <paper-dropdown-menu label="Gender" style="width:100%; margin-right:10px">
-                    <paper-listbox slot="dropdown-content" style="cursor:pointer" attr-for-selected="name" selected="{{sex}}" class="dropdown-content">
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" attr-for-selected="name" selected="{{sex}}"
+                      class="dropdown-content">
                       <paper-item id="item" name="Male">Male</paper-item>
                       <paper-item id="item" name="Female">Female</paper-item>
                     </paper-listbox>
@@ -564,7 +568,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-fab style="background: #1976d2;" id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
         </div>
         <div hidden$="[[favrighthide]]">
-          <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+          <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right"
+            on-tap="_select2"></paper-fab>
         </div>
       </div>
 
@@ -644,15 +649,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ],
 
       ready() {
-        this.todayDate = this.formatTodayDate(new Date());
-        this.pickDate = this.formatTodayDate(new Date());
+        this.todayDate = formatTodayDate(new Date());
+        this.pickDate = formatTodayDate(new Date());
       },
 
       _pickDateChanged(date) {
         if (date) {
           this.$.dateDialogBtn.disabled = false;
           Polymer.dom(this.root).querySelector("#pickDateText").setAttribute('style', 'font-size:14px;color:gray');
-          this.pickText = this.formatWeekDate(date);
+          this.pickText = formatWeekDate(date);
         }
         else {
           this.$.dateDialogBtn.disabled = true;
@@ -716,7 +721,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         if (bday) {
           var newdateformat = /^([0-9]{4})[\/\-](0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])$/;
-          bday = this._formatToGDate(bday);
+          bday = formatTodayDate(bday);
           if (bday.match(newdateformat)) {
             this.age = this._calculateAge(bday);
           }
@@ -735,16 +740,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         else {
           this.favrighthide = false;
-        }
-      },
-
-      _formatToGDate(date) {
-        // var [month, day, year] = date.split(/[\/\-]/);
-        if (date) {
-          var x = new Date(date);
-          return x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2) + '-' + ('0' + x.getDate()).slice(-2);
-        } else {
-          return "";
         }
       },
 
@@ -816,37 +811,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _selectDate() {
         this.$.dateDialog.open();
-      },
-
-      formatWeekDate(date) {
-        var monthNames = [
-          "Jan", "Feb", "Mar",
-          "Apr", "May", "Jun", "Jul",
-          "Aug", "Sep", "Oct",
-          "Nov", "Dec"
-        ];
-
-        var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        // var now = new Date().toDateString();
-        var d = new Date(date);
-
-        return days[d.getDay()] + ', ' + d.getDate() + ' ' + monthNames[d.getMonth()] + ' ' + d.getFullYear();
-      },
-
-      formatTodayDate(date) {
-        var monthNames = [
-          "01", "02", "03",
-          "04", "05", "06", "07",
-          "08", "09", "10",
-          "11", "12"
-        ];
-
-        var day = date.getDate();
-        if (day < 10) { day = '0' + day };
-        var monthIndex = date.getMonth();
-        var year = date.getFullYear();
-
-        return year + '-' + monthNames[monthIndex] + '-' + day;
       },
 
       _select1(e) {
@@ -975,7 +939,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         saveLoad.style.display = 'block';
         noRef.once('value').then(function (data) {
           var num = (data.val() ? data.val() : 0) + 1;
-          var no = self._patientsNoUpdate(num);
+          var no = generateUniqueId(num);
 
           var push = ref.push({
             personal: {
@@ -983,7 +947,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               firstname: self.fname,
               middlename: self.mname,
               lastname: self.lname,
-              birthday: self._formatToGDate(self.bday),
+              birthday: formatTodayDate(self.bday),
               status: self.status ? self.status : "",
               sex: self.sex ? self.sex : "",
               contact: self.contact,
@@ -999,7 +963,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
             insurance: {
               card: self.card,
-              birthday: self._formatToGDate(self.bdate),
+              birthday: formatTodayDate(self.bdate),
               address: self.in_address,
               home_phone: self.home_phone,
               primary_insurance: self.indicate,
@@ -1034,7 +998,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   firstname: self.fname,
                   middlename: self.mname,
                   lastname: self.lname,
-                  birthday: self._formatToGDate(self.bday),
+                  birthday: formatTodayDate(self.bday),
                   sex: self.sex ? self.sex : "",
                   name: self.lname + ', ' + self.fname + ' ' + self.mname,
                   hmo: self.indicate
@@ -1060,26 +1024,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             saveErr.style.display = 'block';
           }
         });
-      },
-
-      _patientsNoUpdate(num) {
-        if (num > 0 && num < 10) {
-          num = '000' + num;
-        }
-        else if (num > 9 && num < 100) {
-          num = '00' + num;
-        }
-        else if (num > 99 && num < 1000) {
-          num = '0' + num;
-        }
-        else if (num > 999) {
-          num = num;
-        }
-        else {
-          num = '0000';
-        }
-
-        return num;
       },
 
       _reportsUpdate(today, mykey) {

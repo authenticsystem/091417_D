@@ -72,6 +72,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       paper-toolbar {
         --paper-toolbar-color: white;
+
         --paper-toolbar: {
           background-image: url("../images/h4.jpeg");
           background-size: cover;
@@ -171,8 +172,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </firebase-app> -->
 
     <!-- dev -->
-    <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com" api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ"
-      storage-bucket="emr-dev-c3005.appspot.com" messaging-sender-id="528097160886">
+    <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com"
+      api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ" storage-bucket="emr-dev-c3005.appspot.com" messaging-sender-id="528097160886">
     </firebase-app>
 
     <firebase-auth id="auth" status-known="{{statusKnown}}" user="{{user}}" provider="google"></firebase-auth>
@@ -323,7 +324,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </a> -->
 
                   <span style="padding:20px; color:gray; font-size:12px;">
-                    v0.7.1
+                    v0.7.2
                   </span>
                 </iron-selector>
               </app-header-layout>
@@ -332,15 +333,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
               <!-- <my-account user={{user}} name="account"></my-account> -->
               <my-dashboard name="dashboard" my-role="[[role]]" my-key="[[mykey]]"></my-dashboard>
-              <my-patients name="patients" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]" my-location-code="[[mylocationCode]]"></my-patients>
-              <my-queue name="queue" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]" my-location-code="[[mylocationCode]]"
-                token="[[token]]"></my-queue>
+              <my-patients name="patients" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"
+                my-location-code="[[mylocationCode]]"></my-patients>
+              <my-queue name="queue" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"
+                my-location-code="[[mylocationCode]]" token="[[token]]"></my-queue>
               <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" my-location="[[mylocation]]"></my-visits>
-              <my-settings name="settings" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[myLastname]]" user="[[user]]"></my-settings>
+              <my-settings name="settings" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[myLastname]]"
+                user="[[user]]"></my-settings>
               <my-billing name="billing" route="[[subroute]]" my-key="[[mykey]]" my-location="[[mylocation]]"></my-billing>
               <my-collection name="collection" my-role="[[role]]" my-key="[[mykey]]"></my-collection>
-              <my-messaging name="messaging" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]" my-location-code="[[mylocationCode]]"
-                token="[[token]]"></my-messaging>
+              <my-messaging name="messaging" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"
+                my-location-code="[[mylocationCode]]" token="[[token]]"></my-messaging>
               <!-- <my-appointments name="appointments"></my-appointments>
               <my-help name="help"></my-help>
               <my-view2 name="view2"></my-view2> -->

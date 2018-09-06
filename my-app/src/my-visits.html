@@ -266,9 +266,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-route route="{{route}}" pattern="/detail" active="{{detailActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/edit" active="{{editActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/new" active="{{newActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail/v/" active="{{detailVisitActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit/v/" active="{{editVisitActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/new/v/" active="{{newVisitActive}}"></app-route>
 
     <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
       <div name="">
@@ -286,14 +286,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <app-toolbar primary id="tool2">
                 <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
                 <div style="width: 100%">
-                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}" disable-filter-button></paper-search-bar>
+                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}"
+                    disable-filter-button></paper-search-bar>
                 </div>
               </app-toolbar>
             </div>
           </app-header>
 
-          <firebase-query disabled id="searchQuery" path="/{{myKey}}/cases" data="{{items}}" order-by-child="patient" start-at="{{search}}"
-            limit-to-first="15">
+          <firebase-query disabled id="searchQuery" path="/{{myKey}}/cases" data="{{items}}" order-by-child="patient"
+            start-at="{{search}}" limit-to-first="15">
           </firebase-query>
 
           <firebase-query id="defaultQuery" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="order" start-at="{{lastorder}}"
@@ -371,7 +372,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                       <div class="clinic">[[item.clinic_location]]</div>
 
-                      <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit">
+                      <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}"
+                        title="edit">
                       </paper-icon-button>
 
                     </div>
@@ -390,20 +392,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_caseNew"></paper-fab>
       </div>
 
-      <div name="/new">
-        <template is="dom-if" if="{{newActive}}" restamp>
+      <div name="/new/v/">
+        <template is="dom-if" if="{{newVisitActive}}" restamp>
           <my-visits-new id="d23" my-key='{{myKey}}' prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-visits-new>
         </template>
       </div>
 
-      <div name="/edit">
-        <template is="dom-if" if="{{editActive}}" restamp>
-          <my-visits-edit id="d25" my-key='{{myKey}}' params="{{route.__queryParams}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-visits-edit>
+      <div name="/edit/v/">
+        <template is="dom-if" if="{{editVisitActive}}" restamp>
+          <my-visits-edit id="d25" my-key='{{myKey}}' params="{{route.__queryParams}}" prev-route="{{route.prefix}}"
+            my-location="{{myLocation}}"></my-visits-edit>
         </template>
       </div>
 
-      <div name="/detail">
-        <template is="dom-if" if="{{detailActive}}" restamp>
+      <div name="/detail/v/">
+        <template is="dom-if" if="{{detailVisitActive}}" restamp>
           <my-visits-view id="d26" my-key='{{myKey}}' params="{{route.__queryParams}}" prev-route="{{route.prefix}}"></my-visits-view>
         </template>
       </div>
@@ -449,9 +452,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _routeChanged(e) {
         var page;
-        if (this.detailActive) page = "visits-view";
-        else if (this.editActive) page = "visits-edit";
-        else if (this.newActive) page = "visits-new";
+        if (this.detailVisitActive) page = "visits-view";
+        else if (this.editVisitActive) page = "visits-edit";
+        else if (this.newVisitActive) page = "visits-new";
 
         if (page) {
           var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
@@ -617,7 +620,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _selectThis(e) {
         this.viewKey = Polymer.dom(e).rootTarget.getAttribute("id");
-        window.history.pushState({}, null, '/visits/detail?ref=' + this.viewKey);
+        window.history.pushState({}, null, '/visits/detail/v/?ref=' + this.viewKey);
         window.dispatchEvent(new CustomEvent('location-changed'));
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "visits-view"
@@ -626,7 +629,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _editThis(e) {
         this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
-        window.history.pushState({}, null, '/visits/edit?ref=' + this.editKey);
+        window.history.pushState({}, null, '/visits/edit/v/?ref=' + this.editKey);
         window.dispatchEvent(new CustomEvent('location-changed'));
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "visits-edit"
@@ -634,7 +637,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _caseNew() {
-        window.history.pushState({}, null, '/visits/new');
+        window.history.pushState({}, null, '/visits/new/v/');
         window.dispatchEvent(new CustomEvent('location-changed'));
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "visits-new"

@@ -57,7 +57,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 /* display: none; */
             }
 
-            table {
+            /* table {
                 border-collapse: collapse;
                 border-spacing: 0;
                 width: 100%;
@@ -73,7 +73,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             tr:nth-child(even) {
                 background-color: #f2f2f2
-            }
+            } */
 
             /* .item:hover .shortText::after {
                 content: ' [+]';
@@ -92,7 +92,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 content: ' [–]';
             } */
 
-            /* table {
+            table {
                 border-collapse: collapse;
                 border-spacing: 0;
                 width: 100%;
@@ -115,22 +115,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             tbody {
                 display: block;
-                height: 105px;
+                height: 40px;
                 overflow: auto;
+            }
+
+            /* tfoot {
+                border-top: 1px solid #DDD;
             } */
 
             /* tbody:hover {
                 overflow: auto;
             } */
 
-            /* th,
+            th,
             td {
                 text-align: left;
                 padding: 8px;
             }
 
-            tr:nth-child(even) {
-                background-color: #f2f2f2
+            /* tr:nth-child(even) {
+                background-color: #f2f2f2;
             } */
 
             /* Custom scrollbar */
@@ -166,7 +170,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             } */
         </style>
 
-        <firebase-query path="/{{myKey}}/billing_data" data="{{myBillingData}}" order-by-child="billing_key" equal-to="{{item.$key}}">
+        <firebase-query path="/{{myKey}}/billing_data" data="{{myBillingData}}" order-by-child="billing_ref" equal-to="{{item.ref}}"
+            limit-to-first="1">
         </firebase-query>
 
         <div>
@@ -185,22 +190,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
                 <div style="margin-top: 12px;">
                     <table>
-                        <!-- <thead> -->
-                        <tr>
-                            <th>Services</th>
-                            <th>Bill To</th>
-                            <th>Amount</th>
-                        </tr>
-                        <!-- </thead> -->
-                        <!-- <tbody> -->
-                        <template is="dom-repeat" items="{{myBillingData}}" as="billing">
+                        <thead>
                             <tr>
-                                <td>{{billing.service}}</td>
-                                <td>{{billing.billTo}}</td>
-                                <td>{{billing.amount}}</td>
+                                <th>Services</th>
+                                <th>Bill To</th>
+                                <th>Amount</th>
                             </tr>
-                        </template>
-                        <!-- </tbody> -->
+                        </thead>
+                        <tbody>
+                            <template is="dom-repeat" items="{{myBillingData}}" as="billing">
+                                <tr>
+                                    <td>{{billing.service}}</td>
+                                    <td>{{billing.billTo}}</td>
+                                    <td>{{billing.amount}}</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td style="text-align:center; font-size: 10px">View more</td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>

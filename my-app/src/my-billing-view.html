@@ -15,8 +15,10 @@
 <link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
 
 <link rel="import" href="bwt-datatable-card.html">
-<link rel="import" href="shared-styles.html">
 <link rel="import" href="time-element.html">
+<link rel="import" href="global-functions.html">
+
+<link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
 <dom-module id="my-billing-view">
@@ -80,9 +82,18 @@
                 margin-bottom: -18px;
                 margin-right: 16px;
             }
+
+            .avatar {
+                height: 45px;
+                width: 45px;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: transparent;
+            }
         </style>
 
-        <firebase-query path="/{{myKey}}/billing" order-by-key equal-to="{{viewKey}}" data="{{mybilling}}" limit-to-first="1"></firebase-query>
+        <firebase-query path="/{{myKey}}/billing" order-by-key equal-to="{{viewKey}}" data="{{mybilling}}"
+            limit-to-first="1"></firebase-query>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
 
@@ -96,25 +107,34 @@
                     </app-toolbar>
                 </app-header>
 
-                <div class="rightText" align="right">
-                    <iron-icon icon="my-icons:watch-later"></iron-icon>
-                    <time-ago datetime$="{{_timeStampToDateTime(timestamp)}}">{{_timeStampToDateTime(timestamp)}}</time-ago>
-                    <br> {{_formatTodayDateFull(date)}}
-                    <br> {{clinic}}
-                </div>
-                <div class="textTemp">“{{remarks}}”</div>
-
-                <div class="docu2">
-                    <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed>
-                        <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
-                        <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
-                        <paper-datatable-column header="Bill To" type="String" property="billTo"></paper-datatable-column>
-                        <paper-datatable-column header="Amount" type="Number" property="amount"></paper-datatable-column>
-                    </paper-datatable>
-                    <div style="padding: 16px;">
-                        <div style="float: right;" class="primary">TOTAL: {{total}}.00</div>
+                <div class="docu">
+                    <div class="details" style="display: flex;">
+                        <img class="avatar" src="{{profile}}"></img>
+                        <div style="margin-left:10px; font-weight:400; color:black">
+                            <span style="font-size:11px;display:block" class="longText">{{myPatient.num}}</span>
+                            <span class="primary">{{myPatient.name}}</span>
+                            <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}}
+                                {{myPatient.gender}}</span>
+                            <span class="longText" style="font-weight:400;display:block">{{_hmo(myPatient.hmo)}}</span>
+                        </div>
                     </div>
                 </div>
+
+                <div class="docu" style="margin-top:-16px;">
+                    <div class="details">
+                        <!-- <div style="font-size: 12px;">Ref. # {{ref}}</div> -->
+                        <div style="font-size: 14px; padding:6px">{{remarks}}</div>
+                        <paper-datatable id="billingDatatable" data="{{myBillingData}}" header-fixed>
+                            <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
+                            <paper-datatable-column header="Bill To" type="String" property="billTo"></paper-datatable-column>
+                            <paper-datatable-column header="Amount" type="Number" property="amount"></paper-datatable-column>
+                        </paper-datatable>
+                        <div style="padding: 16px;">
+                            <div style="float: right;" class="primary">TOTAL: {{total}}.00</div>
+                        </div>
+                    </div>
+                </div>
+
             </app-header-layout>
 
         </app-drawer-layout>
@@ -153,9 +173,19 @@
                     this.date = e[0].created;
                     this.timestamp = e[0].timestamp;
                     this.remarks = e[0].remarks;
-                    this.billingData = e[0].billing_data;
                     this.total = e[0].billing_total;
                     this.clinic = e[0].clinic_location;
+
+                    this.profile = e[0].patientinfo.profile ? e[0].patientinfo.profile : '../images/user.png';
+                    this.age = e[0].patientinfo.birthday ? getAge(e[0].patientinfo.birthday) : '';
+                    this.myPatient = e[0].patientinfo;
+
+                    var self = this;
+
+                    firebase.database().ref('/' + this.myKey + '/billing_data').orderByChild('billing_ref').equalTo(e[0].ref)
+                        .once('value', function (snapshot) {
+                            self.myBillingData = snapshotToArray(snapshot);
+                        });
                 }
             },
 
@@ -174,7 +204,19 @@
 
             _timeStampToDateTime(ts) {
                 return new Date(ts);
-            }
+            },
+
+            _comma(e) {
+                if (e) {
+                    return ',';
+                }
+            },
+
+            _hmo(e) {
+                if (e) {
+                    return 'HMO: ' + e;
+                }
+            },
 
         })
 

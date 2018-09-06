@@ -250,11 +250,11 @@
             }
         </style>
 
-        <app-route route="{{route}}" pattern="/new" active="{{queueNewActive}}"></app-route>
-        <app-route route="{{route}}" pattern="/search" active="{{searchActive}}"></app-route>
-        <app-route route="{{route}}" pattern="/visit/new" active="{{visitNewActive}}"></app-route>
-        <app-route route="{{route}}" pattern="/patient/edit" active="{{patientEditActive}}"></app-route>
-        <app-route route="{{route}}" pattern="/patient/detail" active="{{patientViewActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/new/0/q/" active="{{queueNew0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/search/0/q/" active="{{search0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/visit/new/0/q/" active="{{visitNew0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/patient/edit/0/q/" active="{{patientEdit0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/patient/detail/0/q/" active="{{patientView0Active}}"></app-route>
 
         <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <div name="">
@@ -274,8 +274,8 @@
                         </app-toolbar>
                     </app-header>
 
-                    <firebase-query id="query" path="/{{myKey}}/queue/{{myLocation}}/{{pickDate}}" order-by-child="queueNo" start-at="{{_parseInt(1)}}"
-                        data="{{myqueue}}">
+                    <firebase-query id="query" path="/{{myKey}}/queue/{{myLocation}}/{{pickDate}}" order-by-child="queueNo"
+                        start-at="{{_parseInt(1)}}" data="{{myqueue}}">
                     </firebase-query>
 
                     <template is="dom-if" if="{{_loadCheck(loadingPeople, firstLoad)}}">
@@ -316,7 +316,8 @@
                                     </div>
                                     <div class="pad">
                                         <div style="font-size:11px" class="longText">[[item.patient_no]]</div>
-                                        <div class="primary">[[item.patient_info.lastname]], [[item.patient_info.firstname]]
+                                        <div class="primary">[[item.patient_info.lastname]],
+                                            [[item.patient_info.firstname]]
                                             [[item.patient_info.middlename]]
                                         </div>
                                         <div class="longText">{{_ageCal(item.patient_info.birthday)}}{{_comma(item.patient_info.birthday)}}
@@ -330,7 +331,8 @@
                             </template>
                         </div>
 
-                        <sortable-list class="sortList" sortable=".list" all-data="[[includedItems]]" on-select="_selectedIndex" on-drop="_dropIndex">
+                        <sortable-list class="sortList" sortable=".list" all-data="[[includedItems]]" on-select="_selectedIndex"
+                            on-drop="_dropIndex">
                             <template id="includedTemplate" is="dom-repeat" items="[[includedItems]]">
                                 <div on-tap="_selectThis" class="list">
                                     <div class$="[[getClassForItem(item.isNext, item.isQueue)]]">
@@ -341,7 +343,8 @@
                                         </div>
                                         <div class="pad">
                                             <div style="font-size:11px" class="longText">[[item.patient_no]]</div>
-                                            <div class="primary">[[item.patient_info.lastname]], [[item.patient_info.firstname]]
+                                            <div class="primary">[[item.patient_info.lastname]],
+                                                [[item.patient_info.firstname]]
                                                 [[item.patient_info.middlename]]
                                             </div>
                                             <div class="longText">{{_ageCal(item.patient_info.birthday)}}{{_comma(item.patient_info.birthday)}}
@@ -365,40 +368,41 @@
                 </app-header-layout>
             </div>
 
-            <div name="/new">
-                <template is="dom-if" if="{{queueNewActive}}" restamp>
-                    <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-new>
+            <div name="/new/0/q/">
+                <template is="dom-if" if="{{queueNew0Active}}" restamp>
+                    <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes"
+                        my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-new>
                 </template>
             </div>
 
-            <div name="/search">
-                <template is="dom-if" if="{{searchActive}}" restamp>
-                    <my-queue-patients id="d24" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes" my-location="{{myLocation}}"
-                        my-location-code="{{myLocationCode}}">
+            <div name="/search/0/q/">
+                <template is="dom-if" if="{{search0Active}}" restamp>
+                    <my-queue-patients id="d24" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes"
+                        my-location="{{myLocation}}" my-location-code="{{myLocationCode}}">
                     </my-queue-patients>
                 </template>
             </div>
 
-            <div name="/patient/detail">
-                <template is="dom-if" if="{{patientViewActive}}" restamp>
-                    <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
-                        my-role="{{myRole}}" params="{{route.__queryParams}}">
+            <div name="/patient/detail/0/q/">
+                <template is="dom-if" if="{{patientView0Active}}" restamp>
+                    <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}"
+                        my-location-code="{{myLocationCode}}" my-role="{{myRole}}" params="{{route.__queryParams}}">
                     </my-patients-view>
                 </template>
             </div>
 
-            <div name="/patient/edit">
-                <template is="dom-if" if="{{patientEditActive}}" restamp>
-                    <my-patients-edit id="d25" prev-route="{{route.prefix}}" params="{{route.__queryParams}}" my-key="{{myKey}}" my-queue="yes"
-                        my-location="{{myLocation}}" my-location-code="{{myLocationCode}}">
+            <div name="/patient/edit/0/q/">
+                <template is="dom-if" if="{{patientEdit0Active}}" restamp>
+                    <my-patients-edit id="d25" prev-route="{{route.prefix}}" params="{{route.__queryParams}}" my-key="{{myKey}}"
+                        my-queue="yes" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}">
                     </my-patients-edit>
                 </template>
             </div>
 
-            <div name="/visit/new">
-                <template is="dom-if" if="{{visitNewActive}}" restamp>
-                    <my-visits-new id="d27" prev-route="{{route.prefix}}" params="{{route.__queryParams}}" my-key="{{myKey}}" my-queue="yes"
-                        my-location="{{myLocation}}" my-location-code="{{myLocationCode}}" my-limit="1">
+            <div name="/visit/new/0/q/">
+                <template is="dom-if" if="{{visitNew0Active}}" restamp>
+                    <my-visits-new id="d27" prev-route="{{route.prefix}}" params="{{route.__queryParams}}" my-key="{{myKey}}"
+                        my-queue="yes" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}" my-limit="1">
                     </my-visits-new>
                 </template>
             </div>
@@ -418,7 +422,8 @@
         <salte-dialog no-auto-fullscreen id="openDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
             <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
             <span>
-                <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Cancel
+                <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Cancel
                     Queue
                 </paper-button>
                 <paper-button on-tap="_addVisit" hidden="{{!isNext}}" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
@@ -434,9 +439,11 @@
         <salte-dialog no-auto-fullscreen id="priorDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
             <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
             <span>
-                <paper-button on-tap="_queueSearch" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Search
+                <paper-button on-tap="_queueSearch" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Search
                     existing patient</paper-button>
-                <paper-button on-tap="_queueNew" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Add
+                <paper-button on-tap="_queueNew" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Add
                     new patient</paper-button>
             </span>
             <div class="buttons">
@@ -510,11 +517,11 @@
 
             _routeChanged(e) {
                 var page;
-                if (this.queueNewActive) page = "patients-new";
-                else if (this.searchActive) page = "queue-patients";
-                else if (this.visitNewActive) page = "visits-new";
-                else if (this.patientEditActive) page = "patients-edit";
-                else if (this.patientViewActive) page = "patients-view";
+                if (this.queueNew0Active) page = "patients-new";
+                else if (this.search0Active) page = "queue-patients";
+                else if (this.visitNew0Active) page = "visits-new";
+                else if (this.patientEdit0Active) page = "patients-edit";
+                else if (this.patientView0Active) page = "patients-view";
 
                 if (page) {
                     var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
@@ -674,7 +681,7 @@
             },
 
             _queueNew() {
-                window.history.pushState({}, null, '/queue/new');
+                window.history.pushState({}, null, '/queue/new/0/q/');
                 window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
                     bubbles: true, composed: true, detail: "patients-new"
@@ -682,7 +689,7 @@
             },
 
             _queueSearch() {
-                window.history.pushState({}, null, '/queue/search');
+                window.history.pushState({}, null, '/queue/search/0/q/');
                 window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
                     bubbles: true, composed: true, detail: "queue-patients"
@@ -696,7 +703,7 @@
             },
 
             _editPatient() {
-                window.history.pushState({}, null, '/queue/patient/edit?e=' + this.selectedData.patient_refKey + '&q=' + this.selectedData.$key + '&d=' + this.pickDate);
+                window.history.pushState({}, null, '/queue/patient/edit/0/q/?e=' + this.selectedData.patient_refKey + '&q=' + this.selectedData.$key + '&d=' + this.pickDate);
                 window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
                     bubbles: true, composed: true, detail: "patients-edit"
@@ -704,7 +711,7 @@
             },
 
             _addVisit() {
-                window.history.pushState({}, null, '/queue/visit/new?n=' + this.selectedData.patient_info.name + '&q=' + this.selectedData.$key + '&no=' + this.selectedData.queueNo + '&d=' + this.pickDate);
+                window.history.pushState({}, null, '/queue/visit/new/0/q/?n=' + this.selectedData.patient_info.name + '&q=' + this.selectedData.$key + '&no=' + this.selectedData.queueNo + '&d=' + this.pickDate);
                 window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
                     bubbles: true, composed: true, detail: "visits-new"
@@ -713,7 +720,7 @@
 
             _viewPatient(e) {
                 this.selectedData = this.$.exceptionTemplate.itemForElement(e.target);
-                window.history.pushState({}, null, '/queue/patient/detail?ref=' + this.selectedData.patient_refKey);
+                window.history.pushState({}, null, '/queue/patient/detail/0/q/?ref=' + this.selectedData.patient_refKey);
                 window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
                     bubbles: true, composed: true, detail: "patients-view"

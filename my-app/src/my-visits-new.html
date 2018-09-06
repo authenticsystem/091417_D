@@ -246,12 +246,12 @@
             }
         </style>
 
-        <firebase-query id="filterQuery" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name" start-at="{{filterValue}}"
-            limit-to-first="{{myLimit}}">
+        <firebase-query id="filterQuery" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name"
+            start-at="{{filterValue}}" limit-to-first="{{myLimit}}">
         </firebase-query>
 
-        <firebase-query id="lastCaseQuery" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}" data="{{mycases}}"
-            limit-to-last="1">
+        <firebase-query id="lastCaseQuery" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}"
+            data="{{mycases}}" limit-to-last="1">
         </firebase-query>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -433,8 +433,8 @@
                     </neon-animatable>
 
                     <neon-animatable>
-                        <my-billing-datatable id="billingDatatable" my-patient="[[myPatient]]" billing-data="{{billingData}}" remarks="{{remarks}}"
-                            total="{{total}}" my-key="{{myKey}}"></my-billing-datatable>
+                        <my-billing-datatable id="billingDatatable" my-patient="[[myPatient]]" billing-data="{{billingData}}"
+                            remarks="{{remarks}}" total="{{total}}" my-key="{{myKey}}" favhide="{{favhide}}"></my-billing-datatable>
                     </neon-animatable>
 
                     <neon-animatable>
@@ -444,8 +444,8 @@
                                     <p id="p" style="margin-top:-4px">Billing ref.# <b style="color:#1976d2">[[billReference]]</b></p>
                                 </div>
                                 <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
-                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving
-                                    data.
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while
+                                    saving data.
                                 </div>
                             </div>
                         </div>
@@ -460,7 +460,8 @@
                     <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
                 </div>
                 <div hidden$="[[favrighthide]]">
-                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right"
+                        on-tap="_select2"></paper-fab>
                 </div>
             </div>
 
@@ -545,7 +546,8 @@
                 '_showFab1(subjective, complain, todayDate)',
                 '_myimagingChanged(myimaging)',
                 '_mytimeCheckChanged(mycases, todayDate)',
-                '_thypatientsChanged(thypatients.length)'
+                '_thypatientsChanged(thypatients.length)',
+                '_favhideChanged(favhide)'
             ],
 
             _patientChanged(patient) {
@@ -593,6 +595,18 @@
                             el.setAttribute('id', 'gallery-image');
                             gallery.appendChild(el);
                         });
+                    }
+                }
+            },
+
+            _favhideChanged(e) {
+                if (e) {
+                    this.favrighthide = true;
+                    this.favlefthide = true;
+                } else {
+                    if (this.selectedPage === 3) {
+                        this.favlefthide = false;
+                        this.favrighthide = false;
                     }
                 }
             },
@@ -803,6 +817,7 @@
                 var self = this;
                 var ref = firebase.database().ref("/" + mykey + "/cases");
 
+                this.lastPushTime = new Date(today).getTime();
                 if (today < formatTodayDate(new Date())) {
                     newPushKey = generatePushID(today, this.lastPushTime);
                     timestamp = this.lastPushTime;
@@ -920,7 +935,7 @@
 
                                     billingData.forEach(element => {
                                         element.billing_key = fbPushKey;
-                                        element.billing_no = no;
+                                        element.billing_ref = no;
                                         billDataRef.push(element);
                                     });
                                 });

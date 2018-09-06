@@ -117,7 +117,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 [[selectedItem.length]] item(s) selected
                             </div>
                             <div style="text-align:right; flex: 1;">
-                                <paper-icon-button hidden="{{_ifSelectMore(selectedItem.length)}}" id="edit" icon="datatable:editable" no-ink on-tap="_editBill"></paper-icon-button>
+                                <paper-icon-button hidden="{{_ifSelectMore(selectedItem.length)}}" id="edit" icon="datatable:editable"
+                                    no-ink on-tap="_editBill"></paper-icon-button>
                                 <paper-icon-button id="delete" icon="my-icons:delete-forever" no-ink on-tap="_deleteBill"></paper-icon-button>
 
                                 <paper-tooltip for="edit" position="bottom">Edit</paper-tooltip>
@@ -125,10 +126,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             </div>
                         </div>
                         <div style="padding:16px">
-                            <span style="font-weight: 400; font-size: 12px; float: right">(Ref.# will be generated upon submit)
+                            <span style="font-weight: 400; font-size: 12px; float: right">
+                                {{_billingRef(ref)}}
                             </span>
                             <paper-input style="width:250px" label="Remarks" value="{{remarks}}" always-float-label></paper-input>
-                            <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed multi-selection selectable selected-items="{{selectedItem}}">
+                            <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed multi-selection
+                                selectable selected-items="{{selectedItem}}">
                                 <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
                                 <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
                                 <paper-datatable-column header="Bill To" type="String" property="billTo"></paper-datatable-column>
@@ -149,8 +152,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div class="docu">
                     <div class="details">
                         <span>
-                            <paper-dropdown-input style="width: 100%" id="dropdService" label="Service *" items="[[myservices]]" filter-property="service"
-                                value="{{service}}" selected-item="{{selectedService}}">
+                            <paper-dropdown-input style="width: 100%" id="dropdService" label="Service *" items="[[myservices]]"
+                                filter-property="service" value="{{service}}" selected-item="{{selectedService}}">
                                 <template>
                                     <template is="dom-repeat" items="[[items]]" as="item">
                                         <paper-item id="[[item.rate]]">[[item.service]]</paper-item>
@@ -160,7 +163,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             <paper-input id="amount" label="Amount" allowed-pattern="[\d]" prevent-invalid-input value="{{amount}}"></paper-input>
 
                             <paper-dropdown-menu class="billDropdown" label="Bill to">
-                                <paper-listbox id="dropdSelectedBillTo" slot="dropdown-content" attr-for-selected="name" selected="{{selectedBillTo}}">
+                                <paper-listbox id="dropdSelectedBillTo" slot="dropdown-content" attr-for-selected="name"
+                                    selected="{{selectedBillTo}}">
                                     <paper-item name="patient">Patient</paper-item>
                                     <paper-item name="philhealth">PHILHEALTH</paper-item>
                                     <paper-item name="hmo">HMO</paper-item>
@@ -180,7 +184,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                     </div>
 
                                     <div hidden="[[useInsurance]]">
-                                        <paper-dropdown-input id="dropdHMO" class="billDropdown" label="HMO" items="[[myhmos]]" filter-property="name" value="{{selectedHMO}}">
+                                        <paper-dropdown-input id="dropdHMO" class="billDropdown" label="HMO" items="[[myhmos]]"
+                                            filter-property="name" value="{{selectedHMO}}">
                                             <template>
                                                 <template is="dom-repeat" items="[[items]]" as="item">
                                                     <paper-item>[[item.name]]</paper-item>
@@ -193,8 +198,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 </div>
 
                                 <div name="hospital">
-                                    <paper-dropdown-input id="dropdHospital" class="billDropdown" label="Hospital" items="[[mylocations]]" filter-property="location_name"
-                                        value="{{location}}">
+                                    <paper-dropdown-input id="dropdHospital" class="billDropdown" label="Hospital"
+                                        items="[[mylocations]]" filter-property="location_name" value="{{location}}">
                                         <template>
                                             <template is="dom-repeat" items="[[items]]" as="item">
                                                 <paper-item>[[item.location_name]]</paper-item>
@@ -226,6 +231,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 item: Object,
                 myKey: String,
                 myPatient: Object,
+                ref: String,
                 selectedPage: {
                     type: Number,
                     value: 0
@@ -237,10 +243,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 exitanimation: {
                     type: String,
                     value: "slide-left-animation"
-                },
-                service_no: {
-                    type: Number,
-                    value: 0
                 },
                 billingData: {
                     type: Array,
@@ -262,11 +264,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 todayDate: {
                     type: String,
                     notify: true
-                }
+                },
+                favhide: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+                logs: {
+                    type: Array,
+                    value: [],
+                    notify: true
+                },
             },
 
             ready() {
-                this.todayDate = formatTodayDate(new Date());
+                if (!this.todayDate) {
+                    this.todayDate = formatTodayDate(new Date());
+                }
             },
 
             observers: [
@@ -325,15 +339,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 if (this.selectedItem.length > 0) {
                     Polymer.dom(this.root).querySelector("#billingDatatable").deselectAll();
                 }
+
                 this.entryanimation = 'fade-in-animation';
                 this.exitanimation = 'fade-out-animation';
+                this.favhide = true;
                 this.selectedPage = 1;
             },
 
             _editBill() {
                 this.entryanimation = 'fade-in-animation';
                 this.exitanimation = 'fade-out-animation';
+                this.favhide = true;
                 this.selectedPage = 1;
+
                 this.$.dropdService.value = this.selectedItem[0].service;
                 this.$.amount.value = this.selectedItem[0].amount;
                 this.$.dropdSelectedBillTo.selected = this.selectedItem[0].service_bill_to;
@@ -344,10 +362,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             _deleteBill() {
                 if (this.selectedItem.length > 0) {
+                    var self = this;
                     function removeByKey(array, params) {
                         array.some(function (item, index) {
                             if (array[index][params.key] === params.value) {
                                 // found it!
+                                if (array[index]._key) {
+                                    self.logs.push({
+                                        action: "remove",
+                                        data: array[index]._key
+                                    });
+                                    self.notifyPath('logs', self.logs.slice())
+                                };
+
                                 array.splice(index, 1);
                                 return true; // stops the loop
                             }
@@ -362,7 +389,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     for (var i = 0; i < deleteList.length; ++i) {
                         removeByKey(listOfItems, {
                             key: 'num',
-                            value: deleteList[i].num
+                            value: deleteList[i].num,
                         });
                     }
 
@@ -374,7 +401,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             _billingDataChanged(e) {
                 if (e.length > 0) {
-                    this.service_no = e.length;
                     var amounts = [];
 
                     e.forEach(element => {
@@ -438,21 +464,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             }
                         }
 
+                        if (self.billingData[i]._key) {
+                            self.logs.push({
+                                action: "update",
+                                data: self.billingData[i]
+                            });
+                        }
+
                         Polymer.dom(this.root).querySelector("#billingDatatable").deselectAll();
                     } else {
-                        var number = this.service_no + 1;
-                        this.billingData.push({
+                        var number = new Date().getTime();
+                        var data = {
                             num: number,
                             service: this.service,
                             amount: parseInt(this.amount),
                             billTo: service_bill_to,
                             service_bill_to: this.selectedBillTo,
                             use_insurance: this.useInsurance
+                        }
+                        this.billingData.push(data);
+                        this.logs.push({
+                            action: "add",
+                            data: data
                         });
                     }
 
+                    this.notifyPath('logs', this.logs.slice());
                     this.notifyPath("billingData", this.billingData.slice());
                     this.selectedPage = 0;
+                    this.favhide = false;
                     this._clear();
                 }
                 else {
@@ -462,6 +502,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             _cancelBilling() {
                 this.selectedPage = 0;
+                this.favhide = false;
                 this._clear();
             },
 
@@ -498,6 +539,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _fit(e) {
                 if (e) return "margin-top: 6px;";
                 else return "margin-top: 32px;";
+            },
+
+            _billingRef(e) {
+                if (e) return "Ref.# " + e;
+                else return "(Ref.# will be generated upon submit)";
             },
 
         })

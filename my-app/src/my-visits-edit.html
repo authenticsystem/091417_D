@@ -252,13 +252,11 @@
             }
         </style>
 
-        <firebase-query id="query" path="{{myKey}}/cases" order-by-key equal-to="{{editKey}}" data="{{mycases}}" limit-to-last="1"></firebase-query>
+        <firebase-query id="query" path="{{myKey}}/cases" order-by-key equal-to="{{editKey}}" data="{{mycases}}"
+            limit-to-last="1"></firebase-query>
 
-        <firebase-query path="/{{myKey}}/billing" order-by-key equal-to="{{editKey}}" data="{{mybilling}}" limit-to-first="1"></firebase-query>
-
-        <firebase-query disabled id="billingDataQuery" path="/{{myKey}}/billing_data" data="{{billingData}}" order-by-child="billing_key"
-            equal-to="{{editKey}}">
-        </firebase-query>
+        <firebase-query path="/{{myKey}}/billing" order-by-key equal-to="{{editKey}}" data="{{mybilling}}"
+            limit-to-first="1"></firebase-query>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
 
@@ -281,7 +279,8 @@
                                 <div style="margin-left:10px; font-weight:400; color:black">
                                     <span style="font-size:11px;display:block" class="longText">{{p_num}}</span>
                                     <span class="primary">{{filterValue}}</span>
-                                    <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}} {{sex}}</span>
+                                    <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}}
+                                        {{sex}}</span>
                                     <span class="longText" style="font-weight:400;display:block">{{_hmo(insurance)}}</span>
                                 </div>
                             </div>
@@ -368,25 +367,17 @@
                     </neon-animatable>
 
                     <neon-animatable>
-                        <my-billing-datatable id="billingDatatable" my-patient="[[myPatient]]" billing-data="{{newBillingData}}" remarks="{{remarks}}"
-                            total="{{total}}" my-key="{{myKey}}"></my-billing-datatable>
+                        <my-billing-datatable id="billingDatatable" my-patient="[[myPatient]]" billing-data="{{billingData}}"
+                            remarks="{{remarks}}" total="{{total}}" my-key="{{myKey}}" ref="{{ref}}" logs="{{logs}}"></my-billing-datatable>
                     </neon-animatable>
-
-                    <!-- <neon-animatable>
-                        <div class="docu">
-                            <div class="details">
-                                <div>Save changes ?</div>
-                            </div>
-                        </div>
-                    </neon-animatable> -->
 
                     <neon-animatable>
                         <div class="docu">
                             <div class="details">
                                 <div id="saveSuccess" style="color: green; display:none">Visit successfully saved.</div>
                                 <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
-                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving
-                                    data.
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while
+                                    saving data.
                                 </div>
                             </div>
                         </div>
@@ -401,7 +392,8 @@
                     <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
                 </div>
                 <div hidden$="[[favrighthide]]">
-                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right"
+                        on-tap="_select2"></paper-fab>
                 </div>
             </div>
 
@@ -477,10 +469,6 @@
                     type: Object,
                     observer: '_mybillingChanged'
                 },
-                billingDataHolder: {
-                    type: Array,
-                    value: []
-                }
             },
 
             ready() {
@@ -490,8 +478,7 @@
 
             observers: [
                 '_showFab1(subjective, complain, todayDate)',
-                '_todayDateChanged(todayDate)',
-                '_billingDataChanged(billingData)'
+                '_todayDateChanged(todayDate)'
             ],
 
             _mybillingChanged() {
@@ -500,17 +487,13 @@
                     if (this.mybilling[0].remarks !== "No Remarks") {
                         this.remarks = this.mybilling[0].remarks;
                     }
-                    this.$.billingDataQuery.disabled = false;
-                } else {
-                    this.$.billingDataQuery.disabled = true;
-                }
-            },
+                    var self = this;
 
-            _billingDataChanged(e) {
-                this.newBillingData = e;
-                e.forEach(element => {
-                    this.billingDataHolder.push(element);
-                });
+                    firebase.database().ref('/' + this.myKey + '/billing_data').orderByChild('billing_ref').equalTo(this.mybilling[0].ref)
+                        .once('value', function (snapshot) {
+                            self.billingData = snapshotToArray(snapshot);
+                        });
+                }
             },
 
             // _removeChanged(e) {
@@ -709,7 +692,7 @@
                     this.text = 'Please choose date.';
                 }
 
-                var x = 0;
+                var x = d.getTime();
                 var bol = date !== this.storeDate;
 
                 if (this.storeDate) {
@@ -798,7 +781,6 @@
                         var self = this;
                         var mykey = this.myKey;
                         var editkey = this.editKey;
-                        var ref = firebase.database().ref("/" + mykey + "/cases/" + editkey);
 
                         var today = this.todayDate;
                         var timestamp = this.timestamp;
@@ -824,6 +806,11 @@
                         this.favrighthide = true;
                         this.$.saveRunning.style.display = 'block';
 
+                        var ref = firebase.database().ref("/" + mykey + "/cases/" + editkey);
+                        var billRef = firebase.database().ref('/' + mykey + '/billing');
+                        var noRef = firebase.database().ref("/" + mykey + "/uniqueId/billing");
+                        var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
+
                         firebase.database().ref('/' + mykey + '/patients/' + this.patientkey).once('value').then(function (patient) {
                             if (patient.exists()) {
 
@@ -841,7 +828,8 @@
                                         gender: patient.val().personal.sex,
                                         hmo: patient.val().insurance.primary_insurance
                                     },
-                                    remarks: self.remarks ? self.remarks : "No Remarks"
+                                    remarks: self.remarks ? self.remarks : "No Remarks",
+                                    ref: self.ref
                                 }
 
                                 ref.update({
@@ -871,60 +859,46 @@
                                 }).then(function () {
                                     ref.once('value').then(function (snapshot) {
                                         var negativeTime = snapshot.val().order * -1;
-                                        var noRef = firebase.database().ref("/" + mykey + "/uniqueId/billing");
-                                        var billRef = firebase.database().ref('/' + mykey + '/billing');
-                                        var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
 
                                         ref.update({
                                             order: negativeTime,
                                             imaging: snapshot.val().attachment ? true : false
                                         });
 
-                                        // console.log(self.billingDataHolder);
-                                        // console.log("divide");
-                                        // console.log(self.newBillingData);
-                                        // console.log("up ||");
+                                        data2.order = negativeTime;
+                                        if (data2.ref) {
+                                            billRef.child(editkey).update(data2).then(function () {
+                                                saveBillingData(editkey);
+                                            });
+                                        } else {
+                                            noRef.once('value').then(function (data) {
+                                                var num = (data.val() ? data.val() : 0) + 1;
+                                                var no = generateUniqueId(num);
+                                                data2.ref = no;
 
-                                        if (self.newBillingData.length > 0) {
-                                            if (self.mybilling.length > 0) {
-                                                var no = self.mybilling[0].ref;
-                                                saveBillingData();
-                                            } else {
-                                                data2.order = negativeTime;
-                                                noRef.once('value').then(function (data) {
-                                                    var num = (data.val() ? data.val() : 0) + 1;
-                                                    var no = generateUniqueId(num);
-                                                    data2.ref = no;
+                                                billRef.child(editkey).set(data2).then(function () {
+                                                    noRef.set(num);
+                                                    saveBillingData(editkey);
+                                                });
+                                            });
+                                        }
 
-                                                    billRef.child(editkey).set(data2).then(function () {
-                                                        noRef.set(num);
-                                                        saveBillingData();
-                                                    });
+                                        function saveBillingData(fbPushKey) {
+                                            if (self.logs.length > 0) {
+                                                self.logs.forEach(element => {
+                                                    if (element.action === "remove") {
+                                                        billDataRef.child(element.data).remove();
+                                                    } else if (element.action === "update") {
+                                                        var key = element.data._key;
+                                                        element.data._key = null;
+                                                        billDataRef.child(key).update(element.data);
+                                                    } else if (element.action === "add") {
+                                                        element.data.billing_key = fbPushKey;
+                                                        element.data.billing_ref = self.ref;
+                                                        billDataRef.push(element.data);
+                                                    }
                                                 });
                                             }
-                                        }
-
-                                        // if (self.billingDataHolder.length > 0) {
-                                        //     self.billingDataHolder.forEach(element => {
-                                        //         billDataRef.child(element.$key).remove();
-                                        //     });
-                                        if (self.newBillingData.length === 0) {
-                                            billRef.child(editkey).remove();
-                                        }
-                                        // }
-
-                                        function saveBillingData() {
-                                            self.newBillingData.forEach(element => {
-                                                if (element.$key) {
-                                                    var key = element.$key;
-                                                    delete element.$key;
-                                                    billDataRef.child(key).update(element);
-                                                } else {
-                                                    element.billing_key = editkey;
-                                                    element.billing_no = no;
-                                                    billDataRef.push(element);
-                                                }
-                                            });
                                         }
                                     });
 
@@ -951,6 +925,7 @@
 
                         if (oldPushKey) {
                             firebase.database().ref("/" + mykey + "/cases/" + oldPushKey).remove();
+                            billRef.child(oldPushKey).remove();
                         }
 
                         if (this.isDateChanged === true) {

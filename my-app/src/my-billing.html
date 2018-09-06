@@ -157,6 +157,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .loadingIndicator {
+        margin-top: 16px;
         text-align: center;
         height: 40px;
       }
@@ -168,9 +169,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-route route="{{route}}" pattern="/detail" active="{{detailActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/edit" active="{{editActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/new" active="{{newActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail/b/" active="{{detailBillingActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit/b/" active="{{editBillingActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/new/b/" active="{{newBillingActive}}"></app-route>
 
     <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
       <div name="">
@@ -188,18 +189,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <app-toolbar primary id="tool2">
                 <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
                 <div style="width: 100%">
-                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}" disable-filter-button></paper-search-bar>
+                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}"
+                    disable-filter-button></paper-search-bar>
                 </div>
               </app-toolbar>
             </div>
           </app-header>
 
-          <firebase-query disabled id="searchQuery" path="/{{myKey}}/billing" data="{{items}}" order-by-child="patientinfo/name" start-at="{{search}}"
-            limit-to-first="15">
+          <firebase-query disabled id="searchQuery" path="/{{myKey}}/billing" data="{{items}}" order-by-child="patientinfo/name"
+            start-at="{{search}}" limit-to-first="15">
           </firebase-query>
 
-          <firebase-query id="defaultQuery" path="/{{myKey}}/billing" data="{{myBilling}}" order-by-child="order" start-at="{{lastorder}}"
-            limit-to-first="15">
+          <firebase-query id="defaultQuery" path="/{{myKey}}/billing" data="{{myBilling}}" order-by-child="order"
+            start-at="{{lastorder}}" limit-to-first="15">
           </firebase-query>
 
           <template is="dom-if" if="{{firstLoad}}">
@@ -228,20 +230,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </template>
 
           <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
-            <iron-list id="ironlist" items="[[items]]" as="item">
-              <template>
-                <div class="divSeparator">
-                  <div class="item" tabindex$="[[tabIndex]]">
-                    <my-billing-card item="[[item]]" my-key="[[myKey]]"></my-billing-card>
+            <template is="dom-if" if="{{_hasDataChanged(items.length)}}" restamp>
+              <iron-list id="ironlist" items="[[items]]" as="item" selection-enabled selected-item="{{selectedItem}}">
+                <template>
+                  <div class="divSeparator">
+                    <div class="item" tabindex$="[[tabIndex]]">
+                      <my-billing-card item="[[item]]" my-key="[[myKey]]"></my-billing-card>
 
-                    <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
-                    </paper-icon-button>
+                      <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit"
+                        style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
+                      </paper-icon-button>
 
-                    <div class="clinic">[[item.clinic_location]]</div>
+                      <div class="clinic">[[item.clinic_location]]</div>
+                    </div>
                   </div>
-                </div>
-              </template>
-            </iron-list>
+                </template>
+              </iron-list>
+            </template>
 
             <div class="loadingIndicator">
               <paper-spinner active="{{_loadCheck(loadingPeople, firstLoad)}}"></paper-spinner>
@@ -253,20 +258,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_billingNew"></paper-fab>
       </div>
 
-      <div name="/new">
-        <template is="dom-if" if="{{newActive}}" restamp>
+      <div name="/new/b/">
+        <template is="dom-if" if="{{newBillingActive}}" restamp>
           <my-billing-new id="d23" my-key="{{myKey}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-new>
         </template>
       </div>
 
-      <div name="/edit">
-        <template is="dom-if" if="{{editActive}}" restamp>
-          <my-billing-edit id="d25" my-key="{{myKey}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-edit>
+      <div name="/edit/b/">
+        <template is="dom-if" if="{{editBillingActive}}" restamp>
+          <my-billing-edit id="d25" my-key="{{myKey}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}"
+            my-location="{{myLocation}}"></my-billing-edit>
         </template>
       </div>
 
-      <div name="/detail">
-        <template is="dom-if" if="{{detailActive}}" restamp>
+      <div name="/detail/b/">
+        <template is="dom-if" if="{{detailBillingActive}}" restamp>
           <my-billing-view id="d26" my-key="{{myKey}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}"></my-billing-view>
         </template>
       </div>
@@ -313,7 +319,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         '_searchChanged(search)',
         '_myBillingChanged(myBilling.*)',
         '_routeChanged(route)',
-        '_itemsChanged(items)'
+        '_selectedItemChanged(selectedItem)'
       ],
 
       _searchChanged(search) {
@@ -332,28 +338,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _routeChanged(e) {
         var page;
-        if (this.detailActive) page = "billing-view";
-        else if (this.editActive) page = "billing-edit";
-        else if (this.newActive) page = "billing-new";
+        if (this.detailBillingActive) page = "billing-view";
+        else if (this.editBillingActive) page = "billing-edit";
+        else if (this.newBillingActive) page = "billing-new";
 
         if (page) {
           var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
           Polymer.importHref(resolvedPageUrl);
-        }
-      },
-
-      _itemsChanged(e) {
-        if (e.length > 0) {
-          this.$.threshold.clearTriggers();
-          this.loadingPeople = false;
-          this.firstLoad = false;
-
-          this.$.ironlist._render();
-          setTimeout((e) => {
-            this.$.ironlist._update();
-          }, 600);
-        } else {
-          this._fetching();
         }
       },
 
@@ -369,6 +360,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.$.defaultQuery.disabled = true;
             this.$.defaultQuery.disabled = false;
           }
+
+          this.$.threshold.clearTriggers();
+          this.loadingPeople = false;
+          this.firstLoad = false;
         } else {
           this._fetching();
         }
@@ -414,26 +409,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      _hasDataChanged(e) {
+        if (e > 0) {
+          this.loadingPeople = false;
+          return true;
+        }
+        else {
+          this._fetching();
+          return false;
+        }
+      },
+
       _billingNew() {
-        window.history.pushState({}, null, '/billing/new');
+        window.history.pushState({}, null, '/billing/new/b/');
         window.dispatchEvent(new CustomEvent('location-changed'));
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "billing-new"
         }));
       },
 
-      _selectThis(e) {
-        this.viewKey = Polymer.dom(e).rootTarget.getAttribute("id");
-        window.history.pushState({}, null, '/billing/detail?ref=' + this.viewKey);
-        window.dispatchEvent(new CustomEvent('location-changed'));
-        this.dispatchEvent(new CustomEvent('loadPage', {
-          bubbles: true, composed: true, detail: "billing-view"
-        }));
+      _selectedItemChanged(e) {
+        if (e) {
+          var list = Polymer.dom(this.root).querySelector("#ironlist");
+          this.viewKey = e.$key;
+
+          window.history.pushState({}, null, '/billing/detail/b/?ref=' + this.viewKey);
+          window.dispatchEvent(new CustomEvent('location-changed'));
+          this.dispatchEvent(new CustomEvent('loadPage', {
+            bubbles: true, composed: true, detail: "billing-view"
+          }));
+
+          if (list) {
+            list.clearSelection();
+          }
+        }
       },
 
       _editThis(e) {
         this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
-        window.history.pushState({}, null, '/billing/edit?ref=' + this.editKey);
+        window.history.pushState({}, null, '/billing/edit/b/?ref=' + this.editKey);
         window.dispatchEvent(new CustomEvent('location-changed'));
         this.dispatchEvent(new CustomEvent('loadPage', {
           bubbles: true, composed: true, detail: "billing-edit"

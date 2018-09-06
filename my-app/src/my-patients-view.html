@@ -31,10 +31,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- <link rel="import" href="my-visits-new.html">
 <link rel="import" href="my-visits-view.html">
 <link rel="import" href="my-visits-edit.html"> -->
+<link rel="import" href="global-functions.html">
 <link rel="import" href="my-gallery.html">
+<link rel="import" href="time-element.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
-<link rel="import" href="time-element.html">
 
 <dom-module id="my-patients-view">
   <template>
@@ -272,7 +274,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <neon-animatable>
 
-            <firebase-query id="query" path="/{{myKey}}/patients" order-by-key equal-to="{{viewKey}}" data="{{mypatient}}" limit-to-first="1">
+            <firebase-query id="query" path="/{{myKey}}/patients" order-by-key equal-to="{{viewKey}}" data="{{mypatient}}"
+              limit-to-first="1">
             </firebase-query>
 
             <div class="docu" id="printMe">
@@ -287,7 +290,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <div class="details" style="padding:18px">
                 <!-- <div >Basic Information</div> -->
-                <div style="font-weight:bold; margin-top:16px; padding:5px; background:rgb(236, 235, 235)">Basic Information</div>
+                <div style="font-weight:bold; margin-top:16px; padding:5px; background:rgb(236, 235, 235)">Basic
+                  Information</div>
                 <table style="margin-bottom:6px; padding:6px;">
                   <tr>
                     <td>
@@ -415,7 +419,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </tr>
                 </table>
 
-                <div style="font-weight:bold; margin-top:16px;  padding:5px; background:rgb(236, 235, 235)">In-case of emergency</div>
+                <div style="font-weight:bold; margin-top:16px;  padding:5px; background:rgb(236, 235, 235)">In-case of
+                  emergency</div>
                 <table style="padding:6px">
                   <tr>
                     <td>
@@ -663,13 +668,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         this.viewKey = this.params.ref;
-        this.todayDate = this.formatTodayDate(new Date());
+        this.todayDate = formatTodayDate(new Date());
       },
 
       todayDateChanged(date) {
         if (date) {
           Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
-          this.text = this.formatWeekDate(date);
+          this.text = formatWeekDate(date);
         }
         else {
           Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
@@ -688,7 +693,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _addPatient2Queue() {
         var mykey = this.myKey;
         var pickDate = this.todayDate;
-        this.doneQueueDate = this.formatWeekDate(pickDate);
+        this.doneQueueDate = formatWeekDate(pickDate);
         var self = this;
 
         var queueData = {
@@ -810,51 +815,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
           if (this.mypatient[0].personal.birthday) {
-
             Date.shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-            var today = new Date();
             var birthday = new Date(this.mypatient[0].personal.birthday);
             this.bday = birthday.getDate() + '-' + Date.shortMonths[birthday.getMonth()] + '-' + birthday.getFullYear();
 
-            var differenceInMilisecond = today.valueOf() - birthday.valueOf();
-
-            var year_age = Math.floor(differenceInMilisecond / 31536000000);
-            var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
-
-            var month_age = Math.floor(day_age / 30);
-
-            day_age = day_age % 30;
-
-            if (!isNaN(year_age) || !isNaN(month_age) || !isNaN(day_age)) {
-              if (year_age > 0) {
-                if (year_age == 1) {
-                  this.age = year_age + " year old";
-                }
-                else {
-                  this.age = year_age + " years old";
-                }
-              }
-              else if (year_age == 0 && month_age > 0) {
-                if (month_age == 1) {
-                  this.age = month_age + " month old";
-                }
-                else {
-                  this.age = month_age + " months old";
-                }
-              }
-              else if (year_age == 0 && month_age == 0 && day_age > 0) {
-                if (day_age == 1) {
-                  this.age = day_age + " day old";
-                }
-                else {
-                  this.age = day_age + " days old";
-                }
-              }
-              else {
-                this.age = year_age + " years " + month_age + " months " + day_age + " days old";
-              }
-            }
+            this.age = getAge(this.mypatient[0].personal.birthday);
           }
           else {
             this.age = '';
@@ -961,37 +927,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }));
         this.$.narrow = !this.$.narrow;
-      },
-
-      formatWeekDate(date) {
-        var monthNames = [
-          "Jan", "Feb", "Mar",
-          "Apr", "May", "Jun", "Jul",
-          "Aug", "Sep", "Oct",
-          "Nov", "Dec"
-        ];
-
-        var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        // var now = new Date().toDateString();
-        var d = new Date(date);
-
-        return days[d.getDay()] + ', ' + d.getDate() + ' ' + monthNames[d.getMonth()] + ' ' + d.getFullYear();
-      },
-
-      formatTodayDate(date) {
-        var monthNames = [
-          "01", "02", "03",
-          "04", "05", "06", "07",
-          "08", "09", "10",
-          "11", "12"
-        ];
-
-        var day = date.getDate();
-        if (day < 10) { day = '0' + day };
-        var monthIndex = date.getMonth();
-        var year = date.getFullYear();
-
-        return year + '-' + monthNames[monthIndex] + '-' + day;
       },
 
       _comma(e) {

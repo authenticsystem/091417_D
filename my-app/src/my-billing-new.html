@@ -66,6 +66,7 @@
                     bottom: 16px;
                     width: 100%;
                 }
+
                 .paper-fab-0 {
                     position: absolute;
                     left: 48px;
@@ -103,21 +104,6 @@
                 cursor: pointer;
             }
 
-            .primary {
-                font-size: 14px;
-                font-weight: 400;
-            }
-
-            .shortText,
-            .longText {
-                font-size: 14px;
-            }
-
-            .longText {
-                color: gray;
-                /* display: none; */
-            }
-
             .textTemp {
                 color: rgb(100, 100, 100);
                 font-weight: 500;
@@ -147,12 +133,12 @@
             }
         </style>
 
-        <firebase-query id="filterQuery" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name" start-at="{{filterValue}}"
-            limit-to-first="{{myLimit}}">
+        <firebase-query id="filterQuery" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name"
+            start-at="{{filterValue}}" limit-to-first="{{myLimit}}">
         </firebase-query>
 
-        <firebase-query id="lastCaseQuery" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}" data="{{mycases}}"
-            limit-to-last="1">
+        <firebase-query id="lastCaseQuery" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}"
+            data="{{mycases}}" limit-to-last="1">
         </firebase-query>
 
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
@@ -277,22 +263,20 @@
                     </neon-animatable>
 
                     <neon-animatable>
-                        <div class="textTemp">
-
-                        </div>
-
-                        <my-billing-datatable id="billingDatatable" my-patient="[[myPatient]]" billing-data="{{billingData}}" remarks="{{remarks}}"
-                            total="{{total}}" my-key="{{myKey}}" show-date="true" today-date="{{todayDate}}"></my-billing-datatable>
+                        <my-billing-datatable id="billingDatatable" my-patient="[[myPatient]]" billing-data="{{billingData}}"
+                            remarks="{{remarks}}" total="{{total}}" my-key="{{myKey}}" show-date="true" today-date="{{todayDate}}"
+                            favhide="{{favhide}}"></my-billing-datatable>
                     </neon-animatable>
 
                     <neon-animatable>
                         <div class="docu">
                             <div class="details">
                                 <div id="saveSuccess" style="color: green; display:none">Billing successfully saved.
-                                    <p id="p" style="margin-top:-4px">Billing ref.# <b style="color:#1976d2">[[billReference]]</p>
+                                    <p id="p" style="margin-top:-4px">Billing ref.# <b style="color:#1976d2">[[billReference]]</b></p>
                                 </div>
                                 <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
-                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while saving
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while
+                                    saving
                                     data.
                                 </div>
                             </div>
@@ -308,7 +292,8 @@
                     <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
                 </div>
                 <div hidden$="[[favrighthide]]">
-                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right"
+                        on-tap="_select2"></paper-fab>
                 </div>
             </div>
 
@@ -405,13 +390,32 @@
                 }
             },
 
+            ready() {
+                this.billingData = [];
+                this.$.billingDatatable._clear();
+            },
+
             observers: [
                 '_todayDateChanged(todayDate)',
                 '_billingDataChanged(billingData)',
                 '_patientChanged(filterValue)',
                 '_myimagingChanged(myimaging)',
-                '_thypatientsChanged(thypatients.length)'
+                '_thypatientsChanged(thypatients.length)',
+                '_favhideChanged(favhide)'
             ],
+
+            _favhideChanged(e) {
+                if (e) {
+                    this.favrighthide = true;
+                    this.favlefthide = true;
+                } else {
+                    if (this.selectedPage !== 0) {
+                        this.favlefthide = false;
+                    }
+                    if (this.todayDate && this.billingData.length > 0) this.favrighthide = false;
+                    else this.favrighthide = true;
+                }
+            },
 
             _todayDateChanged(e) {
                 if (e && this.billingData.length > 0) this.favrighthide = false;
@@ -529,6 +533,7 @@
                 var noRef = firebase.database().ref("/" + mykey + "/uniqueId/billing");
                 var billRef = firebase.database().ref('/' + mykey + '/billing');
                 var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
+                this.lastPushTime = new Date(today).getTime();
 
                 if (today < formatTodayDate(new Date())) {
                     newPushKey = generatePushID(today, this.lastPushTime);
@@ -577,7 +582,7 @@
 
                             self.billingData.forEach(element => {
                                 element.billing_key = fbPushKey;
-                                element.billing_no = no;
+                                element.billing_ref = no;
                                 billDataRef.push(element);
                             });
                         });
