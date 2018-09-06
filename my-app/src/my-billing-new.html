@@ -276,8 +276,7 @@
                                 </div>
                                 <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
                                 <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while
-                                    saving
-                                    data.
+                                    saving data.
                                 </div>
                             </div>
                         </div>
@@ -401,8 +400,14 @@
                 '_patientChanged(filterValue)',
                 '_myimagingChanged(myimaging)',
                 '_thypatientsChanged(thypatients.length)',
-                '_favhideChanged(favhide)'
+                '_favhideChanged(favhide)',
+                '_mycasesChanged(mycases.length)'
             ],
+
+            _mycasesChanged(e) {
+                if (e > 0) this.noprev = '';
+                else this.noprev = 'No previous visit.';
+            },
 
             _favhideChanged(e) {
                 if (e) {
@@ -598,7 +603,7 @@
 
             _calculate(e) {
                 if (e) {
-                    getAge(e);
+                    return getAge(e);
                 }
                 else {
                     return '';

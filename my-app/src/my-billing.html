@@ -9,31 +9,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
-<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/iron-image/iron-image.html">
-<link rel="import" href="../bower_components/iron-list/iron-list.html">
-<link rel="import" href="../bower_components/paper-card/paper-card.html">
-<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/neon-animation/web-animations.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
-<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
-<link rel="import" href="my-billing-card.html">
-<link rel="import" href="my-icons.html">
+<link rel="import" href="my-billing-doctor.html">
+<link rel="import" href="my-billing-secretary.html">
 <link rel="import" href="shared-styles.html">
-
-<link rel="lazy-import" href="my-billing-new.html">
-<link rel="lazy-import" href="my-billing-edit.html">
-<link rel="lazy-import" href="my-billing-view.html">
+<link rel="import" href="my-icons.html">
 
 <dom-module id="my-billing">
   <template>
@@ -41,244 +21,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       :host {
         height: 100vh;
         margin: 0;
-
         display: flex;
         flex-direction: column;
       }
 
-      .item {
-        /* @apply --layout-horizontal; */
-        /* padding: 20px; */
-        background-color: white;
-        border-bottom: 1px solid #ddd;
-        cursor: pointer;
-        margin-bottom: 10px;
-      }
-
-      .item:hover {
-        box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2);
-      }
-
-      @media (max-width: 768px) {
-        iron-list {
-          margin: 16px;
-          /* margin-top: 0px; */
-          display: flex;
-          /* height: 100vh; */
-          flex-direction: column;
-          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
-        }
-
-        .ph-item {
-          margin: 16px;
-          padding: 16px;
-        }
-
-        .ph-col-1 {
-          -webkit-box-flex: 0;
-          -ms-flex: 0 0 20%;
-          flex: 0 0 20%
-        }
-
-        .ph-col-10 {
-          -webkit-box-flex: 0;
-          -ms-flex: 0 0 80%;
-          flex: 0 0 80%
-        }
-
-        .ph-col-8 {
-          -webkit-box-flex: 0;
-          -ms-flex: 0 0 80%;
-          flex: 0 0 80%
-        }
-
-        #noRecord {
-          margin: 16px;
-          display: flex;
-          flex-direction: column;
-        }
-      }
-
-      @media (min-width: 768px) {
-        iron-list {
-          width: 736px;
-          margin: 16px auto;
-          /* margin-top: 0px; */
-          /* height: 100vh; */
-          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
-        }
-
-        .ph-item {
-          width: 736px;
-          margin: 16px auto;
-          padding: 16px;
-        }
-
-        #noRecord {
-          width: 736px;
-          margin: 16px auto;
-        }
-      }
-
-      #tool1 {
+      app-header {
         color: rgb(255, 255, 255);
         background-color: #673AB7;
-      }
-
-      #tool2 {
-        background-color: white;
-      }
-
-      #btn-arrow {
-        color: black;
-      }
-
-      #btn-menu {
-        color: gray;
-        position: fixed;
-        right: 35px;
       }
 
       paper-icon-button.menu {
         margin-right: 16px;
       }
 
-      .clinic {
-        position: absolute;
-        right: 50px;
-        top: 15px;
-        font-size: 12px;
-      }
-
       paper-fab.fab-menu {
         position: fixed;
-        right: 32px;
         bottom: 32px;
-      }
-
-      .loadingIndicator {
-        margin-top: 16px;
-        text-align: center;
-        height: 40px;
-      }
-
-      paper-spinner {
-        width: 20px;
-        height: 20px;
-        margin-right: 10px;
+        float: right;
+        right: 32px;
       }
     </style>
 
-    <app-route route="{{route}}" pattern="/detail/b/" active="{{detailBillingActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/edit/b/" active="{{editBillingActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/new/b/" active="{{newBillingActive}}"></app-route>
+    <template is="dom-if" if="{{myRole}}">
+      <template is="dom-if" if="{{_secretary(myRole)}}">
+        <my-billing-secretary route="[[route]]" my-key="[[myKey]]" my-location="[[myLocation]]"></my-billing-secretary>
+      </template>
 
-    <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
-      <div name="">
-        <app-header-layout fullbleed has-scrolling-region>
-          <app-header fixed slot="header">
-            <div hidden="{{openSearch}}">
-              <app-toolbar primary id="tool1">
-                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                <div main-title>Billing</div>
-                <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
-              </app-toolbar>
-            </div>
-
-            <div hidden="{{!openSearch}}">
-              <app-toolbar primary id="tool2">
-                <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                <div style="width: 100%">
-                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}"
-                    disable-filter-button></paper-search-bar>
-                </div>
-              </app-toolbar>
-            </div>
-          </app-header>
-
-          <firebase-query disabled id="searchQuery" path="/{{myKey}}/billing" data="{{items}}" order-by-child="patientinfo/name"
-            start-at="{{search}}" limit-to-first="15">
-          </firebase-query>
-
-          <firebase-query id="defaultQuery" path="/{{myKey}}/billing" data="{{myBilling}}" order-by-child="order"
-            start-at="{{lastorder}}" limit-to-first="15">
-          </firebase-query>
-
-          <template is="dom-if" if="{{firstLoad}}">
-            <div class="ph-item">
-              <div class="ph-col-1">
-                <div class="ph-avatar" style="width: 45px;"></div>
-              </div>
-              <div class="ph-col-8">
-                <div class="ph-row" style="margin-top:6px;">
-                  <div class="ph-col-8 big"></div>
-                  <div class="ph-col-2 empty"></div>
-                  <div class="ph-col-6 big"></div>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
-            <div id="noRecord">
-              <div class="item" style="padding:15px;">
-                <div style="text-align: center">
-                  No data found.
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
-            <template is="dom-if" if="{{_hasDataChanged(items.length)}}" restamp>
-              <iron-list id="ironlist" items="[[items]]" as="item" selection-enabled selected-item="{{selectedItem}}">
-                <template>
-                  <div class="divSeparator">
-                    <div class="item" tabindex$="[[tabIndex]]">
-                      <my-billing-card item="[[item]]" my-key="[[myKey]]"></my-billing-card>
-
-                      <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit"
-                        style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
-                      </paper-icon-button>
-
-                      <div class="clinic">[[item.clinic_location]]</div>
-                    </div>
-                  </div>
-                </template>
-              </iron-list>
-            </template>
-
-            <div class="loadingIndicator">
-              <paper-spinner active="{{_loadCheck(loadingPeople, firstLoad)}}"></paper-spinner>
-            </div>
-          </iron-scroll-threshold>
-
-        </app-header-layout>
-
-        <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_billingNew"></paper-fab>
-      </div>
-
-      <div name="/new/b/">
-        <template is="dom-if" if="{{newBillingActive}}" restamp>
-          <my-billing-new id="d23" my-key="{{myKey}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-new>
-        </template>
-      </div>
-
-      <div name="/edit/b/">
-        <template is="dom-if" if="{{editBillingActive}}" restamp>
-          <my-billing-edit id="d25" my-key="{{myKey}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}"
-            my-location="{{myLocation}}"></my-billing-edit>
-        </template>
-      </div>
-
-      <div name="/detail/b/">
-        <template is="dom-if" if="{{detailBillingActive}}" restamp>
-          <my-billing-view id="d26" my-key="{{myKey}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}"></my-billing-view>
-        </template>
-      </div>
-
-      <div name="view404">Not found.</div>
-    </iron-pages>
+      <template is="dom-if" if="{{_notSecretary(myRole)}}">
+        <my-billing-doctor route="[[route]]" my-key="[[myKey]]" my-location="[[myLocation]]"></my-billing-doctor>
+      </template>
+    </template>
 
   </template>
 
@@ -287,196 +59,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       is: 'my-billing',
 
       properties: {
-
-        items: {
-          type: Array,
-          value: [],
-          notify: true
-        },
-        myKey: String,
-        myLocation: String,
         route: Object,
-        narrow: {
-          type: Boolean,
-          notify: true
-        },
-        openSearch: {
-          type: Boolean,
-          value: false,
-          notify: true
-        },
-        order: {
-          type: String,
-          value: 'order'
-        },
-        firstLoad: {
-          type: Boolean,
-          value: true
-        }
+        myLocation: String,
+        myKey: String,
+        myRole: String,
       },
 
-      observers: [
-        '_searchChanged(search)',
-        '_myBillingChanged(myBilling.*)',
-        '_routeChanged(route)',
-        '_selectedItemChanged(selectedItem)'
-      ],
-
-      _searchChanged(search) {
-        if (search) {
-          this.search = search.toUpperCase();
-          this.$.defaultQuery.disabled = true;
-          this.$.searchQuery.disabled = false;
-        }
-        else {
-          this.$.defaultQuery.disabled = false;
-          this.$.searchQuery.disabled = true;
-        }
-
-        this.loadingPeople = true;
-      },
-
-      _routeChanged(e) {
-        var page;
-        if (this.detailBillingActive) page = "billing-view";
-        else if (this.editBillingActive) page = "billing-edit";
-        else if (this.newBillingActive) page = "billing-new";
-
-        if (page) {
-          var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
-          Polymer.importHref(resolvedPageUrl);
-        }
-      },
-
-      _myBillingChanged(e) {
-        if (this.myBilling.length > 0) {
-          if (e.path === "myBilling") {
-            this.appendToList();
-          }
-
-          if (e.path !== "myBilling" && e.path === "myBilling.splices" && e.path !== "myBilling.length") {
-            this.items = [];
-            this.lastorder = "";
-            this.$.defaultQuery.disabled = true;
-            this.$.defaultQuery.disabled = false;
-          }
-
-          this.$.threshold.clearTriggers();
-          this.loadingPeople = false;
-          this.firstLoad = false;
-        } else {
-          this._fetching();
-        }
-      },
-
-      appendToList() {
-        for (var i = 0; i < this.myBilling.length; i++) {
-          var exists = this.items.some(patient => patient['$key'] === this.myBilling[i].$key);
-          if (!exists) {
-            this.items.push(this.myBilling[i]);
-            this.notifyPath('items', this.items.slice());
-          }
-        }
-      },
-
-      loadMoreData() {
-        if (this.items.length > 0) {
-          this.lastorder = this.items[this.items.length - 1].order;
-        }
-
-        this.loadingPeople = true;
-      },
-
-      _fetching() {
-        setTimeout((e) => {
-          this.loadingPeople = false;
-          this.firstLoad = false;
-        }, 5000);
-      },
-
-      _noDataChanged(e, f) {
-        if (f) return false;
-        else {
-          if (e > 0) return false;
-          else return true;
-        }
-      },
-
-      _loadCheck(e, l) {
-        if (l) return false;
-        else {
-          return e;
-        }
-      },
-
-      _hasDataChanged(e) {
-        if (e > 0) {
-          this.loadingPeople = false;
-          return true;
-        }
-        else {
-          this._fetching();
-          return false;
-        }
-      },
-
-      _billingNew() {
-        window.history.pushState({}, null, '/billing/new/b/');
-        window.dispatchEvent(new CustomEvent('location-changed'));
-        this.dispatchEvent(new CustomEvent('loadPage', {
-          bubbles: true, composed: true, detail: "billing-new"
-        }));
-      },
-
-      _selectedItemChanged(e) {
+      _secretary(e) {
         if (e) {
-          var list = Polymer.dom(this.root).querySelector("#ironlist");
-          this.viewKey = e.$key;
-
-          window.history.pushState({}, null, '/billing/detail/b/?ref=' + this.viewKey);
-          window.dispatchEvent(new CustomEvent('location-changed'));
-          this.dispatchEvent(new CustomEvent('loadPage', {
-            bubbles: true, composed: true, detail: "billing-view"
-          }));
-
-          if (list) {
-            list.clearSelection();
-          }
+          if (e == 'Secretary') return true;
+          else return false;
         }
       },
 
-      _editThis(e) {
-        this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
-        window.history.pushState({}, null, '/billing/edit/b/?ref=' + this.editKey);
-        window.dispatchEvent(new CustomEvent('location-changed'));
-        this.dispatchEvent(new CustomEvent('loadPage', {
-          bubbles: true, composed: true, detail: "billing-edit"
-        }));
-      },
-
-      toggleDrawer() {
-        this.dispatchEvent(new CustomEvent('toggleDrawer', {
-          bubbles: true, composed: true, detail: {
-            narrow: this.$.narrow
-          }
-        }));
-        this.$.narrow = !this.$.narrow;
-      },
-
-      toggleSearch() {
-        this.openSearch = true;
-        this.$.search.focus();
-      },
-
-      toggleReturn() {
-        this.openSearch = false;
-        this.search = '';
-      },
-
-      toggleClear() {
-        this.search = '';
+      _notSecretary(e) {
+        if (e) {
+          if (e != 'Secretary') return true;
+          else return false;
+        }
       }
 
     })
+
   </script>
 </dom-module>

@@ -52,6 +52,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 .div1 {
                     text-align: center
                 }
+
                 /*.div2{
                     flex:2; padding: 25px;
                 } */
@@ -69,10 +70,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 .div1 {
                     flex: 1;
                 }
+
                 .div2 {
                     flex: 2;
                     padding: 25px;
                 }
+
                 .divHolder {
                     display: flex;
                 }
@@ -139,13 +142,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         </div>
                     </div>
                     <div class="divHolder">
-                        <div class="div1" align="center">
+                        <div hidden="{{isSecretary}}" class="div1" align="center">
                             <div on-tap="_newServices" class="card">
                                 <img style="width:150px; height:150px; border-radius:50%;" src="../images/services.png">
                                 <h3>My Services</h3>
                             </div>
                         </div>
-                        <div class="div1" align="center">
+                        <div hidden="{{isSecretary}}" class="div1" align="center">
                             <div on-tap="_newHMO" class="card">
                                 <img style="width:150px; height:150px; border-radius:50%;" src="../images/hmo.png">
                                 <h3>My HMO</h3>
