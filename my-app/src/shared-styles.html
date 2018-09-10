@@ -523,6 +523,138 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           transform: translate3d(30%, 0, 0)
         }
       }
+
+      /* Messaging shared styles */
+      .textarea {
+        width: 100%;
+        margin-top: -16px;
+        margin-bottom: 3px;
+      }
+
+      .mnu {
+        padding: 13px;
+        overflow: auto;
+        height: calc(100vh - 90px);
+        /* background: #eeeeee; */
+        /* border-left: 0.3px solid gray; */
+      }
+
+      .small {
+        --paper-avatar-width: 30px;
+      }
+
+      .badge {
+        padding: 3px;
+        border: .5px solid rgb(199, 199, 199);
+        font-size: 12px;
+        font-weight: 400;
+        height: 20px;
+        position: absolute;
+        right: 10px;
+      }
+
+      /* Message design */
+      .content {
+        padding: 16px;
+        overflow: auto;
+        @apply --layout-flex;
+      }
+
+      .incoming_msg {
+        display: flex;
+        margin-top: 13px;
+        margin-bottom: 13px;
+      }
+
+      .received_msg {
+        padding: 0 0 0 10px;
+        /* width: 92%; */
+      }
+
+      .received_withd_msg p {
+        /* #ebebeb */
+        background: rgb(253, 253, 253) none repeat scroll 0 0;
+        border-radius: 3px;
+        color: #3f3e3e;
+        font-size: 14px;
+        margin: 0;
+        padding: 5px 10px 5px 12px;
+        /* width: 100%; */
+      }
+
+      /* .received_withd_msg {
+        width: 57%;
+      } */
+
+      .outgoing_msg {
+        overflow: hidden;
+        margin: 13px 0 13px;
+      }
+
+      .sent_msg p {
+        background: #05728f none repeat scroll 0 0;
+        border-radius: 3px;
+        font-size: 14px;
+        margin: 0;
+        color: #fff;
+        padding: 5px 10px 5px 12px;
+      }
+
+      .sent_msg {
+        float: right;
+        /* width: 46%; */
+      }
+
+      .time_date {
+        color: #747474;
+        display: block;
+        font-size: 12px;
+        margin: 8px 0 0;
+      }
+
+      footer {
+        background-color: white;
+        -webkit-box-shadow: -1px -3px 18px -1px rgba(209, 194, 209, 1);
+        -moz-box-shadow: -1px -3px 18px -1px rgba(209, 194, 209, 1);
+        box-shadow: -1px -3px 18px -1px rgba(209, 194, 209, 1);
+      }
+
+      .item-header {
+        border-bottom: 1px solid #ddd;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .longText {
+        font-weight: 400;
+        font-size: 12px;
+      }
+
+      .emoticon_not_active {
+        color: black;
+        transition: 0.3s;
+      }
+
+      .emoticon_not_active:hover {
+        color: rebeccapurple;
+      }
+
+      .emoticon_active {
+        color: rebeccapurple;
+        transition: 0.3s;
+      }
+
+      .emoticon_active:hover {
+        opacity: 0.6;
+      }
+
+      .emoji {
+        cursor: pointer;
+      }
+
+      .emoji:hover {
+        opacity: 0.7;
+      }
     </style>
   </template>
 </dom-module>

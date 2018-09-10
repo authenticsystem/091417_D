@@ -263,7 +263,7 @@
             <app-header-layout id="appheader" has-scrolling-region>
                 <app-header fixed slot="header">
                     <app-toolbar>
-                        <a href="/visits">
+                        <a href="{{prevRoute}}">
                             <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
                         </a>
                         <div main-title>Edit Visit</div>
@@ -407,6 +407,7 @@
             is: 'my-visits-edit',
 
             properties: {
+                prevRoute: String,
                 editKey: String,
                 mycases: {
                     type: Object,

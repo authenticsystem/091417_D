@@ -33,6 +33,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-messaging.html">
+<link rel="import" href="../bower_components/g-element/push-notification.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
 
@@ -210,7 +211,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <template is="dom-if" if="{{user.phoneNumber}}">
 
           <firebase-query id="query" path="/accounts" data="{{myaccount}}" order-by-child="uid" equal-to="{{user.uid}}"></firebase-query>
-          <firebase-messaging id="messaging" token="{{token}}"></firebase-messaging>
+          <!-- <firebase-messaging id="messaging" token="{{token}}"></firebase-messaging> -->
+          <!-- token="[[token]]" -->
+          <push-notification id="notification" is-granted="{{isNotificationGranted}}"></push-notification>
 
           <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
             <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
@@ -297,7 +300,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <a name="messaging" href="[[rootPath]]messaging">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon id="messageIcon" icon="my-icons:chat" slot="item-icon"></iron-icon>
-                      <paper-badge for="messageIcon" label="0"></paper-badge>
+                      <paper-badge for="messageIcon" label="{{noOfMsg}}"></paper-badge>
                       <span>Messaging</span>
                     </paper-icon-item>
                   </a>
@@ -336,14 +339,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <my-patients name="patients" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"
                 my-location-code="[[mylocationCode]]"></my-patients>
               <my-queue name="queue" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"
-                my-location-code="[[mylocationCode]]" token="[[token]]"></my-queue>
+                my-location-code="[[mylocationCode]]"></my-queue>
               <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" my-location="[[mylocation]]"></my-visits>
               <my-settings name="settings" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[myLastname]]"
                 user="[[user]]"></my-settings>
               <my-billing name="billing" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"></my-billing>
               <my-collection name="collection" my-role="[[role]]" my-key="[[mykey]]"></my-collection>
               <my-messaging name="messaging" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"
-                my-location-code="[[mylocationCode]]" token="[[token]]"></my-messaging>
+                my-location-code="[[mylocationCode]]"></my-messaging>
               <!-- <my-appointments name="appointments"></my-appointments>
               <my-help name="help"></my-help>
               <my-view2 name="view2"></my-view2> -->
@@ -382,6 +385,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             value: false
           },
+          noOfMsg: {
+            type: Number,
+            value: 0
+          },
           mykey: String
         };
       }
@@ -389,7 +396,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get observers() {
         return [
           '_routePageChanged(routeData.page, user, mykey)',
-          '_myaccountChanged(myaccount.*)'
+          '_myaccountChanged(myaccount.*, isNotificationGranted)'
         ];
       }
 
@@ -403,7 +410,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         window.addEventListener('offline', (e) => this._updateOnlineStatus(e));
       }
 
-      _myaccountChanged() {
+      _myaccountChanged(e, n) {
         if (this.myaccount.length > 0) {
           this.mykey = this.myaccount[0].code;
           this.drTitle = this.myaccount[0].designatory;
@@ -416,11 +423,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           if (this.myaccount[0].role != 'Secretary') this.hasAccess = true;
 
-          var messaging = Polymer.dom(this.root).querySelector("#messaging");
+          var messaging = Polymer.dom(this.root).querySelector("#notification");
           if (messaging) {
-            messaging.requestPermission();
+            if (n) {
+              var self = this, msgRef;
+              if (this.myaccount[0].role != 'Secretary') {
+                msgRef = firebase.database().ref("/" + this.mykey + "/secretary");
+              } else {
+                msgRef = firebase.database().ref("/" + this.mykey + "/doctors");
+              }
+
+              msgRef.on('value', function (snapshot) {
+                if (snapshot.exists()) {
+                  if (self.page !== "messaging") {
+                    var noOfMsg = 0;
+                    snapshot.forEach(element => {
+                      noOfMsg += (element.val().msg ? element.val().msg : 0);
+                    });
+
+                    if (noOfMsg > 0) {
+                      self.noOfMsg = noOfMsg;
+                      var title = "message";
+                      if (noOfMsg > 1) title = "messages";
+                      self._sendNotification(
+                        messaging,
+                        "You have " + noOfMsg + " unread " + title + ".",
+                        "message", true);
+                    }
+                  }
+                }
+              });
+            } else {
+              messaging.requestPermission();
+            }
           }
         }
+      }
+
+      _sendNotification(messaging, body, tag, requireInteraction) {
+        messaging.sendNotification({
+          title: "BaseEMR",
+          icon: "../images/icon.png",
+          badge: "../images/icon.png",
+          body: body,
+          tag: tag,
+          requireInteraction: requireInteraction,
+          renotify: true
+        });
       }
 
       _access(e) {
@@ -492,6 +541,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _pageChanged(page) {
+        if (page === "messaging") this.noOfMsg = 0;
         this._loadThisPage(page);
       }
 

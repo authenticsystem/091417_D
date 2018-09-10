@@ -201,6 +201,13 @@
                 font-family: Arial;
             } */
 
+            #noRecordList {
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                padding: 16px;
+                text-align: center;
+                display: none;
+            }
+
             #list {
                 box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
                 padding: 0;
@@ -273,6 +280,7 @@
                         <div class="docu">
                             <div class="details">
                                 <paper-input on-keyup="_ack" label="Patient *" value="{{filterValue}}" placeholder="Search patient"></paper-input>
+                                <div id="noRecordList"> No record found. </div>
                                 <paper-listbox id="list">
                                     <template id="thypatientTemp" is="dom-repeat" items="[[thypatients]]">
                                         <paper-item on-tap="_bind">[[item.personal.name]]</paper-item>
@@ -555,6 +563,7 @@
                     Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'none';
                     Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'none';
                     Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                    this.$.noRecordList.style.display = "none";
                     this.favrighthide = true;
                 } else {
                     this.isLoading = true;
@@ -564,7 +573,17 @@
             },
 
             _thypatientsChanged(e) {
-                this.isLoading = false;
+                if (e === 0) {
+                    setTimeout(() => {
+                        if (this.isLoading) {
+                            this.isLoading = false;
+                            this.$.noRecordList.style.display = "block";
+                        }
+                    }, 5000);
+                } else {
+                    this.isLoading = false;
+                    this.$.noRecordList.style.display = "none";
+                }
             },
 
             _bind(e) {
@@ -885,7 +904,7 @@
                     self._reportsUpdate(today, mykey);
 
                     if (self.myQueue) {
-                        self._locateNextQueue(mykey, self.queueKey, self.queueDate, self.queueNo, self.myLocation)
+                        self._locateNextQueue(mykey, self.queueKey, self.queueDate, self.queueNo, self.myLocation, fbPushKey)
                     }
 
                     if (self.attachment.length > 0) {
@@ -967,9 +986,9 @@
                 });
             },
 
-            _locateNextQueue(mykey, queueKey, queueDate, queueNo, myLocation) {
+            _locateNextQueue(mykey, queueKey, queueDate, queueNo, myLocation, visitKey) {
                 var ref = firebase.database().ref("/" + mykey + "/queue/" + myLocation + "/" + queueDate);
-                ref.child(queueKey).update({ isNext: false, isQueue: false, xy: "x" }).then(function () {
+                ref.child(queueKey).update({ isNext: false, isQueue: false, xy: "x", visit_refKey: visitKey }).then(function () {
                     ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
                         if (!hasNext.exists()) {
                             ref.orderByChild("queueNo").startAt(queueNo + 1).once("value").then(function (findNext) {
@@ -1048,6 +1067,7 @@
             _ack() {
                 Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'none';
                 Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'none';
+                this.$.noRecordList.style.display = "none";
             },
 
             _timeStampToDateTime(ts) {

@@ -157,7 +157,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
                             <paper-avatar class="small" label="[[item.location_name]]"></paper-avatar>
                             <div class="pad" on-tap="_selectThis" id="[[item.$key]]~[[item.location_mini]]~[[item.location_code]]">
-                                <div id="[[item.$key]]~[[item.location_mini]]~[[item.location_code]]" style="font-size:11px" class="longText">[[item.location_mini]]</div>
+                                <div id="[[item.$key]]~[[item.location_mini]]~[[item.location_code]]" style="font-size:11px"
+                                    class="longText">[[item.location_mini]]</div>
                                 <div id="[[item.$key]]~[[item.location_mini]]~[[item.location_code]]">[[item.location_name]]</div>
                             </div>
                             <div style="padding:10px"> </div>
@@ -182,7 +183,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <span>
                 <paper-input id="location" label="Location" auto-validate value="{{location}}" always-float-label></paper-input>
                 <iron-a11y-keys target="[[targetLocation]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
-                <paper-input id="locationMin" label="Location mini name" auto-validate value="{{locationMinName}}" always-float-label></paper-input>
+                <paper-input id="locationMin" label="Location mini name" auto-validate value="{{locationMinName}}"
+                    always-float-label></paper-input>
                 <iron-a11y-keys target="[[targetLocationMin]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
             </span>
             <div class="buttons">
@@ -194,10 +196,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <salte-dialog no-auto-fullscreen id="openDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
             <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
             <span>
-                <paper-button hidden="{{_access(myRole)}}" on-tap="_removeLocation" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;"
+                <!-- <paper-button hidden="{{_access(myRole)}}" on-tap="_removeLocation" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;"
                     dialog-confirm>Remove location
-                </paper-button>
-                <paper-button on-tap="_setLocation" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>
+                </paper-button> -->
+                <paper-button on-tap="_setLocation" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>
                     Set as current location
                 </paper-button>
             </span>

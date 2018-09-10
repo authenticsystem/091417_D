@@ -27,6 +27,7 @@ const imagemin = require('gulp-imagemin');
 
 const swPrecacheConfig = require('./sw-precache-config.js');
 const firebaseMessagingSw = require('./firebase-messaging-sw.js');
+const swNotification = require('./sw-notification');
 const polymerJson = require('./polymer.json');
 const polymerProject = new polymerBuild.PolymerProject(polymerJson);
 const buildDirectory = 'build';
@@ -116,12 +117,13 @@ function build() {
           buildRoot: buildDirectory,
           bundled: true,
           swPrecacheConfig: swPrecacheConfig,
-          firebaseMessagingSw: firebaseMessagingSw
+          firebaseMessagingSw: firebaseMessagingSw,
+          swNotification: swNotification
         });
       })
       .then(() => {
         // You did it!
-        console.log('Build complete!');
+        console.log('Yehey! Build complete!');
         resolve();
       });
   });
