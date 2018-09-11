@@ -36,6 +36,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/g-element/push-notification.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="global-functions.html">
 
 <link rel="lazy-import" href="my-signin.html">
 <link rel="lazy-import" href="my-register-signin.html">
@@ -389,6 +390,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Number,
             value: 0
           },
+          noOfPatients: {
+            type: Number,
+            value: 0
+          },
           mykey: String
         };
       }
@@ -408,6 +413,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // listen for online/offline
         window.addEventListener('online', (e) => this._updateOnlineStatus(e));
         window.addEventListener('offline', (e) => this._updateOnlineStatus(e));
+        window.addEventListener('show-toast', (e) => this._showUpdateToast(e));
+      }
+
+      _showUpdateToast(e) {
+        console.log(e.detail);
       }
 
       _myaccountChanged(e, n) {
@@ -429,6 +439,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               var self = this, msgRef;
               if (this.myaccount[0].role != 'Secretary') {
                 msgRef = firebase.database().ref("/" + this.mykey + "/secretary");
+
+                var todayDate = formatTodayDate(new Date());
+                var queueRef = firebase.database().ref("/" + this.mykey + "/queue/" + this.mylocation + "/" + todayDate);
+                queueRef.on('value', function (childsnapshot) {
+                  if (childsnapshot.exists()) {
+                    var noOfPatients = 0;
+                    childsnapshot.forEach(childElement => {
+                      if (childElement.val().isQueue) noOfPatients += 1;
+                    });
+
+                    if (noOfPatients > 0) {
+                      var childtitle = "patient";
+                      if (noOfPatients > 1) childtitle = "patients";
+                      if (noOfPatients > self.noOfPatients) {
+                        self.noOfPatients = noOfPatients;
+                        self._sendNotification(
+                          messaging,
+                          "You have " + noOfPatients + " " + childtitle + " waiting in queue.",
+                          "queue", true);
+                      }
+                    }
+                  }
+                });
               } else {
                 msgRef = firebase.database().ref("/" + this.mykey + "/doctors");
               }

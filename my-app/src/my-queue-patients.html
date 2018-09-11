@@ -204,7 +204,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back"></paper-icon-button>
                     </a>
                     <div style="width:100%">
-                        <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}" disable-filter-button></paper-search-bar>
+                        <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}"
+                            disable-filter-button></paper-search-bar>
                     </div>
                     <!-- <template is="dom-if" if="{{search}}">
                         <paper-icon-button id="btn-menu" icon="my-icons:close" on-tap="toggleClear"></paper-icon-button>
@@ -212,8 +213,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </app-toolbar>
             </app-header>
 
-            <firebase-query disabled id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name" start-at="{{search}}"
-                limit-to-first="15">
+            <firebase-query disabled id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name"
+                start-at="{{search}}" limit-to-first="15">
             </firebase-query>
 
             <div id="noRecord">
@@ -224,7 +225,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
             </div>
 
-            <iron-list id="ironlist" items="[[mypatients]]" as="item" selected-item="{{selectedItem}}" selection-enabled scroll-target="threshold">
+            <iron-list id="ironlist" items="[[mypatients]]" as="item" selected-item="{{selectedItem}}"
+                selection-enabled scroll-target="threshold">
                 <template>
                     <div class="divSeparator">
                         <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
@@ -233,7 +235,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             </div>
                             <div class="pad">
                                 <div style="font-size:11px" class="longText">[[item.no]]</div>
-                                <div class="primary">[[item.personal.lastname]], [[item.personal.firstname]] [[item.personal.middlename]]
+                                <div class="primary">[[item.personal.lastname]], [[item.personal.firstname]]
+                                    [[item.personal.middlename]]
                                 </div>
                                 <div class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}}
                                     [[item.personal.sex]]
@@ -255,7 +258,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <salte-dialog no-auto-fullscreen id="dateDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
             <h2 style="font-size: 16px; background: #1E88E5">Add to queue</h2>
             <span>
-                <paper-input disabled="[[isLoading]]" type="date" value="{{todayDate}}" label="Pick a date" always-float-label>
+                <paper-input disabled="[[isLoading]]" type="date" value="{{todayDate}}" label="Pick a date"
+                    always-float-label>
                     <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
                 </paper-input>
                 <div style="margin-left:4px;margin-top:-6px;">
@@ -318,7 +322,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         firstname: e.personal.firstname,
                         middlename: e.personal.middlename,
                         lastname: e.personal.lastname,
-                        birthday: e.personal.birthday,
+                        birthday: e.personal.birthday ? e.personal.birthday : null,
                         sex: e.personal.sex,
                         name: e.personal.name,
                         hmo: e.insurance.primary_insurance

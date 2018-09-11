@@ -854,7 +854,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             firstname: this.mypatient[0].personal.firstname,
             middlename: this.mypatient[0].personal.middlename,
             lastname: this.mypatient[0].personal.lastname,
-            birthday: this.mypatient[0].personal.birthday,
+            birthday: this.mypatient[0].personal.birthday ? this.mypatient[0].personal.birthday : null,
             sex: this.mypatient[0].personal.sex,
             name: this.mypatient[0].personal.name,
             hmo: this.mypatient[0].insurance.primary_insurance
