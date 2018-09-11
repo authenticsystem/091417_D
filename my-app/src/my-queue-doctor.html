@@ -282,7 +282,7 @@
                         start-at="{{_parseInt(1)}}" data="{{myqueue}}">
                     </firebase-query>
 
-                    <template is="dom-if" if="{{_loadCheck(loadingPeople, firstLoad)}}">
+                    <template is="dom-if" if="{{_loadCheck(loadingPeople, firstLoad, myqueue.length)}}">
                         <div class="ph-item">
                             <div class="ph-col-1">
                                 <div class="ph-avatar" style="width: 45px;"></div>
@@ -530,6 +530,7 @@
                 if (this.queueNew0Active) page = "patients-new";
                 else if (this.search0Active) page = "queue-patients";
                 else if (this.visitNew0Active) page = "visits-new";
+                else if (this.visitEdit0Active) page = "visits-edit";
                 else if (this.patientEdit0Active) page = "patients-edit";
                 else if (this.patientView0Active) page = "patients-view";
 
@@ -756,11 +757,10 @@
                 }
             },
 
-            _loadCheck(e, l) {
+            _loadCheck(e, l, q) {
                 if (l) return l;
-                else {
-                    return e;
-                }
+                if (q > 0) return false;
+                return e;
             },
 
             _parseInt(e) {

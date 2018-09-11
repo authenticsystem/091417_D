@@ -141,7 +141,7 @@
         </style>
 
         <firebase-query id="filterQuery" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name"
-            start-at="{{filterValue}}" limit-to-first="{{myLimit}}">
+            start-at="{{filterValue}}" limit-to-first="5">
         </firebase-query>
 
         <firebase-query id="lastCaseQuery" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}"
