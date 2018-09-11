@@ -91,7 +91,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   if (!navigator.serviceWorker.controller) {
                     window.dispatchEvent(new CustomEvent('show-toast', {
                       detail: {
-                        text: 'Service worker installed, site is cached for offline use.',
+                        text: 'Service worker installed, this site is cached for offline use.',
+                        isNew: false
                       },
                     }));
                   }
@@ -110,12 +111,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             if (event.target.state === 'redundant') {
               window.dispatchEvent(new CustomEvent('show-toast', {
                 detail: {
-                  text: 'Site updated. Refresh this page to see the latest content.',
-                  duration: Infinity,
-                  button: {
-                    text: 'Refresh',
-                    onclick: () => window.location.reload(true),
-                  },
+                  text: 'New Update Available! Update now to see the latest content.',
+                  isNew: true
                 },
               }));
             }

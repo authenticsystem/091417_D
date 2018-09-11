@@ -157,6 +157,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <paper-icon-button on-tap="_closeToast" class="yellow-button" icon="my-icons:close"></paper-icon-button>
     </paper-toast>
 
+    <paper-toast id="updateToast" class="fit-bottom" duration="0" text="New Update Is Here :)">
+      <paper-button onclick="window.location.reload(true)">
+        Update
+      </paper-button>
+    </paper-toast>
+
+    <!-- <paper-toast id="swToast" duration="0" text=""></paper-toast> -->
+
     <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
     </app-location>
 
@@ -328,7 +336,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </a> -->
 
                   <span style="padding:20px; color:gray; font-size:12px;">
-                    v0.7.2
+                    v0.7.4
                   </span>
                 </iron-selector>
               </app-header-layout>
@@ -414,10 +422,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         window.addEventListener('online', (e) => this._updateOnlineStatus(e));
         window.addEventListener('offline', (e) => this._updateOnlineStatus(e));
         window.addEventListener('show-toast', (e) => this._showUpdateToast(e));
-      }
-
-      _showUpdateToast(e) {
-        console.log(e.detail);
       }
 
       _myaccountChanged(e, n) {
@@ -628,6 +632,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           toast.opened = true;
           toast.text = 'Network connection lost. Offline mode enabled.';
+        }
+      }
+
+      _showUpdateToast(e) {
+        if (e.detail.isNew) {
+          this.$.updateToast.text = e.detail.text;
+          this.$.updateToast.opened = true;
+        } else {
+          this.$.networkToast.text = e.detail.text;
+          this.$.networkToast.duration = 5000;
+          this.$.networkToast.opened = true;
         }
       }
 
