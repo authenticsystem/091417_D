@@ -147,6 +147,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-bottom: -10px;
         color: #eeff41;
       }
+
+      .yellow {
+        color: #eeff41;
+      }
     </style>
 
     <div id="overlay">
@@ -157,10 +161,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <paper-icon-button on-tap="_closeToast" class="yellow-button" icon="my-icons:close"></paper-icon-button>
     </paper-toast>
 
-    <paper-toast id="updateToast" class="fit-bottom" duration="0" text="New Update Is Here :)">
-      <paper-button onclick="window.location.reload(true)">
-        Update
-      </paper-button>
+    <paper-toast id="updateToast" duration="0" text="">
+      <div>
+        <span>New Update Available!</span>
+        <span>Click
+          <a class="yellow" onclick="window.location.reload(true)">
+            here
+          </a> for the new version.
+        </span>
+      </div>
     </paper-toast>
 
     <!-- <paper-toast id="swToast" duration="0" text=""></paper-toast> -->
@@ -448,20 +457,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 var queueRef = firebase.database().ref("/" + this.mykey + "/queue/" + this.mylocation + "/" + todayDate);
                 queueRef.on('value', function (childsnapshot) {
                   if (childsnapshot.exists()) {
-                    var noOfPatients = 0;
-                    childsnapshot.forEach(childElement => {
-                      if (childElement.val().isQueue) noOfPatients += 1;
-                    });
+                    if (self.page !== "queue" || !document.hasFocus()) {
+                      var noOfPatients = 0;
+                      childsnapshot.forEach(childElement => {
+                        if (childElement.val().isQueue) noOfPatients += 1;
+                      });
 
-                    if (noOfPatients > 0) {
-                      var childtitle = "patient";
-                      if (noOfPatients > 1) childtitle = "patients";
-                      if (noOfPatients > self.noOfPatients) {
-                        self.noOfPatients = noOfPatients;
-                        self._sendNotification(
-                          messaging,
-                          "You have " + noOfPatients + " " + childtitle + " waiting in queue.",
-                          "queue", true);
+                      if (noOfPatients > 0) {
+                        var childtitle = "patient";
+                        if (noOfPatients > 1) childtitle = "patients";
+                        if (noOfPatients > self.noOfPatients) {
+                          self.noOfPatients = noOfPatients;
+                          self._sendNotification(
+                            messaging,
+                            "You have " + noOfPatients + " " + childtitle + " waiting in queue.",
+                            "queue", true);
+                        }
                       }
                     }
                   }
@@ -472,7 +483,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               msgRef.on('value', function (snapshot) {
                 if (snapshot.exists()) {
-                  if (self.page !== "messaging") {
+                  if (self.page !== "messaging" || !document.hasFocus()) {
                     var noOfMsg = 0;
                     snapshot.forEach(element => {
                       noOfMsg += (element.val().msg ? element.val().msg : 0);
@@ -637,7 +648,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _showUpdateToast(e) {
         if (e.detail.isNew) {
-          this.$.updateToast.text = e.detail.text;
+          // this.$.updateToast.text = e.detail.text;
           this.$.updateToast.opened = true;
         } else {
           this.$.networkToast.text = e.detail.text;
