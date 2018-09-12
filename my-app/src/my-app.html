@@ -490,7 +490,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     });
 
                     if (noOfMsg > 0) {
-                      self.noOfMsg = noOfMsg;
+                      if (self.page !== "messaging") {
+                        self.noOfMsg = noOfMsg;
+                      }
                       var title = "message";
                       if (noOfMsg > 1) title = "messages";
                       self._sendNotification(

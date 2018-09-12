@@ -88,14 +88,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             installingWorker.onstatechange = () => {
               switch (installingWorker.state) {
                 case 'installed':
-                  if (navigator.serviceWorker.controller) {
-                    window.dispatchEvent(new CustomEvent('show-toast', {
-                      detail: {
-                        text: 'New Update Available!',
-                        isNew: true
-                      },
-                    }));
-                  } else {
+                  if (!navigator.serviceWorker.controller) {
+                    //   window.dispatchEvent(new CustomEvent('show-toast', {
+                    //     detail: {
+                    //       text: 'New Update Available!',
+                    //       isNew: true
+                    //     },
+                    //   }));
+                    // } else {
                     window.dispatchEvent(new CustomEvent('show-toast', {
                       detail: {
                         text: 'Service worker installed, this site is cached for offline use.',
@@ -111,7 +111,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       isNew: true
                     },
                   }));
-                // throw Error('The installing service worker became redundant.');
+                  throw Error('The installing service worker became redundant.');
               }
             };
           };
@@ -119,18 +119,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           console.error('Service worker registration failed:', error);
         });
 
-        // if (navigator.serviceWorker.controller) {
-        //   navigator.serviceWorker.controller.onstatechange = (event) => {
-        //     if (event.target.state === 'redundant') {
-        //       window.dispatchEvent(new CustomEvent('show-toast', {
-        //         detail: {
-        //           text: 'New Update Available! Update now to see the latest content.',
-        //           isNew: true
-        //         },
-        //       }));
-        //     }
-        //   };
-        // }
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.onstatechange = (event) => {
+            if (event.target.state === 'redundant') {
+              window.dispatchEvent(new CustomEvent('show-toast', {
+                detail: {
+                  text: 'New Update Available!',
+                  isNew: true
+                },
+              }));
+            }
+          };
+        }
 
       });
     }

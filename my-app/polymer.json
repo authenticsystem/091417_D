@@ -25,6 +25,7 @@
   ],
   "extraDependencies": [
     "manifest.json",
+    "sw-notification.js",
     "bower_components/webcomponentsjs/*.js"
   ],
   "lint": {
