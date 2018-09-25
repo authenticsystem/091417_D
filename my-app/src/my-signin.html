@@ -1,21 +1,21 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-input/paper-input-container.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="my-icons.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
 
 <dom-module id="my-signin">
     <template>
@@ -55,6 +55,10 @@
                 background-color: var(--paper-green-500);
                 color: white;
                 height: 38px;
+            }
+
+            .green:focus {
+                box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
             }
 
             .action {
@@ -103,8 +107,10 @@
             <div id="errorMsgDiv" style="display: none;">
                 <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}
             </div>
-            <paper-input label="Email" value="{{email}}" always-float-label required auto-validate error-message=""></paper-input>
-            <paper-input label="Password" type="password" value="{{password}}" always-float-label required auto-validate error-message=""></paper-input>
+            <paper-input id="email" label="Email" value="{{email}}" always-float-label auto-validate error-message=""></paper-input>
+            <paper-input id="pass" label="Password" type="password" value="{{password}}" always-float-label auto-validate error-message=""></paper-input>
+            <iron-a11y-keys target="[[targetEmail]]" keys="enter" on-keys-pressed="_onEnter"></iron-a11y-keys>
+            <iron-a11y-keys target="[[targetPass]]" keys="enter" on-keys-pressed="_onEnter"></iron-a11y-keys>
             <br>
             <div class="footer">
                 <div class="moreoption">
@@ -144,6 +150,11 @@
                 }
             },
 
+            ready() {
+                this.targetEmail = this.$.email;
+                this.targetPass = this.$.pass;
+            },
+
             handleError() {
                 Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                 this.validationMessage = 'Invalid email or password.';
@@ -159,6 +170,10 @@
                 Polymer.dom(this.root).querySelector("#spinnerNext").style.display = "none";
                 Polymer.dom(this.root).querySelector("#next").disabled = false;
                 Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
+            },
+
+            _onEnter() {
+                this._signIn();
             },
 
             _signIn() {

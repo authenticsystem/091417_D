@@ -30,5 +30,6 @@ module.exports = {
         },
       },
     },
-  ]
+  ],
+  importScripts: ['sw-notification.js']
 };

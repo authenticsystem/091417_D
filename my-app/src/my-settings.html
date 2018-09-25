@@ -14,24 +14,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
-<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
-<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="short-unique-id.html">
 
-<link rel="import" href="my-account.html">
-<link rel="import" href="my-secretary.html">
+<link rel="lazy-import" href="my-account.html">
+<link rel="lazy-import" href="my-secretary.html">
+<link rel="lazy-import" href="my-services.html">
+<link rel="lazy-import" href="my-hmo.html">
 
 <dom-module id="my-settings">
     <template>
@@ -55,6 +52,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 .div1 {
                     text-align: center
                 }
+
                 /*.div2{
                     flex:2; padding: 25px;
                 } */
@@ -72,10 +70,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 .div1 {
                     flex: 1;
                 }
+
                 .div2 {
                     flex: 2;
                     padding: 25px;
                 }
+
                 .divHolder {
                     display: flex;
                 }
@@ -92,15 +92,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 /* padding: 2px;
                 border-radius: 3px;
                 font-weight: 500; */
-            }
-
-            #uploader {
-                -webkit-appearance: none;
-                /* appearance: none; */
-                width: 55%;
-                margin-left: 10px;
-                height: 5px;
-                display: none;
             }
 
             paper-button {
@@ -121,7 +112,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
         </style>
 
-        <firebase-auth id="auth" user="{{user}}" provider="google" on-error="showError"></firebase-auth>
+        <app-route route="{{route}}" pattern="/account" active="{{accountActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/secretary" active="{{secretaryActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/services" active="{{servicesActive}}"></app-route>
+        <app-route route="{{route}}" pattern="/hmo" active="{{hmoActive}}"></app-route>
 
         <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <div name="">
@@ -135,20 +129,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                     <div class="divHolder">
                         <div class="div1" align="center">
-                            <a href="/settings/account">
-                                <div class="card">
-                                    <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
-                                    <h3>My Account</h3>
-                                </div>
-                            </a>
+                            <div on-tap="_newAccount" class="card">
+                                <img style="width:150px; height:150px; border-radius:50%;" src="../images/user.png">
+                                <h3>My Account</h3>
+                            </div>
                         </div>
-                        <div class="div1" align="center">
-                            <a href="/settings/secretary">
-                                <div class="card">
-                                    <img preload style="width:150px; height:150px;" src="../images/secretary.png">
-                                    <h3>My Secretary</h3>
-                                </div>
-                            </a>
+                        <div hidden="{{isSecretary}}" class="div1" align="center">
+                            <div on-tap="_newSecretary" class="card">
+                                <img preload style="width:150px; height:150px;" src="../images/secretary.png">
+                                <h3>My Secretary</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divHolder">
+                        <div hidden="{{isSecretary}}" class="div1" align="center">
+                            <div on-tap="_newServices" class="card">
+                                <img style="width:150px; height:150px; border-radius:50%;" src="../images/services.png">
+                                <h3>My Services</h3>
+                            </div>
+                        </div>
+                        <div hidden="{{isSecretary}}" class="div1" align="center">
+                            <div on-tap="_newHMO" class="card">
+                                <img style="width:150px; height:150px; border-radius:50%;" src="../images/hmo.png">
+                                <h3>My HMO</h3>
+                            </div>
                         </div>
                     </div>
 
@@ -156,11 +160,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
 
             <div name="/account">
-                <my-account user={{user}} name="account"></my-account>
+                <template is="dom-if" if="{{accountActive}}" restamp>
+                    <my-account id="acc2" user="{{user}}"></my-account>
+                </template>
             </div>
 
             <div name="/secretary">
-                <my-secretary user={{user}} name="account"></my-secretary>
+                <template is="dom-if" if="{{secretaryActive}}" restamp>
+                    <my-secretary id="sec2" my-key="{{myKey}}" my-lastname="{{myLastname}}"></my-secretary>
+                </template>
+            </div>
+
+            <div name="/services">
+                <template is="dom-if" if="{{servicesActive}}" restamp>
+                    <my-services id="ser2" my-key="{{myKey}}" my-role="{{myRole}}"></my-services>
+                </template>
+            </div>
+
+            <div name="/hmo">
+                <template is="dom-if" if="{{hmoActive}}" restamp>
+                    <my-hmo id="hmo2" my-key="{{myKey}}" my-role="{{myRole}}"></my-hmo>
+                </template>
             </div>
 
             <div name="view404">Not found.</div>
@@ -189,10 +209,71 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 account: {
                     type: Object,
                 },
-                user: {
+                route: {
                     type: Object,
-                    // observer: 'userChanged'
+                    observer: '_routeChanged'
+                },
+                user: Object,
+                myKey: String,
+                myLastname: String,
+                myRole: {
+                    type: String,
+                    observer: '_myRoleChanged'
+                },
+                isSecretary: {
+                    type: Boolean,
+                    value: true
                 }
+            },
+
+            _routeChanged(e) {
+                var page;
+                if (this.accountActive) page = "account";
+                else if (this.secretaryActive) page = "secretary";
+                else if (this.servicesActive) page = "services";
+                else if (this.hmoActive) page = "hmo";
+
+                if (page) {
+                    var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+                    Polymer.importHref(resolvedPageUrl);
+                }
+            },
+
+            _newAccount() {
+                window.history.pushState({}, null, '/settings/account');
+                window.dispatchEvent(new CustomEvent('location-changed'));
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "account"
+                }));
+            },
+
+            _newSecretary() {
+                window.history.pushState({}, null, '/settings/secretary');
+                window.dispatchEvent(new CustomEvent('location-changed'));
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "secretary"
+                }));
+            },
+
+            _newServices() {
+                window.history.pushState({}, null, '/settings/services');
+                window.dispatchEvent(new CustomEvent('location-changed'));
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "services"
+                }));
+            },
+
+            _newHMO() {
+                window.history.pushState({}, null, '/settings/hmo');
+                window.dispatchEvent(new CustomEvent('location-changed'));
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "hmo"
+                }));
+            },
+
+            _myRoleChanged() {
+                if (this.myRole == 'Secretary') this.isSecretary = true;
+                else this.isSecretary = false;
             },
 
             toggleDrawer() {
@@ -203,7 +284,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }));
                 this.$.narrow = !this.$.narrow;
             }
-
         })
 
 

@@ -10,7 +10,9 @@
     "src/time-element.html",
     "src/chartjs.html",
     "src/image-resize.html",
+    "src/sortable-list.html",
     "dist/image-resize.js",
+    "dist/image-tools.js",
     "src/my-view2.html",
     "src/my-view404.html"
   ],
@@ -18,10 +20,12 @@
     "src/**/*",
     "images/**/*",
     "dist/*.js",
-    "dist/*.json"
+    "dist/*.json",
+    "dist/*.mp3"
   ],
   "extraDependencies": [
     "manifest.json",
+    "sw-notification.js",
     "bower_components/webcomponentsjs/*.js"
   ],
   "lint": {

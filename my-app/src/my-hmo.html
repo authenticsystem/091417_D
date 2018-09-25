@@ -1,0 +1,381 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-hmo">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+
+                padding: 10px;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            .item {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+            }
+
+            .item:hover {
+                box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
+            }
+
+            @media (max-width: 768px) {
+                .input {
+                    margin: 16px;
+                }
+
+                iron-list {
+                    margin: 16px;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                paper-search-bar {
+                    margin-left: 80px;
+                    width: 50%;
+                    color: black;
+                }
+            }
+
+            @media (min-width: 768px) {
+                .input {
+                    width: 736px;
+                    margin: 16px auto;
+                }
+
+                iron-list {
+                    width: 736px;
+                    margin: 16px auto;
+                }
+
+                paper-search-bar {
+                    margin-left: 50px;
+                    width: 50%;
+                    color: black;
+                }
+            }
+
+            #btn-menu {
+                color: gray;
+                position: fixed;
+                right: 35px;
+            }
+
+            #btn-menu2 {
+                color: green;
+                position: fixed;
+                right: 65px;
+            }
+
+            #noRecord {
+                width: 736px;
+                margin: 16px auto;
+            }
+
+            .pad {
+                margin-left: 10px;
+                /* padding: 6px; */
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .small {
+                --paper-avatar-width: 45px;
+            }
+
+            paper-fab.fab-menu {
+                position: fixed;
+                right: 32px;
+                bottom: 32px;
+            }
+
+            .longText {
+                color: gray;
+                /* display: none; */
+            }
+        </style>
+
+
+        <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+                <app-toolbar primary>
+                    <a href="/settings">
+                        <paper-icon-button style="color:white" class="menu" icon="my-icons:arrow-back"></paper-icon-button>
+                    </a>
+                    <div main-title>My HMO</div>
+                </app-toolbar>
+            </app-header>
+
+            <firebase-query path="/{{myKey}}/hmo" data="{{myhmo}}" order-by-child="name"></firebase-query>
+
+            <div id="noRecord">
+                <div class="item">
+                    <div style="margin:auto">
+                        {{record}}
+                    </div>
+                </div>
+            </div>
+
+            <iron-list items="[[myhmo]]" as="item" selection-enabled scroll-target="threshold">
+                <template>
+                    <div class="divSeparator">
+                        <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                            <paper-avatar class="small" label="[[item.name]]"></paper-avatar>
+                            <div id="[[item.$key]]~[[item.shortName]]~[[item.name]]~[[item.address]]" class="pad" on-tap="_selectThis">
+                                <div id="[[item.$key]]~[[item.shortName]]~[[item.name]]~[[item.address]]" style="font-size:11px" class="longText">[[item.shortName]]</div>
+                                <div id="[[item.$key]]~[[item.shortName]]~[[item.name]]~[[item.address]]" style="font-size: 14px;">[[item.name]]</div>
+                                <div id="[[item.$key]]~[[item.shortName]]~[[item.name]]~[[item.address]]" style="font-size: 14px;">[[item.address]]</div>
+                            </div>
+                            <div style="padding:10px"> </div>
+                        </div>
+                    </div>
+                </template>
+            </iron-list>
+
+            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
+            </iron-scroll-threshold>
+
+            <paper-fab hidden$="{{_access(myRole)}}" class="fab-menu" icon="my-icons:add" on-tap="toggleAdd"></paper-fab>
+
+        </app-header-layout>
+
+        <salte-dialog no-auto-fullscreen id="addDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #1E88E5">{{header}}</h2>
+            <span>
+                <paper-input id="hmo" label="Name *" value="{{name}}" always-float-label></paper-input>
+                <iron-a11y-keys target="[[targethmo]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
+                <paper-input id="hmoMin" label="Short name *" value="{{nameMini}}" always-float-label></paper-input>
+                <iron-a11y-keys target="[[targethmoMin]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
+                <paper-input id="address" label="Address *" value="{{address}}" always-float-label></paper-input>
+                <iron-a11y-keys target="[[targetaddress]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
+            </span>
+            <div class="buttons">
+                <paper-button id="onEnter" autofocus on-tap="toggleAddHMO">Save</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </salte-dialog>
+
+        <salte-dialog no-auto-fullscreen id="alertDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #F44336">Request denied!</h2>
+            <span>{{alertMsg}}</span>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </salte-dialog>
+
+        <salte-dialog no-auto-fullscreen id="removeDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #1E88E5">Confirmation required!</h2>
+            <span>Sure you want to remove this location?
+                <br>This action can't be undone.</span>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus on-tap="_confirmRemoveLocation">Yes</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </salte-dialog>
+
+    </template>
+
+    <script>
+        class MyHmo extends Polymer.Element {
+            static get is() { return 'my-hmo'; }
+
+            static get properties() {
+                return {
+                    myKey: String,
+                    myRole: String,
+                    openAdd: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    },
+                    narrow: {
+                        type: Boolean,
+                        notify: true
+                    },
+                    _key: String
+                };
+            }
+
+            static get observers() {
+                return [
+                    '_twoChanged(name, nameMini, address)',
+                    '_myhmoChanged(myhmo.*)'
+                ];
+            }
+
+            _twoChanged(e, f, g) {
+                if (e || f || g) {
+                    this.name = this.convertCase(e);
+                    this.address = this.convertCase(g);
+                    this.targethmo = Polymer.dom(this.root).querySelector("#hmo");
+                    this.targethmoMin = Polymer.dom(this.root).querySelector("#hmoMin");
+                    this.targetaddress = Polymer.dom(this.root).querySelector("#address");
+                }
+            }
+
+            _myhmoChanged() {
+                if (this.myhmo.length > 0) {
+                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+                } else {
+                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
+                    this._fetching();
+                }
+            }
+
+            _removeLocation() {
+                this.$.removeDialog.open();
+            }
+
+            _confirmRemoveLocation() {
+                var key = this.location_key;
+                var ref = firebase.database().ref('/' + this.myKey + '/locations');
+                var alert = Polymer.dom(this.root).querySelector("#alertDialog");
+                this.alertMsg = "Can't remove location! This location is currently in use.";
+
+                ref.orderByChild('location_active').equalTo(true).once('value').then(function (data) {
+                    if (data.exists()) {
+                        if (key != Object.keys(data.val())[0]) {
+                            ref.child(key).remove();
+                        }
+                        else {
+                            alert.open();
+                        }
+                    }
+                });
+            }
+
+            toggleAdd() {
+                this.header = "Add new HMO";
+                this._key = null;
+                this.name = '';
+                this.nameMini = '';
+                this.address = '';
+                this.$.addDialog.open();
+            }
+
+            _selectThis(e) {
+                var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
+                if (data_args) {
+                    var [key, shortName, name, address] = data_args.split('~');
+                    this.header = "Edit " + key;
+                    this._key = key;
+                    this.name = name;
+                    this.nameMini = shortName;
+                    this.address = address;
+                    this.$.addDialog.open();
+                }
+            }
+
+            onEnter() {
+                this.toggleAddHMO();
+            }
+
+            toggleAddHMO() {
+                if (!this.name) {
+                    this.alertMsg = "Please enter HMO name.";
+                    this.$.alertDialog.open();
+                }
+                else if (!this.nameMini) {
+                    this.alertMsg = "Please enter HMO short name.";
+                    this.$.alertDialog.open();
+                }
+                else if (!this.address) {
+                    this.alertMsg = "Please enter HMO address.";
+                    this.$.alertDialog.open();
+                }
+                else {
+                    var ref = firebase.database().ref("/" + this.myKey + "/hmo");
+                    if (this._key) {
+                        ref.child(this._key).update({
+                            name: this.name,
+                            shortName: this.nameMini,
+                            address: this.address
+                        });
+                        this.$.addDialog.close();
+                    }
+                    else {
+                        var push = ref.push({
+                            name: this.name,
+                            shortName: this.nameMini,
+                            address: this.address
+                        });
+                        if (push.key) this.$.addDialog.close();
+                    }
+                }
+            }
+
+            _access(e) {
+                if (e != 'Secretary') return false;
+                else return true;
+            }
+
+            _fetching() {
+                this.record = 'Loading data . . .';
+                setTimeout((e) => {
+                    this.record = 'No record found.';
+                }, 3000);
+            }
+
+            getClassForItem(item, selected) {
+                return selected ? 'item expanded' : 'item';
+            }
+
+            convertCase(str) {
+                var lower = String(str).toLowerCase();
+                return lower.replace(/(^| )(\w)/g, function (x) {
+                    return x.toUpperCase();
+                });
+            }
+
+            randomString(n) {
+                var r = "";
+                while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+                return r;
+            }
+
+            loadMoreData() {
+                // load async stuff. e.g. XHR
+                Polymer.dom(this.root).querySelector("#threshold").clearTriggers();
+            }
+
+        }
+
+        window.customElements.define(MyHmo.is, MyHmo);
+    </script>
+</dom-module>

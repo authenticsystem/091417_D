@@ -86,9 +86,9 @@
                 <div id="errorMsgDiv" style="display: none;">
                     <iron-icon icon="my-icons:error-outline"></iron-icon>&nbsp;{{validationMessage}}</div>
                 <!-- <paper-input label="Name" id="displayName" value="{{displayName}}"></paper-input> -->
-                <paper-input required auto-validate label="Email" id="email" value="{{email}}"></paper-input>
-                <paper-input required auto-validate label="Password" type="password" id="password" value="{{password}}"></paper-input>
-                <paper-input required auto-validate label="Confirm password" type="password" id="password" value="{{confirmPass}}"></paper-input>
+                <paper-input auto-validate label="Email" id="email" value="{{email}}"></paper-input>
+                <paper-input auto-validate label="Password" type="password" id="password" value="{{password}}"></paper-input>
+                <paper-input auto-validate label="Confirm password" type="password" id="password" value="{{confirmPass}}"></paper-input>
                 <br>
                 <div class="footer">
                     <div class="action">
@@ -135,9 +135,12 @@
                         this.validationMessage = '';
                     }
                 }
-                else {
+                else if (this.password) {
                     Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
                     this.validationMessage = 'Please confirm your password.';
+                }
+                else {
+
                 }
             },
 

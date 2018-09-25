@@ -9,8 +9,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
-<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
@@ -24,15 +22,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="my-icons.html">
-<link rel="import" href="time-element.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
 
-<link rel="import" href="search-bar.html">
-<link rel="import" href="my-visits-new.html">
-<link rel="import" href="my-visits-view.html">
-<link rel="import" href="my-visits-edit.html">
-<!-- <link rel="import" href="shared-styles.html"> -->
+<link rel="import" href="time-element.html">
+<link rel="import" href="global-functions.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="shared-styles.html">
+
+<link rel="lazy-import" href="my-visits-new.html">
+<link rel="lazy-import" href="my-visits-view.html">
+<link rel="lazy-import" href="my-visits-edit.html">
 
 <dom-module id="my-visits">
   <template>
@@ -68,7 +68,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .pad {
-        padding: 0 16px;
         @apply --layout-flex;
         @apply --layout-vertical;
       }
@@ -118,11 +117,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           flex-direction: column;
           /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
-        paper-search-bar {
+
+        .ph-item {
+          margin: 16px;
+          padding: 16px;
+        }
+
+        .ph-col-1 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 20%;
+          flex: 0 0 20%
+        }
+
+        .ph-col-10 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 80%;
+          flex: 0 0 80%
+        }
+
+        .ph-col-8 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 80%;
+          flex: 0 0 80%
+        }
+
+        #noRecord {
+          margin: 16px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* paper-search-bar {
           margin-left: 80px;
           width: 50%;
           color: black;
-        }
+        } */
       }
 
       @media (min-width: 768px) {
@@ -133,11 +162,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           /* height: 100vh; */
           /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
         }
-        paper-search-bar {
+
+        .ph-item {
+          width: 736px;
+          margin: 16px auto;
+          padding: 16px;
+        }
+
+        #noRecord {
+          width: 736px;
+          margin: 16px auto;
+        }
+
+        /* paper-search-bar {
           margin-left: 50px;
           width: 50%;
           color: black;
-        }
+        } */
 
       }
 
@@ -151,7 +192,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       #btn-arrow {
-        position: absolute;
         color: black;
       }
 
@@ -197,166 +237,182 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .b-view {
-        /* display: inline-block;
-        position: absolute;
-        right: 8px; */
         color: rgb(2, 136, 160);
-        /* top: 8px; */
+        /* color: #673AB7; */
+      }
+
+      .clinic {
+        margin-top: 16px;
+        font-size: 12px;
+      }
+
+      .pencil {
+        margin-top: 16px;
+        margin-right: 16px;
+        color: #673AB7;
+        bottom: 8px;
+      }
+
+      .loadingIndicator {
+        margin-top: 16px;
+        text-align: center;
+        height: 40px;
+      }
+
+      paper-spinner {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
       }
     </style>
 
-    <app-route route="{{route}}" pattern="" active="{{applicationActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/detail/:key" tail="{{detailRoute}}" data="{{detailData}}" active="{{detailActive}}"></app-route>
-    <app-route route="{{route}}" pattern="/edit/:key" tail="{{editRoute}}" data="{{editData}}" active="{{editActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/detail/v/" active="{{detailVisitActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit/v/" active="{{editVisitActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/new/v/" active="{{newVisitActive}}"></app-route>
 
-    <!-- <iron-ajax auto url="src/data.json" last-response="{{items}}"></iron-ajax> -->
-    <div hidden$="{{!applicationActive}}">
-      <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
-        <div name="">
-          <app-header-layout fullbleed has-scrolling-region>
-            <app-header fixed slot="header">
-              <template is="dom-if" if="{{!openSearch}}">
-                <app-toolbar primary id="tool1">
-                  <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                  <div main-title>Visits</div>
-                  <!-- <div main-title hidden$="{{access}}">Opps!</div> -->
-                  <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
-                </app-toolbar>
-              </template>
+    <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+      <div name="">
+        <app-header-layout fullbleed has-scrolling-region>
+          <app-header fixed slot="header">
+            <div hidden="{{openSearch}}">
+              <app-toolbar primary id="tool1">
+                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                <div main-title>Visits</div>
+                <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+              </app-toolbar>
+            </div>
 
-              <template is="dom-if" if="{{openSearch}}">
-                <app-toolbar primary id="tool2">
-                  <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
-                  <paper-search-bar id="search" placeholder="Search Last First Middle Name .." query="{{search}}" disable-filter-button></paper-search-bar>
-                  <template is="dom-if" if="{{search}}">
-                    <paper-icon-button id="btn-menu" icon="my-icons:close" drawer-toggle on-tap="toggleClear"></paper-icon-button>
-                  </template>
-                  <!-- <paper-menu-button id="btn-menu" horizontal-align="right">
-                    <paper-icon-button slot="dropdown-trigger" icon="my-icons:tune"></paper-icon-button>
-                    <paper-listbox style="cursor:pointer" slot="dropdown-content" selected="{{filterBy}}">
-                      <paper-item style="display:none;">Filter By</paper-item>
-                      <paper-item>By Firstname</paper-item>
-                      <paper-item>By Middlename</paper-item>
-                      <paper-item>By Lastname</paper-item>
-                    </paper-listbox>
-                  </paper-menu-button> -->
-                </app-toolbar>
-              </template>
-            </app-header>
+            <div hidden="{{!openSearch}}">
+              <app-toolbar primary id="tool2">
+                <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                <div style="width: 100%">
+                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}"
+                    disable-filter-button></paper-search-bar>
+                </div>
+              </app-toolbar>
+            </div>
+          </app-header>
 
-            <firebase-query id="query" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="{{order}}" start-at="{{search}}">
-            </firebase-query>
+          <firebase-query disabled id="searchQuery" path="/{{myKey}}/cases" data="{{items}}" order-by-child="patient"
+            start-at="{{search}}" limit-to-first="15">
+          </firebase-query>
 
-            <iron-list items="[[mycases]]" as="item" selection-enabled scroll-target="threshold">
-              <template>
-                <div class="divSeparator">
-                  <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+          <firebase-query id="defaultQuery" path="/{{myKey}}/cases" data="{{mycases}}" order-by-child="order" start-at="{{lastorder}}"
+            limit-to-first="15">
+          </firebase-query>
 
-                    <div class="card-content" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
-                      <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
-                        <iron-icon icon="my-icons:watch-later"></iron-icon>
-                        <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
-                      </div>
-                      <div id="{{item.$key}}" style=" padding: 16px; display:flex">
+          <template is="dom-if" if="{{firstLoad}}">
+            <div class="ph-item">
+              <div class="ph-col-1">
+                <div class="ph-avatar" style="width: 45px;"></div>
+              </div>
+              <div class="ph-col-8">
+                <div class="ph-row">
+                  <div class="ph-col-1"></div>
+                  <div class="ph-col-10 empty"></div>
+                  <div class="ph-col-8 big"></div>
+                  <div class="ph-col-2 empty"></div>
+                  <div class="ph-col-6"></div>
+                  <div class="ph-col-4 empty"></div>
+                  <div class="ph-col-12 empty"></div>
+                  <div class="ph-col-2"></div>
+                  <div class="ph-col-10 empty"></div>
+                  <div class="ph-col-12"></div>
+                  <div class="ph-col-10"></div>
+                </div>
+              </div>
+            </div>
+          </template>
 
-                        <div>
-                          <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+          <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
+            <div id="noRecord">
+              <div class="item" style="padding:15px;">
+                <div style="margin:auto">
+                  No data found.
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+            <template is="dom-if" if="{{_hasDataChanged(items.length)}}" restamp>
+              <iron-list items="[[items]]" as="item">
+                <template>
+                  <div class="divSeparator">
+                    <div class="item" tabindex$="[[tabIndex]]">
+                      <div class="pad" id="{{item.$key}}" on-tap="_selectThis" style="width: 100%;">
+                        <div id="{{item.$key}}" style="padding: 16px; color:gray; margin-bottom:-18px;">
+                          <iron-icon icon="my-icons:watch-later"></iron-icon>
+                          <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago>
                         </div>
-                        <div id="{{item.$key}}" style=" margin-left:10px;">
-                          <!-- <div style="font-size:11px" class="longText">[[item.no]]</div> -->
-                          <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
-                          <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
-                          <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}} [[item.patientinfo.gender]]</div>
-                          <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
-                          <!-- <div class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}} [[item.personal.sex]]</div> -->
-                          <!-- <div class="longText">[[_hmo(item.insurance.primary_insurance)]]</div> -->
-
-                          <!-- <div style="padding:16px;"> -->
-                          <!-- <div class="primary">[[item.patient]]</div> -->
-                          <!-- <div class="shortText">{{_date(item.timestamp)}}</div> -->
-                          <div id="{{item.$key}}" style="margin-top:16px;">
-                            <span id="{{item.$key}}" class="longText">Chief Complaint</span>
-                            <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
-                            <!-- <div hidden$="{{!item.history}}">
-                            <span class="longText">History</span>
-                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.history}}</div>
-                          </div> -->
-                            <!-- <hr> -->
-                            <!-- <div hidden$="{{!item.diagnosis}}">
-                            <span class="longText">Diagnosis</span>
-                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.diagnosis}}</div>
-                          </div> -->
-                            <!-- <hr> -->
-                            <!-- <div hidden$="{{!item.treatment}}">
-                            <span class="longText">Treatment</span>
-                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.treatment}}</div>
-                          </div> -->
+                        <div id="{{item.$key}}" style=" padding: 16px; display:flex">
+                          <div>
+                            <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
                           </div>
+                          <div id="{{item.$key}}" style=" margin-left:10px;">
+                            <div id="{{item.$key}}" style="font-size:11px" class="longText">{{item.patientinfo.num}}</div>
+                            <div id="{{item.$key}}" class="primary">[[item.patient]]</div>
+                            <div id="{{item.$key}}" class="longText">{{_ageCal(item.patientinfo.birthday)}}{{_comma(item.patientinfo.birthday)}}
+                              [[item.patientinfo.gender]]
+                            </div>
+                            <div id="{{item.$key}}" class="longText">[[_hmo(item.patientinfo.hmo)]]</div>
 
+                            <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkNormal(item.template)}}">
+                              <span id="{{item.$key}}" class="longText">Chief Complaint</span>
+                              <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                            </div>
+
+                            <div id="{{item.$key}}" style="margin-top:16px;" hidden$="{{_checkSOAP(item.template)}}">
+                              <span id="{{item.$key}}" class="longText">Subjective</span>
+                              <div id="{{item.$key}}" style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <!-- </div> -->
+
+                      <div class="clinic">[[item.clinic_location]]</div>
+
+                      <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}"
+                        title="edit">
+                      </paper-icon-button>
 
                     </div>
-
-                    <a href$="{{_getEditAppLink(item.$key)}}">
-                      <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}" title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
-                      </paper-icon-button>
-                    </a>
-
-                    <!-- <paper-icon-button noink on-tap="_selectThis" icon="my-icons:open-in-new" alt="{{item.$key}}" title="view details" style="display:inline-block;position: absolute; color: #673AB7; right: 10px; top:8px;">
-                      </paper-icon-button> -->
-                    <a id="open" href$="{{_getViewDetailsLink(e)}}"></a>
-                    <!-- <paper-menu-button vertical-align="bottom" horizontal-align="right">
-                      <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
-                      <paper-listbox slot="dropdown-content">
-                        <paper-item on-tap="_editThis" id="{{item.$key}}">Edit</paper-item>
-                        <paper-item on-tap="_openDelete" id="{{item.$key}}">Delete</paper-item>
-                      </paper-listbox>
-                    </paper-menu-button> -->
                   </div>
-                </div>
-              </template>
-            </iron-list>
+                </template>
+              </iron-list>
+            </template>
 
-            <iron-scroll-threshold id="threshold" lower-threshold="500" on-lower-threshold="loadMoreData">
-            </iron-scroll-threshold>
+            <div class="loadingIndicator">
+              <paper-spinner active="{{_loadCheck(loadingPeople, firstLoad)}}"></paper-spinner>
+            </div>
+          </iron-scroll-threshold>
 
-          </app-header-layout>
+        </app-header-layout>
 
-          <a href="/visits/new" style="text-decoration: none;">
-            <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_caseNew"></paper-fab>
-          </a>
-        </div>
-
-        <div name="/new">
-          <div id="newcase"></div>
-          <my-visits-new id="d23" my-key='{{myKey}}' path="" prev-route="{{route.prefix}}"></my-visits-new>
-        </div>
-
-        <div name="view404">Not found.</div>
-      </iron-pages>
-    </div>
-
-    <div hidden$="{{!editActive}}">
-      <div id="caseedit"></div>
-      <my-visits-edit id="d25" my-key='{{myKey}}' edit-key='{{editData.key}}' prev-route="{{route.prefix}}"></my-visits-edit>
-    </div>
-
-    <div hidden$="{{!detailActive}}">
-      <div id="casesview"></div>
-      <my-visits-view id="d26" my-key='{{myKey}}' view-key='{{detailData.key}}' prev-route="{{route.prefix}}"></my-visits-view>
-    </div>
-
-    <paper-dialog id="deleteDialog" confirm-button="Done">
-      <h3>Are you sure you want to delete this case?</h3>
-      <div class="buttons">
-        <div class="action">
-          <paper-button style="background:rgb(207, 206, 206);color:black" dialog-confirm autofocus>No</paper-button>
-          <paper-button id="dialBtn" on-tap="_deletePatient" toggles class="custom green">Yes</paper-button>
-        </div>
+        <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_caseNew"></paper-fab>
       </div>
-    </paper-dialog>
+
+      <div name="/new/v/">
+        <template is="dom-if" if="{{newVisitActive}}" restamp>
+          <my-visits-new id="d23" my-key='{{myKey}}' prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-visits-new>
+        </template>
+      </div>
+
+      <div name="/edit/v/">
+        <template is="dom-if" if="{{editVisitActive}}" restamp>
+          <my-visits-edit id="d25" my-key='{{myKey}}' params="{{route.__queryParams}}" prev-route="{{route.prefix}}"
+            my-location="{{myLocation}}"></my-visits-edit>
+        </template>
+      </div>
+
+      <div name="/detail/v/">
+        <template is="dom-if" if="{{detailVisitActive}}" restamp>
+          <my-visits-view id="d26" my-key='{{myKey}}' params="{{route.__queryParams}}" prev-route="{{route.prefix}}"></my-visits-view>
+        </template>
+      </div>
+
+      <div name="view404">Not found.</div>
+    </iron-pages>
 
   </template>
 
@@ -368,10 +424,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         items: {
           type: Array,
-          value: function () {
-            return [];
-          }
+          value: [],
+          notify: true
         },
+        route: Object,
+        myLocation: String,
         myKey: String,
         narrow: {
           type: Boolean,
@@ -379,111 +436,143 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         openSearch: {
           type: Boolean,
-          value: false,
-          notify: true
+          value: false
         },
-        filterBy: {
-          type: Number,
-          value: 1
-        },
-        order: {
-          type: String,
-          value: 'order'
+        firstLoad: {
+          type: Boolean,
+          value: true
         }
       },
 
-      // _convertKeyToTimestamp(key) {
-      //   var PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
-      //   // var key = prompt("Enter Firebase push ID");
+      observers: [
+        '_searchChanged(search)',
+        '_mycasesChanged(mycases.*)',
+        '_routeChanged(route)'
+      ],
 
-      //   key = key.substring(0, 8);
-      //   var timestamp = 0;
-      //   for (var i = 0; i < key.length; i++) {
-      //     var c = key.charAt(i);
-      //     timestamp = timestamp * 64 + PUSH_CHARS.indexOf(c);
-      //   }
+      _routeChanged(e) {
+        var page;
+        if (this.detailVisitActive) page = "visits-view";
+        else if (this.editVisitActive) page = "visits-edit";
+        else if (this.newVisitActive) page = "visits-new";
 
-      //   console.log(timestamp + "\n" + new Date(timestamp));
-      // },
+        if (page) {
+          var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+          Polymer.importHref(resolvedPageUrl);
+        }
+      },
+
+      _searchChanged(search) {
+        if (search) {
+          this.search = search.toUpperCase();
+          this.$.defaultQuery.disabled = true;
+          this.$.searchQuery.disabled = false;
+        } else {
+          this.$.defaultQuery.disabled = false;
+          this.$.searchQuery.disabled = true;
+        }
+
+        this.loadingPeople = true;
+      },
+
+      _mycasesChanged(e) {
+        if (this.mycases.length > 0) {
+          if (e.path === "mycases") {
+            this.appendToList();
+          }
+
+          if (e.path !== "mycases" && e.path === "mycases.splices" && e.path !== "mycases.length") {
+            this.items = [];
+            this.lastorder = "";
+            this.$.defaultQuery.disabled = true;
+            this.$.defaultQuery.disabled = false;
+          }
+
+          this.$.threshold.clearTriggers();
+          this.loadingPeople = false;
+          this.firstLoad = false;
+        } else {
+          this._fetching();
+        }
+      },
+
+      appendToList() {
+        for (var i = 0; i < this.mycases.length; i++) {
+          var exists = this.items.some(patient => patient['$key'] === this.mycases[i].$key);
+          if (!exists) {
+            this.items.push(this.mycases[i]);
+            this.notifyPath('items', this.items.slice());
+          }
+        }
+      },
+
+      loadMoreData() {
+        if (this.items.length > 0) {
+          this.lastorder = this.items[this.items.length - 1].order;
+        }
+
+        this.loadingPeople = true;
+      },
+
+      _fetching() {
+        setTimeout((e) => {
+          this.loadingPeople = false;
+          this.firstLoad = false;
+        }, 5000);
+      },
+
+      _noDataChanged(e, f) {
+        if (f) return false;
+        else {
+          if (e > 0) return false;
+          else return true;
+        }
+      },
+
+      _loadCheck(e, l) {
+        if (l) return false;
+        else {
+          return e;
+        }
+      },
+
+      _hasDataChanged(e) {
+        if (e > 0) {
+          this.loadingPeople = false;
+          return true;
+        }
+        else {
+          this._fetching();
+          return false;
+        }
+      },
 
       _timeStampToDateTime(ts) {
         return new Date(ts);
       },
-
-      loadMoreData() {
-        // load async stuff. e.g. XHR
-
-        this.$.threshold.clearTriggers();
-
-      },
-
-      observers: [
-        '_searchChanged(search)'
-      ],
 
       _patientImg(e) {
         if (e) return e;
         else return '../images/user.png';
       },
 
-      _getViewDetailsLink(e) {
-        if (e) {
-          return '/visits/detail/' + e.toString();
-        }
-      },
-
       _ageCal(bday) {
         if (bday) {
-
-          var today = new Date();
-          var birthday = new Date(bday);
-
-          var differenceInMilisecond = today.valueOf() - birthday.valueOf();
-
-          var year_age = Math.floor(differenceInMilisecond / 31536000000);
-          var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
-
-          var month_age = Math.floor(day_age / 30);
-
-          day_age = day_age % 30;
-
-          if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
-            console.log('err');
-            // $("#exact_age").text("Invalid birthday - Please try again!");
-          }
-          else {
-            if (year_age > 0) {
-              if (year_age == 1) {
-                return year_age + " year old";
-              }
-              else {
-                return year_age + " years old";
-              }
-            }
-            else if (year_age == 0 && month_age > 0) {
-              if (month_age == 1) {
-                return month_age + " month old";
-              }
-              else {
-                return month_age + " months old";
-              }
-            }
-            else if (year_age == 0 && month_age == 0 && day_age > 0) {
-              if (day_age == 1) {
-                return day_age + " day old";
-              }
-              else {
-                return day_age + " days old";
-              }
-            }
-            else {
-              return year_age + " years " + month_age + " months " + day_age + " days old";
-            }
-          }
+          return getAge(bday);
         }
         else {
           return '';
         }
+      },
+
+      _checkNormal(e) {
+        if (e === "Normal") return false;
+        else return true;
+      },
+
+      _checkSOAP(e) {
+        if (e === "SOAP") return false;
+        else return true;
       },
 
       _comma(e) {
@@ -495,34 +584,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _hmo(e) {
         if (e) {
           return 'HMO: ' + e;
-        }
-      },
-
-      _date(e) {
-        if (e) {
-          var date = new Date(e);
-          var options = {
-            weekday: "long", year: "numeric", month: "short",
-            day: "numeric", hour: "2-digit", minute: "2-digit"
-          };
-
-          return date.toLocaleTimeString("en-us", options);
-        }
-      },
-
-      _getEditAppLink(e) {
-        if (e) {
-          return '/visits/edit/' + e.toString();
-        }
-      },
-
-      _searchChanged(search) {
-        if (search) {
-          this.order = 'patient';
-          this.search = search.toUpperCase();
-        }
-        else {
-          this.order = 'order';
         }
       },
 
@@ -545,6 +606,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       toggleSearch() {
         this.openSearch = true;
+        this.$.search.focus();
       },
 
       toggleReturn() {
@@ -557,65 +619,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _selectThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("id");
-        var node = Polymer.dom(this.root).querySelector("#casesview");
-        this.e = data_args;
-        var oldDiv = Polymer.dom(node.parentNode).querySelector("#d26");
-        if (oldDiv) {
-          Polymer.dom(node.parentNode).removeChild(oldDiv);
-        }
-        var newDiv = document.createElement("my-visits-view");
-        newDiv.setAttribute("my-key", this.myKey);
-        newDiv.setAttribute("id", "d26");
-        newDiv.setAttribute("view-key", data_args);
-        newDiv.setAttribute("prev-route", this.route.prefix);
-        Polymer.dom(this.root).querySelector("#open").click();
-
-        var currentDiv = document.getElementById("casesview");
-        Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
+        this.viewKey = Polymer.dom(e).rootTarget.getAttribute("id");
+        window.history.pushState({}, null, '/visits/detail/v/?ref=' + this.viewKey);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "visits-view"
+        }));
       },
 
       _editThis(e) {
-        var data_args = Polymer.dom(e).rootTarget.getAttribute("alt");
-        var node = Polymer.dom(this.root).querySelector("#caseedit");
-        if (node) {
-          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d25");
-          if (oldDiv) {
-            Polymer.dom(node.parentNode).removeChild(oldDiv);
-          }
-          var newDiv = document.createElement("my-visits-edit");
-          newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("id", "d25");
-          newDiv.setAttribute("edit-key", data_args);
-          newDiv.setAttribute("prev-route", this.route.prefix);
-          //if open existing
-          var currentDiv = document.getElementById("caseedit");
-          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        }
+        this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
+        window.history.pushState({}, null, '/visits/edit/v/?ref=' + this.editKey);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "visits-edit"
+        }));
       },
 
       _caseNew() {
-        var node = Polymer.dom(this.root).querySelector("#newcase");
-        if (node) {
-          var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
-          if (oldDiv) {
-            Polymer.dom(node.parentNode).removeChild(oldDiv);
-          }
-          var newDiv = document.createElement("my-visits-new");
-          newDiv.setAttribute("my-key", this.myKey);
-          newDiv.setAttribute("id", "d23");
-          newDiv.setAttribute("prev-route", this.route.prefix);
-          //if open existing
-          var currentDiv = document.getElementById("newcase");
-          Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-        }
-      },
-
-      _openDelete(e) {
-        var d_key = Polymer.dom(e).rootTarget.getAttribute("id");
-        var dialogBtn = Polymer.dom(this.root).querySelector("#dialBtn");
-        dialogBtn.setAttribute('alt', d_key);
-        Polymer.dom(this.root).querySelector("#deleteDialog").open();
+        window.history.pushState({}, null, '/visits/new/v/');
+        window.dispatchEvent(new CustomEvent('location-changed'));
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "visits-new"
+        }));
       },
 
       _deletePatient(e) {

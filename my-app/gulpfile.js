@@ -26,6 +26,7 @@ const imagemin = require('gulp-imagemin');
 // const htmlMinifier = require('gulp-html-minifier');
 
 const swPrecacheConfig = require('./sw-precache-config.js');
+const swNotification = require('./sw-notification');
 const polymerJson = require('./polymer.json');
 const polymerProject = new polymerBuild.PolymerProject(polymerJson);
 const buildDirectory = 'build';
@@ -114,12 +115,13 @@ function build() {
           project: polymerProject,
           buildRoot: buildDirectory,
           bundled: true,
-          swPrecacheConfig: swPrecacheConfig
+          swPrecacheConfig: swPrecacheConfig,
+          swNotification: swNotification
         });
       })
       .then(() => {
         // You did it!
-        console.log('Build complete!');
+        console.log('Yehey! Build complete!');
         resolve();
       });
   });

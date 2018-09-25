@@ -1,0 +1,75 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="my-messaging-secretary.html">
+<link rel="import" href="my-messaging-doctor.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-messaging">
+    <template>
+        <style include="shared-styles">
+            :host {
+                height: 100vh;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            paper-fab.fab-menu {
+                position: fixed;
+                bottom: 32px;
+                float: right;
+                right: 32px;
+            }
+        </style>
+
+        <template is="dom-if" if="{{myRole}}">
+            <template is="dom-if" if="{{_secretary(myRole)}}">
+                <my-messaging-secretary route="{{route}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
+                    my-role="{{myRole}}" token="{{token}}"></my-messaging-secretary>
+            </template>
+
+            <template is="dom-if" if="{{_notSecretary(myRole)}}">
+                <my-messaging-doctor route="{{route}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
+                    my-role="{{myRole}}" token="{{token}}"></my-messaging-doctor>
+            </template>
+        </template>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'my-messaging',
+            properties: {
+                myKey: String,
+                myRole: String,
+                myLocation: String,
+                myLocationCode: String,
+                token: String,
+                route: Object
+            },
+
+            _secretary(e) {
+                if (e) {
+                    if (e == 'Secretary') return true;
+                    else return false;
+                }
+            },
+
+            _notSecretary(e) {
+                if (e) {
+                    if (e != 'Secretary') return true;
+                    else return false;
+                }
+            }
+        })
+    </script>
+</dom-module>

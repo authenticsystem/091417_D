@@ -25,10 +25,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/timeu-wizard/timeu-wizard.html">
+
+<link rel="import" href="image-resize.html">
+<link rel="import" href="global-functions.html">
 
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
-<link rel="import" href="image-resize.html">
 
 <dom-module id="my-patients-edit">
   <template>
@@ -73,6 +76,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .mnu {
         padding: 13px;
+        height: 500px;
       }
 
       @media (min-width: 800px) {
@@ -134,31 +138,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: gray;
         /* display: none; */
       }
+
+      #vertical {
+        margin-top: 16px;
+      }
     </style>
 
     <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
         <div class="mnu" role="listbox">
-          <!-- <iron-selector attr-for-selected="value" class="drawer-list"> -->
-          <!-- on-tap="_selectPage" data-args="1" -->
-          <paper-item id="buyersinformation">
+          <timeu-wizard id="vertical" steps='["Profile Picture","Basic Information","Insurance","In-case of Emergency","Finalize","Completed"]'
+            vertical step="{{selectedStep}}">
+          </timeu-wizard>
+          <!-- <paper-item id="buyersinformation">
             <div class="circle-mini-first">1</div>
             <span>Profile Picture</span>
           </paper-item>
 
-          <!-- on-tap="_selectPage" data-args="2" -->
           <paper-item id="samplecomputation">
             <div class="circle-mini">2</div>
             <span>Basic Information</span>
           </paper-item>
 
-          <!-- on-tap="_selectPage" data-args="3" -->
           <paper-item id="finalize">
             <div class="circle-mini">3</div>
             <span>Insurance</span>
           </paper-item>
 
-          <!-- on-tap="_selectPage" data-args="4" -->
           <paper-item id="complete">
             <div class="circle-mini">4</div>
             <span>In-case of Emergency</span>
@@ -172,8 +178,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-item id="complete">
             <div class="circle-mini-last">6</div>
             <span>Completed</span>
-          </paper-item>
-          <!-- </iron-selector> -->
+          </paper-item> -->
         </div>
       </app-drawer>
 
@@ -181,25 +186,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-header-layout id="appheader" has-scrolling-region>
         <app-header fixed slot="header">
           <app-toolbar>
-            <a href="/patients">
+            <a href="{{prevRoute}}">
               <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
             </a>
             <div main-title>{{no}}</div>
-            <!-- <paper-menu-button horizontal-align="right">
-              <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
-              <paper-listbox slot="dropdown-content" style="cursor:pointer">
-                <paper-item>
-                  <a style="text-decoration:none" href="/patients">Discard</a>
-                </paper-item>
-                <paper-item on-tap="_openDelete">Delete</paper-item>
-              </paper-listbox>
-            </paper-menu-button> -->
-            <!-- <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button> -->
-            <!-- <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button> -->
           </app-toolbar>
         </app-header>
 
-        <firebase-query id="query" path="{{path}}" order-by-key equal-to="{{editKey}}" data="{{mypatient}}">
+        <firebase-query id="query" path="/{{myKey}}/patients" order-by-key equal-to="{{editKey}}" data="{{mypatient}}"
+          limit-to-first="1">
         </firebase-query>
 
         <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
@@ -238,24 +233,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
                 <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
                 <div id="info">
-                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$" auto-validate
+                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$"
                     error-message="Invalid date format!" value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
                   <paper-input value="{{age}}" label="Age" style="width:100%;"></paper-input>
                 </div>
                 <div id="info">
                   <paper-dropdown-menu-light label="Marital Status" style="width:100%; margin-right:10px">
-                    <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{status}}" class="dropdown-content">
-                      <paper-item id="item">Single</paper-item>
-                      <paper-item id="item">Married</paper-item>
-                      <paper-item id="item">Divorced</paper-item>
-                      <paper-item id="item">Separated</paper-item>
-                      <paper-item id="item">Widowed</paper-item>
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" attr-for-selected="name" selected="{{status}}"
+                      class="dropdown-content">
+                      <paper-item id="item" name="Single">Single</paper-item>
+                      <paper-item id="item" name="Married">Married</paper-item>
+                      <paper-item id="item" name="Divorced">Divorced</paper-item>
+                      <paper-item id="item" name="Separated">Separated</paper-item>
+                      <paper-item id="item" name="Widowed">Widowed</paper-item>
                     </paper-listbox>
                   </paper-dropdown-menu-light>
                   <paper-dropdown-menu-light label="Gender" style="width:100%; margin-right:10px">
-                    <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{sex}}" class="dropdown-content">
-                      <paper-item id="item">Male</paper-item>
-                      <paper-item id="item">Female</paper-item>
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" attr-for-selected="name" selected="{{sex}}"
+                      class="dropdown-content">
+                      <paper-item id="item" name="Male">Male</paper-item>
+                      <paper-item id="item" name="Female">Female</paper-item>
                     </paper-listbox>
                   </paper-dropdown-menu-light>
                   <paper-input type="number" value="{{contact}}" label="Contact Number" style="width:100%;"></paper-input>
@@ -295,7 +292,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div id="info">
                   <paper-input value="{{card}}" Label="ID Card Number" style="width:100%; margin-right:10px"></paper-input>
                   <paper-input value="{{bdate}}" placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$"
-                    auto-validate error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
+                    error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
                 </div>
                 <paper-input value="{{in_address}}" Label="Address (If different)"></paper-input>
                 <paper-input value="{{home_phone}}" type="number" Label="Home phone no."></paper-input>
@@ -350,10 +347,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div class="docu-header">5. Finalize</div>
 
               <div class="details">
-                <!-- <div style="margin-bottom:10px;">Please review the following details:</div> -->
                 <img id="p_profile" src="{{p_profile}}" class="avatar">
 
-                <!-- <div style="font-weight:bold">Basic Information</div> -->
                 <table style="margin-bottom:6px;">
                   <tr>
                     <td>
@@ -409,7 +404,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </td>
                     <td></td>
                     <td></td>
-                    <td style="color:rgb(37, 37, 37)">{{stat}}</td>
+                    <td style="color:rgb(37, 37, 37)">{{status}}</td>
                   </tr>
                   <tr>
                     <td>
@@ -417,7 +412,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </td>
                     <td></td>
                     <td></td>
-                    <td style="color:rgb(37, 37, 37)">{{gender}}</td>
+                    <td style="color:rgb(37, 37, 37)">{{sex}}</td>
                   </tr>
                   <tr>
                     <td>
@@ -449,7 +444,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </td>
                     <td></td>
                     <td></td>
-                    <td style="color:rgb(37, 37, 37)">{{occupation}}</td>
+                    <td style="color:rgb(37, 37, 37)">{{employer}}</td>
                   </tr>
                   <tr>
                     <td>
@@ -556,40 +551,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <td style="color:rgb(37, 37, 37)">{{work_phone}}</td>
                   </tr>
                 </table>
-
-                <!-- <div style="margin-bottom:10px;">Please review the following details:</div>
-                <div style="font-weight:bold">Basic Information</div>
-                <div style="margin-left:10px;">
-                  <div>Email address: {{email}}</div>
-                  <div>Firstname: {{fname}}</div>
-                  <div>Middlename: {{mname}}</div>
-                  <div>Lastname: {{lname}}</div>
-                  <div>Birth date: {{bday}}</div>
-                  <div>Age: {{age}}</div>
-                  <div>Marital Status: {{stat}}</div>
-                  <div>Sex: {{gender}}</div>
-                  <div>Contact no: {{contact}}</div>
-                  <div>Street address: {{address}}</div>
-                  <div>Occupation: {{occupation}}</div>
-                  <div>Employer: {{employer}}</div>
-                  <div>Employer phone no: {{emp_phone}}</div>
-                </div>
-                <div style="font-weight:bold">Insurance</div>
-                <div style="margin-left:10px;">
-                  <div>ID Card no: {{card}}</div>
-                  <div>Birth date: {{bdate}}</div>
-                  <div>address: {{in_address}}</div>
-                  <div>Home phone no: {{home_phone}}</div>
-                  <div>Primary insurance: {{indicate}}</div>
-                  <div>Relationship to patient: {{p_relation}}</div>
-                </div>
-                <div style="font-weight:bold">In-case of emergency</div>
-                <div style="margin-left:10px;">
-                  <div>Name: {{name_e}}</div>
-                  <div>Relationship to patient: {{relation_e}}</div>
-                  <div>Home phone no: {{phone_e}}</div>
-                  <div>Work phone no: {{work_phone}}</div>
-                </div> -->
               </div>
             </div>
             <br>
@@ -617,7 +578,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-fab style="background: #1976d2;" id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
         </div>
         <div hidden$="[[favrighthide]]">
-          <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+          <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right"
+            on-tap="_select2"></paper-fab>
         </div>
       </div>
 
@@ -634,8 +596,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Boolean,
           notify: true
         },
+        prevRoute: String,
         myKey: String,
-        selectedPage: Number,
+        editKey: String,
+        myLocation: String,
+        myLocationCode: String,
+        myQueue: String,
+        queueKey: String,
+        queueDate: String,
+        params: Object,
+        selectedPage: {
+          type: Number,
+          value: 0
+        },
         entryanimation: {
           type: String,
           value: "slide-from-right-animation"
@@ -650,132 +623,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         favrighthide: {
           type: Boolean,
-          value: true
-        },
-        mname: {
-          type: String,
-          value: ''
-        },
-        email: {
-          type: String,
-          value: ''
-        },
-        bday: {
-          type: String,
-          value: ''
-        },
-        age: {
-          type: String,
-          value: ''
-        },
-        contact: {
-          type: String,
-          value: ''
-        },
-        address: {
-          type: String,
-          value: ''
-        },
-        occupation: {
-          type: String,
-          value: ''
-        },
-        employer: {
-          type: String,
-          value: ''
-        },
-        emp_phone: {
-          type: String,
-          value: ''
-        },
-        gender: {
-          type: String,
-          value: ''
-        },
-        stat: {
-          type: String,
-          value: ''
-        },
-        doctor: {
-          type: String,
-          value: ''
-        },
-        hospital_name: {
-          type: String,
-          value: ''
-        },
-
-        card: {
-          type: String,
-          value: ''
-        },
-        bdate: {
-          type: String,
-          value: ''
-        },
-        in_address: {
-          type: String,
-          value: ''
-        },
-        home_phone: {
-          type: String,
-          value: ''
-        },
-        indicate: {
-          type: String,
-          value: ''
-        },
-        p_relation: {
-          type: String,
-          value: ''
-        },
-
-        name_e: {
-          type: String,
-          value: ''
-        },
-        relation_e: {
-          type: String,
-          value: ''
-        },
-        phone_e: {
-          type: String,
-          value: ''
-        },
-        work_phone: {
-          type: String,
-          value: ''
+          value: false
         },
         isDateChanged: {
           type: Boolean,
           value: false
         },
         profile: String,
-        editKey: String,
-        personal: Object,
-        insurance: Object,
-        emergency: Object,
         mypatient: Object,
         todayDate: String,
         storeDate: String
       },
 
       observers: [
-        'personalInfoChanged(doctor,refer,hospital_name,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
-        'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
-        'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
+        'personalInfoChanged(fname, mname, lname, bday, age)',
+        '_selectedPageChanged(selectedPage)',
         'mypatientChanged(mypatient)',
         '_todayDateChanged(todayDate)',
-        '_editKeyChanged(editKey)'
+        '_referChanged(refer)'
       ],
 
-      _editKeyChanged(e) {
-        if (e) {
-          this.path = '/' + this.myKey + '/patients';
+      ready() {
+
+        if (this.myQueue) {
+          this.editKey = this.params.e;
+          this.queueKey = this.params.q;
+          this.queueDate = this.params.d;
+        } else {
+          this.editKey = this.params.ref;
         }
-        else {
-          this.path = '';
-        }
+
+        this.storeDate = this.todayDate;
+      },
+
+      _selectedPageChanged(page) {
+        this.selectedStep = page + 1;
       },
 
       _todayDateChanged(date) {
@@ -805,6 +687,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
+      _referChanged(e) {
+        if (e == 'Dr') {
+          Polymer.dom(this.root).querySelector("#doctor").style.display = 'block';
+          Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
+          this.referredby = 'Dr. ' + this.doctor;
+          this.hospital_name = '';
+        }
+        else if (e == 'Hospital') {
+          Polymer.dom(this.root).querySelector("#hospital").style.display = 'block';
+          Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+          this.doctor = '';
+          this.hospital_name = this.hospital_name;
+          this.referredby = this.hospital_name;
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+          Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
+          this.doctor = '';
+          this.hospital_name = ''
+          this.referredby = e;
+        }
+      },
+
       mypatientChanged(e) {
         if (e.length > 0) {
           if (e[0].profile) {
@@ -825,20 +730,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
           if (e[0].personal.birthday) {
-            var dateformat = /^([0-2]{2})[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$/;
-            if (e[0].personal.birthday.match(dateformat)) {
-              this.bday = e[0].personal.birthday;
-            }
-            else {
-              var mdate = e[0].personal.birthday.toString();
-
-              var yearThen = parseInt(mdate.substring(0, 4), 10);
-              var monthThen = parseInt(mdate.substring(5, 7), 10);
-              var dayThen = parseInt(mdate.substring(8, 10), 10);
-
-              // mm/dd/yyyy
-              this.bday = monthThen + '/' + dayThen + '/' + yearThen;
-            }
+            var x = new Date(e[0].personal.birthday);
+            this.bday = ('0' + (x.getMonth() + 1)).slice(-2) + '/' + ('0' + x.getDate()).slice(-2) + '/' + x.getFullYear();
           }
 
           this.todayDate = e[0].created;
@@ -854,29 +747,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.employer = e[0].personal.employer;
           this.emp_phone = e[0].personal.emp_phone;
           this.no = e[0].no;
-
-
-          if (e[0].personal.sex == 'Male') {
-            this.sex = 0;
-          }
-          if (e[0].personal.sex == 'Female') {
-            this.sex = 1;
-          }
-          if (e[0].personal.status == 'Single') {
-            this.status = 0;
-          }
-          if (e[0].personal.status == 'Married') {
-            this.status = 1;
-          }
-          if (e[0].personal.status == 'Divorced') {
-            this.status = 2;
-          }
-          if (e[0].personal.status == 'Separated') {
-            this.status = 3;
-          }
-          if (e[0].personal.status == 'Widowed') {
-            this.status = 4;
-          }
+          this.sex = e[0].personal.sex;
+          this.status = e[0].personal.status;
 
           this.card = e[0].insurance.card;
           this.bdate = e[0].insurance.birthday;
@@ -892,57 +764,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      personalInfoChanged(doctor, refer, hospital_name, email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
-        if (fname) {
-          this.fname = fname.toUpperCase();
-          fname = fname.toUpperCase();
-        }
-
-        if (mname) {
-          this.mname = mname.toUpperCase();
-          mname = mname.toUpperCase();
-        }
-
-        if (lname) {
-          this.lname = lname.toUpperCase();
-          lname = lname.toUpperCase();
-        }
+      personalInfoChanged(fname, mname, lname, bday) {
+        if (fname) this.fname = fname.toUpperCase();
+        if (mname) this.mname = mname.toUpperCase();
+        if (lname) this.lname = lname.toUpperCase();
 
         if (bday) {
-          var dateformat = /^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$/;
-          if (bday.match(dateformat)) {
-
-            var mdate = bday.toString();
-
-            var monthThen = parseInt(mdate.substring(0, 2), 10);
-            var dayThen = parseInt(mdate.substring(3, 5), 10);
-            var yearThen = parseInt(mdate.substring(6, 10), 10);
-
-            // yyyy-mm-dd
-            bday = yearThen + '-' + monthThen + '-' + dayThen;
-
-            var daysBetweenDates;
-            daysBetweenDates = function (d1, d2) {
-              var diffDays, oneDay;
-              oneDay = 24 * 60 * 60 * 1000;
-              diffDays = (d2 - Date.parse(d1)) / oneDay;
-              return diffDays;
-            };
-
-            var ageNum = daysBetweenDates(bday, new Date()) / 365;
-
-            function N(num, places) {
-              return +(Math.round(num + "e+" + places) + "e-" + places);
-            }
-
-            var x = N(ageNum, 2);
-
-            if (x <= 0) {
-              this.age = 0;
-            }
-            else {
-              this.age = x;
-            }
+          var newdateformat = /^([0-9]{4})[\/\-](0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])$/;
+          bday = formatTodayDate(bday);
+          if (bday.match(newdateformat)) {
+            this.age = this._calculateAge(bday);
           }
           else {
             this.age = '';
@@ -952,130 +783,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.age = '';
         }
 
-        if (refer) {
-          if (refer == 'Dr') {
-            Polymer.dom(this.root).querySelector("#doctor").style.display = 'block';
-            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
-            doctor = doctor;
-            this.referredby = 'Dr. ' + doctor;
-            hospital_name = '';
-            this.hospital_name = '';
-          }
-          else if (refer == 'Hospital') {
-            Polymer.dom(this.root).querySelector("#hospital").style.display = 'block';
-            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
-            this.doctor = '';
-            doctor = '';
-            this.hospital_name = hospital_name;
-            hospital_name = hospital_name;
-            this.referredby = hospital_name;
-          }
-          else {
-            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
-            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
-            this.doctor = '';
-            doctor = '';
-            this.hospital_name = '';
-            hospital_name = '';
-            this.referredby = refer;
-          }
-        }
-        else {
-          refer = '';
-        }
-
-        if (sex == 0) {
-          this.gender = 'Male';
-        }
-        if (sex == 1) {
-          this.gender = 'Female';
-        }
-        if (status == 0) {
-          this.stat = 'Single';
-        }
-        if (status == 1) {
-          this.stat = 'Married';
-        }
-        if (status == 2) {
-          this.stat = 'Divorced'
-        }
-        if (status == 3) {
-          this.stat = 'Separated';
-        }
-        if (status == 4) {
-          this.stat = 'Widowed';
-        }
-
         if (!fname || !lname) {
           this.favrighthide = true;
         }
         else {
           this.favrighthide = false;
-          this.personal = {
-            email: email,
-            firstname: fname,
-            middlename: mname,
-            lastname: lname,
-            birthday: bday,
-            status: this.stat,
-            sex: this.gender,
-            contact: contact,
-            address: address,
-            occupation: occupation,
-            employer: employer,
-            emp_phone: emp_phone,
-            referred: refer,
-            doctor: doctor,
-            hospital: hospital_name,
-            name: lname + ', ' + fname + ' ' + mname
-          }
         }
       },
 
-      insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation) {
-        var date = '';
-        if (bdate) {
-          var dateformat = /^(0[1-9]|1[0-2])[\/\-]([0-9]{2})[\/\-]([0-9]{4})$/;
-          if (bdate.match(dateformat)) {
-            this.ibd = bdate;
-            date = bdate;
-          }
-          else {
-            this.ibd = '';
-            date = '';
-          }
-        }
-        else {
-          this.ibd = '';
-          date = '';
+      _calculateAge(bday) {
+        var daysBetweenDates;
+        daysBetweenDates = function (d1, d2) {
+          var diffDays, oneDay;
+          oneDay = 24 * 60 * 60 * 1000;
+          diffDays = (d2 - Date.parse(d1)) / oneDay;
+          return diffDays;
+        };
+
+        var ageNum = daysBetweenDates(bday, new Date()) / 365;
+
+        function N(num, places) {
+          return +(Math.round(num + "e+" + places) + "e-" + places);
         }
 
-        this.insurance = {
-          card: card,
-          birthday: bdate,
-          address: in_address,
-          home_phone: home_phone,
-          primary_insurance: indicate,
-          relationship: p_relation
-        }
-      },
+        var x = N(ageNum, 3);
 
-      emergencyChanged(name_e, relation_e, phone_e, work_phone) {
-        this.emergency = {
-          name: name_e,
-          relationship: relation_e,
-          home_phone: phone_e,
-          work_phone: work_phone
-        }
+        if (x <= 0) return 0;
+        else return x;
       },
 
       _changepic(e) {
         if (e.target.files.length > 0) {
-          // Polymer.dom(this.root).querySelector("#err").style.display = 'none';
           var img = Polymer.dom(this.root).querySelector("#profilePic");
           var i = Polymer.dom(this.root).querySelector("#p_profile");
-
-          this.profile = e.target.files[0];
 
           var reader = new FileReader();
           reader.onload = function (e) {
@@ -1083,11 +823,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             i.src = e.target.result;
           };
           reader.readAsDataURL(e.target.files[0]);
+
+          var profile = e.target.files[0];
+          var pic_name = new Date().getTime() + '.' + profile.type.substring(6);
+          var self = this;
+
+          if (profile.size > 9999) {
+            ImageTools.resize(profile, { width: 440, height: 400 }, function (blob, didItResize) {
+              self.profile = { name: pic_name, blob: blob }
+            });
+          }
+          else {
+            self.profile = { name: pic_name, blob: profile }
+          }
         }
         else {
+          this.profile = null;
           Polymer.dom(this.root).querySelector("#profilePic").src = this.p_profile;
           Polymer.dom(this.root).querySelector("#p_profile").src = this.p_profile;
-          // Polymer.dom(this.root).querySelector("#err").style.display = 'inline-block';
         }
       },
 
@@ -1098,12 +851,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }));
         this.$.narrow = !this.$.narrow;
-      },
-
-      ready() {
-        this.selectedPage = 0;
-        this.favrighthide = false;
-        this.storeDate = this.todayDate;
       },
 
       _select1(e) {
@@ -1165,164 +912,110 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
 
-          // if (parseInt(this.selectedPage) == 1) {
-          //   if (!this.card || !this.bdate || !this.in_address || !this.home_phone || !this.indicate || !this.p_relation) {
-          //     this.favlefthide = false;
-          //     this.favrighthide = true;
-          //   }
-          //   else {
-          //     this.favlefthide = false;
-          //     this.favrighthide = false;
-          //   }
-          // }
-
-          // if (parseInt(this.selectedPage) == 2) {
-          //   if (!this.name_e || !this.relation_e || !this.phone_e || !this.work_phone) {
-          //     this.favlefthide = false;
-          //     this.favrighthide = true;
-          //   }
-          //   else {
-          //     this.favlefthide = false;
-          //     this.favrighthide = false;
-          //   }
-          // }
-
           if (parseInt(this.selectedPage) == 4) {
             //complete
-            var info = this.personal, insure = this.insurance, emerg = this.emergency, key = this.editKey;
+            var key = this.editKey;
             var mykey = this.myKey;
+            var queueKey = this.queueKey;
             var today = this.todayDate;
+            var isQueue = this.myQueue;
+            var locationCode = this.myLocationCode;
+            var queueDate = this.queueDate;
+            var location = this.myLocation;
+            var self = this;
 
             var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
             var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+            var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
+            var queueRef = firebase.database().ref("/" + mykey + "/queue/" + location + "/" + queueDate);
+
+            saveLoad.style.display = 'block';
+            ref.update({
+              personal: {
+                email: self.email,
+                firstname: self.fname,
+                middlename: self.mname,
+                lastname: self.lname,
+                birthday: formatTodayDate(self.bday),
+                status: self.status ? self.status : "",
+                sex: self.sex ? self.sex : "",
+                contact: self.contact,
+                address: self.address,
+                occupation: self.occupation,
+                employer: self.employer,
+                emp_phone: self.emp_phone,
+                referred: self.refer ? self.refer : "",
+                doctor: self.doctor,
+                hospital: self.hospital_name,
+                name: self.lname + ', ' + self.fname + ' ' + self.mname,
+                clinic_location: self.myLocation
+              },
+              insurance: {
+                card: self.card,
+                birthday: formatTodayDate(self.bdate),
+                address: self.in_address,
+                home_phone: self.home_phone,
+                primary_insurance: self.indicate,
+                relationship: self.p_relation
+              },
+              emergency: {
+                name: self.name_e,
+                relationship: self.relation_e,
+                home_phone: self.phone_e,
+                work_phone: self.work_phone
+              },
+              created: today,
+            }).then(function () {
+              saveLoad.style.display = 'none';
+              saveSucc.style.display = 'block';
+            }).catch(function (err) {
+              console.warn(err);
+            });
+
+            if (isQueue) {
+              queueRef.child(queueKey).update({
+                patient_info: {
+                  firstname: self.fname,
+                  middlename: self.mname,
+                  lastname: self.lname,
+                  birthday: formatTodayDate(self.bday),
+                  sex: self.sex ? self.sex : "",
+                  name: self.lname + ', ' + self.fname + ' ' + self.mname,
+                  hmo: self.indicate
+                },
+                profile: self.p_profile ? self.p_profile : null
+              });
+            }
 
             if (this.profile) {
-              saveLoad.style.display = 'block';
-
-              var ext = this.profile.type.substring(6);
-              var pic_name = this.randomString(8) + '.' + ext;
-
-              var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
-
-              if (this.profile.size > 9999) {
-
-                ImageTools.resize(this.profile, {
-                  width: 440, // maximum width
-                  height: 400 // maximum height
-                }, function (blob, didItResize) {
-
-                  var uploadTask = storageRef.put(blob);
-                  firebase.database().ref('/' + mykey + '/patients/' + key)
-                    .once('value').then(function (patient) {
-                      if (patient.val().profile) {
-                        firebase.storage().refFromURL(patient.val().profile).delete()
-                          .then(function () {
-                            uploadTask.on('state_changed',
-                              function () {
-                                var downLoadURL = uploadTask.snapshot.downloadURL;
-                                if (downLoadURL) {
-
-                                  var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-                                  var push = ref.update({
-                                    personal: info,
-                                    insurance: insure,
-                                    emergency: emerg,
-                                    profile: downLoadURL,
-                                    created: today
-                                  }).then(function () {
-                                    saveLoad.style.display = 'none';
-                                    saveSucc.style.display = 'block';
-                                  });
-                                }
-                              });
-                          });
-
-                      }
-                      else {
-                        uploadTask.on('state_changed',
-                          function () {
-                            var downLoadURL = uploadTask.snapshot.downloadURL;
-                            if (downLoadURL) {
-
-                              var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-                              var push = ref.update({
-                                personal: info,
-                                insurance: insure,
-                                emergency: emerg,
-                                profile: downLoadURL,
-                                created: today
-                              }).then(function () {
-                                saveLoad.style.display = 'none';
-                                saveSucc.style.display = 'block';
-                              });
-                            }
-                          });
-                      }
-                    });
-                });
-
-              }
-              else {
-                var uploadTask = storageRef.put(this.profile);
-                firebase.database().ref('/' + mykey + '/patients/' + key)
-                  .once('value').then(function (patient) {
-                    if (patient.val().profile) {
-                      firebase.storage().refFromURL(patient.val().profile).delete()
-                        .then(function () {
-                          uploadTask.on('state_changed',
-                            function () {
-                              var downLoadURL = uploadTask.snapshot.downloadURL;
-                              if (downLoadURL) {
-
-                                var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-                                var push = ref.update({
-                                  personal: info,
-                                  insurance: insure,
-                                  emergency: emerg,
-                                  profile: downLoadURL,
-                                  created: today
-                                }).then(function () {
-                                  saveLoad.style.display = 'none';
-                                  saveSucc.style.display = 'block';
-                                });
-                              }
-                            });
-                        });
-                    }
-                    else {
-                      uploadTask.on('state_changed',
-                        function () {
-                          var downLoadURL = uploadTask.snapshot.downloadURL;
-                          if (downLoadURL) {
-
-                            var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-                            var push = ref.update({
-                              personal: info,
-                              insurance: insure,
-                              emergency: emerg,
-                              profile: downLoadURL,
-                              created: today
-                            }).then(function () {
-                              saveLoad.style.display = 'none';
-                              saveSucc.style.display = 'block';
-                            });
+              var storageRef = firebase.storage().ref('profilePicture/' + this.profile.name);
+              var uploadTask = storageRef.put(this.profile.blob);
+              ref.once('value').then(function (patient) {
+                if (patient.val().profile) {
+                  firebase.storage().refFromURL(patient.val().profile).delete().then(function () {
+                    uploadTask.on('state_changed',
+                      function () {
+                        var downLoadURL = uploadTask.snapshot.downloadURL;
+                        if (downLoadURL) {
+                          ref.update({ profile: downLoadURL });
+                          if (isQueue) {
+                            queueRef.child(queueKey).update({ profile: downLoadURL });
                           }
-                        });
+                        }
+                      });
+                  });
+                }
+                else {
+                  uploadTask.on('state_changed', function () {
+                    var downLoadURL = uploadTask.snapshot.downloadURL;
+                    if (downLoadURL) {
+                      ref.update({ profile: downLoadURL });
+                      if (isQueue) {
+                        queueRef.child(queueKey).update({ profile: downLoadURL });
+                      }
                     }
                   });
-              }
-            }
-            else {
-              saveLoad.style.display = 'block';
-              var ref = firebase.database().ref("/" + mykey + "/patients/" + key);
-              var push = ref.update({
-                personal: info,
-                insurance: insure,
-                emergency: emerg,
-                created: today
-              }).then(function () {
-                saveLoad.style.display = 'none';
-                saveSucc.style.display = 'block';
+                }
               });
             }
 
@@ -1394,12 +1087,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.favrighthide = false;
         }
       },
-
-      randomString(n) {
-        var r = "";
-        while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
-        return r;
-      }
 
     })
   </script>

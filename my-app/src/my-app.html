@@ -20,17 +20,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+<link rel="import" href="../bower_components/paper-badge/paper-badge.html">
+<link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-messaging.html">
+<link rel="import" href="../bower_components/g-element/push-notification.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="global-functions.html">
 
 <link rel="lazy-import" href="my-signin.html">
 <link rel="lazy-import" href="my-register-signin.html">
@@ -42,15 +48,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="my-patients.html">
 <link rel="lazy-import" href="my-accountlist.html">
 <link rel="lazy-import" href="my-settings.html">
-<!-- <link rel="lazy-import" href="my-billing.html"> -->
-<!-- <link rel="lazy-import" href="my-collection.html"> -->
+<link rel="lazy-import" href="my-queue.html">
+<link rel="lazy-import" href="my-location.html">
+<link rel="lazy-import" href="my-billing.html">
+<link rel="lazy-import" href="my-collection.html">
+<link rel="lazy-import" href="my-messaging.html">
 <!-- <link rel="lazy-import" href="my-help.html"> -->
 <!-- <link rel="lazy-import" href="my-view2.html"> -->
 <!-- <link rel="lazy-import" href="my-appointments.html"> -->
-<!-- <link rel="lazy-import" href="my-queue.html"> -->
-<!-- <link rel="lazy-import" href="my-map.html"> -->
 <link rel="lazy-import" href="my-view404.html">
-
 
 <dom-module id="my-app">
   <template>
@@ -66,11 +72,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: none;
       }
 
-      app-header {
-        color: #000000;
-        background-color: var(--app-primary-color);
-      }
+      paper-toolbar {
+        --paper-toolbar-color: white;
 
+        --paper-toolbar: {
+          background-image: url("../images/h4.jpeg");
+          background-size: cover;
+        }
+      }
 
       app-header paper-icon-button {
         --paper-icon-button-ink-color: #000000;
@@ -90,28 +99,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .drawer-list a:hover {
-        background-color: rgba(0, 0, 0, 0.05);
+        /* background-color: rgba(0, 0, 0, 0.05); */
+        background-color: #eee;
       }
-
-      /* .drawer-list a.iron-selected {
-        color: black;
-        font-weight: bold;
-      } */
 
       app-drawer-layout {
         --app-drawer-layout-content-transition: margin 0.2s;
-      }
-
-      app-drawer {
-        --app-drawer-content-container: {
-          background-color: #F4F5F6;
-        }
-      }
-
-      .drawer-content {
-        margin-top: 80px;
-        height: calc(100% - 80px);
-        overflow: auto;
       }
 
       .iron-selected .menuSelected {
@@ -119,37 +112,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-weight: bold;
       }
 
-      .header-div {
-        box-shadow: 0px 5px 2px -3px rgba(0, 0, 0, 0.05);
-      }
-
-      .avatar {
-        height: 40px;
-        width: 40px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        background-color: #DDD;
-      }
-
-      .pad {
-        padding: 0 16px;
-        @apply --layout-flex;
-        @apply --layout-vertical;
-      }
-
       .primary {
-        font-size: 14px;
-        font-weight: bold;
-      }
-
-      .shortText,
-      .longText {
-        font-size: 12px;
-      }
-
-      .longText {
-        color: gray;
-        display: none;
+        font-size: 18px;
+        font-weight: 300;
       }
 
       paper-fab {
@@ -158,12 +123,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         bottom: -20px;
       }
 
-      .divHeaderLabelLocation {
-        /* padding: 0 16px 8px; */
-        font-size: 14px;
-        color: rgb(56, 56, 56);
-        @apply --layout-flex;
-        @apply --layout-vertical;
+      paper-avatar.x-large {
+        --paper-avatar-width: 60px;
       }
 
       #overlay {
@@ -176,6 +137,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        z-index: 2;
       }
 
       .yellow-button {
@@ -183,6 +145,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 10px;
         margin-top: -10px;
         margin-bottom: -10px;
+        color: #eeff41;
+      }
+
+      .yellow {
         color: #eeff41;
       }
     </style>
@@ -195,6 +161,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <paper-icon-button on-tap="_closeToast" class="yellow-button" icon="my-icons:close"></paper-icon-button>
     </paper-toast>
 
+    <paper-toast id="updateToast" duration="0" text="">
+      <div>
+        <span>New Update Available!</span>
+        <span>Click
+          <a class="yellow" onclick="window.location.reload(true)">
+            here
+          </a> for the new version.
+        </span>
+      </div>
+    </paper-toast>
+
+    <!-- <paper-toast id="swToast" duration="0" text=""></paper-toast> -->
 
     <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
     </app-location>
@@ -202,19 +180,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-route route="{{route}}" pattern="[[rootPath]]:page" data="{{routeData}}" tail="{{subroute}}">
     </app-route>
 
+    <!-- TODOS -->
+    <!-- 1. Change firebase app config -->
+    <!-- 2. my-messaging change key and click_action of notification -->
+    <!-- 3. my-queue-doctor change key and click_action of notification  -->
+
+    <!-- live -->
     <!-- <firebase-app auth-domain="p123-6256e.firebaseapp.com" database-url="https://p123-6256e.firebaseio.com" api-key="AIzaSyCV24k2Ev083HFXiASIj9g7RhvUi7C9J3w"
-      storage-bucket="p123-6256e.appspot.com">
+      storage-bucket="p123-6256e.appspot.com" messaging-sender-id="291030422568">
     </firebase-app> -->
 
-    <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com" api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ"
-      storage-bucket="emr-dev-c3005.appspot.com">
+    <!-- dev -->
+    <firebase-app auth-domain="emr-dev-c3005.firebaseapp.com" database-url="https://emr-dev-c3005.firebaseio.com"
+      api-key="AIzaSyCDdA4QGj9z7nVnUIRMjDuCvsACP7f17OQ" storage-bucket="emr-dev-c3005.appspot.com" messaging-sender-id="528097160886">
     </firebase-app>
 
-    <firebase-auth id="auth" status-known="{{statusKnown}}" user="{{user}}" provider="google" on-error="showError"></firebase-auth>
+    <firebase-auth id="auth" status-known="{{statusKnown}}" user="{{user}}" provider="google"></firebase-auth>
 
     <template is="dom-if" if="{{_needToSignIn(user,statusKnown)}}">
       <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
         <my-signin name="signin"></my-signin>
+        <!-- <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist> -->
         <my-register-signin name="register-signin"></my-register-signin>
         <my-reset-password name="reset-password"></my-reset-password>
         <my-view404 name="view404"></my-view404>
@@ -243,27 +229,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <template is="dom-if" if="{{user.phoneNumber}}">
 
           <firebase-query id="query" path="/accounts" data="{{myaccount}}" order-by-child="uid" equal-to="{{user.uid}}"></firebase-query>
+          <!-- <firebase-messaging id="messaging" token="{{token}}"></firebase-messaging> -->
+          <!-- token="[[token]]" -->
+          <push-notification id="notification" is-granted="{{isNotificationGranted}}"></push-notification>
 
-          <app-drawer-layout has-scrolling-region fullbleed narrow="{{narrow}}" id="drawerLayout">
+          <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
             <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
-
-              <div style="height: 100%; overflow: auto;">
-                <app-header fixed>
-                  <app-toolbar>
-                    <iron-image preload fade style$="{{_hasprofile(user.photoURL)}}" class="avatar" sizing="cover" src="{{user.photoURL}}"></iron-image>
-                    <iron-image style$="{{_noprofile(user.photoURL)}}" class="avatar" sizing="cover" src="../images/user.png"></iron-image>
-                    <div class="pad">
-                      <div hidden$="{{user.displayName}}" class="primary">{{user.email}}</div>
-                      <div hidden$="{{!user.displayName}}" class="primary">Dr. {{user.displayName}}</div>
-                      <div class="shortText">{{drTitle}}</div>
-                      <div class="longText"></div>
+              <app-header-layout has-scrolling-region>
+                <app-header fixed slot="header">
+                  <paper-toolbar class="tall">
+                    <div slot="middle">
+                      <paper-avatar class="x-large" src$="{{_userImg(user.photoURL)}}"></paper-avatar><br>
+                      <span hidden$="{{user.displayName}}">{{user.email}}</span>
+                      <span hidden$="{{!user.displayName}}">{{user.displayName}}</span><br>
+                      <span>{{drTitle}}</span><br>
+                      <span style="font-size:12px;">{{_set(mylocation)}}</span>
                     </div>
-                  </app-toolbar>
-
-                  <!-- <app-toolbar>
-                  <div class="divHeaderLabelLocation">Location: (not set)</div>
-                </app-toolbar> -->
-                  <!-- <paper-fab mini icon="my-icons:my-location" on-tap="_mymap"></paper-fab> -->
+                  </paper-toolbar>
+                  <a href="/location">
+                    <paper-fab mini icon="my-icons:my-location"></paper-fab>
+                  </a>
                 </app-header>
 
                 <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
@@ -295,40 +280,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </paper-icon-item>
                   </a>
 
-                  <!-- <a style="display:none" name="queue" href="[[rootPath]]queue">
+                  <a name="queue" href="[[rootPath]]queue">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:list" slot="item-icon"></iron-icon>
                       <span>Queue</span>
                     </paper-icon-item>
-                  </a> -->
+                  </a>
 
                   <!-- <a name="account" href="[[rootPath]]account">
-              <paper-icon-item toggles="true" class="menuSelected">
-                <iron-icon icon="my-icons:account-circle" slot="item-icon"></iron-icon>
-                <span>My account</span>
-              </paper-icon-item>
-            </a> -->
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon icon="my-icons:account-circle" slot="item-icon"></iron-icon>
+                      <span>My account</span>
+                    </paper-icon-item>
+                  </a> -->
 
-                  <a name="visits" href="[[rootPath]]visits">
+                  <a style$="{{_access(hasAccess)}}" name="visits" href="[[rootPath]]visits">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:folder-open" slot="item-icon"></iron-icon>
                       <span>Visits</span>
                     </paper-icon-item>
                   </a>
 
-                  <!-- <a style="display:none" name="billing" href="[[rootPath]]billing">
+                  <a name="billing" href="[[rootPath]]billing">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:send" slot="item-icon"></iron-icon>
                       <span>Billing</span>
                     </paper-icon-item>
-                  </a> -->
+                  </a>
 
-                  <!-- <a style="display:none" name="collection" href="[[rootPath]]collection">
+                  <a name="collection" href="[[rootPath]]collection">
                     <paper-icon-item toggles="true" class="menuSelected">
                       <iron-icon icon="my-icons:payment" slot="item-icon"></iron-icon>
                       <span>Collection</span>
                     </paper-icon-item>
-                  </a> -->
+                  </a>
+
+                  <a name="messaging" href="[[rootPath]]messaging">
+                    <paper-icon-item toggles="true" class="menuSelected">
+                      <iron-icon id="messageIcon" icon="my-icons:chat" slot="item-icon"></iron-icon>
+                      <paper-badge for="messageIcon" label="{{noOfMsg}}"></paper-badge>
+                      <span>Messaging</span>
+                    </paper-icon-item>
+                  </a>
                   <hr>
                   <a name="settings" href="[[rootPath]]settings">
                     <paper-icon-item toggles="true" class="menuSelected">
@@ -350,26 +343,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       <span>Help</span>
                     </paper-icon-item>
                   </a> -->
+
                   <span style="padding:20px; color:gray; font-size:12px;">
-                    v0.2.0
+                    v0.7.5
                   </span>
                 </iron-selector>
-              </div>
+              </app-header-layout>
             </app-drawer>
+
             <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
               <!-- <my-account user={{user}} name="account"></my-account> -->
-              <my-dashboard name="dashboard" my-key="[[mykey]]" user="[[user]]"></my-dashboard>
-              <my-settings name="settings" route="[[subroute]]" user=[[user]]></my-settings>
-              <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" user-uid=[[user.uid]]></my-visits>
-              <my-patients name="patients" route="[[subroute]]" my-key="[[mykey]]" user-uid=[[user.uid]]></my-patients>
-              <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
+              <my-dashboard name="dashboard" my-role="[[role]]" my-key="[[mykey]]"></my-dashboard>
+              <my-patients name="patients" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"
+                my-location-code="[[mylocationCode]]"></my-patients>
+              <my-queue name="queue" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"
+                my-location-code="[[mylocationCode]]"></my-queue>
+              <my-visits name="visits" route="[[subroute]]" my-key="[[mykey]]" my-location="[[mylocation]]"></my-visits>
+              <my-settings name="settings" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-lastname="[[myLastname]]"
+                user="[[user]]"></my-settings>
+              <my-billing name="billing" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"></my-billing>
+              <my-collection name="collection" my-role="[[role]]" my-key="[[mykey]]"></my-collection>
+              <my-messaging name="messaging" route="[[subroute]]" my-role="[[role]]" my-key="[[mykey]]" my-location="[[mylocation]]"
+                my-location-code="[[mylocationCode]]"></my-messaging>
               <!-- <my-appointments name="appointments"></my-appointments>
-              <my-billing name="billing"></my-billing>
-              <my-collection name="collection"></my-collection>
               <my-help name="help"></my-help>
-              <my-view2 name="view2"></my-view2>
-              <my-queue name="queue"></my-queue>
-              <my-map name="map"></my-map> -->
+              <my-view2 name="view2"></my-view2> -->
+              <my-location name="location" my-role="[[role]]" my-key="[[mykey]]"></my-location>
+              <my-accountlist name="accountlist" route="[[subroute]]"></my-accountlist>
               <my-view404 name="view404"></my-view404>
             </iron-pages>
           </app-drawer-layout>
@@ -395,13 +395,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // This shouldn't be neccessary, but the Analyzer isn't picking up
           // Polymer.Element#rootPath
           rootPath: String,
-          headerSearchBarIsHidden: {
-            type: Boolean,
-            value: true
-          },
           narrow: {
             type: Boolean,
             notify: true
+          },
+          hasAccess: {
+            type: Boolean,
+            value: false
+          },
+          noOfMsg: {
+            type: Number,
+            value: 0
+          },
+          noOfPatients: {
+            type: Number,
+            value: 0
           },
           mykey: String
         };
@@ -410,23 +418,127 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get observers() {
         return [
           '_routePageChanged(routeData.page, user, mykey)',
-          '_myaccountChanged(myaccount)'
+          '_myaccountChanged(myaccount.*, isNotificationGranted)'
         ];
       }
 
-      _myaccountChanged(e) {
-        if (e.length > 0) {
-          this.mykey = e[0].code;
-          this.drTitle = e[0].designatory;
-          this.lastname = e[0].name.lastname;
+      ready() {
+        super.ready();
+        this.addEventListener('toggleDrawer', (e) => this._onChangeSection(e));
+        this.addEventListener('toggleDrawer2', (e) => this._onChangeSection2(e));
+        this.addEventListener('loadPage', (e) => this._loadThisPage(e.detail));
+        // listen for online/offline
+        window.addEventListener('online', (e) => this._updateOnlineStatus(e));
+        window.addEventListener('offline', (e) => this._updateOnlineStatus(e));
+        window.addEventListener('show-toast', (e) => this._showUpdateToast(e));
+      }
+
+      _myaccountChanged(e, n) {
+        if (this.myaccount.length > 0) {
+          this.mykey = this.myaccount[0].code;
+          this.drTitle = this.myaccount[0].designatory;
+          this.role = this.myaccount[0].role;
+          this.myLastname = this.myaccount[0].name.lastname;
+          this.mylocationCode = this.myaccount[0].location_code;
+
+          if (this.myaccount[0].location) this.mylocation = this.myaccount[0].location;
+          else this.mylocation = '(not set)';
+
+          if (this.myaccount[0].role != 'Secretary') this.hasAccess = true;
+
+          var messaging = Polymer.dom(this.root).querySelector("#notification");
+          if (messaging) {
+            if (n) {
+              var self = this, msgRef;
+              if (this.myaccount[0].role != 'Secretary') {
+                msgRef = firebase.database().ref("/" + this.mykey + "/secretary");
+
+                var todayDate = formatTodayDate(new Date());
+                var queueRef = firebase.database().ref("/" + this.mykey + "/queue/" + this.mylocation + "/" + todayDate);
+                queueRef.on('value', function (childsnapshot) {
+                  if (childsnapshot.exists()) {
+                    if (self.page !== "queue" || !document.hasFocus()) {
+                      var noOfPatients = 0;
+                      childsnapshot.forEach(childElement => {
+                        if (childElement.val().isQueue) noOfPatients += 1;
+                      });
+
+                      if (noOfPatients > 0) {
+                        var childtitle = "patient";
+                        if (noOfPatients > 1) childtitle = "patients";
+                        if (noOfPatients > self.noOfPatients) {
+                          self.noOfPatients = noOfPatients;
+                          self._sendNotification(
+                            messaging,
+                            "You have " + noOfPatients + " " + childtitle + " waiting in queue.",
+                            "queue", true);
+                        }
+                      }
+                    }
+                  }
+                });
+              } else {
+                msgRef = firebase.database().ref("/" + this.mykey + "/doctors");
+              }
+
+              msgRef.on('value', function (snapshot) {
+                if (snapshot.exists()) {
+                  if (self.page !== "messaging" || !document.hasFocus()) {
+                    var noOfMsg = 0;
+                    snapshot.forEach(element => {
+                      noOfMsg += (element.val().msg ? element.val().msg : 0);
+                    });
+
+                    if (noOfMsg > 0) {
+                      if (self.page !== "messaging") {
+                        self.noOfMsg = noOfMsg;
+                      }
+                      var title = "message";
+                      if (noOfMsg > 1) title = "messages";
+                      self._sendNotification(
+                        messaging,
+                        "You have " + noOfMsg + " unread " + title + ".",
+                        "message", true);
+                    }
+                  }
+                }
+              });
+            } else {
+              messaging.requestPermission();
+            }
+          }
         }
+      }
+
+      _sendNotification(messaging, body, tag, requireInteraction) {
+        messaging.sendNotification({
+          title: "BaseEMR",
+          icon: "../images/icon.png",
+          badge: "../images/icon.png",
+          body: body,
+          tag: tag,
+          requireInteraction: requireInteraction,
+          renotify: true
+        });
+      }
+
+      _access(e) {
+        if (e) return 'display:block';
+        else return 'display:none';
+      }
+
+      _set(e) {
+        if (e.length > 40) return "Location: " + e.substring(0, 40) + '...';
+        else return "Location: " + e;
       }
 
       _routePageChanged(page, user, key) {
         if (user) {
           if (user.emailVerified) {
             if (user.phoneNumber) {
+              this._showOverlay();
               if (key) {
+                this._hideOverlay();
                 this.page = page || 'dashboard';
                 // Close a non-persistent drawer when the page & route are changed.
                 var drawer = Polymer.dom(this.root).querySelector("#drawer");
@@ -450,22 +562,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _hasprofile(e) {
-        if (e) {
-          return 'display:block';
-        }
-        else {
-          return 'display:none';
-        }
-      }
-
-      _noprofile(e) {
-        if (!e) {
-          return 'display:block';
-        }
-        else {
-          return 'display:none';
-        }
+      _userImg(e) {
+        if (e) return e;
+        else return '../images/user.png';
       }
 
       _signOut() {
@@ -492,23 +591,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _pageChanged(page) {
-        // Polymer.dom(this.root).querySelector("#overlay").style.display = 'flex';
-        // Polymer.dom(this.root).querySelector("#spinner").active = true;
+        if (page === "messaging") this.noOfMsg = 0;
+        this._loadThisPage(page);
+      }
+
+      _loadThisPage(page) {
         // Load page import on demand. Show 404 page if fails
-        var loader = Polymer.dom(this.root).querySelector("#overlay");
-        var spinner = Polymer.dom(this.root).querySelector("#spinner");
-        loader.style.display = 'flex';
-        spinner.active = true;
+        var self = this;
+        self._showOverlay();
         var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
         Polymer.importHref(
           resolvedPageUrl,
           function () {
-            loader.style.display = 'none';
-            spinner.active = false;
+            self._hideOverlay();
           },
           this._showPage404.bind(this),
           true);
+      }
 
+      _showOverlay() {
+        Polymer.dom(this.root).querySelector("#overlay").style.display = 'flex';
+      }
+
+      _hideOverlay() {
+        Polymer.dom(this.root).querySelector("#overlay").style.display = 'none';
       }
 
       _showPage404() {
@@ -522,24 +628,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         } else {
           drawerlayout.toggle();
         }
-      }
-
-      toggleSearch() {
-        this.headerSearchBarIsHidden = !this.headerSearchBarIsHidden
-
-        if (this.headerSearchBarIsHidden == false) {
-          this.$.searchBox.focus();
-        }
-      }
-
-      ready() {
-        super.ready();
-        this.addEventListener('toggleDrawer', (e) => this._onChangeSection(e));
-        this.addEventListener('toggleDrawer2', (e) => this._onChangeSection2(e));
-        // this.addEventListener('on-tap', (e) => this._onChangeSection(e));
-        // listen for online/offline
-        window.addEventListener('online', (e) => this._updateOnlineStatus(e));
-        window.addEventListener('offline', (e) => this._updateOnlineStatus(e));
       }
 
       _updateOnlineStatus() {
@@ -560,6 +648,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
+      _showUpdateToast(e) {
+        if (e.detail.isNew) {
+          // this.$.updateToast.text = e.detail.text;
+          this.$.updateToast.opened = true;
+        } else {
+          this.$.networkToast.text = e.detail.text;
+          this.$.networkToast.duration = 5000;
+          this.$.networkToast.opened = true;
+        }
+      }
+
       _closeToast() {
         Polymer.dom(this.root).querySelector("#networkToast").opened = false;
       }
@@ -577,10 +676,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var drawerlayout = Polymer.dom(this.root).querySelector("#drawerLayout");
         drawerlayout.forceNarrow = e.detail.narrow;
       }
-
-      // _mymap() {
-      // window.location = "/map";
-      // }
 
     }
 

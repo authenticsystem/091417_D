@@ -1,0 +1,250 @@
+<script>
+    var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    var weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    function getAge(date) {
+        var today = new Date();
+        var birthday = new Date(date);
+
+        var differenceInMilisecond = today.valueOf() - birthday.valueOf();
+
+        var year_age = Math.floor(differenceInMilisecond / 31536000000);
+        var day_age = Math.floor((differenceInMilisecond % 31536000000) / 86400000);
+
+        var month_age = Math.floor(day_age / 30);
+
+        day_age = day_age % 30;
+
+        if (isNaN(year_age) || isNaN(month_age) || isNaN(day_age)) {
+            console.warn('Invalid date format!');
+        }
+        else {
+            if (year_age > 0) {
+                if (year_age == 1) {
+                    return year_age + " year old";
+                }
+                else {
+                    return year_age + " years old";
+                }
+            }
+            else if (year_age == 0 && month_age > 0) {
+                if (month_age == 1) {
+                    return month_age + " month old";
+                }
+                else {
+                    return month_age + " months old";
+                }
+            }
+            else if (year_age == 0 && month_age == 0 && day_age > 0) {
+                if (day_age == 1) {
+                    return day_age + " day old";
+                }
+                else {
+                    return day_age + " days old";
+                }
+            }
+            else {
+                return year_age + " years " + month_age + " months " + day_age + " days old";
+            }
+        }
+    }
+
+    function formatWeekDate(date) {
+        var d = new Date(date);
+        return weekdays[d.getDay()] + ', ' + d.getDate() + '-' + monthNames[d.getMonth()] + '-' + d.getFullYear();
+    }
+
+    function formatLocalDateString(date) {
+        var d = new Date(date);
+        // return d.toDateString() + ' at ' + d.toLocaleTimeString().match(/\d{2}:\d{2}|[AMP]+/g).join(' ');
+        return d.toDateString() + ' at ' + d.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+    }
+
+    function formatTodayDate(date) {
+        if (date) {
+            var d = new Date(date);
+            return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+        } else {
+            return null;
+        }
+    }
+
+    function chatTimeAndDate(date) {
+        var givenDate = new Date(date);
+        var time = givenDate.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+        var dateDiff = DateDiff(givenDate, new Date());
+        var title;
+        if (dateDiff === 0) {
+            title = "Today";
+        } else if (dateDiff === 1) {
+            title = "Yesterday";
+        } else {
+            title = monthNames[givenDate.getMonth()] + ' ' + givenDate.getDate();
+        }
+
+        return time + ' | ' + title;
+    }
+
+    function DateDiff(date1, date2) {
+        date1.setHours(0);
+        date1.setMinutes(0, 0, 0);
+        date2.setHours(0);
+        date2.setMinutes(0, 0, 0);
+        var datediff = Math.abs(date1.getTime() - date2.getTime()); // difference 
+        return parseInt(datediff / (24 * 60 * 60 * 1000), 10); //Convert values days and return value      
+    }
+
+    function generateUniqueId(num) {
+        if (num > 0 && num < 10) {
+            num = '000' + num;
+        }
+        else if (num > 9 && num < 100) {
+            num = '00' + num;
+        }
+        else if (num > 99 && num < 1000) {
+            num = '0' + num;
+        }
+        else if (num > 999) {
+            num = num;
+        }
+        else {
+            num = '0000';
+        }
+
+        return num.toString();
+    }
+
+    function generatePushID(date, lastPushTime) {
+        //reference: https://gist.github.com/mikelehen/3596a30bd69384624c11
+        // Modeled after base64 web-safe chars, but ordered by ASCII.
+        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+
+        // Timestamp of last push, used to prevent local collisions if you push twice in one ms.
+        // var lastPushTime = 0;
+        // We generate 72-bits of randomness which get turned into 12 characters and appended to the
+        // timestamp to prevent collisions with other clients.  We store the last characters we
+        // generated because in the event of a collision, we'll use those same characters except
+        // "incremented" by one.
+        var lastRandChars = [];
+
+        //check if there's a last push
+        if (lastPushTime === 0) {
+            var now = new Date(date).getTime();
+        }
+        else {
+            var now = lastPushTime;
+        }
+
+        lastPushTime = now;
+
+        var timeStampChars = new Array(8);
+
+        for (var i = 7; i >= 0; i--) {
+            timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+            // NOTE: Can't use << here because javascript will convert to int and lose the upper bits.
+            now = Math.floor(now / 64);
+        }
+
+        if (now !== 0) throw new Error('We should have converted the entire timestamp.');
+
+        var id = timeStampChars.join('');
+
+        for (i = 0; i < 12; i++) {
+            lastRandChars[i] = Math.floor(Math.random() * 64);
+        }
+
+        for (i = 0; i < 12; i++) {
+            id += PUSH_CHARS.charAt(lastRandChars[i]);
+        }
+
+        if (id.length != 20) throw new Error('Length should be 20.');
+
+        return id;
+    }
+
+    function randomString(n) {
+        var r = "";
+        while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+        return r;
+    }
+
+    function snapshotToArray(snapshot) {
+        var returnArr = [];
+
+        snapshot.forEach(childSnapshot => {
+            var item = childSnapshot.val();
+            item._key = childSnapshot.key;
+            returnArr.push(item);
+        });
+
+        return returnArr;
+    }
+
+    var smooth_scroll_to = function (element, target, duration) {
+        target = Math.round(target);
+        duration = Math.round(duration);
+        if (duration < 0) {
+            return Promise.reject("bad duration");
+        }
+        if (duration === 0) {
+            element.scrollTop = target;
+            return Promise.resolve();
+        }
+
+        var start_time = Date.now();
+        var end_time = start_time + duration;
+
+        var start_top = element.scrollTop;
+        var distance = target - start_top;
+
+        // based on http://en.wikipedia.org/wiki/Smoothstep
+        var smooth_step = function (start, end, point) {
+            if (point <= start) { return 0; }
+            if (point >= end) { return 1; }
+            var x = (point - start) / (end - start); // interpolation
+            return x * x * (3 - 2 * x);
+        }
+
+        return new Promise(function (resolve, reject) {
+            // This is to keep track of where the element's scrollTop is
+            // supposed to be, based on what we're doing
+            var previous_top = element.scrollTop;
+
+            // This is like a think function from a game loop
+            var scroll_frame = function () {
+                if (element.scrollTop != previous_top) {
+                    // reject("interrupted");
+                    return;
+                }
+
+                // set the scrollTop for this frame
+                var now = Date.now();
+                var point = smooth_step(start_time, end_time, now);
+                var frameTop = Math.round(start_top + (distance * point));
+                element.scrollTop = frameTop;
+
+                // check if we're done!
+                if (now >= end_time) {
+                    resolve();
+                    return;
+                }
+
+                // If we were supposed to scroll but didn't, then we
+                // probably hit the limit, so consider it done; not
+                // interrupted.
+                if (element.scrollTop === previous_top
+                    && element.scrollTop !== frameTop) {
+                    resolve();
+                    return;
+                }
+                previous_top = element.scrollTop;
+
+                // schedule next frame for execution
+                setTimeout(scroll_frame, 0);
+            }
+
+            // boostrap the animation process
+            setTimeout(scroll_frame, 0);
+        });
+    }
+</script>

@@ -1,26 +1,20 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
-<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
-<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
-<link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
-<!-- <link rel="import" href="../bower_components/polymerfire/firebase-document.html"> -->
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
-<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
-<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="short-unique-id.html">
 
 <dom-module id="my-accountlist-new">
@@ -51,8 +45,6 @@
 
             @media (min-width: 800px) {
                 .docu {
-                    /* margin-left: 16px;
-                     margin-right: 16px; */
                     padding: 16px;
                 }
             }
@@ -98,19 +90,10 @@
                 font-size: 14px;
                 margin-right: 5px;
             }
-
-            /* @media print {
-                 .ok {
-                     visibility: hidden;
-                }
-                /* .details#ok {
-                     visibility: hidden;
-                    
-                 }  
-             } */
         </style>
-        <!-- <firebase-document id="idd" path="{{getpath()}}" data="{{newdata}}"></firebase-document> -->
+
         <firebase-query id="query" path="{{getpath()}}" data="{{account}}"></firebase-query>
+
         <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
             <app-header-layout id="appheader" has-scrolling-region>
                 <app-header fixed slot="header">
@@ -120,12 +103,11 @@
                         </a>
                         <div main-title>New Account</div>
                         <paper-icon-button drawer-toggle icon="my-icons:menu"></paper-icon-button>
-                        <!-- <paper-icon-button icon="my-icons:more-vert" on-tap="toggleDrawer"></paper-icon-button> -->
                     </app-toolbar>
                 </app-header>
 
                 <div class="docu" hidden$="[[firstStep]]">
-                    <!-- <div class="docu-header">Add New Account</div> -->
+
                     <div class="details">
                         <paper-input readonly="true" value="{{accountkey}}" always-float-label label="Account Code"></paper-input>
                         <!-- <div style="font-size:12px; margin-top:1em;">Prefix
@@ -136,19 +118,19 @@
                             <paper-radio-button name="Ms">Ms</paper-radio-button>
                             <paper-radio-button name="Mrs">Mrs</paper-radio-button>
                         </paper-radio-group> -->
-                        <paper-input required auto-validate pattern="[a-zA-Z-.-/ ]*" value="{{prefix}}" always-float-label label="Designatory letters"></paper-input>
-                        <paper-input required auto-validate pattern="[a-zA-Z-. ]*" value="{{firstname}}" always-float-label label="First Name"></paper-input>
+                        <paper-input auto-validate pattern="[a-zA-Z-.-/ ]*" value="{{prefix}}" always-float-label label="Designatory letters *"></paper-input>
+                        <paper-input auto-validate pattern="[a-zA-Z-. ]*" value="{{firstname}}" always-float-label label="First Name *"></paper-input>
                         <paper-input auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{middlename}}" always-float-label label="Middle Name"></paper-input>
-                        <paper-input required auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{lastname}}" always-float-label label="Last Name"></paper-input>
+                        <paper-input auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{lastname}}" always-float-label label="Last Name *"></paper-input>
                         <paper-input auto-validate="true" pattern="[a-zA-Z-. ]*" value="{{suffix}}" always-float-label label="Suffix"></paper-input>
-                        <paper-input required allowed-pattern="[\d]" prevent-invalid-input char-counter maxlength="10" value="{{cellphone}}" always-float-label
-                            label="Cellphone">
+                        <paper-input allowed-pattern="[\d]" prevent-invalid-input char-counter maxlength="10" value="{{cellphone}}" always-float-label
+                            label="Cellphone *">
                             <div slot="prefix">+63</div>
                         </paper-input>
                         <paper-dropdown-menu vertical-align="bottom" style="cursor:pointer; width:100%" label="Role">
                             <paper-listbox slot="dropdown-content" class="dropdown-content" selected="{{roleSelect}}">
                                 <paper-item>Doctor</paper-item>
-                                <paper-item>Secretary</paper-item>
+                                <!-- <paper-item>Secretary</paper-item> -->
                                 <paper-item>System Admin</paper-item>
                             </paper-listbox>
                         </paper-dropdown-menu>
@@ -160,16 +142,12 @@
                         <!-- <paper-checkbox noink value="{{checked}}" >Allow Access</paper-checkbox> -->
                     </div>
                     <br>
-                    <span style="color:red; font-size:13px; float:right">{{msg}}</span>
-                    <!-- <paper-button class="indigo" on-click="_submit" raised>Add</paper-button>
-                             <a href="/accountlist" style="text-decoration:none">
-                                 <paper-button class="cancel" on-tap="_cancel">Cancel</paper-button>
-                             </a> -->
+                    <span id="errorMsgDiv" style="color: rgb(36, 36, 36); font-size:13px; float:right; display:none;">
+                        <b>Error!</b> {{msg}}</span>
                     <paper-button id="favleft" class="indigo" on-click="_submit" raised>Add</paper-button>
                     <a href="/accountlist" style="text-decoration:none">
-                        <paper-button id="favright" class="cancel" on-tap="_cancel">Cancel</paper-button>
+                        <paper-button id="favright" class="cancel">Cancel</paper-button>
                     </a>
-                </div>
                 </div>
 
                 <div class="docu" hidden$="[[finalstepHide]]">
@@ -184,8 +162,7 @@
                         <div>Contact No. +63{{cellphone}}</div>
                     </div>
                 </div>
-                <!-- <paper-toast id="toast" text="{{txt}}"></paper-toast> -->
-                </div>
+
             </app-header-layout>
         </app-drawer-layout>
     </template>
@@ -227,7 +204,20 @@
                     type: Number,
                     observer: 'roleSelectChanged'
                 },
+                msg: {
+                    type: String,
+                    observer: '_msgChanged'
+                },
                 role: String
+            },
+
+            _msgChanged() {
+                if (this.msg) {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'block';
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#errorMsgDiv").style.display = 'none';
+                }
             },
 
             roleSelectChanged() {
@@ -237,12 +227,12 @@
                     // Polymer.dom(this.root).querySelector("#app").checked = true;
                     // Polymer.dom(this.root).querySelector("#acc").checked = true;
                 }
-                else if (this.roleSelect == 1) {
-                    this.role = 'Secretary';
-                    // Polymer.dom(this.root).querySelector("#dash").checked = false;
-                    // Polymer.dom(this.root).querySelector("#app").checked = true;
-                    // Polymer.dom(this.root).querySelector("#acc").checked = false;
-                }
+                // else if (this.roleSelect == 1) {
+                //     this.role = 'Secretary';
+                // Polymer.dom(this.root).querySelector("#dash").checked = false;
+                // Polymer.dom(this.root).querySelector("#app").checked = true;
+                // Polymer.dom(this.root).querySelector("#acc").checked = false;
+                // }
                 else {
                     this.role = 'System Admin';
                 }
@@ -268,9 +258,9 @@
 
             _submit() {
                 if (!this.firstname || !this.lastname || !this.prefix) {
-                    this.firstname = '';
-                    this.lastname = '';
-                    this.prefix = '';
+                    if (!this.firstname) this.firstname = '';
+                    if (!this.lastname) this.lastname = '';
+                    if (!this.prefix) this.prefix = '';
                     this.msg = 'Please fill-up the required field.';
                 }
                 else if (!this.cellphone) {
@@ -286,7 +276,7 @@
                 else {
                     // Polymer.dom(this.root).querySelector("#rPrefix").style.display = 'none';
                     if (this.cellphone.length != 10) {
-                        this.msg = 'Error! Invalid cellphone number.';
+                        this.msg = 'Invalid cellphone number.';
                     }
                     else {
                         this.msg = '';
@@ -316,23 +306,13 @@
                         });
 
                         if (push.key) {
-                            if (this.role == 'Secretary') {
-                                var sec = firebase.database().ref("/secretary");
-                                var push = sec.push({
-                                    name: this.lastname + ' ' + this.firstname + '' + this.middlename,
-                                    code: this.accountkey,
-                                    key: push.key
-                                });
-                            }
-
                             this.finalstepHide = false;
                             this.firstStep = true;
                         }
                     }
                 }
-            },
-            toggleDrawer() { },
-            _cancel() { }
+            }
+
         })
     </script>
 </dom-module>

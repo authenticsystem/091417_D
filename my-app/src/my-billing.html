@@ -9,6 +9,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="my-billing-doctor.html">
+<link rel="import" href="my-billing-secretary.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -16,9 +19,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style include="shared-styles">
       :host {
-        display: block;
-
-        padding: 10px;
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
       }
 
       app-header {
@@ -29,48 +33,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-icon-button.menu {
         margin-right: 16px;
       }
+
+      paper-fab.fab-menu {
+        position: fixed;
+        bottom: 32px;
+        float: right;
+        right: 32px;
+      }
     </style>
 
+    <template is="dom-if" if="{{myRole}}">
+      <template is="dom-if" if="{{_secretary(myRole)}}">
+        <my-billing-secretary route="[[route]]" my-key="[[myKey]]" my-location="[[myLocation]]"></my-billing-secretary>
+      </template>
 
-    <app-header-layout fullbleed has-scrolling-region>
-      <app-header fixed slot="header">
-        <app-toolbar primary>
-          <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-          <div main-title>Billing</div>
-        </app-toolbar>
-      </app-header>
-
-      <div class="card">
-        Content soon.
-      </div>
-
-    </app-header-layout>
+      <template is="dom-if" if="{{_notSecretary(myRole)}}">
+        <my-billing-doctor route="[[route]]" my-key="[[myKey]]" my-location="[[myLocation]]"></my-billing-doctor>
+      </template>
+    </template>
 
   </template>
 
   <script>
-    class MyBilling extends Polymer.Element {
-      static get is() { return 'my-billing'; }
+    Polymer({
+      is: 'my-billing',
 
-      static get properties() {
-        return {
-          narrow: {
-            type: Boolean,
-            notify: true
-          }
-        };
+      properties: {
+        route: Object,
+        myLocation: String,
+        myKey: String,
+        myRole: String,
+      },
+
+      _secretary(e) {
+        if (e) {
+          if (e == 'Secretary') return true;
+          else return false;
+        }
+      },
+
+      _notSecretary(e) {
+        if (e) {
+          if (e != 'Secretary') return true;
+          else return false;
+        }
       }
 
-      toggleDrawer() {
-        this.dispatchEvent(new CustomEvent('toggleDrawer', {
-          bubbles: true, composed: true, detail: {
-            narrow: this.$.narrow
-          }
-        }));
-        this.$.narrow = !this.$.narrow;
-      }
-    }
+    })
 
-    window.customElements.define(MyBilling.is, MyBilling);
   </script>
 </dom-module>

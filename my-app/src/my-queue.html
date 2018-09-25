@@ -1,18 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
-<link rel="import" href="../bower_components/paper-card/paper-card.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
-<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<!-- <link rel="import" href="../bower_components/iron-image/iron-image.html"> -->
-<link rel="import" href="../bower_components/iron-list/iron-list.html">
-<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
-<link rel="import" href="../bower_components/iron-scroll-target-behavior/iron-scroll-target-behavior.html">
+
+<link rel="import" href="my-queue-secretary.html">
+<link rel="import" href="my-queue-doctor.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
 
@@ -24,89 +13,6 @@
                 margin: 0;
                 display: flex;
                 flex-direction: column;
-            }
-
-            .item {
-                @apply --layout-horizontal;
-                padding: 20px;
-                background-color: white;
-                border-bottom: 1px solid #ddd;
-                cursor: pointer;
-                margin-bottom: 10px;
-
-            }
-
-            .avatar {
-                height: 40px;
-                width: 40px;
-                border-radius: 20px;
-                box-sizing: border-box;
-                background-color: #DDD;
-            }
-
-            .pad {
-                /* padding: 0 16px; */
-                @apply --layout-flex;
-                @apply --layout-vertical;
-            }
-
-            .primary {
-                font-size: 16px;
-                font-weight: bold;
-            }
-
-            .shortText,
-            .longText {
-                font-size: 14px;
-            }
-
-            .longText {
-                color: gray;
-                display: none;
-            }
-
-            .item:hover .shortText::after {
-                content: ' [+]';
-                color: gray;
-            }
-
-            .item.expanded:hover .shortText::after {
-                content: '';
-            }
-
-            .item.expanded .longText {
-                display: block;
-            }
-
-            .item.expanded:hover .longText::after {
-                content: ' [–]';
-            }
-
-            /* .spacer {
-                @apply --layout-flex;
-            } */
-
-            /* @media (max-width: 768px) {
-                iron-list {
-                    margin: 16px;
-                    margin-top: 0px;
-                    display: flex;
-                    height: 100vh;
-                    flex-direction: column;
-                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-                }
-
-            } */
-
-            @media (min-width: 768px) {
-                iron-list {
-                    width: 100%;
-                    margin: 16px auto;
-                    margin-top: 0px;
-                    height: 100vh;
-                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-                }
-
             }
 
             app-header {
@@ -123,165 +29,46 @@
                 bottom: 32px;
                 float: right;
                 right: 32px;
-
             }
         </style>
 
-        <iron-ajax auto url="../dist/data.json" last-response="{{items}}"></iron-ajax>
+        <template is="dom-if" if="{{myRole}}">
+            <template is="dom-if" if="{{_secretary(myRole)}}">
+                <my-queue-secretary route="{{route}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
+                    my-role="{{myRole}}"></my-queue-secretary>
+            </template>
 
-        <app-header-layout fullbleed has-scrolling-region>
-            <app-header fixed slot="header">
-                <app-toolbar primary>
-                    <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                    <div main-title>Queue</div>
-                </app-toolbar>
-                <paper-tabs selected="{{tabs}}" scrollable fit-container>
-                    <paper-tab>Doctor A.</paper-tab>
-                    <paper-tab>Doctor B.</paper-tab>
-                    <paper-tab>Doctor C.</paper-tab>
-                    <paper-tab>Doctor D.</paper-tab>
-                </paper-tabs>
-            </app-header>
+            <template is="dom-if" if="{{_notSecretary(myRole)}}">
+                <my-queue-doctor route="{{route}}" my-key="{{myKey}}" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"
+                    my-role="{{myRole}}" token="[[token]]"></my-queue-doctor>
+            </template>
+        </template>
 
-            <paper-card class="card" id="first" style="display:block">
-                <div class="card-content">
-                    <iron-scroll-threshold id="threshold">
-                        <iron-list items="[[items]]" as="item" selection-enabled multi-selection scroll-target="threshold" style="height:400px;">
-                            <template>
-                                <!-- <div class="divSeparator"> -->
-                                <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
-                                    <iron-image class="avatar" sizing="contain" src="[[item.image]]"></iron-image>
-                                    <!-- <iron-icon icon="my-icons:person" slot="item-icon"></iron-icon>  -->
-                                    <div class="pad">
-                                        <div class="primary">[[item.name]]</div>
-                                        <div class="longText">[[item.longText]]</div>
-                                    </div>
-                                    <!-- <div class="shortText">[[item.shortText]]</div> -->
-                                    <!-- <iron-icon icon$="[[iconForItem(item)]]"></iron-icon> -->
-                                </div>
-                                <!-- </div>  -->
-                            </template>
-                        </iron-list>
-                    </iron-scroll-threshold>
-                </div>
-                <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_addDialog"></paper-fab>
-            </paper-card>
-
-            <paper-card class="card" id="second" style="display:none">
-                <div class="card-content">
-                    second
-                </div>
-            </paper-card>
-
-            <paper-card class="card" id="third" style="display:none">
-                <div class="card-content">
-                    third
-                </div>
-            </paper-card>
-
-            <paper-card class="card" id="fourth" style="display:none">
-                <div class="card-content">
-                    fourth
-                </div>
-            </paper-card>
-
-        </app-header-layout>
-        <!-- <a href="/queue/new" style="text-decoration: none;">
-            <paper-fab noink class="fab-menu" on-tap="_queueNew" icon="my-icons:add"></paper-fab>
-        </a>
-        <div name="/new">
-            <div id="StartNew"></div>
-            <my-new-patients id="d23" path="" prev-route="{{route.prefix}}"></my-new-patients>
-        </div> -->
     </template>
     <script>
         Polymer({
             is: 'my-queue',
             properties: {
-                tabs: {
-                    type: Number,
-                    observer: '_onSelected'
-                },
-                items: {
-                    type: Array,
-                    value: []
-                },
+                myKey: String,
+                token: String,
+                myRole: String,
+                myLocation: String,
+                myLocationCode: String,
+                route: Object
             },
-            iconForItem(item) {
-                return item ? (item.integer < 50 ? 'my-icons:star-border' : 'my-icons:star') : '';
-            },
-            getClassForItem(item, selected) {
-                return selected ? 'item expanded' : 'item';
-            },
-            // loadMoreDat() {
-            //     var self = this;
-            //     var people = e.detail.response.results;
-            //     people.forEach(function (element) {
-            //         self.push('items', element);
-            //     });
 
-            //     asyncStuff(function done() {
-            //         ironScrollTheshold.clearTriggers();
-            //     });
-            // },
-
-            _onSelected() {
-                var uno = Polymer.dom(this.root).querySelector("#first")
-                var dos = Polymer.dom(this.root).querySelector("#second")
-                var tres = Polymer.dom(this.root).querySelector("#third")
-                var kwatro = Polymer.dom(this.root).querySelector("#fourth")
-
-                if (this.tabs == 0) {
-                    uno.style.display = "block";
-                    dos.style.display = "none";
-                    tres.style.display = "none";
-                    kwatro.style.display = "none";
-                }
-                else if (this.tabs == 1) {
-                    dos.style.display = "block";
-                    uno.style.display = "none";
-                    tres.style.display = "none"
-                    kwatro.style.display = "none"
-                }
-                else if (this.tabs == 2) {
-                    tres.style.display = "block";
-                    uno.style.display = "none";
-                    dos.style.display = "none"
-                    kwatro.style.display = "none"
-                }
-                else {
-                    kwatro.style.display = "block";
-                    uno.style.display = "none";
-                    dos.style.display = "none"
-                    tres.style.display = "none"
+            _secretary(e) {
+                if (e) {
+                    if (e == 'Secretary') return true;
+                    else return false;
                 }
             },
-            _queueNew() {
-                var node = Polymer.dom(this.root).querySelector("#StartNew");
-                if (node) {
-                    var oldDiv = Polymer.dom(node.parentNode).querySelector("#d23");
-                    if (oldDiv) {
-                        Polymer.dom(node.parentNode).removeChild(oldDiv);
-                    }
-                    var newDiv = document.createElement("my-new-patients");
-                    newDiv.setAttribute("id", "d23");
-                    //  newDiv.setAttribute("prev-route", this.route.prefix);
-                    // newDiv.setAttribute("block", "3")
-                    //if open existing
-                    var currentDiv = document.getElementById("StartNew");
-                    Polymer.dom(node.parentNode).insertBefore(newDiv, currentDiv);
-                }
-            },
-            _addDialog() {
 
-            },
-            toggleDrawer() {
-                this.dispatchEvent(new CustomEvent('toggleDrawer', {
-                    bubbles: true, composed: true, detail: {
-                        narrow: this.$.narrow
-                    }
-                }));
-                this.$.narrow = !this.$.narrow;
+            _notSecretary(e) {
+                if (e) {
+                    if (e != 'Secretary') return true;
+                    else return false;
+                }
             }
         })
     </script>

@@ -14,7 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
@@ -22,13 +22,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/neon-animations.html">
 <link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/timeu-wizard/timeu-wizard.html">
+
+<link rel="import" href="image-resize.html">
+<link rel="import" href="global-functions.html">
 
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="my-icons.html">
-<link rel="import" href="image-resize.html">
 
 <dom-module id="my-patients-new">
   <template>
@@ -73,6 +75,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .mnu {
         padding: 13px;
+        height: 500px;
       }
 
       @media (min-width: 800px) {
@@ -96,21 +99,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         #info {
           display: flex;
         }
-
-        /* #video {
-          width: 400px;
-          height: 325px;
-        }
-
-        #canvas {
-          width: 400px;
-          height: 325px;
-        }
-
-        #btn-take {
-          padding: 10px 105px;
-          margin-left: -7px;
-        } */
       }
 
       @media (max-width: 800px) {
@@ -130,21 +118,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin-left: 16px;
           margin-right: 16px;
         }
-
-        /* #video {
-          width: 200px;
-          height: 200px;
-        }
-
-        #canvas {
-          width: 200px;
-          height: 200px;
-        }
-
-        #btn-take {
-          padding: 10px 60px;
-          margin-left: -7px; 
-        }*/
       }
 
       .avatar {
@@ -164,105 +137,65 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: gray;
         /* display: none; */
       }
+
+      .action paper-button {
+        height: 32px;
+        font-size: 12px;
+        font-weight: 400;
+        width: 80px;
+      }
+
+      paper-button.green {
+        background-color: var(--paper-green-500);
+        color: white;
+      }
+
+      #css {
+        --timeu-wizard-line-color: yellow;
+        --timeu-wizard-line-size: 3px;
+        --timeu-wizard-circle-size: 60px;
+        --timeu-wizard-filling-color: red;
+        --timeu-wizard-anim-speed: 1s;
+        --timeu-wizard-active-color: blue;
+        --timeu-wizard-label-font-size: 20px;
+        --timeu-wizard-step-font-size: 30px;
+        --timeu-wizard-circle-border-size: 2px;
+      }
+
+      #vertical {
+        margin-top: 16px;
+      }
     </style>
 
     <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" align="right">
         <div class="mnu" role="listbox">
-          <!-- <iron-selector selected="profile" attr-for-selected="name"> -->
-
-          <!-- on-tap="_selectPage" data-args="0" -->
-          <!-- <paper-item id="lotdetails">
-            <div class="circle-mini-first">1</div>
-            <span>Add to Queue</span>
-          </paper-item> -->
-
-          <!--  on-tap="_selectPage" id="0" -->
-          <paper-item id="0">
-            <div class="circle-mini-first" id="0">1</div>
-            <span id="0">Profile Picture</span>
-          </paper-item>
-
-          <!-- on-tap="_selectPage" data-args="2" -->
-          <paper-item id="1">
-            <div id="1" class="circle-mini">2</div>
-            <span id="1">Basic Information</span>
-          </paper-item>
-
-          <!-- on-tap="_selectPage" data-args="3" -->
-          <paper-item id="2">
-            <div id="2" class="circle-mini">3</div>
-            <span id="2">Insurance</span>
-          </paper-item>
-
-          <!-- on-tap="_selectPage" data-args="4" -->
-          <paper-item id="3">
-            <div id="3" class="circle-mini">4</div>
-            <span id="3">In-case of Emergency</span>
-          </paper-item>
-
-          <paper-item id="4">
-            <div id="4" class="circle-mini">5</div>
-            <span id="4">Finalize</span>
-          </paper-item>
-
-          <paper-item>
-            <div class="circle-mini-last">6</div>
-            <span>Completed</span>
-          </paper-item>
-          <!-- </iron-selector> -->
+          <timeu-wizard id="vertical" steps='["Profile Picture","Basic Information","Insurance","In-case of Emergency","Finalize","Completed"]'
+            vertical step="{{selectedStep}}">
+          </timeu-wizard>
         </div>
       </app-drawer>
-
 
       <app-header-layout id="appheader" has-scrolling-region>
         <app-header fixed slot="header">
           <app-toolbar>
-            <a href="/patients">
+            <a href="{{prevRoute}}">
               <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
             </a>
-            <div main-title>Add Patient</div>
-            <!-- <paper-menu-button>
-              <paper-icon-button noink style="color: white; margin-right:-15px;" icon="my-icons:more-vert" slot="dropdown-trigger" alt="bottom align"></paper-icon-button>
-              <paper-listbox slot="dropdown-content" style="cursor:pointer">
-                <paper-item>Discard</paper-item>
-                <paper-item>Delete</paper-item>
-              </paper-listbox>
-            </paper-menu-button>
-            <paper-icon-button noink style="color: white;" icon="my-icons:menu" on-tap="drawer.toggle()"></paper-icon-button> -->
+            <div main-title>Add {{_label(prevRoute)}}</div>
             <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle></paper-icon-button>
           </app-toolbar>
         </app-header>
 
-        <firebase-query id="query" path="{{path}}" data="{{patientsLength}}">
-        </firebase-query>
-
         <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
-
-          <!-- <neon-animatable>
-            <div class="docu">
-
-              <div class="docu-header">
-                <span>1. Add to Queue</span>
-              </div>
-
-              <div class="details">
-                <paper-input></paper-input>
-              </div>
-
-            </div>
-          </neon-animatable> -->
 
           <neon-animatable>
             <div class="docu">
-
               <div class="docu-header">
                 <span>1. Profile Picture</span>
               </div>
 
               <div class="details" style="text-align:center">
-
-                <!-- <canvas style="border-radius:50%; display:none" id="myCanvass"></canvas> -->
                 <img id="profilePic" style="width:200px; height:200px; border-radius:50%;" src="../images/user.png">
                 <br>
                 <div class="upload-btn-wrapper">
@@ -270,46 +203,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <input on-change="_changepic" id="myfile" type="file" name="myfile" accept="image/*" />
                 </div>
                 <br>
-                <!-- <span id="err" style="display:none; font-size:6px;">No file chosen</span> -->
-                <!-- <div id="select"> -->
-                <!-- <div style="margin-top:8px;">
-                    <div class="upload-btn-wrapper">
-                      <button class="myBtn">Take a photo</button>
-                      <input type="file" name="myfile" accept="image/*" />
-                    </div>
-                  </div> -->
-                <!-- <div id="recordMe" style="display:none">
-                  <video style="border:2px solid #ddbff5" id="video" autoplay></video>
-                  <br>
-                  <button class="myBtn" id="btn-take" on-tap="snapMe">Capture</button>
-                </div>
-
-                <div id="ohSnap" style="display:none;"> -->
-                <!-- <button id="snap" on-tap="snapMe">Snap Photo</button> -->
-                <!-- <canvas style="border:2px solid #ddbff5;" id="canvas"></canvas>
-                  <br>
-                  <button class="myBtn" id="btn-take" on-tap="_discard">Discard</button>
-                </div> -->
-                <!-- <br>
-                <div style="text-align:center; margin-top:15px;">
-                  <div class="upload-btn-wrapper">
-                    <button class="btn">Take a photo</button>
-                    <input type="file" name="myfile1" accept="image/*" />
-                  </div>
-                  <br>
-                  <div class="upload-btn-wrapper">
-                    <button class="btn">Upload a photo</button>
-                    <input type="file" name="myfile3" accept="image/*,video/*" />
-                  </div>
-                </div> -->
-                <!-- </div> -->
-
               </div>
             </div>
           </neon-animatable>
 
           <neon-animatable>
-
             <div class="docu">
               <div class="docu-header">
                 <span>2. Basic Information</span>
@@ -323,27 +221,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
                 <paper-input id="email" value="{{email}}" label="E-mail Address"></paper-input>
                 <div id="info">
-                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$" auto-validate
+                  <paper-input placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$"
                     error-message="Invalid date format!" value="{{bday}}" label="Birth date" style="width:100%;margin-right:10px"></paper-input>
                   <paper-input value="{{age}}" label="Age" style="width:100%;"></paper-input>
-                  <!-- <span>Age: {{age}}</span> -->
                 </div>
                 <div id="info">
-                  <paper-dropdown-menu-light label="Marital Status" style="width:100%; margin-right:10px">
-                    <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{status}}" class="dropdown-content">
-                      <paper-item id="item">Single</paper-item>
-                      <paper-item id="item">Married</paper-item>
-                      <paper-item id="item">Divorced</paper-item>
-                      <paper-item id="item">Separated</paper-item>
-                      <paper-item id="item">Widowed</paper-item>
+                  <paper-dropdown-menu label="Marital Status" style="width:100%; margin-right:10px">
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" attr-for-selected="name" selected="{{status}}"
+                      class="dropdown-content">
+                      <paper-item id="item" name="Single">Single</paper-item>
+                      <paper-item id="item" name="Married">Married</paper-item>
+                      <paper-item id="item" name="Divorced">Divorced</paper-item>
+                      <paper-item id="item" name="Separated">Separated</paper-item>
+                      <paper-item id="item" name="Widowed">Widowed</paper-item>
                     </paper-listbox>
-                  </paper-dropdown-menu-light>
-                  <paper-dropdown-menu-light label="Gender" style="width:100%; margin-right:10px">
-                    <paper-listbox slot="dropdown-content" style="cursor:pointer" selected="{{sex}}" class="dropdown-content">
-                      <paper-item id="item">Male</paper-item>
-                      <paper-item id="item">Female</paper-item>
+                  </paper-dropdown-menu>
+                  <paper-dropdown-menu label="Gender" style="width:100%; margin-right:10px">
+                    <paper-listbox slot="dropdown-content" style="cursor:pointer" attr-for-selected="name" selected="{{sex}}"
+                      class="dropdown-content">
+                      <paper-item id="item" name="Male">Male</paper-item>
+                      <paper-item id="item" name="Female">Female</paper-item>
                     </paper-listbox>
-                  </paper-dropdown-menu-light>
+                  </paper-dropdown-menu>
                   <paper-input type="number" value="{{contact}}" label="Contact Number" style="width:100%;"></paper-input>
                 </div>
                 <paper-input value="{{address}}" label="Street Address"></paper-input>
@@ -381,7 +280,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div id="info">
                   <paper-input value="{{card}}" Label="ID Card Number" style="width:100%; margin-right:10px"></paper-input>
                   <paper-input value="{{bdate}}" placeholder="mm/dd/yyyy" pattern="^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$"
-                    auto-validate error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
+                    error-message="Invalid date format!" Label="Birth date" style="width:100%;"></paper-input>
                 </div>
                 <paper-input value="{{in_address}}" Label="Address (If different)"></paper-input>
                 <paper-input value="{{home_phone}}" type="number" Label="Home phone no."></paper-input>
@@ -420,7 +319,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </neon-animatable>
 
           <neon-animatable>
-
             <div style="margin-right:10px">
               <div style="float:right; padding:16px; margin-top:-34px;">
                 <paper-input type="date" value="{{todayDate}}" style="width:150px">
@@ -436,10 +334,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div class="docu-header">5. Finalize</div>
 
               <div class="details">
-                <!-- <div style="margin-bottom:10px;">Please review the following details:</div> -->
                 <img id="p_profile" src="../images/user.png" class="avatar">
-
-                <!-- <div style="font-weight:bold">Basic Information</div> -->
 
                 <table style="margin-bottom:6px;">
                   <tr>
@@ -496,7 +391,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </td>
                     <td></td>
                     <td></td>
-                    <td style="color:rgb(37, 37, 37)">{{stat}}</td>
+                    <td style="color:rgb(37, 37, 37)">{{status}}</td>
                   </tr>
                   <tr>
                     <td>
@@ -504,7 +399,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </td>
                     <td></td>
                     <td></td>
-                    <td style="color:rgb(37, 37, 37)">{{gender}}</td>
+                    <td style="color:rgb(37, 37, 37)">{{sex}}</td>
                   </tr>
                   <tr>
                     <td>
@@ -536,7 +431,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </td>
                     <td></td>
                     <td></td>
-                    <td style="color:rgb(37, 37, 37)">{{occupation}}</td>
+                    <td style="color:rgb(37, 37, 37)">{{employer}}</td>
                   </tr>
                   <tr>
                     <td>
@@ -643,40 +538,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <td style="color:rgb(37, 37, 37)">{{work_phone}}</td>
                   </tr>
                 </table>
-
-
-
-                <!-- <div style="margin-left:10px;">
-                  <div>Email address: {{email}}</div>
-                  <div>Firstname: {{fname}}</div>
-                  <div>Middlename: {{mname}}</div>
-                  <div>Lastname: {{lname}}</div>
-                  <div>Birth date: {{bday}}</div>
-                  <div>Age: {{age}}</div>
-                  <div>Marital Status: {{stat}}</div>
-                  <div>Sex: {{gender}}</div>
-                  <div>Contact no: {{contact}}</div>
-                  <div>Street address: {{address}}</div>
-                  <div>Occupation: {{occupation}}</div>
-                  <div>Employer: {{employer}}</div>
-                  <div>Employer phone no: {{emp_phone}}</div>
-                </div>
-                <div style="font-weight:bold">Insurance</div>
-                <div style="margin-left:10px;">
-                  <div>ID Card no: {{card}}</div>
-                  <div>Birth date: {{bdate}}</div>
-                  <div>address: {{in_address}}</div>
-                  <div>Home phone no: {{home_phone}}</div>
-                  <div>Primary insurance: {{indicate}}</div>
-                  <div>Relationship to patient: {{p_relation}}</div>
-                </div>
-                <div style="font-weight:bold">In-case of emergency</div>
-                <div style="margin-left:10px;">
-                  <div>Name: {{name_e}}</div>
-                  <div>Relationship to patient: {{relation_e}}</div>
-                  <div>Home phone no: {{phone_e}}</div>
-                  <div>Work phone no: {{work_phone}}</div>
-                </div> -->
               </div>
             </div>
             <br>
@@ -690,8 +551,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <div class="details">
                 <div id="saveSuccess" style="color: green; display:none;">Patient successfully saved.
-                  <br> Patient no
-                  <b style="color:blue">{{no}}</b>
+                  <p id="p" style="margin-top:-4px">Patient no: <b style="color:#1976d2">[[patientNo]]</b></p>
                 </div>
                 <div id="saveLoad" style="color: orange; display:none;">Saving patient info.</div>
                 <div id="saveFailed" style="color: red; display:none;">Opps! Something went wrong while saving patient.</div>
@@ -708,11 +568,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-fab style="background: #1976d2;" id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
         </div>
         <div hidden$="[[favrighthide]]">
-          <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right" on-tap="_select2"></paper-fab>
+          <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right"
+            on-tap="_select2"></paper-fab>
         </div>
       </div>
 
     </app-drawer-layout>
+
+    <salte-dialog no-auto-fullscreen id="queueDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2 style="font-size: 16px; background: #1E88E5">Confirmation required!</h2>
+      <span>Would you like to add this patient to queue?</span>
+      <div class="buttons">
+        <paper-button on-tap="_selectDate" dialog-confirm autofocus>Yes</paper-button>
+        <paper-button on-tap="_addPatient" dialog-dismiss>No</paper-button>
+      </div>
+    </salte-dialog>
+
+    <salte-dialog no-auto-fullscreen id="dateDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2 style="font-size: 16px; background: #1E88E5">When?</h2>
+      <span>
+        <paper-input type="date" value="{{pickDate}}" label="Pick a date" always-float-label>
+          <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+        </paper-input>
+        <div style="margin-left:4px;margin-top:-6px;">
+          <span id="pickDateText" style="font-size:14px; color:gray; font-weight:50">{{pickText}}</span>
+        </div>
+      </span>
+      <div class="buttons">
+        <paper-button id="dateDialogBtn" dialog-confirm autofocus on-tap="_queuePatient">OK</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
+      </div>
+    </salte-dialog>
 
   </template>
 
@@ -726,7 +612,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true
         },
         myKey: String,
-        selectedPage: Number,
+        prevRoute: String,
+        myQueue: String,
+        myLocation: String,
+        myLocationCode: String,
+        selectedPage: {
+          type: Number,
+          value: 0
+        },
         entryanimation: {
           type: String,
           value: "slide-from-right-animation"
@@ -741,123 +634,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         favrighthide: {
           type: Boolean,
-          value: true
-        },
-        mname: {
-          type: String,
-          value: ''
-        },
-        email: {
-          type: String,
-          value: ''
-        },
-        bday: {
-          type: String,
-          value: ''
-        },
-        age: {
-          type: String,
-          value: ''
-        },
-        contact: {
-          type: String,
-          value: ''
-        },
-        address: {
-          type: String,
-          value: ''
-        },
-        occupation: {
-          type: String,
-          value: ''
-        },
-        employer: {
-          type: String,
-          value: ''
-        },
-        emp_phone: {
-          type: String,
-          value: ''
-        },
-        gender: {
-          type: String,
-          value: ''
-        },
-        stat: {
-          type: String,
-          value: ''
-        },
-        doctor: {
-          type: String,
-          value: ''
-        },
-        hospital_name: {
-          type: String,
-          value: ''
-        },
-
-        card: {
-          type: String,
-          value: ''
-        },
-        bdate: {
-          type: String,
-          value: ''
-        },
-        in_address: {
-          type: String,
-          value: ''
-        },
-        home_phone: {
-          type: String,
-          value: ''
-        },
-        indicate: {
-          type: String,
-          value: ''
-        },
-        p_relation: {
-          type: String,
-          value: ''
-        },
-
-        name_e: {
-          type: String,
-          value: ''
-        },
-        relation_e: {
-          type: String,
-          value: ''
-        },
-        phone_e: {
-          type: String,
-          value: ''
-        },
-        work_phone: {
-          type: String,
-          value: ''
+          value: false
         },
         profile: String,
-        personal: Object,
-        insurance: Object,
-        emergency: Object,
-        length: {
-          type: Number,
-          value: 0
-        },
-        todayDate: String
-        // canvas: String,
-        // context: String,
-        // video: String,
-        // localstream: Object,
+        patientPushKey: String
       },
 
       observers: [
-        'personalInfoChanged(doctor,refer,hospital_name,email,fname,mname,lname,bday,age,contact,address,occupation,employer,emp_phone,sex,status)',
-        'insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation)',
-        'emergencyChanged(name_e, relation_e, phone_e, work_phone)',
-        '_todayDateChanged(todayDate)'
+        'personalInfoChanged(fname, mname, lname, bday, age)',
+        '_selectedPageChanged(selectedPage)',
+        '_todayDateChanged(todayDate)',
+        '_pickDateChanged(pickDate)',
+        '_referChanged(refer)'
       ],
+
+      ready() {
+        this.todayDate = formatTodayDate(new Date());
+        this.pickDate = formatTodayDate(new Date());
+      },
+
+      _pickDateChanged(date) {
+        if (date) {
+          this.$.dateDialogBtn.disabled = false;
+          Polymer.dom(this.root).querySelector("#pickDateText").setAttribute('style', 'font-size:14px;color:gray');
+          this.pickText = formatWeekDate(date);
+        }
+        else {
+          this.$.dateDialogBtn.disabled = true;
+          Polymer.dom(this.root).querySelector("#pickDateText").setAttribute('style', 'font-size:12px;color:red');
+          this.pickText = 'Please pick a date.';
+        }
+      },
+
+      _selectedPageChanged(page) {
+        this.selectedStep = page + 1;
+      },
 
       _todayDateChanged(date) {
         var monthNames = [
@@ -880,64 +691,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      // _selectPage(e) {
-      //   var select = Polymer.dom(e).rootTarget.getAttribute("id");
-      //   this.selectedPage = select;
-      // },
-
-      personalInfoChanged(doctor, refer, hospital_name, email, fname, mname, lname, bday, age, contact, address, occupation, employer, emp_phone, sex, status) {
-        if (fname) {
-          this.fname = fname.toUpperCase();
-          fname = fname.toUpperCase();
+      _referChanged(e) {
+        if (e == 'Dr') {
+          Polymer.dom(this.root).querySelector("#doctor").style.display = 'block';
+          Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
+          this.referredby = 'Dr. ' + this.doctor;
+          this.hospital_name = '';
         }
-
-        if (mname) {
-          this.mname = mname.toUpperCase();
-          mname = mname.toUpperCase();
+        else if (e == 'Hospital') {
+          Polymer.dom(this.root).querySelector("#hospital").style.display = 'block';
+          Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+          this.doctor = '';
+          this.hospital_name = this.hospital_name;
+          this.referredby = this.hospital_name;
         }
-
-        if (lname) {
-          this.lname = lname.toUpperCase();
-          lname = lname.toUpperCase();
+        else {
+          Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
+          Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
+          this.doctor = '';
+          this.hospital_name = ''
+          this.referredby = e;
         }
+      },
+
+      personalInfoChanged(fname, mname, lname, bday) {
+        if (fname) this.fname = fname.toUpperCase();
+        if (mname) this.mname = mname.toUpperCase();
+        if (lname) this.lname = lname.toUpperCase();
 
         if (bday) {
-          var dateformat = /^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$/;
-          if (bday.match(dateformat)) {
-
-            var mdate = bday.toString();
-
-            var monthThen = parseInt(mdate.substring(0, 2), 10);
-            var dayThen = parseInt(mdate.substring(3, 5), 10);
-            var yearThen = parseInt(mdate.substring(6, 10), 10);
-
-            // yyyy-mm-dd
-            bday = yearThen + '-' + monthThen + '-' + dayThen;
-
-            // bday = new Date(mydate);
-
-            var daysBetweenDates;
-            daysBetweenDates = function (d1, d2) {
-              var diffDays, oneDay;
-              oneDay = 24 * 60 * 60 * 1000;
-              diffDays = (d2 - Date.parse(d1)) / oneDay;
-              return diffDays;
-            };
-
-            var ageNum = daysBetweenDates(bday, new Date()) / 365;
-
-            function N(num, places) {
-              return +(Math.round(num + "e+" + places) + "e-" + places);
-            }
-
-            var x = N(ageNum, 3);
-
-            if (x <= 0) {
-              this.age = 0;
-            }
-            else {
-              this.age = x;
-            }
+          var newdateformat = /^([0-9]{4})[\/\-](0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])$/;
+          bday = formatTodayDate(bday);
+          if (bday.match(newdateformat)) {
+            this.age = this._calculateAge(bday);
           }
           else {
             this.age = '';
@@ -947,131 +733,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.age = '';
         }
 
-        if (refer) {
-          if (refer == 'Dr') {
-            Polymer.dom(this.root).querySelector("#doctor").style.display = 'block';
-            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
-            doctor = doctor;
-            this.referredby = 'Dr. ' + doctor;
-            hospital_name = '';
-            this.hospital_name = '';
-          }
-          else if (refer == 'Hospital') {
-            Polymer.dom(this.root).querySelector("#hospital").style.display = 'block';
-            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
-            this.doctor = '';
-            doctor = '';
-            this.hospital_name = hospital_name;
-            hospital_name = hospital_name;
-            this.referredby = hospital_name;
-          }
-          else {
-            Polymer.dom(this.root).querySelector("#doctor").style.display = 'none';
-            Polymer.dom(this.root).querySelector("#hospital").style.display = 'none';
-            this.doctor = '';
-            doctor = '';
-            this.hospital_name = '';
-            hospital_name = '';
-            this.referredby = refer;
-          }
-        }
-        else {
-          refer = '';
-        }
-
-        if (sex == 0) {
-          this.gender = 'Male';
-        }
-        if (sex == 1) {
-          this.gender = 'Female';
-        }
-        if (status == 0) {
-          this.stat = 'Single';
-        }
-        if (status == 1) {
-          this.stat = 'Married';
-        }
-        if (status == 2) {
-          this.stat = 'Divorced'
-        }
-        if (status == 3) {
-          this.stat = 'Separated';
-        }
-        if (status == 4) {
-          this.stat = 'Widowed';
-        }
-
         if (!fname || !lname) {
-          this.favrighthide = true;
+          if (this.selectedPage === 1) {
+            this.favrighthide = true;
+          }
         }
         else {
-          // console.log(bday);
           this.favrighthide = false;
-          this.personal = {
-            email: email,
-            firstname: fname,
-            middlename: mname,
-            lastname: lname,
-            birthday: bday,
-            status: this.stat,
-            sex: this.gender,
-            contact: contact,
-            address: address,
-            occupation: occupation,
-            employer: employer,
-            emp_phone: emp_phone,
-            referred: refer,
-            doctor: doctor,
-            hospital: hospital_name,
-            name: lname + ', ' + fname + ' ' + mname
-          }
         }
       },
 
-      insuranceChanged(card, bdate, in_address, home_phone, indicate, p_relation) {
-        var date = '';
-        if (bdate) {
-          var dateformat = /^(0[1-9]|1[0-2])[\/\-](0[1-9]|1\d|2\d|3[01])[\/\-]([0-9]{4})$/;
-          if (bdate.match(dateformat)) {
-            this.ibd = bdate;
-            date = bdate;
-          }
-          else {
-            this.ibd = '';
-            date = '';
-          }
-        }
-        else {
-          this.ibd = '';
-          date = '';
+      _calculateAge(bday) {
+        var daysBetweenDates;
+        daysBetweenDates = function (d1, d2) {
+          var diffDays, oneDay;
+          oneDay = 24 * 60 * 60 * 1000;
+          diffDays = (d2 - Date.parse(d1)) / oneDay;
+          return diffDays;
+        };
+
+        var ageNum = daysBetweenDates(bday, new Date()) / 365;
+
+        function N(num, places) {
+          return +(Math.round(num + "e+" + places) + "e-" + places);
         }
 
-        this.insurance = {
-          card: card,
-          birthday: bdate,
-          address: in_address,
-          home_phone: home_phone,
-          primary_insurance: indicate,
-          relationship: p_relation
-        }
+        var x = N(ageNum, 3);
+
+        if (x <= 0) return 0;
+        else return x;
       },
 
-      emergencyChanged(name_e, relation_e, phone_e, work_phone) {
-        this.emergency = {
-          name: name_e,
-          relationship: relation_e,
-          home_phone: phone_e,
-          work_phone: work_phone
-        }
+      _label(e) {
+        return e.charAt(1).toUpperCase() + e.slice(2).replace("s", "");
       },
 
       _changepic(e) {
         if (e.target.files.length > 0) {
-          // Polymer.dom(this.root).querySelector("#err").style.display = 'none';
           var img = Polymer.dom(this.root).querySelector("#profilePic");
           var i = Polymer.dom(this.root).querySelector("#p_profile");
-
-          this.profile = e.target.files[0];
 
           var reader = new FileReader();
           reader.onload = function (e) {
@@ -1079,11 +779,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             i.src = e.target.result;
           };
           reader.readAsDataURL(e.target.files[0]);
+
+          var profile = e.target.files[0];
+          var pic_name = new Date().getTime() + '.' + profile.type.substring(6);
+          var self = this;
+
+          if (profile.size > 9999) {
+            ImageTools.resize(profile, { width: 440, height: 400 }, function (blob, didItResize) {
+              self.profile = { name: pic_name, blob: blob }
+            });
+          }
+          else {
+            self.profile = { name: pic_name, blob: profile }
+          }
         }
         else {
+          this.profile = null;
           Polymer.dom(this.root).querySelector("#profilePic").src = '../images/user.png';
           Polymer.dom(this.root).querySelector("#p_profile").src = '../images/user.png';
-          // Polymer.dom(this.root).querySelector("#err").style.display = 'inline-block';
         }
       },
 
@@ -1096,30 +809,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.narrow = !this.$.narrow;
       },
 
-      formatTodayDate(date) {
-        var monthNames = [
-          "01", "02", "03",
-          "04", "05", "06", "07",
-          "08", "09", "10",
-          "11", "12"
-        ];
-
-        var day = date.getDate();
-        if (day < 10) { day = '0' + day };
-        var monthIndex = date.getMonth();
-        var year = date.getFullYear();
-
-        return year + '-' + monthNames[monthIndex] + '-' + day;
-      },
-
-      ready() {
-        this.selectedPage = 0;
-        this.favrighthide = false;
-        this.todayDate = this.formatTodayDate(new Date());
-        // this.canvas = Polymer.dom(this.root).querySelector("#canvas");
-        // this.context = this.canvas.getContext('2d');
-        // this.video = Polymer.dom(this.root).querySelector("#video");
-        // this.imgHolder = Polymer.dom(this.root).querySelector("#profilePic");
+      _selectDate() {
+        this.$.dateDialog.open();
       },
 
       _select1(e) {
@@ -1181,90 +872,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
 
-          // if (parseInt(this.selectedPage) == 1) {
-          //   if (!this.card || !this.bdate || !this.in_address || !this.home_phone || !this.indicate || !this.p_relation) {
-          //     this.favlefthide = false;
-          //     this.favrighthide = true;
-          //   }
-          //   else {
-          //     this.favlefthide = false;
-          //     this.favrighthide = false;
-          //   }
-          // }
-
-          // if (parseInt(this.selectedPage) == 2) {
-          //   if (!this.name_e || !this.relation_e || !this.phone_e || !this.work_phone) {
-          //     this.favlefthide = false;
-          //     this.favrighthide = true;
-          //   }
-          //   else {
-          //     this.favlefthide = false;
-          //     this.favrighthide = false;
-          //   }
-          // }
-
           if (parseInt(this.selectedPage) == 4) {
-            //complete
-            var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
-            var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
-            var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
 
-            var info = this.personal, insure = this.insurance, emerg = this.emergency;
-            var mykey = this.myKey;
-            var today = this.todayDate;
-
-            saveLoad.style.display = 'block';
-            var ref = firebase.database().ref("/" + mykey + "/patients");
-            var push = ref.push({
-              personal: info,
-              insurance: insure,
-              emergency: emerg,
-              created: today
-            });
-
-            if (push.key) {
-              this.path = '/' + mykey + '/patients';
-              var num = this.patientsLength.length;
-              this.no = this._patientsNoUpdate(num, mykey, push.key);
-              this._reportsUpdate(today, mykey);
-
-              if (this.profile) {
-                var ext = this.profile.type.substring(6);
-                var pic_name = this.randomString(8) + '.' + ext;
-
-                if (this.profile.size > 9999) {
-                  ImageTools.resize(this.profile, {
-                    width: 440, // maximum width
-                    height: 400 // maximum height
-                  }, function (blob, didItResize) {
-                    var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
-                    storageRef.put(blob).then(function (snapshot) {
-                      firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
-                    });
-
-                  });
-                }
-                else {
-                  var storageRef = firebase.storage().ref('profilePicture/' + pic_name);
-                  storageRef.put(this.profile).then(function (snapshot) {
-                    firebase.database().ref("/" + mykey + "/patients/" + push.key + "/profile").set(snapshot.downloadURL);
-                  });
-                }
+            if (!this.myQueue) {
+              if (this.myLocation == "(not set)") {
+                this._insertNewPatient(false, this.myKey, '', '', '', '');
               }
-
-              saveLoad.style.display = 'none';
-              saveSucc.style.display = 'block';
+              else {
+                Polymer.dom(this.root).querySelector("#queueDialog").open();
+              }
             }
             else {
-              this.path = '';
-              saveLoad.style.display = 'none';
-              saveErr.style.display = 'block';
+              this.$.dateDialog.open();
             }
           }
 
-          if (parseInt(this.selectedPage) !== 5) {
-
+          if (parseInt(this.selectedPage) < 4) {
             this.selectedPage = (parseInt(this.selectedPage) + 1);
+          }
+
+          if (parseInt(this.selectedPage) !== 5) {
 
             if (parseInt(this.selectedPage) == 4) {
               Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
@@ -1284,25 +911,119 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _patientsNoUpdate(num, mykey, pushkey) {
-        if (num > 0 && num < 10) {
-          num = '000' + num;
-        }
-        else if (num > 9 && num < 100) {
-          num = '00' + num;
-        }
-        else if (num > 99 && num < 1000) {
-          num = '0' + num;
-        }
-        else if (num > 999) {
-          num = num;
-        }
-        else {
-          num = '0000';
-        }
+      _addPatient() {
+        this.favlefthide = true;
+        this.favrighthide = true;
+        this.selectedPage = (parseInt(this.selectedPage) + 1);
 
-        firebase.database().ref("/" + mykey + "/patients/" + pushkey + "/no").set(num);
-        return num;
+        this._insertNewPatient(false, this.myKey, '', '', '', '');
+      },
+
+      _queuePatient() {
+        this.favlefthide = true;
+        this.favrighthide = true;
+        this.selectedPage = (parseInt(this.selectedPage) + 1);
+        this._insertNewPatient(true, this.myKey, this.myLocation, this.myLocationCode, 'yes', this.pickDate);
+      },
+
+      _insertNewPatient(isQue, mykey, myLocation, myLocationCode, add2Que, pickDate) {
+        var saveLoad = Polymer.dom(this.root).querySelector("#saveLoad");
+        var saveSucc = Polymer.dom(this.root).querySelector("#saveSuccess");
+        var saveErr = Polymer.dom(this.root).querySelector("#saveFailed");
+        var today = this.todayDate;
+        var self = this;
+
+        var ref = firebase.database().ref("/" + mykey + "/patients");
+        var noRef = firebase.database().ref("/" + mykey + "/uniqueId/patients");
+
+        saveLoad.style.display = 'block';
+        noRef.once('value').then(function (data) {
+          var num = (data.val() ? data.val() : 0) + 1;
+          var no = generateUniqueId(num);
+
+          var push = ref.push({
+            personal: {
+              email: self.email,
+              firstname: self.fname,
+              middlename: self.mname,
+              lastname: self.lname,
+              birthday: formatTodayDate(self.bday),
+              status: self.status ? self.status : "",
+              sex: self.sex ? self.sex : "",
+              contact: self.contact,
+              address: self.address,
+              occupation: self.occupation,
+              employer: self.employer,
+              emp_phone: self.emp_phone,
+              referred: self.refer ? self.refer : "",
+              doctor: self.doctor,
+              hospital: self.hospital_name,
+              name: self.lname + ', ' + self.fname + ' ' + self.mname,
+              clinic_location: self.myLocation
+            },
+            insurance: {
+              card: self.card,
+              birthday: formatTodayDate(self.bdate),
+              address: self.in_address,
+              home_phone: self.home_phone,
+              primary_insurance: self.indicate,
+              relationship: self.p_relation
+            },
+            emergency: {
+              name: self.name_e,
+              relationship: self.relation_e,
+              home_phone: self.phone_e,
+              work_phone: self.work_phone
+            },
+            created: today,
+            no: no
+          });
+
+          if (push.key) {
+            noRef.set(num);
+            self.patientNo = no;
+            self._reportsUpdate(today, mykey);
+
+            if (self.profile) {
+              var storageRef = firebase.storage().ref('profilePicture/' + self.profile.name);
+              storageRef.put(self.profile.blob).then(function (snapshot) {
+                ref.child(push.key).update({ profile: snapshot.downloadURL });
+                self.downloadURL = snapshot.downloadURL;
+              });
+            }
+
+            if (add2Que) {
+              var queueData = {
+                patient_info: {
+                  firstname: self.fname,
+                  middlename: self.mname,
+                  lastname: self.lname,
+                  birthday: formatTodayDate(self.bday),
+                  sex: self.sex ? self.sex : "",
+                  name: self.lname + ', ' + self.fname + ' ' + self.mname,
+                  hmo: self.indicate
+                },
+                patient_profile: self.downloadURL ? self.downloadURL : null,
+                patient_refKey: push.key,
+                patient_no: no,
+                queueLocation: myLocation,
+                isCancel: false,
+                isQueue: true,
+                isNext: true,
+                queueNo: 1,
+                xy: "y"
+              }
+
+              self._locateNextQueue(mykey, queueData, pickDate);
+            }
+
+            saveLoad.style.display = 'none';
+            saveSucc.style.display = 'block';
+          } else {
+            saveLoad.style.display = 'none';
+            saveErr.style.display = 'block';
+          }
+        });
       },
 
       _reportsUpdate(today, mykey) {
@@ -1325,73 +1046,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       },
 
-      randomString(n) {
-        var r = "";
-        while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
-        return r;
-      }
+      _locateNextQueue(mykey, queueData, pickDate) {
+        var queueRef = firebase.database().ref("/" + mykey + "/queue/" + queueData.queueLocation + "/" + pickDate);
+        queueRef.once('value').then(function (snapshot) {
+          if (snapshot.exists()) {
+            queueRef.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
+              if (hasNext.exists()) {
+                queueData.isNext = false;
+                queueData.queueNo = snapshot.numChildren() + 1;
+                queueRef.push(queueData);
+              }
+              else {
+                queueData.queueNo = snapshot.numChildren() + 1;
+                queueRef.push(queueData);
+              }
+            });
+          }
+          else {
+            queueRef.push(queueData);
+          }
+        });
+      },
 
-      // _select2(e) {
-      //   this.entryanimation = "slide-from-right-animation";
-      //   this.exitanimation = "slide-left-animation";
-
-      //   if (parseInt(this.selectedPage) !== 4) {
-      //     this.selectedPage = (parseInt(this.selectedPage) + 1);
-      //     Polymer.dom(this.root).querySelector("#favleft").setAttribute("style", "background: #1976d2;");
-      //     Polymer.dom(this.root).querySelector("#favleft").setAttribute("icon", "my-icons:chevron-left");
-      //     this.favlefthide = false;
-      //   }
-      //   else {
-      //     this.selectedPage = 0;
-      //     this.favlefthide = true;
-      //   }
-
-      // },
-
-      // _discard() {
-      //   Polymer.dom(this.root).querySelector("#select").style.display = 'block';
-      //   Polymer.dom(this.root).querySelector("#recordMe").style.display = 'none';
-      //   Polymer.dom(this.root).querySelector("#ohSnap").style.display = 'none';
-      // },
-
-      // snapMe() {
-      //   Polymer.dom(this.root).querySelector("#select").style.display = 'none';
-      //   Polymer.dom(this.root).querySelector("#recordMe").style.display = 'none';
-      //   Polymer.dom(this.root).querySelector("#ohSnap").style.display = 'block';
-
-      //   this.context.drawImage(this.video, 0, 0, 300, 150);
-      //   if (this.context) {
-      //     this.localstream.getTracks().forEach((track) => {
-      //       track.stop();
-      //     })
-      //   }
-      // },
-
-      // _capture() {
-      //   Polymer.dom(this.root).querySelector("#select").style.display = 'none';
-      //   Polymer.dom(this.root).querySelector("#recordMe").style.display = 'block';
-      //   Polymer.dom(this.root).querySelector("#ohSnap").style.display = 'none';
-
-      //   var video = this.video;
-      //   vendorUrl = window.URL || window.webkitURL;
-
-      //   // navigator.getMedia = navigator.getUserMedia ||
-      //   //   navigator.webkitGetUserMedia ||
-      //   //   navigator.mozGetUserMedia ||
-      //   //   navigator.msGetUserMedia;
-      //   navigator.mediaDevices.getUserMedia({
-      //     video: true,
-      //     audio: false
-      //   })
-      //     .then(stream => {
-      //       this.localstream = stream;
-      //       video.src = vendorUrl.createObjectURL(stream);
-      //       video.play();
-      //     })
-      //     .catch((err) => {
-      //       window.alert(err);
-      //     });
-      // }
     })
   </script>
 </dom-module>
