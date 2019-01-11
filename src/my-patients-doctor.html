@@ -1,0 +1,599 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
+
+<link rel="import" href="global-functions.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="shared-styles.html">
+
+<link rel="lazy-import" href="my-patients-new.html">
+<link rel="lazy-import" href="my-patients-view.html">
+<link rel="lazy-import" href="my-patients-edit.html">
+
+<dom-module id="my-patients-doctor">
+  <template>
+    <style include="shared-styles">
+      :host {
+        height: 100vh;
+        margin: 0;
+
+        display: flex;
+        flex-direction: column;
+      }
+
+      .item {
+        @apply --layout-horizontal;
+        padding: 15px;
+        background-color: white;
+        border-bottom: 1px solid #ddd;
+        cursor: pointer;
+        /* margin-bottom: 5px; */
+      }
+
+      .item:hover {
+        box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
+      }
+
+      .avatar {
+        height: 45px;
+        width: 45px;
+        border: 2px solid white;
+        border-radius: 50%;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+
+      .pad {
+        margin-left: 10px;
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
+
+      .primary {
+        font-size: 14px;
+        font-weight: 400;
+      }
+
+      .shortText,
+      .longText {
+        font-size: 14px;
+      }
+
+      .longText {
+        color: gray;
+        /* display: none; */
+      }
+
+      .spacer {
+        @apply --layout-flex;
+      }
+
+      @media (max-width: 768px) {
+        iron-list {
+          margin: 8px;
+          display: flex;
+          flex-direction: column;
+          /* margin-top: 0px; */
+          /* height: 100vh; */
+          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
+        }
+
+        .ph-item {
+          margin: 8px;
+          padding: 16px;
+        }
+
+        .ph-col-1 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 20%;
+          flex: 0 0 20%
+        }
+
+        .ph-col-10 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 80%;
+          flex: 0 0 80%
+        }
+
+        .ph-col-8 {
+          -webkit-box-flex: 0;
+          -ms-flex: 0 0 80%;
+          flex: 0 0 80%
+        }
+
+        #noRecord {
+          margin: 8px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* paper-search-bar {
+          margin-left: 80px;
+          width: 50%;
+          color: black;
+        } */
+      }
+
+      @media (min-width: 768px) {
+        iron-list {
+          width: 736px;
+          margin: 16px auto;
+          /* margin-top: 0px; */
+          /* height: 100vh; */
+          /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
+        }
+
+        .ph-item {
+          width: 736px;
+          margin: 16px auto;
+          padding: 16px;
+        }
+
+        #noRecord {
+          width: 736px;
+          margin: 16px auto;
+        }
+
+        /* paper-search-bar {
+          margin-left: 50px;
+          width: 50%;
+          color: black;
+        } */
+      }
+
+      #tool1 {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      }
+
+      #tool2 {
+        background-color: white;
+      }
+
+      #btn-arrow {
+        color: black;
+      }
+
+      #btn-menu {
+        color: gray;
+        position: fixed;
+        right: 35px;
+      }
+
+      paper-fab.fab-menu {
+        position: fixed;
+        right: 32px;
+        bottom: 32px;
+      }
+
+      paper-fab.fab-search {
+        position: fixed;
+        right: 40px;
+        bottom: 104px;
+      }
+
+      paper-icon-button.menu {
+        margin-right: 16px;
+      }
+
+      .action paper-button {
+        height: 32px;
+        font-size: 12px;
+        font-weight: 400;
+        width: 80px;
+      }
+
+      paper-button.green {
+        background-color: var(--paper-green-500);
+        color: white;
+      }
+
+      paper-toggle-button.green {
+        --paper-toggle-button-checked-bar-color: white;
+        --paper-toggle-button-checked-button-color: violet;
+        --paper-toggle-button-checked-ink-color: white;
+        --paper-toggle-button-label-color: rgb(247, 223, 223);
+        --paper-toggle-button-label-spacing: 6px;
+        font-size: 16px;
+      }
+
+      .clinic {
+        font-size: 12px;
+      }
+
+      .pencil {
+        color: #673AB7;
+        bottom: 8px;
+      }
+
+      .loadingIndicator {
+        margin-top: 16px;
+        text-align: center;
+        height: 40px;
+      }
+
+      paper-spinner {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+      }
+    </style>
+
+    <app-route route="{{route}}" pattern="/detail/0/p/" active="{{detail0Active}}"></app-route>
+    <app-route route="{{route}}" pattern="/edit/0/p/" active="{{edit0Active}}"></app-route>
+    <app-route route="{{route}}" pattern="/new/0/p/" active="{{new0Active}}"></app-route>
+
+    <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+      <div name="">
+        <app-header-layout fullbleed has-scrolling-region>
+          <app-header fixed slot="header">
+            <div hidden="{{openSearch}}">
+              <app-toolbar primary id="tool1">
+                <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                <div main-title>Patients</div>
+                <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
+              </app-toolbar>
+            </div>
+
+            <div hidden="{{!openSearch}}">
+              <app-toolbar primary id="tool2">
+                <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle on-tap="toggleReturn"></paper-icon-button>
+                <div style="width:100%">
+                  <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}"
+                    disable-filter-button></paper-search-bar>
+                </div>
+              </app-toolbar>
+            </div>
+          </app-header>
+
+          <firebase-query disabled id="searchQuery" path="/{{myKey}}/patients" data="{{items}}" order-by-child="personal/name"
+            start-at="{{search}}" limit-to-first="15">
+          </firebase-query>
+
+          <firebase-query id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="no"
+            start-at="{{lastnum}}" limit-to-first="15">
+          </firebase-query>
+
+          <template is="dom-if" if="{{firstLoad}}">
+            <div class="ph-item">
+              <div class="ph-col-1">
+                <div class="ph-avatar" style="width: 45px;"></div>
+              </div>
+              <div class="ph-col-8">
+                <div class="ph-row">
+                  <div class="ph-col-1"></div>
+                  <div class="ph-col-10 empty"></div>
+                  <div class="ph-col-8 big"></div>
+                  <div class="ph-col-2 empty"></div>
+                  <div class="ph-col-6"></div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template is="dom-if" if="{{_noDataChanged(items.length, loadingPeople)}}">
+            <div id="noRecord">
+              <div class="item">
+                <div style="margin:auto">
+                  No data found.
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+            <template is="dom-if" if="{{_hasDataChanged(items.length)}}" restamp>
+              <iron-list items="[[items]]" as="item">
+                <template>
+                  <div class="item" tabindex$="[[tabIndex]]">
+                    <div>
+                      <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+                    </div>
+                    <div class="pad" on-tap="_selectThis" id="{{item.$key}}">
+                      <div id="{{item.$key}}" style="font-size:11px" class="longText">[[item.no]]</div>
+                      <div id="{{item.$key}}" class="primary">[[item.personal.lastname]], [[item.personal.firstname]]
+                        [[item.personal.middlename]]</div>
+                      <div id="{{item.$key}}" class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}}
+                        [[item.personal.sex]]
+                      </div>
+                      <div id="{{item.$key}}" class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
+                      <div id="{{item.$key}}" class="longText">[[item.lastchiefcomplaint]]</div>
+                    </div>
+
+                    <div class="clinic">[[item.personal.clinic_location]]</div>
+                    <paper-icon-button class="pencil" noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}"
+                      title="Edit">
+                    </paper-icon-button>
+                  </div>
+                </template>
+              </iron-list>
+            </template>
+
+            <div class="loadingIndicator">
+              <paper-spinner active="{{_loadCheck(loadingPeople, firstLoad)}}"></paper-spinner>
+            </div>
+          </iron-scroll-threshold>
+
+        </app-header-layout>
+
+        <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_patientsNew"></paper-fab>
+      </div>
+
+      <div name="/new/0/p/">
+        <template is="dom-if" if="{{new0Active}}" restamp>
+          <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}"
+            my-location-code="{{myLocationCode}}"></my-patients-new>
+        </template>
+      </div>
+
+      <div name="/edit/0/p/">
+        <template is="dom-if" if="{{edit0Active}}" restamp>
+          <my-patients-edit id="d25" prev-route="{{route.prefix}}" my-key="{{myKey}}" params="{{route.__queryParams}}"
+            my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-edit>
+        </template>
+      </div>
+
+      <div name="/detail/0/p/">
+        <template is="dom-if" if="{{detail0Active}}" restamp>
+          <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}"
+            my-location-code="{{myLocationCode}}" my-role="{{myRole}}" params="{{route.__queryParams}}"></my-patients-view>
+        </template>
+      </div>
+
+      <div name="view404">Not found.</div>
+    </iron-pages>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-patients-doctor',
+
+      properties: {
+
+        items: {
+          type: Array,
+          value: [],
+          notify: true
+        },
+        route: Object,
+        myLocation: String,
+        myLocationCode: String,
+        myKey: String,
+        myRole: String,
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        openSearch: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        lastnum: {
+          type: String,
+          value: ""
+        },
+        firstLoad: {
+          type: Boolean,
+          value: true
+        }
+      },
+
+      observers: [
+        '_searchChanged(search)',
+        '_mypatientsChanged(mypatients.*)',
+        '_routeChanged(route)'
+      ],
+
+      _routeChanged(e) {
+        var page;
+        if (this.detail0Active) page = "patients-view";
+        else if (this.edit0Active) page = "patients-edit";
+        else if (this.new0Active) page = "patients-new";
+
+        if (page) {
+          var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+          Polymer.importHref(resolvedPageUrl);
+        }
+      },
+
+      _searchChanged(search) {
+        if (search) {
+          this.search = search.toUpperCase();
+          this.$.defaultQuery.disabled = true;
+          this.$.searchQuery.disabled = false;
+        } else {
+          this.$.defaultQuery.disabled = false;
+          this.$.searchQuery.disabled = true;
+        }
+
+        this.loadingPeople = true;
+      },
+
+      _noDataChanged(e, f) {
+        if (f) return false;
+        else {
+          if (e > 0) return false;
+          else return true;
+        }
+      },
+
+      _loadCheck(e, l) {
+        if (l) return false;
+        else {
+          return e;
+        }
+      },
+
+      _hasDataChanged(e) {
+        if (e > 0) {
+          this.loadingPeople = false;
+          return true;
+        }
+        else {
+          this._fetching();
+          return false;
+        }
+      },
+
+      _mypatientsChanged(e) {
+        if (this.mypatients.length > 0) {
+          if (e.path === "mypatients") {
+            this.appendToList();
+          }
+
+          if (e.path === "mypatients.splices") {
+            this.items = [];
+            this.lastnum = "";
+            this.$.defaultQuery.disabled = true;
+            this.$.defaultQuery.disabled = false;
+          }
+
+          if (e.path !== "mypatients" && e.path !== "mypatients.splices" && e.path !== "mypatients.length") {
+            this.items = [];
+            this.lastnum = "";
+            this.$.defaultQuery.disabled = true;
+            this.$.defaultQuery.disabled = false;
+          }
+
+          this.$.threshold.clearTriggers();
+          this.loadingPeople = false;
+          this.firstLoad = false;
+        } else {
+          this._fetching();
+        }
+      },
+
+      appendToList() {
+        for (var i = 0; i < this.mypatients.length; i++) {
+          var exists = this.items.some(patient => patient['$key'] === this.mypatients[i].$key);
+          if (!exists) {
+            this.items.push(this.mypatients[i]);
+            this.notifyPath('items', this.items.slice());
+          }
+        }
+      },
+
+      _selectThis(e) {
+        this.viewKey = Polymer.dom(e).rootTarget.getAttribute("id");
+        window.history.pushState({}, null, '/patients/detail/0/p/?ref=' + this.viewKey);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "patients-view"
+        }));
+      },
+
+      _editThis(e) {
+        this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
+        window.history.pushState({}, null, '/patients/edit/0/p/?ref=' + this.editKey);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "patients-edit"
+        }));
+      },
+
+      _patientsNew() {
+        var app = document.querySelector('my-app');
+        app.set('route.path', '/patients/new/0/p/');
+        this.dispatchEvent(new CustomEvent('loadPage', {
+          bubbles: true, composed: true, detail: "patients-new"
+        }));
+      },
+
+      _fetching() {
+        setTimeout((e) => {
+          this.loadingPeople = false;
+          this.firstLoad = false;
+        }, 5000);
+      },
+
+      loadMoreData() {
+        if (this.items.length > 0) {
+          this.lastnum = this.items[this.items.length - 1].no;
+        }
+
+        this.loadingPeople = true;
+      },
+
+      _ageCal(bday) {
+        if (bday) {
+          return getAge(bday);
+        }
+        else {
+          return '';
+        }
+      },
+
+      _patientImg(e) {
+        if (e) return e;
+        else return '../images/user.png';
+      },
+
+      getClassForItem(item, selected) {
+        return selected ? 'item expanded' : 'item';
+      },
+
+      toggleDrawer() {
+        this.dispatchEvent(new CustomEvent('toggleDrawer', {
+          bubbles: true, composed: true, detail: {
+            narrow: this.$.narrow
+          }
+        }));
+        this.$.narrow = !this.$.narrow;
+      },
+
+      toggleSearch() {
+        this.openSearch = true;
+        this.$.search.focus();
+      },
+
+      toggleReturn() {
+        this.openSearch = false;
+        this.search = '';
+      },
+
+      _comma(e) {
+        if (e) {
+          return ',';
+        }
+      },
+
+      _hmo(e) {
+        if (e) {
+          return 'HMO: ' + e;
+        }
+      },
+
+      _sort: function (a, b) {
+        if (a.personal.lastname === b.personal.lastname) return 0;
+        return a.personal.lastname < b.personal.lastname ? -1 : 1;
+      },
+
+    })
+
+  </script>
+</dom-module>

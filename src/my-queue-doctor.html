@@ -1,0 +1,817 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="global-functions.html">
+<link rel="import" href="sortable-list.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<link rel="lazy-import" href="my-patients-view.html">
+<link rel="lazy-import" href="my-patients-edit.html">
+<link rel="lazy-import" href="my-visits-new.html">
+<link rel="lazy-import" href="my-visits-edit.html">
+<link rel="lazy-import" href="my-queue-patients.html">
+
+<dom-module id="my-queue-doctor">
+    <template>
+        <style include="shared-styles">
+            :host {
+                height: 100vh;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .itemNoRecord {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+            }
+
+            @media (max-width: 768px) {
+                .list {
+                    margin: 8px;
+                    display: flex;
+                    flex-direction: column;
+                    margin-bottom: -16px;
+                }
+
+                .list2 {
+                    margin: 8px;
+                    display: flex;
+                    flex-direction: column;
+                    margin-bottom: -16px;
+                }
+
+                .ph-item {
+                    margin: 8px;
+                    padding: 16px;
+                }
+
+                .ph-col-1 {
+                    -webkit-box-flex: 0;
+                    -ms-flex: 0 0 20%;
+                    flex: 0 0 20%
+                }
+
+                .ph-col-10 {
+                    -webkit-box-flex: 0;
+                    -ms-flex: 0 0 80%;
+                    flex: 0 0 80%
+                }
+
+                .ph-col-8 {
+                    -webkit-box-flex: 0;
+                    -ms-flex: 0 0 80%;
+                    flex: 0 0 80%
+                }
+
+                #noRecord {
+                    margin: 8px;
+                    display: flex;
+                    flex-direction: column;
+                }
+            }
+
+            @media (min-width: 768px) {
+                .list {
+                    width: 736px;
+                    margin: 16px auto;
+                    margin-bottom: -16px;
+                }
+
+                .list2 {
+                    width: 736px;
+                    margin: 16px auto;
+                    margin-bottom: -16px;
+                }
+
+                .ph-item {
+                    width: 736px;
+                    margin: 16px auto;
+                    padding: 16px;
+                }
+
+                #noRecord {
+                    width: 736px;
+                    margin: 16px auto;
+                }
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            paper-fab.fab-menu {
+                position: fixed;
+                bottom: 32px;
+                float: right;
+                right: 32px;
+
+            }
+
+            .itemDialog:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
+
+            .dateInput {
+                --paper-input-container-input-color: white;
+                --paper-input-container-color: white;
+                --paper-input-container-focus-color: white;
+                font-size: 10px;
+                width: 145px;
+            }
+
+            .sortList {
+                position: relative;
+                margin-bottom: 30px;
+            }
+
+            .primary {
+                font-size: 14px;
+                font-weight: 400;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .longText {
+                color: gray;
+                /* display: none; */
+            }
+
+            .item_D {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+                opacity: 0.4;
+                transition: 0.3s;
+            }
+
+            .item_N {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+                opacity: 0.7;
+                transition: 0.3s;
+            }
+
+            .item_N:hover,
+            .item_D:hover {
+                opacity: 1;
+                box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
+            }
+
+            .avatar {
+                height: 45px;
+                width: 45px;
+                border: 2px solid white;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: #DDD;
+            }
+
+            .pad {
+                /* border-left: 6px solid rgb(208, 137, 236); */
+                margin-left: 10px;
+                /* padding: 10px; */
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .item {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+                box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
+                transition: 0.3s;
+                /* counter-reset: section; */
+                /* opacity: 0.5; */
+                /* margin-bottom: 5px; */
+            }
+
+            .cancel {
+                transform: rotate(-25deg);
+                display: none;
+                /* position: absolute;
+                right: 27px;
+                top: 27px; */
+                color: #F44336;
+                font-size: 12px;
+                padding: 4px;
+                border: 2px solid #F44336;
+                border-radius: 6px;
+                height: 17px;
+                margin-top: 8px;
+            }
+
+            .loadingIndicator {
+                margin-top: 16px;
+                text-align: center;
+                height: 40px;
+            }
+
+            paper-spinner {
+                width: 20px;
+                height: 20px;
+                margin-right: 10px;
+            }
+        </style>
+
+        <app-route route="{{route}}" pattern="/new/0/q/" active="{{queueNew0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/search/0/q/" active="{{search0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/visit/new/0/q/" active="{{visitNew0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/visit/edit/0/q/" active="{{visitEdit0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/patient/edit/0/q/" active="{{patientEdit0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/patient/detail/0/q/" active="{{patientView0Active}}"></app-route>
+
+        <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
+            <div name="">
+                <app-header-layout fullbleed has-scrolling-region>
+                    <app-header fixed slot="header">
+                        <app-toolbar primary>
+                            <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
+                            <div main-title>Queue</div>
+                            <div style="margin-top: -16px; margin-right:10px">
+                                <paper-input class="dateInput" type="date" value="{{pickDate}}">
+                                    <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                                </paper-input>
+                                <div style="margin-left:4px;margin-top:-16px;">
+                                    <span id="pickDateText" style="font-size:10px; font-weight:400">{{pickText}}</span>
+                                </div>
+                            </div>
+                        </app-toolbar>
+                    </app-header>
+
+                    <firebase-query id="query" path="/{{myKey}}/queue/{{myLocation}}/{{pickDate}}" order-by-child="queueNo"
+                        start-at="{{_parseInt(1)}}" data="{{myqueue}}">
+                    </firebase-query>
+
+                    <template is="dom-if" if="{{_loadCheck(loadingPeople, firstLoad, myqueue.length)}}">
+                        <div class="ph-item">
+                            <div class="ph-col-1">
+                                <div class="ph-avatar" style="width: 45px;"></div>
+                            </div>
+                            <div class="ph-col-8">
+                                <div class="ph-row">
+                                    <div class="ph-col-1"></div>
+                                    <div class="ph-col-10 empty"></div>
+                                    <div class="ph-col-8 big"></div>
+                                    <div class="ph-col-2 empty"></div>
+                                    <div class="ph-col-6"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template is="dom-if" if="{{_noDataChanged(myqueue.length, loadingPeople)}}">
+                        <div id="noRecord">
+                            <div class="itemNoRecord">
+                                <div style="margin:auto">
+                                    No record found.
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+                        <div class="list2">
+                            <template id="exceptionTemplate" is="dom-repeat" items="[[exceptionItems]]">
+                                <div class$="[[getClassForItem(item.isNext, item.isQueue)]]" on-tap="_openDialogDoneQueue">
+                                    <div style="font-size:16px;" class="longText">[[item.queueNo]]</div>
+                                    <div style="padding:6px"></div>
+                                    <div>
+                                        <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.patient_profile)}}"></iron-image>
+                                    </div>
+                                    <div class="pad">
+                                        <div style="font-size:11px" class="longText">[[item.patient_no]]</div>
+                                        <div class="primary">[[item.patient_info.lastname]],
+                                            [[item.patient_info.firstname]]
+                                            [[item.patient_info.middlename]]
+                                        </div>
+                                        <div class="longText">{{_ageCal(item.patient_info.birthday)}}{{_comma(item.patient_info.birthday)}}
+                                            [[item.patient_info.sex]]
+                                        </div>
+                                        <div class="longText">[[_hmo(item.patient_info.hmo)]]</div>
+                                    </div>
+
+                                    <div style$="{{_isCancel(item.isCancel)}}" class="cancel">Cancelled</div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <sortable-list class="sortList" sortable=".list" all-data="[[includedItems]]" on-select="_selectedIndex"
+                            on-drop="_dropIndex">
+                            <template id="includedTemplate" is="dom-repeat" items="[[includedItems]]">
+                                <div on-tap="_selectThis" class="list">
+                                    <div class$="[[getClassForItem(item.isNext, item.isQueue)]]">
+                                        <div style="font-size:16px;" class="longText">[[item.queueNo]]</div>
+                                        <div style="padding:6px"></div>
+                                        <div>
+                                            <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.patient_profile)}}"></iron-image>
+                                        </div>
+                                        <div class="pad">
+                                            <div style="font-size:11px" class="longText">[[item.patient_no]]</div>
+                                            <div class="primary">[[item.patient_info.lastname]],
+                                                [[item.patient_info.firstname]]
+                                                [[item.patient_info.middlename]]
+                                            </div>
+                                            <div class="longText">{{_ageCal(item.patient_info.birthday)}}{{_comma(item.patient_info.birthday)}}
+                                                [[item.patient_info.sex]]
+                                            </div>
+                                            <div class="longText">[[_hmo(item.patient_info.hmo)]]</div>
+                                        </div>
+
+                                        <div style$="{{_isCancel(item.isCancel)}}" class="cancel">Cancelled</div>
+                                    </div>
+                                </div>
+                            </template>
+                        </sortable-list>
+
+                        <!-- <div class="loadingIndicator">
+                            <paper-spinner active="{{_loadCheck(loadingPeople, firstLoad)}}"></paper-spinner>
+                        </div> -->
+                    </iron-scroll-threshold>
+
+                    <paper-fab id="adddialog" class="fab-menu" icon="my-icons:add" on-tap="_openAddNew"></paper-fab>
+                </app-header-layout>
+            </div>
+
+            <div name="/new/0/q/">
+                <template is="dom-if" if="{{queueNew0Active}}" restamp>
+                    <my-patients-new id="d23" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes"
+                        my-location="{{myLocation}}" my-location-code="{{myLocationCode}}"></my-patients-new>
+                </template>
+            </div>
+
+            <div name="/search/0/q/">
+                <template is="dom-if" if="{{search0Active}}" restamp>
+                    <my-queue-patients id="d24" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-queue="yes"
+                        my-location="{{myLocation}}" my-location-code="{{myLocationCode}}">
+                    </my-queue-patients>
+                </template>
+            </div>
+
+            <div name="/patient/detail/0/q/">
+                <template is="dom-if" if="{{patientView0Active}}" restamp>
+                    <my-patients-view id="d26" prev-route="{{route.prefix}}" my-key="{{myKey}}" my-location="{{myLocation}}"
+                        my-location-code="{{myLocationCode}}" my-role="{{myRole}}" params="{{route.__queryParams}}">
+                    </my-patients-view>
+                </template>
+            </div>
+
+            <div name="/patient/edit/0/q/">
+                <template is="dom-if" if="{{patientEdit0Active}}" restamp>
+                    <my-patients-edit id="d25" prev-route="{{route.prefix}}" params="{{route.__queryParams}}" my-key="{{myKey}}"
+                        my-queue="yes" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}">
+                    </my-patients-edit>
+                </template>
+            </div>
+
+            <div name="/visit/new/0/q/">
+                <template is="dom-if" if="{{visitNew0Active}}" restamp>
+                    <my-visits-new id="d27" prev-route="{{route.prefix}}" params="{{route.__queryParams}}" my-key="{{myKey}}"
+                        my-queue="yes" my-location="{{myLocation}}" my-location-code="{{myLocationCode}}" my-limit="1">
+                    </my-visits-new>
+                </template>
+            </div>
+
+            <div name="/visit/edit/0/q/">
+                <template is="dom-if" if="{{visitEdit0Active}}" restamp>
+                    <my-visits-edit id="d25" prev-route="{{route.prefix}}" params="{{route.__queryParams}}" my-key='{{myKey}}'
+                        my-location="{{myLocation}}"></my-visits-edit>
+                </template>
+            </div>
+
+            <div name="view404">Not found.</div>
+        </iron-pages>
+
+        <salte-dialog no-auto-fullscreen id="locationDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #F44336">Request denied!</h2>
+            <span>Unable adding patient to queue.
+                <br>Please set your location and try again.</span>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </salte-dialog>
+
+        <salte-dialog no-auto-fullscreen id="openDialogDoneQueue" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
+            <span>
+                <paper-button on-tap="_editVisit" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Edit Visit</paper-button>
+                <paper-button on-tap="_viewPatient" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>View Patient Detail's</paper-button>
+            </span>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </salte-dialog>
+
+        <salte-dialog no-auto-fullscreen id="openDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
+            <span>
+                <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Cancel
+                    Queue
+                </paper-button>
+                <paper-button on-tap="_addVisit" hidden="{{!isNext}}" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Add Visit</paper-button>
+                <paper-button on-tap="_editPatient" hidden="{{isNext}}" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Edit Patient Detail's</paper-button>
+            </span>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </salte-dialog>
+
+        <salte-dialog no-auto-fullscreen id="priorDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
+            <span>
+                <paper-button on-tap="_queueSearch" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Search
+                    existing patient</paper-button>
+                <paper-button on-tap="_queueNew" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;"
+                    dialog-confirm>Add
+                    new patient</paper-button>
+            </span>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </salte-dialog>
+
+        <salte-dialog no-auto-fullscreen id="confirmationDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #1E88E5">Confirmation required!</h2>
+            <span>Sure you want to cancel this queue?
+                <br>This action can't be undone.</span>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus on-tap="_confirmCancel">Yes</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </salte-dialog>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'my-queue-doctor',
+            properties: {
+                myKey: String,
+                myRole: String,
+                myLocation: String,
+                myLocationCode: String,
+                route: Object,
+                token: String,
+                selectedData: String,
+                includedItems: {
+                    type: Array,
+                    computed: '_returnIncluded(myqueue.*)'
+                },
+                exceptionItems: {
+                    type: Array,
+                    computed: '_returnException(myqueue.*)'
+                },
+                firstLoad: {
+                    type: Boolean,
+                    value: true
+                },
+                loadingPeople: {
+                    type: Boolean,
+                    value: true
+                }
+            },
+
+            ready() {
+                this.pickDate = formatTodayDate(new Date());
+            },
+
+            observers: [
+                '_myqueueChanged(myqueue.*)',
+                '_pickDateChanged(pickDate)',
+                '_routeChanged(route)'
+            ],
+
+            _routeChanged(e) {
+                var page;
+                if (this.queueNew0Active) page = "patients-new";
+                else if (this.search0Active) page = "queue-patients";
+                else if (this.visitNew0Active) page = "visits-new";
+                else if (this.visitEdit0Active) page = "visits-edit";
+                else if (this.patientEdit0Active) page = "patients-edit";
+                else if (this.patientView0Active) page = "patients-view";
+
+                if (page) {
+                    var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+                    Polymer.importHref(resolvedPageUrl);
+                }
+            },
+
+            _pickDateChanged(date) {
+                if (date) {
+                    Polymer.dom(this.root).querySelector("#pickDateText").setAttribute('style', 'font-size:14px;color:white');
+                    this.pickText = formatWeekDate(date);
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#pickDateText").setAttribute('style', 'font-size:12px;color:red');
+                    this.pickText = 'Please pick a date.';
+                }
+
+                this.loadingPeople = true;
+            },
+
+            _myqueueChanged(e) {
+                if (this.myqueue.length > 0) {
+                    if (e.path !== "myqueue" && e.path !== "myqueue.splices" && e.path !== "myqueue.length") {
+                        this.$.query.disabled = true;
+                        this.$.query.disabled = false;
+                    }
+
+                    this.loadingPeople = false;
+                    this.firstLoad = false;
+                }
+                else {
+                    this._fetching();
+                }
+            },
+
+            _returnException(e) {
+                return this.myqueue.filter(isExcept);
+                function isExcept(item) {
+                    return !item.isQueue;
+                }
+            },
+
+            _returnIncluded(e) {
+                var data = this.myqueue.filter(isInclude);
+
+                return data;
+                function isInclude(item) {
+                    return item.isQueue;
+                }
+            },
+
+            _selectedIndex(e) {
+                this.selectedData = this.includedItems[e.detail];
+            },
+
+            _dropIndex(e) {
+                var droppedData = this.includedItems[e.detail];
+                if (this.selectedData.queueNo !== droppedData.queueNo) {
+                    var self = this;
+                    var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.pickDate);
+
+                    ref.child(self.selectedData.$key).update({
+                        queueNo: droppedData.queueNo,
+                        isNext: droppedData.isNext,
+                        xy: "x"
+                    }).then(function () {
+                        self.$.query.disabled = true;
+                        if (droppedData.queueNo > self.selectedData.queueNo) {
+                            ref.orderByChild("queueNo").startAt(self.selectedData.queueNo).endAt(droppedData.queueNo).once("value").then(function (snapshot) {
+                                if (snapshot.exists()) {
+                                    snapshot.forEach(element => {
+                                        var newQueueNo = element.val().queueNo - 1;
+                                        if (element.val().xy === "y" && newQueueNo === self.selectedData.queueNo) {
+                                            ref.child(element.key).update({ queueNo: newQueueNo, isNext: self.selectedData.isNext });
+                                        } else if (element.val().xy === "y" && newQueueNo !== self.selectedData.queueNo) {
+                                            ref.child(element.key).update({ queueNo: newQueueNo });
+                                        } else if (element.val().xy === "x") {
+                                            ref.child(element.key).update({ xy: 'y' });
+                                        }
+                                    });
+                                }
+                                self.$.query.disabled = false;
+                            });
+                        } else {
+                            ref.orderByChild("queueNo").startAt(droppedData.queueNo).endAt(self.selectedData.queueNo).once("value").then(function (snapshot) {
+                                if (snapshot.exists()) {
+                                    snapshot.forEach(element => {
+                                        var newQueueNo = element.val().queueNo + 1;
+                                        if (element.val().xy === "y") {
+                                            ref.child(element.key).update({ queueNo: newQueueNo, isNext: false });
+                                        } else if (element.val().xy === "x") {
+                                            ref.child(element.key).update({ xy: 'y' });
+                                        }
+                                    });
+                                }
+                                self.$.query.disabled = false;
+                            });
+                        }
+                    });
+                }
+            },
+
+            _openAddNew() {
+                if (this.myLocation == '(not set)') {
+                    Polymer.dom(this.root).querySelector("#locationDialog").open();
+                }
+                else {
+                    this.$.priorDialog.open();
+                }
+            },
+
+            _openDialogDoneQueue(e) {
+                this.selectedData = this.$.exceptionTemplate.itemForElement(e.target);
+                this.$.openDialogDoneQueue.open();
+            },
+
+            _queueNew() {
+                window.history.pushState({}, null, '/queue/new/0/q/');
+                window.dispatchEvent(new CustomEvent('location-changed'));
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "patients-new"
+                }));
+            },
+
+            _queueSearch() {
+                window.history.pushState({}, null, '/queue/search/0/q/');
+                window.dispatchEvent(new CustomEvent('location-changed'));
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "queue-patients"
+                }));
+            },
+
+            _selectThis(e) {
+                this.selectedData = this.$.includedTemplate.itemForElement(e.target);
+                this.isNext = this.selectedData.isNext;
+                this.$.openDialog.open();
+            },
+
+            _editPatient() {
+                window.history.pushState({}, null, '/queue/patient/edit/0/q/?e=' + this.selectedData.patient_refKey + '&q=' + this.selectedData.$key + '&d=' + this.pickDate);
+                window.dispatchEvent(new CustomEvent('location-changed'));
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "patients-edit"
+                }));
+            },
+
+            _addVisit() {
+                window.history.pushState({}, null, '/queue/visit/new/0/q/?n=' + this.selectedData.patient_info.name + '&q=' + this.selectedData.$key + '&no=' + this.selectedData.queueNo + '&d=' + this.pickDate);
+                window.dispatchEvent(new CustomEvent('location-changed'));
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "visits-new"
+                }));
+            },
+
+            _editVisit() {
+                window.history.pushState({}, null, '/queue/visit/edit/0/q/?ref=' + this.selectedData.visit_refKey);
+                window.dispatchEvent(new CustomEvent('location-changed'));
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "visits-edit"
+                }));
+            },
+
+            _viewPatient(e) {
+                window.history.pushState({}, null, '/queue/patient/detail/0/q/?ref=' + this.selectedData.patient_refKey);
+                window.dispatchEvent(new CustomEvent('location-changed'));
+                this.dispatchEvent(new CustomEvent('loadPage', {
+                    bubbles: true, composed: true, detail: "patients-view"
+                }));
+            },
+
+            _cancelQueue() {
+                this.$.confirmationDialog.open();
+            },
+
+            _confirmCancel() {
+                var startNo = this.selectedData.queueNo + 1;
+                var ref = firebase.database().ref("/" + this.myKey + "/queue/" + this.myLocation + "/" + this.pickDate);
+
+                ref.child(this.selectedData.$key).update({
+                    isQueue: false,
+                    isNext: false,
+                    isCancel: true,
+                    xy: "x"
+                }).then(function () {
+                    ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
+                        if (!hasNext.exists()) {
+                            ref.orderByChild("queueNo").startAt(startNo).once("value").then(function (findNext) {
+                                if (findNext.exists()) {
+                                    var done = false;
+                                    findNext.forEach(element => {
+                                        if (done) return;
+                                        if (!element.val().isCancel && element.val().isQueue) {
+                                            ref.child(element.key).update({ isNext: true });
+                                            done = true;
+                                            return;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+            },
+
+            loadMoreData() {
+                // load async stuff. e.g. XHR
+                // this.$.threshold.clearTriggers();
+            },
+
+            _fetching() {
+                setTimeout((e) => {
+                    this.firstLoad = false;
+                    this.loadingPeople = false;
+                }, 5000);
+            },
+
+            _noDataChanged(e, f) {
+                if (f) return false;
+                else {
+                    if (e > 0) return false;
+                    else return true;
+                }
+            },
+
+            _loadCheck(e, l, q) {
+                if (l) return l;
+                if (q > 0) return false;
+                return e;
+            },
+
+            _parseInt(e) {
+                return parseInt(e);
+            },
+
+            toggleDrawer() {
+                this.dispatchEvent(new CustomEvent('toggleDrawer', {
+                    bubbles: true, composed: true, detail: {
+                        narrow: this.$.narrow
+                    }
+                }));
+                this.$.narrow = !this.$.narrow;
+            },
+
+            getClassForItem(isNext, isQueue) {
+                if (!isNext && !isQueue) return 'item_D';
+                else if (!isNext && isQueue) return 'item_N';
+                else return 'item';
+            },
+
+            _ageCal(bday) {
+                if (bday) {
+                    return getAge(bday);
+                }
+                else {
+                    return '';
+                }
+            },
+
+            _comma(e) {
+                if (e) {
+                    return ',';
+                }
+            },
+
+            _hmo(e) {
+                if (e) {
+                    return 'HMO: ' + e;
+                }
+            },
+
+            _patientImg(e) {
+                if (e) return e;
+                else return '../images/user.png';
+            },
+
+            _isCancel(e) {
+                if (e) return 'display:inline-block';
+            },
+
+        })
+    </script>
+</dom-module>

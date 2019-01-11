@@ -1,5 +1,9 @@
 {
-  "dependencies": {
-    "generator-polymer-init-custom-build": "^2.2.1"
+  "name": "base-emr",
+  "license": "BSD-3-Clause",
+  "scripts": {
+    "start": "polymer serve",
+    "build": "polymer build",
+    "deploy": "firebase deploy"
   }
 }

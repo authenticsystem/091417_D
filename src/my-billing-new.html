@@ -1,0 +1,617 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
+
+<link rel="import" href="global-functions.html">
+<link rel="import" href="my-billing-datatable.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-billing-new">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            app-header paper-icon-button {
+                --paper-icon-button-ink-color: #000000;
+            }
+
+            app-drawer-layout:not([narrow]) [drawer-toggle] {
+                display: none;
+            }
+
+            app-drawer {
+                --app-drawer-content-container: {
+                    background-color: #F4F5F6;
+                }
+            }
+
+            paper-icon-button.menu {
+                margin-right: 15px;
+            }
+
+            paper-item {
+                height: 64px;
+            }
+
+            paper-fab {
+                background: #1976d2;
+            }
+
+            @media (min-width: 800px) {
+                .footer {
+                    position: absolute;
+                    bottom: 16px;
+                    width: 100%;
+                }
+
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 48px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 48px;
+                    bottom: 48px;
+                }
+            }
+
+            @media (max-width: 800px) {
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 16px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 16px;
+                    bottom: 48px;
+                }
+
+                .docu {
+                    margin-left: 16px;
+                    margin-right: 16px;
+                }
+            }
+
+            paper-item:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
+
+            .textTemp {
+                color: rgb(100, 100, 100);
+                font-weight: 500;
+                font-size: 14px;
+                margin-top: 16px;
+                margin-left: 16px;
+            }
+
+            paper-progress.blue {
+                --paper-progress-active-color: var(--paper-light-blue-500);
+                --paper-progress-secondary-color: var(--paper-light-blue-100);
+                width: 100%;
+            }
+
+            #noRecordList {
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                padding: 16px;
+                text-align: center;
+                display: none;
+            }
+
+            #list {
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                padding: 0;
+                display: none;
+            }
+
+            .avatar {
+                height: 45px;
+                width: 45px;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: transparent;
+            }
+        </style>
+
+        <firebase-query id="filterQuery" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name"
+            start-at="{{filterValue}}" limit-to-first="5">
+        </firebase-query>
+
+        <firebase-query id="lastCaseQuery" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}"
+            data="{{mycases}}" limit-to-last="1">
+        </firebase-query>
+
+        <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+
+            <app-header-layout id="appheader" has-scrolling-region>
+                <app-header fixed slot="header">
+                    <app-toolbar>
+                        <a href="{{prevRoute}}">
+                            <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
+                        </a>
+                        <div main-title>Add Billing</div>
+                    </app-toolbar>
+                </app-header>
+
+                <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+                    <neon-animatable>
+                        <paper-progress hidden="{{!isLoading}}" indeterminate class="blue"></paper-progress>
+                        <div class="docu">
+                            <div class="details">
+                                <paper-input on-keyup="_ack" label="Patient *" value="{{filterValue}}" placeholder="Search patient"></paper-input>
+                                <div id="noRecordList"> No record found. </div>
+                                <paper-listbox id="list">
+                                    <template id="thypatientTemp" is="dom-repeat" items="[[thypatients]]">
+                                        <paper-item on-tap="_bind">[[item.personal.name]]</paper-item>
+                                    </template>
+                                </paper-listbox>
+                            </div>
+                        </div>
+
+                        <div id="patientProfile" class="docu" style="margin-top:-16px; display:none;">
+                            <div class="details" style="display: flex;">
+                                <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(selectedPatient.profile)}}"></iron-image>
+                                <div style="margin-left:10px; font-weight:400; color:black">
+                                    <span style="font-size:11px;display:block" class="longText">{{selectedPatient.no}}</span>
+                                    <span class="primary">{{filterValue}}</span>
+                                    <span class="longText" style="font-weight:400;display:block">{{_calculate(selectedPatient.personal.birthday)}}{{_comma(selectedPatient.personal.birthday)}}
+                                        {{selectedPatient.personal.sex}}
+                                    </span>
+                                    <span class="longText" style="font-weight:400;display:block">{{_hmo(selectedPatient.insurance.primary_insurance)}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="lastVisit" class="docu" style="margin-top:-16px; display:none">
+                            <div class="details">
+                                <div id="showed" id="prev">
+                                    <div>{{noprev}}</div>
+                                    <template is="dom-repeat" items="[[mycases]]">
+
+                                        <firebase-query path="/{{myKey}}/cases/{{item.$key}}/attachment" data="{{myimaging}}">
+                                        </firebase-query>
+
+                                        <div style="margin-bottom:16px;">
+                                            <span class="primary" style="color:black; font-weight:400; margin-right:2px;">Last
+                                                Visit
+                                            </span>
+                                            <iron-icon icon="my-icons:watch-later"></iron-icon>
+                                            <span style="font-size:14px; margin-top:10px;">{{_getDate(item.timestamp)}}</span>
+                                            <!-- <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago> -->
+                                        </div>
+
+                                        <div hidden$="{{!item.complain}}">
+                                            <span class="longText">Chief Complaint</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.history}}">
+                                            <span class="longText">History</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.history}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.laboratory}}">
+                                            <span class="longText">Laboratory</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.laboratory}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.subjective}}">
+                                            <span class="longText">Subjective</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.objective}}">
+                                            <span class="longText">Objective</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.objective}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.assessment}}">
+                                            <span class="longText">Assessment</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.assessment}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.imaging}}">
+                                            <span class="longText">Imaging</span>
+                                            <div class="galleryHolder">
+                                                <sl-gallery id="gallery"></sl-gallery>
+                                            </div>
+                                            <br>
+                                        </div>
+
+                                        <div hidden$="{{!item.pe}}">
+                                            <span class="longText">Physical Exam</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.pe}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.diagnosis}}">
+                                            <span class="longText">Diagnosis</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.diagnosis}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.treatment}}">
+                                            <span class="longText">Treatment</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.treatment}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.plan}}">
+                                            <span class="longText">Plan</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.plan}}</div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <my-billing-datatable id="billingDatatable" my-patient="[[myPatient]]" billing-data="{{billingData}}"
+                            remarks="{{remarks}}" total="{{total}}" my-key="{{myKey}}" show-date="true" today-date="{{todayDate}}"
+                            favhide="{{favhide}}"></my-billing-datatable>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="details">
+                                <div id="saveSuccess" style="color: green; display:none">Billing successfully saved.
+                                    <p id="p" style="margin-top:-4px">Billing ref.# <b style="color:#1976d2">[[billReference]]</b></p>
+                                </div>
+                                <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while
+                                    saving data.
+                                </div>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                </neon-animated-pages>
+
+            </app-header-layout>
+
+            <div class="footer">
+                <div hidden$="[[favlefthide]]">
+                    <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
+                </div>
+                <div hidden$="[[favrighthide]]">
+                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right"
+                        on-tap="_select2"></paper-fab>
+                </div>
+            </div>
+
+        </app-drawer-layout>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-billing-new',
+
+            properties: {
+                narrow: {
+                    type: Boolean,
+                    notify: true
+                },
+                myLocation: String,
+                prevRoute: String,
+                myKey: String,
+                selectedPage: {
+                    type: Number,
+                    value: 0
+                },
+                entryanimation: {
+                    type: String,
+                    value: "slide-from-right-animation"
+                },
+                exitanimation: {
+                    type: String,
+                    value: "slide-left-animation"
+                },
+                favlefthide: {
+                    type: Boolean,
+                    value: true
+                },
+                favrighthide: {
+                    type: Boolean,
+                    value: true
+                },
+                todayDate: String,
+                lastPushTime: {
+                    type: Number,
+                    value: 0
+                }
+            },
+
+            ready() {
+                this.billingData = [];
+                this.$.billingDatatable._clear();
+            },
+
+            observers: [
+                '_todayDateChanged(todayDate)',
+                '_billingDataChanged(billingData)',
+                '_patientChanged(filterValue)',
+                '_myimagingChanged(myimaging)',
+                '_thypatientsChanged(thypatients.length)',
+                '_favhideChanged(favhide)',
+                '_mycasesChanged(mycases.length)'
+            ],
+
+            _mycasesChanged(e) {
+                if (e > 0) this.noprev = '';
+                else this.noprev = 'No previous visit.';
+            },
+
+            _favhideChanged(e) {
+                if (e) {
+                    this.favrighthide = true;
+                    this.favlefthide = true;
+                } else {
+                    if (this.selectedPage !== 0) {
+                        this.favlefthide = false;
+                    }
+                    if (this.todayDate && this.billingData.length > 0) this.favrighthide = false;
+                    else this.favrighthide = true;
+                }
+            },
+
+            _todayDateChanged(e) {
+                if (e && this.billingData.length > 0) this.favrighthide = false;
+                else this.favrighthide = true;
+            },
+
+            _billingDataChanged(e) {
+                if (e.length > 0 && this.todayDate) this.favrighthide = false;
+                else this.favrighthide = true;
+            },
+
+            _patientChanged(patient) {
+                if (!patient) {
+                    Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                    this.$.noRecordList.style.display = "none";
+                    this.favrighthide = true;
+                } else {
+                    this.isLoading = true;
+                    this.filterValue = patient.toUpperCase();
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
+                }
+            },
+
+            _thypatientsChanged(e) {
+                if (e === 0) {
+                    setTimeout(() => {
+                        if (this.isLoading) {
+                            this.isLoading = false;
+                            this.$.noRecordList.style.display = "block";
+                        }
+                    }, 5000);
+                } else {
+                    this.isLoading = false;
+                    this.$.noRecordList.style.display = "none";
+                }
+            },
+
+            _bind(e) {
+                this.favrighthide = false;
+                this.selectedPatient = this.$.thypatientTemp.itemForElement(e.target);
+
+                this.filterValue = this.selectedPatient.personal.name;
+                this.myPatientKey = this.selectedPatient.$key;
+                this.myPatient = {
+                    name: this.selectedPatient.personal.name,
+                    hmo: this.selectedPatient.insurance.primary_insurance
+                }
+
+                Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'block';
+                Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'block';
+            },
+
+            _myimagingChanged(e) {
+                if (e) {
+                    const gallery = Polymer.dom(this.root).querySelector('#gallery');
+
+                    if (gallery) {
+                        e.forEach(img => {
+                            const el = document.createElement('sl-gallery-image');
+                            el.setAttribute('src', img.url);
+                            el.setAttribute('small', img.url);
+                            el.setAttribute('id', 'gallery-image');
+                            gallery.appendChild(el);
+                        });
+                    }
+                }
+            },
+
+            _select1(e) {
+                this.entryanimation = "slide-from-left-animation";
+                this.exitanimation = "slide-right-animation";
+
+                this.favlefthide = false;
+                this.favrighthide = false;
+
+                Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+                Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+
+                if (this.selectedPage !== 0) {
+                    this.selectedPage = this.selectedPage - 1;
+                }
+                if (this.selectedPage === 0) {
+                    this.favlefthide = true;
+                }
+            },
+
+            _select2(e) {
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+
+                this.favlefthide = false;
+                this.favrighthide = false;
+
+                if (this.selectedPage != 2) {
+                    this.selectedPage = this.selectedPage + 1;
+                }
+
+                if (this.selectedPage === 1) {
+                    Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                    Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                    if (!this.todayDate || this.billingData.length === 0) {
+                        this.favrighthide = true;
+                    } else {
+                        this.favrighthide = false;
+                    }
+                }
+
+                if (this.selectedPage === 2) {
+                    this._submitToFireB();
+                    this.favlefthide = true;
+                    this.favrighthide = true;
+                }
+            },
+
+            _submitToFireB() {
+                var self = this;
+                var mykey = this.myKey;
+                var today = this.todayDate;
+                var timestamp = firebase.database.ServerValue.TIMESTAMP;
+                var order = firebase.database.ServerValue.TIMESTAMP;
+                var newPushKey, fbPushKey;
+
+                var noRef = firebase.database().ref("/" + mykey + "/uniqueId/billing");
+                var billRef = firebase.database().ref('/' + mykey + '/billing');
+                var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
+                this.lastPushTime = new Date(today).getTime();
+
+                if (today < formatTodayDate(new Date())) {
+                    newPushKey = generatePushID(today, this.lastPushTime);
+                    timestamp = this.lastPushTime;
+                    order = this.lastPushTime;
+                }
+
+                var dataToSave = {
+                    timestamp: timestamp,
+                    order: order,
+                    created: today,
+                    clinic_location: this.myLocation,
+                    billing_total: this.total,
+                    patientinfo: {
+                        name: this.filterValue,
+                        profile: this.selectedPatient.profile ? this.selectedPatient.profile : null,
+                        num: this.selectedPatient.no,
+                        birthday: this.selectedPatient.personal.birthday,
+                        gender: this.selectedPatient.personal.sex,
+                        hmo: this.selectedPatient.insurance.primary_insurance
+                    },
+                    remarks: this.remarks ? this.remarks : "No Remarks"
+                }
+
+                if (newPushKey) {
+                    fbPushKey = newPushKey;
+                } else {
+                    fbPushKey = billRef.push().key;
+                }
+
+                this.$.saveRunning.style.display = 'block';
+                if (fbPushKey) {
+                    noRef.once('value').then(function (data) {
+                        var num = (data.val() ? data.val() : 0) + 1;
+                        var no = generateUniqueId(num);
+                        dataToSave.ref = no;
+
+                        billRef.child(fbPushKey).set(dataToSave).then(function () {
+                            noRef.set(num);
+                            self.billReference = no;
+
+                            billRef.child(fbPushKey).once('value').then(function (snapshot) {
+                                var order = snapshot.val().order * -1;
+                                billRef.child(fbPushKey).update({ order: order });
+                            });
+
+                            self.billingData.forEach(element => {
+                                element.billing_key = fbPushKey;
+                                element.billing_ref = no;
+                                element.patient_billTo = self.filterValue + "_" + element.billTo;
+                                billDataRef.push(element);
+                            });
+                        });
+                    });
+
+                    self.$.saveRunning.style.display = 'none';
+                    self.$.saveSuccess.style.display = 'block';
+                } else {
+                    self.$.saveRunning.style.display = 'none';
+                    self.$.saveFailed.style.display = 'block';
+                }
+            },
+
+            _calculate(e) {
+                if (e) {
+                    return getAge(e);
+                }
+                else {
+                    return '';
+                }
+            },
+
+            _patientImg(e) {
+                if (e) return e;
+                else return '../images/user.png';
+            },
+
+            _comma(e) {
+                if (e) {
+                    return ',';
+                }
+            },
+
+            _hmo(e) {
+                if (e) {
+                    return 'HMO: ' + e;
+                }
+            },
+
+            _ack() {
+                Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'none';
+                this.$.noRecordList.style.display = "none";
+            },
+
+            _timeStampToDateTime(ts) {
+                return new Date(ts);
+            },
+
+            _getDate(ts) {
+                return formatLocalDateString(ts);
+            },
+
+        })
+
+    </script>
+</dom-module>
