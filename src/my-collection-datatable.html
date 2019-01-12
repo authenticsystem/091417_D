@@ -503,6 +503,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         });
 
                         this.billingData = this.billingData.concat(this.selectedItemC);
+
+                        var data = this.selectedItemC.map(item => {
+                            return {
+                                action: "add",
+                                data: item
+                            }
+                        });
+
+                        this.logs = this.logs.concat(data);
                         // var number = new Date().getTime();
                         // var data = {
                         //     num: number,

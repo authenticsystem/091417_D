@@ -26,17 +26,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
-<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
-
+<link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
 <link rel="import" href="my-billing-card.html">
-<link rel="import" href="my-icons.html">
-<link rel="import" href="shared-styles.html">
 
-<link rel="lazy-import" href="my-billing-new.html">
-<link rel="lazy-import" href="my-billing-edit.html">
-<link rel="lazy-import" href="my-billing-view.html">
+<link rel="lazy-import" href="my-collection-new.html">
+<link rel="lazy-import" href="my-collection-edit.html">
+<link rel="lazy-import" href="my-collection-view.html">
 
-<dom-module id="my-billing-secretary">
+<dom-module id="my-collection-doctor">
     <template>
         <style include="shared-styles">
             :host {
@@ -170,21 +167,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
         </style>
 
-        <app-route route="{{route}}" pattern="/detail/1/b/" active="{{detailBilling1Active}}"></app-route>
-        <app-route route="{{route}}" pattern="/edit/1/b/" active="{{editBilling1Active}}"></app-route>
-        <app-route route="{{route}}" pattern="/new/1/b/" active="{{newBilling1Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/detail/0/c/" active="{{detailCollection0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/edit/0/c/" active="{{editCollection0Active}}"></app-route>
+        <app-route route="{{route}}" pattern="/new/0/c/" active="{{newCollection0Active}}"></app-route>
 
         <iron-pages selected="[[route.path]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <div name="">
-
-                <firebase-query path="/{{myKey}}/doctors" data="{{mydoctors}}" order-by-child="location" equal-to="{{myLocation}}"></firebase-query>
-
                 <app-header-layout fullbleed has-scrolling-region>
                     <app-header fixed slot="header">
                         <div hidden="{{openSearch}}">
                             <app-toolbar primary id="tool1">
                                 <paper-icon-button class="menu" icon="my-icons:menu" drawer-toggle on-tap="toggleDrawer"></paper-icon-button>
-                                <div main-title>Billing</div>
+                                <div main-title>Collection</div>
                                 <paper-icon-button class="menu" icon="my-icons:search" drawer-toggle on-tap="toggleSearch"></paper-icon-button>
                             </app-toolbar>
                         </div>
@@ -198,20 +192,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 </div>
                             </app-toolbar>
                         </div>
-                        <paper-tabs id="tool1" attr-for-selected="name" selected="{{tabs}}" scrollable fit-container>
-                            <template is="dom-repeat" items="[[mydoctors]]">
-                                <paper-tab name="[[item.code]]~[[item.lastname]]">Dr. [[item.lastname]]</paper-tab>
-                            </template>
-                            <paper-tab style="display:none" id="noDOC" name="anon~123">Dr. Unknown</paper-tab>
-                        </paper-tabs>
                     </app-header>
 
-                    <firebase-query disabled id="searchQuery" path="/{{doctorCode}}/billing" data="{{items}}"
+                    <firebase-query disabled id="searchQuery" path="/{{myKey}}/collection" data="{{items}}"
                         order-by-child="patientinfo/name" start-at="{{search}}" limit-to-first="15">
                     </firebase-query>
 
-                    <firebase-query id="defaultQuery" path="/{{doctorCode}}/billing" data="{{myBilling}}"
-                        order-by-child="order" start-at="{{lastorder}}" limit-to-first="15">
+                    <firebase-query id="defaultQuery" path="/{{myKey}}/collection" data="{{myBilling}}" order-by-child="order"
+                        start-at="{{lastorder}}" limit-to-first="15">
                     </firebase-query>
 
                     <template is="dom-if" if="{{firstLoad}}">
@@ -245,8 +233,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 <template>
                                     <div class="divSeparator">
                                         <div class="item" tabindex$="[[tabIndex]]">
-                                            <my-billing-card item="[[item]]" my-key="[[doctorCode]]" query-to="billing_data"
-                                                child-to="billing_ref" on-resize="_resizeHandler"></my-billing-card>
+                                            <my-billing-card item="[[item]]" my-key="[[myKey]]" query-to="collection_data"
+                                                child-to="collection_ref" on-resize="_resizeHandler"></my-billing-card>
 
                                             <paper-icon-button noink on-tap="_editThis" icon="my-icons:edit" alt="{{item.$key}}"
                                                 title="edit" style="display:inline-block;position: absolute; color: #673AB7; right: 10px;top:8px;">
@@ -266,25 +254,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 </app-header-layout>
 
-                <paper-fab id="Bnew" class="fab-menu" icon="my-icons:add" on-tap="_billingNew"></paper-fab>
+                <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_collectionNew"></paper-fab>
             </div>
 
-            <div name="/new/1/b/">
-                <template is="dom-if" if="{{newBilling1Active}}" restamp>
-                    <my-billing-new id="d23" my-key="{{doctorCode}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-billing-new>
+            <div name="/new/0/c/">
+                <template is="dom-if" if="{{newCollection0Active}}" restamp>
+                    <my-collection-new id="d23" my-key="{{myKey}}" prev-route="{{route.prefix}}" my-location="{{myLocation}}"></my-collection-new>
                 </template>
             </div>
 
-            <div name="/edit/1/b/">
-                <template is="dom-if" if="{{editBilling1Active}}" restamp>
-                    <my-billing-edit id="d25" my-key="{{doctorCode}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}"
-                        my-location="{{myLocation}}"></my-billing-edit>
+            <div name="/edit/0/c/">
+                <template is="dom-if" if="{{editCollection0Active}}" restamp>
+                    <my-collection-edit id="d25" my-key="{{myKey}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}"
+                        my-location="{{myLocation}}"></my-collection-edit>
                 </template>
             </div>
 
-            <div name="/detail/1/b/">
-                <template is="dom-if" if="{{detailBilling1Active}}" restamp>
-                    <my-billing-view id="d26" my-key="{{doctorCode}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}"></my-billing-view>
+            <div name="/detail/0/c/">
+                <template is="dom-if" if="{{detailCollection0Active}}" restamp>
+                    <my-collection-view id="d26" my-key="{{myKey}}" params="{{route.__queryParams}}" prev-route="{{route.prefix}}"></my-collection-view>
                 </template>
             </div>
 
@@ -295,7 +283,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <script>
         Polymer({
-            is: 'my-billing-secretary',
+            is: 'my-collection-doctor',
 
             properties: {
 
@@ -307,8 +295,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 myKey: String,
                 myLocation: String,
                 route: Object,
-                doctorCode: String,
-                doctorLastname: String,
                 narrow: {
                     type: Boolean,
                     notify: true
@@ -332,9 +318,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 '_searchChanged(search)',
                 '_myBillingChanged(myBilling.*)',
                 '_routeChanged(route)',
-                '_tabsChanged(tabs)',
-                '_selectedItemChanged(selectedItem)',
-                '_mydoctorsChanged(mydoctors.*)',
+                '_selectedItemChanged(selectedItem)'
             ],
 
             _searchChanged(search) {
@@ -354,44 +338,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             _routeChanged(e) {
                 var page;
-                if (this.detailBilling1Active) page = "billing-view";
-                else if (this.editBilling1Active) page = "billing-edit";
-                else if (this.newBilling1Active) page = "billing-new";
+                if (this.detailCollection0Active) page = "collection-view";
+                else if (this.editCollection0Active) page = "collection-edit";
+                else if (this.newCollection0Active) page = "collection-new";
 
                 if (page) {
                     var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
                     Polymer.importHref(resolvedPageUrl);
-                }
-            },
-
-            _mydoctorsChanged() {
-                if (this.mydoctors.length > 0) {
-                    this.tabs = this.mydoctors[0].code + "~" + this.mydoctors[0].lastname;
-
-                    if (Polymer.dom(this.root).querySelector("#noDOC")) {
-                        Polymer.dom(this.root).querySelector("#noDOC").style.display = 'none';
-                    }
-                    Polymer.dom(this.root).querySelector("#Bnew").style.display = 'block';
-                }
-                else {
-                    this.tabs = 'anon~123';
-
-                    if (Polymer.dom(this.root).querySelector("#noDOC")) {
-                        Polymer.dom(this.root).querySelector("#noDOC").style.display = 'block';
-                    }
-                    Polymer.dom(this.root).querySelector("#Bnew").style.display = 'none';
-                }
-            },
-
-            _tabsChanged(e) {
-                if (e) {
-                    var [docode, doclastname] = e.split('~');
-                    this.items = [];
-                    this.lastorder = "";
-                    this.doctorCode = docode;
-                    this.doctorLastname = doclastname;
-
-                    this.loadingPeople = true;
                 }
             },
 
@@ -427,9 +380,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
 
             _resizeHandler() {
-                if (Polymer.dom(this.root).querySelector("#ironlist")) {
-                    Polymer.dom(this.root).querySelector("#ironlist").fire('iron-resize');
-                }
+                Polymer.dom(this.root).querySelector("#ironlist").fire('iron-resize');
             },
 
             loadMoreData() {
@@ -473,11 +424,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
             },
 
-            _billingNew() {
-                window.history.pushState({}, null, '/billing/new/1/b/');
+            _collectionNew() {
+                window.history.pushState({}, null, '/collection/new/0/c/');
                 window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
-                    bubbles: true, composed: true, detail: "billing-new"
+                    bubbles: true, composed: true, detail: "collection-new"
                 }));
             },
 
@@ -486,10 +437,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     var list = Polymer.dom(this.root).querySelector("#ironlist");
                     this.viewKey = e.$key;
 
-                    window.history.pushState({}, null, '/billing/detail/1/b/?ref=' + this.viewKey);
+                    window.history.pushState({}, null, '/collection/detail/0/c/?ref=' + this.viewKey);
                     window.dispatchEvent(new CustomEvent('location-changed'));
                     this.dispatchEvent(new CustomEvent('loadPage', {
-                        bubbles: true, composed: true, detail: "billing-view"
+                        bubbles: true, composed: true, detail: "collection-view"
                     }));
 
                     if (list) {
@@ -500,10 +451,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             _editThis(e) {
                 this.editKey = Polymer.dom(e).rootTarget.getAttribute("alt");
-                window.history.pushState({}, null, '/billing/edit/1/b/?ref=' + this.editKey);
+                window.history.pushState({}, null, '/collection/edit/0/c/?ref=' + this.editKey);
                 window.dispatchEvent(new CustomEvent('location-changed'));
                 this.dispatchEvent(new CustomEvent('loadPage', {
-                    bubbles: true, composed: true, detail: "billing-edit"
+                    bubbles: true, composed: true, detail: "collection-edit"
                 }));
             },
 
