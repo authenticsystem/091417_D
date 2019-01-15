@@ -380,7 +380,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
 
             _resizeHandler() {
-                Polymer.dom(this.root).querySelector("#ironlist").fire('iron-resize');
+                if (Polymer.dom(this.root).querySelector("#ironlist")) {
+                    Polymer.dom(this.root).querySelector("#ironlist").fire('iron-resize');
+                }
             },
 
             loadMoreData() {

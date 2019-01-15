@@ -4,6 +4,7 @@
   "scripts": {
     "start": "polymer serve",
     "build": "polymer build",
-    "deploy": "firebase deploy"
+    "deploy": "firebase deploy",
+    "deploy:dev": "polymer build && firebase deploy"
   }
 }

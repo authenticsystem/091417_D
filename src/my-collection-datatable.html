@@ -99,7 +99,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </style>
 
         <!-- <firebase-query id="serviceQuery" path="/{{myKey}}/services" data="{{myservices}}" order-by-child="service"></firebase-query> -->
-        <firebase-query id="allBillQuery" path="/{{myKey}}/billing_data" data="{{myAllBill}}" order-by-child="patient_billTo"
+        <firebase-query id="allBillQuery" path="/{{myKey}}/billing_data" data="{{myAllBill}}" order-by-child="patient_billTo_collected"
             equal-to="[[patientBillTo]]"></firebase-query>
         <firebase-query id="hmoQuery" path="/{{myKey}}/hmo" data="{{myhmos}}" order-by-child="name"></firebase-query>
         <firebase-query id="locationQuery" path="/{{myKey}}/locations" data="{{mylocations}}" order-by-child="location_name"></firebase-query>
@@ -369,7 +369,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             break;
                     }
 
-                    this.patientBillTo = service_bill_to ? this.myPatient.name + "_" + service_bill_to : "";
+                    this.patientBillTo = service_bill_to ? this.myPatient.name + "_" + service_bill_to + "_false" : "";
                 }
             },
 
@@ -416,6 +416,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _deleteBill() {
                 if (this.selectedItem.length > 0) {
                     var self = this;
+                    var billDataRef = firebase.database().ref('/' + this.myKey + '/billing_data');
+
                     function removeByKey(array, params) {
                         array.some(function (item, index) {
                             if (array[index][params.key] === params.value) {
@@ -425,7 +427,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                         action: "remove",
                                         data: array[index]._key
                                     });
-                                    self.notifyPath('logs', self.logs.slice())
+                                    self.notifyPath('logs', self.logs.slice());
+
+                                    billDataRef.child(array[index].billing_data_key).update({
+                                        patient_billTo_collected: self.myPatient.name + "_" + array[index].collectFrom + "_false",
+                                        collected: false
+                                    });
                                 };
 
                                 array.splice(index, 1);
@@ -492,6 +499,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     if (this.selectedItemC.length > 0) {
                         this.selectedItemC = this.selectedItemC.map(item => {
                             return {
+                                billing_data_key: item.$key,
                                 amount: item.amount,
                                 collectFrom: item.billTo,
                                 num: new Date().getTime(),
@@ -502,7 +510,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             };
                         });
 
-                        this.billingData = this.billingData.concat(this.selectedItemC);
+                        this.billingData = uniqueArray(this.billingData.concat(this.selectedItemC));
 
                         var data = this.selectedItemC.map(item => {
                             return {
@@ -510,6 +518,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 data: item
                             }
                         });
+
+                        function uniqueArray(array) {
+                            array = array.filter((array, index, self) =>
+                                index === self.findIndex((data) => (
+                                    data.billing_data_key === array.billing_data_key
+                                ))
+                            );
+
+                            return array;
+                        };
 
                         this.logs = this.logs.concat(data);
                         // var number = new Date().getTime();

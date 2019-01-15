@@ -506,7 +506,8 @@
 
                 var noRef = firebase.database().ref("/" + mykey + "/uniqueId/collection");
                 var billRef = firebase.database().ref('/' + mykey + '/collection');
-                var billDataRef = firebase.database().ref('/' + mykey + '/collection_data');
+                var collDataRef = firebase.database().ref('/' + mykey + '/collection_data');
+                var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
                 this.lastPushTime = new Date(today).getTime();
 
                 if (today < formatTodayDate(new Date())) {
@@ -555,9 +556,14 @@
                             });
 
                             self.billingData.forEach(element => {
+                                billDataRef.child(element.billing_data_key).update({
+                                    patient_billTo_collected: self.filterValue + "_" + element.collectFrom + "_true",
+                                    collected: true
+                                });
+
                                 element.collection_key = fbPushKey;
                                 element.collection_ref = no;
-                                billDataRef.push(element);
+                                collDataRef.push(element);
                             });
                         });
                     });

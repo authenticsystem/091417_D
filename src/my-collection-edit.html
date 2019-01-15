@@ -355,8 +355,9 @@
                 var order = firebase.database.ServerValue.TIMESTAMP;
                 var newPushKey;
 
-                var billRef = firebase.database().ref('/' + mykey + '/collection');
-                var billDataRef = firebase.database().ref('/' + mykey + '/collection_data');
+                var collRef = firebase.database().ref('/' + mykey + '/collection');
+                var collDataRef = firebase.database().ref('/' + mykey + '/collection_data');
+                var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
                 this.lastPushTime = new Date(today).getTime();
 
                 var bol = today !== this.storeDate;
@@ -385,12 +386,12 @@
 
                 this.$.saveRunning.style.display = 'block';
                 if (newPushKey) {
-                    billRef.child(newPushKey).set(dataToSave).then(function () {
-                        billRef.child(self.editKey).remove();
-                        billRef.child(newPushKey).once('value').then(function (snapshot) {
+                    collRef.child(newPushKey).set(dataToSave).then(function () {
+                        collRef.child(self.editKey).remove();
+                        collRef.child(newPushKey).once('value').then(function (snapshot) {
                             if (snapshot.exists()) {
                                 var order = snapshot.val().order * -1;
-                                billRef.child(newPushKey).update({ order: order });
+                                collRef.child(newPushKey).update({ order: order });
                             }
                         });
                         saveBillingData(newPushKey);
@@ -403,7 +404,7 @@
                     });
                 }
                 else {
-                    billRef.child(self.editKey).update(dataToSave).then(function () {
+                    collRef.child(self.editKey).update(dataToSave).then(function () {
                         saveBillingData(self.editKey);
                         self.$.saveRunning.style.display = 'none';
                         self.$.saveSuccess.style.display = 'block';
@@ -418,12 +419,17 @@
                     if (self.logs.length > 0) {
                         self.logs.forEach(element => {
                             if (element.action === "remove") {
-                                billDataRef.child(element.data).remove();
+                                collDataRef.child(element.data).remove();
                             } else if (element.action === "add") {
+                                billDataRef.child(element.data.billing_data_key).update({
+                                    patient_billTo_collected: self.myPatient.name + "_" + element.data.collectFrom + "_true",
+                                    collected: true
+                                });
+
                                 element.data.collection_key = fbPushKey;
                                 element.data.collection_ref = self.ref;
                                 element.data.patient_collectFrom = self.myPatient.name + "_" + element.data.collectFrom;
-                                billDataRef.push(element.data);
+                                collDataRef.push(element.data);
                             }
                         });
                     }
