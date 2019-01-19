@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "p123-6256e",
+    "live": "p123-6256e",
     "dev": "emr-dev-c3005"
   }
 }
