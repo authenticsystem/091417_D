@@ -557,7 +557,9 @@
                             self.billingData.forEach(element => {
                                 element.billing_key = fbPushKey;
                                 element.billing_ref = no;
-                                element.patient_billTo = self.filterValue + "_" + element.billTo;
+                                element.patient = self.filterValue;
+                                element.collected = false;
+                                element.patient_billTo_collected = self.filterValue + "_" + element.billTo + "_false";
                                 billDataRef.push(element);
                             });
                         });

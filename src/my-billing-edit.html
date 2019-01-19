@@ -422,12 +422,14 @@
                             } else if (element.action === "update") {
                                 var key = element.data._key;
                                 element.data._key = null;
-                                element.data.patient_billTo = self.myPatient.name + "_" + element.data.billTo;
+                                element.data.patient_billTo_collected = self.myPatient.name + "_" + element.data.billTo + "_" + element.data.collected;
                                 billDataRef.child(key).update(element.data);
                             } else if (element.action === "add") {
                                 element.data.billing_key = fbPushKey;
                                 element.data.billing_ref = self.ref;
-                                element.data.patient_billTo = self.myPatient.name + "_" + element.data.billTo;
+                                element.data.patient = self.myPatient.name;
+                                element.data.collected = false;
+                                element.data.patient_billTo_collected = self.myPatient.name + "_" + element.data.billTo + "_false";
                                 billDataRef.push(element.data);
                             }
                         });
