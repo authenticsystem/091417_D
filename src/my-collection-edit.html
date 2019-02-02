@@ -358,6 +358,7 @@
                 var collRef = firebase.database().ref('/' + mykey + '/collection');
                 var collDataRef = firebase.database().ref('/' + mykey + '/collection_data');
                 var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
+                var recRef = firebase.database().ref('/' + mykey + '/receivables');
                 this.lastPushTime = new Date(today).getTime();
 
                 var bol = today !== this.storeDate;
@@ -419,7 +420,12 @@
                     if (self.logs.length > 0) {
                         self.logs.forEach(element => {
                             if (element.action === "remove") {
-                                collDataRef.child(element.data).remove();
+                                recRef.child(element.data.service_collect_from).once('value', function (snapshot) {
+                                    var total = snapshot.val() ? snapshot.val() : 0;
+                                    total += element.data.amount;
+                                    recRef.child(element.data.service_collect_from).set(total);
+                                    collDataRef.child(element.data._key).remove();
+                                });
                             } else if (element.action === "add") {
                                 billDataRef.child(element.data.billing_data_key).update({
                                     patient_billTo_collected: self.myPatient.name + "_" + element.data.collectFrom + "_true",
@@ -428,8 +434,13 @@
 
                                 element.data.collection_key = fbPushKey;
                                 element.data.collection_ref = self.ref;
-                                element.data.patient_collectFrom = self.myPatient.name + "_" + element.data.collectFrom;
+                                element.data.patient = self.myPatient.name;
                                 collDataRef.push(element.data);
+                                recRef.child(element.data.service_collect_from).once('value', function (snapshot) {
+                                    var total = snapshot.val() ? snapshot.val() : 0;
+                                    total -= element.data.amount;
+                                    recRef.child(element.data.service_collect_from).set(total);
+                                });
                             }
                         });
                     }

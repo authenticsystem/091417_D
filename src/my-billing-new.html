@@ -507,6 +507,7 @@
                 var noRef = firebase.database().ref("/" + mykey + "/uniqueId/billing");
                 var billRef = firebase.database().ref('/' + mykey + '/billing');
                 var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
+                var recRef = firebase.database().ref('/' + mykey + '/receivables');
                 this.lastPushTime = new Date(today).getTime();
 
                 if (today < formatTodayDate(new Date())) {
@@ -561,6 +562,11 @@
                                 element.collected = false;
                                 element.patient_billTo_collected = self.filterValue + "_" + element.billTo + "_false";
                                 billDataRef.push(element);
+                                recRef.child(element.service_bill_to).once('value', function (snapshot) {
+                                    var total = snapshot.val() ? snapshot.val() : 0;
+                                    total += element.amount;
+                                    recRef.child(element.service_bill_to).set(total);
+                                });
                             });
                         });
                     });

@@ -357,6 +357,7 @@
 
                 var billRef = firebase.database().ref('/' + mykey + '/billing');
                 var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
+                var recRef = firebase.database().ref('/' + mykey + '/receivables');
                 this.lastPushTime = new Date(today).getTime();
 
                 var bol = today !== this.storeDate;
@@ -418,12 +419,26 @@
                     if (self.logs.length > 0) {
                         self.logs.forEach(element => {
                             if (element.action === "remove") {
-                                billDataRef.child(element.data).remove();
+                                recRef.child(element.data.service_bill_to).once('value', function (snapshot) {
+                                    var total = snapshot.val() ? snapshot.val() : 0;
+                                    total -= element.data.amount;
+                                    recRef.child(element.data.service_bill_to).set(total);
+                                    billDataRef.child(element.data._key).remove();
+                                });
                             } else if (element.action === "update") {
                                 var key = element.data._key;
                                 element.data._key = null;
                                 element.data.patient_billTo_collected = self.myPatient.name + "_" + element.data.billTo + "_" + element.data.collected;
-                                billDataRef.child(key).update(element.data);
+                                recRef.child(element.data.service_bill_to).once('value', function (snapshot) {
+                                    var total = snapshot.val() ? snapshot.val() : 0;
+                                    if (element.data.add) total += element.data.amount;
+                                    if (element.data.minus) total -= element.data.amount;
+                                    recRef.child(element.data.service_bill_to).set(total);
+
+                                    delete element.data.add;
+                                    delete element.data.minus;
+                                    billDataRef.child(key).update(element.data);
+                                });
                             } else if (element.action === "add") {
                                 element.data.billing_key = fbPushKey;
                                 element.data.billing_ref = self.ref;
@@ -431,6 +446,11 @@
                                 element.data.collected = false;
                                 element.data.patient_billTo_collected = self.myPatient.name + "_" + element.data.billTo + "_false";
                                 billDataRef.push(element.data);
+                                recRef.child(element.data.service_bill_to).once('value', function (snapshot) {
+                                    var total = snapshot.val() ? snapshot.val() : 0;
+                                    total += element.data.amount;
+                                    recRef.child(element.data.service_bill_to).set(total);
+                                });
                             }
                         });
                     }

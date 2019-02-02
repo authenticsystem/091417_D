@@ -508,6 +508,7 @@
                 var billRef = firebase.database().ref('/' + mykey + '/collection');
                 var collDataRef = firebase.database().ref('/' + mykey + '/collection_data');
                 var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
+                var recRef = firebase.database().ref('/' + mykey + '/receivables');
                 this.lastPushTime = new Date(today).getTime();
 
                 if (today < formatTodayDate(new Date())) {
@@ -564,6 +565,11 @@
                                 element.collection_key = fbPushKey;
                                 element.collection_ref = no;
                                 collDataRef.push(element);
+                                recRef.child(element.service_collect_from).once('value', function (snapshot) {
+                                    var total = snapshot.val() ? snapshot.val() : 0;
+                                    total -= element.amount;
+                                    recRef.child(element.service_collect_from).set(total);
+                                });
                             });
                         });
                     });

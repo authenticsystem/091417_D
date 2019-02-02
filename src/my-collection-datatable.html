@@ -155,6 +155,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <br>
                 <br>
                 <br>
+                <br>
+                <br>
             </neon-animatable>
 
             <neon-animatable>
@@ -240,7 +242,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             <paper-button class="buttonAdd" id="onEnter" on-tap="_addBilling">{{_displayText(selectedItem)}}</paper-button>
                         </div>
                     </div>
-                </div>
                 </div>
             </neon-animatable>
 
@@ -425,7 +426,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 if (array[index]._key) {
                                     self.logs.push({
                                         action: "remove",
-                                        data: array[index]._key
+                                        data: array[index]
                                     });
                                     self.notifyPath('logs', self.logs.slice());
 
@@ -502,8 +503,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 billing_data_key: item.$key,
                                 amount: item.amount,
                                 collectFrom: item.billTo,
-                                num: new Date().getTime(),
-                                patient_collectFrom: item.patient_billTo,
+                                num: item.num,
+                                patient: this.myPatient.name,
                                 service: item.service,
                                 service_collect_from: item.service_bill_to,
                                 use_insurance: item.use_insurance

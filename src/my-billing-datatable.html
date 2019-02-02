@@ -146,6 +146,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <br>
                 <br>
                 <br>
+                <br>
+                <br>
             </neon-animatable>
 
             <neon-animatable>
@@ -370,7 +372,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 if (array[index]._key) {
                                     self.logs.push({
                                         action: "remove",
-                                        data: array[index]._key
+                                        data: array[index]
                                     });
                                     self.notifyPath('logs', self.logs.slice())
                                 };
@@ -455,8 +457,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         var self = this;
                         for (var i = 0; i < this.billingData.length; i++) {
                             if (self.selectedItem[0].num === self.billingData[i].num) {
+                                var newAmount = parseInt(self.amount);
+                                if (self.billingData[i].amount > newAmount) {
+                                    self.set('billingData.' + [i] + '.minus', (self.billingData[i].amount - newAmount));
+                                }
+                                else if (self.billingData[i].amount == newAmount) {
+                                    delete billingData[i].minus;
+                                    delete billingData[i].add;
+                                }
+                                else {
+                                    self.set('billingData.' + [i] + '.add', (newAmount - self.billingData[i].amount));
+                                }
+
                                 self.set('billingData.' + [i] + '.service', self.service);
-                                self.set('billingData.' + [i] + '.amount', parseInt(self.amount));
+                                self.set('billingData.' + [i] + '.amount', newAmount);
                                 self.set('billingData.' + [i] + '.billTo', service_bill_to);
                                 self.set('billingData.' + [i] + '.service_bill_to', self.selectedBillTo);
                                 self.set('billingData.' + [i] + '.use_insurance', self.useInsurance);

@@ -54,24 +54,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       @media (max-width: 800px) {
 
         #card1 {
-          margin-top: -10px;
+          margin-top: -8px;
         }
 
         #card2 {
-          margin-top: -10px;
+          margin-top: -8px;
         }
 
         .card {
-          margin-left: 10px;
-          margin-right: 10px;
+          margin-left: 8px;
+          margin-right: 8px;
+        }
+
+        .section-holder {
+          margin: 8px;
+        }
+
+        .section-title {
+          padding: 8px;
         }
       }
 
+      .amount-holder {
+        padding: 8px 8px 0;
+        color: rgb(100, 100, 100);
+        font-weight: 500;
+        font-size: 16px;
+      }
+
+      .section-title {
+        float: right;
+        margin-top: 8px;
+        margin-right: 8px;
+        color: rgb(100, 100, 100);
+        font-weight: 400;
+        font-size: 14px;
+      }
+
+      .section-holder {
+        margin: 0 16px;
+      }
+
       #card1 {
-        margin-top: -10px;
+        margin-top: -8px;
       }
 
       .card {
+        margin: 16px;
         text-align: center;
       }
 
@@ -99,6 +128,84 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-top: -6px;
         font-weight: 450
       }
+
+      /*  SECTIONS  */
+      .section {
+        clear: both;
+        padding: 0px;
+        margin: 0px;
+      }
+
+      /*  COLUMN SETUP  */
+      .col {
+        background: #fff;
+        text-align: center;
+        display: block;
+        float: left;
+        margin: 1% 0 1% 0.88%;
+      }
+
+      .col:first-child {
+        margin-left: 0;
+      }
+
+      /*  GROUPING  */
+      .group:before,
+      .group:after {
+        content: "";
+        display: table;
+      }
+
+      .group:after {
+        clear: both;
+      }
+
+      .group {
+        zoom: 1;
+        /* For IE 6/7 */
+      }
+
+      /*  GRID OF FIVE  */
+      .col-5 {
+        width: 100%;
+      }
+
+      .col-4 {
+        width: 79.82%;
+      }
+
+      .col-3 {
+        width: 59.64%;
+      }
+
+      .col-2 {
+        width: 39.47%;
+      }
+
+      .col-1 {
+        width: 19.29%;
+      }
+
+      /*  GO FULL WIDTH BELOW 480 PIXELS */
+      @media only screen and (max-width: 480px) {
+        .col {
+          margin: 1% 0 1% 0%;
+        }
+
+        .col-1,
+        .col-2,
+        .col-3,
+        .col-4,
+        .col-5 {
+          width: 100%;
+        }
+      }
+
+      .small-text {
+        font-size: 14px;
+        color: gray;
+        font-weight: 50;
+      }
     </style>
 
     <app-header-layout fullbleed has-scrolling-region>
@@ -116,6 +223,44 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
       </div>
 
+      <div hidden$="{{_isDoctor(myRole)}}" class="section-holder">
+        <div class="section-title">
+          Receivables
+        </div>
+        <div class="section group">
+          <div class="col col-1">
+            <div style="padding: 8px 8px 10px; border: 1px solid #f48989; background: #feefef;">
+              <div class="amount-holder" style="color:#da1414;">₱ [[r_patient]]</div>
+              <div class="small-text" style="color:#da1414;">Patients</div>
+            </div>
+          </div>
+          <div class="col col-1">
+            <div style="padding: 8px 8px 10px; border: 1px solid #5aca75; background: #edf9f0;">
+              <div class="amount-holder" style="color:#287d3c;">₱ [[r_philhealth]]</div>
+              <div class="small-text" style="color:#287d3c;">Philhealth</div>
+            </div>
+          </div>
+          <div class="col col-1">
+            <div style="padding: 8px 8px 10px; border: 1px solid #ff8f39; background: #fff4ec;">
+              <div class="amount-holder" style="color:#b95000;">₱ [[r_insurance]]</div>
+              <div class="small-text" style="color:#b95000;">Insurance</div>
+            </div>
+          </div>
+          <div class="col col-1">
+            <div style="padding: 8px 8px 10px; border: 1px solid #89a7e0; background: #eef2fa;">
+              <div class="amount-holder" style="color:#2e5aac;">₱ [[r_hospital]]</div>
+              <div class="small-text" style="color:#2e5aac;">Hospital</div>
+            </div>
+          </div>
+          <div class="col col-1">
+            <div style="padding: 8px 8px 10px; border: 1px solid rgba(54, 162, 235, 1); background: rgba(54, 162, 235, 0.2);">
+              <div class="amount-holder" style="color:blue;">₱ [[r_total]]</div>
+              <div class="small-text" style="color:blue;">Total</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div hidden$="{{_isDoctor(myRole)}}" style="padding:26px; margin-top:-30px">
         <div style="float:right;">
           <div style="display:flex;">
@@ -129,7 +274,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </paper-dropdown-menu>
           </div>
           <div style="margin-left:34px;margin-top:-10px;">
-            <span style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+            <span class="small-text">{{text}}</span>
           </div>
         </div>
       </div>
@@ -152,6 +297,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       is: 'my-dashboard',
 
       properties: {
+        r_hospital: {
+          type: Number,
+          value: 0
+        },
+        r_insurance: {
+          type: Number,
+          value: 0
+        },
+        r_patient: {
+          type: Number,
+          value: 0
+        },
+        r_philhealth: {
+          type: Number,
+          value: 0
+        },
+        r_total: {
+          type: Number,
+          value: 0
+        },
         narrow: {
           type: Boolean,
           notify: true
@@ -164,6 +329,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_selectedRangeChanged'
         },
         prevRange: String
+      },
+
+      observers: [
+        '_receivables(myKey, myRole)'
+      ],
+
+      _receivables(key, role) {
+        if (key && (role && role !== "Secretary")) {
+          const self = this;
+          firebase.database().ref('/' + key + '/receivables').on('value', function (snapshot) {
+            if (snapshot.exists()) {
+              var r_hospital = snapshot.val().hospital ? snapshot.val().hospital : 0;
+              var r_insurance = snapshot.val().hmo ? snapshot.val().hmo : 0;
+              var r_patient = snapshot.val().patient ? snapshot.val().patient : 0;
+              var r_philhealth = snapshot.val().philhealth ? snapshot.val().philhealth : 0;
+
+              self.r_hospital = formatN(r_hospital);
+              self.r_insurance = formatN(r_insurance);
+              self.r_patient = formatN(r_patient);
+              self.r_philhealth = formatN(r_philhealth);
+              self.r_total = formatN(r_hospital + r_insurance + r_patient + r_philhealth);
+            }
+          });
+
+          function formatN(n) {
+            if (n > 0) return n.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+            return n;
+          }
+        }
       },
 
       _isDoctor(e) {
