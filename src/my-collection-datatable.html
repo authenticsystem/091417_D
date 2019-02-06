@@ -1,0 +1,618 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+
+<link rel="import" href="bwt-datatable-card.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-collection-datatable">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+            }
+
+            .toolbar-select {
+                /* text-align: right; */
+                /* display: flex; */
+                background: var(--paper-datatable-selection-toolbar-color, var(--paper-pink-50));
+                color: var(--paper-datatable-selection-toolbar-text-color, var(--accent-color));
+                padding: 6px;
+            }
+
+            .billBtn {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                background: white;
+                color: black;
+                float: right;
+                margin-top: -30px;
+                margin-right: 16px;
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            }
+
+            .aHref {
+                text-decoration: none;
+                color: #1976d2;
+                font-size: 12px;
+                margin-top: -8px;
+                cursor: pointer;
+            }
+
+            .buttonAdd {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                background: green;
+                color: white;
+                float: right;
+            }
+
+            .buttonCancel {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                background: rgb(200, 200, 200);
+                color: black;
+                float: right;
+            }
+
+            .billDropdown {
+                width: 100%;
+            }
+
+            .textTemp {
+                color: rgb(100, 100, 100);
+                font-weight: 500;
+                font-size: 14px;
+                margin-left: 16px;
+            }
+
+            paper-item:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
+
+            @media (max-width: 800px) {
+                .docu {
+                    margin-left: 8px;
+                    margin-right: 8px;
+                }
+            }
+        </style>
+
+        <!-- <firebase-query id="serviceQuery" path="/{{myKey}}/services" data="{{myservices}}" order-by-child="service"></firebase-query> -->
+        <firebase-query id="allBillQuery" path="/{{myKey}}/billing_data" data="{{myAllBill}}" order-by-child="patient_billTo_collected"
+            equal-to="[[patientBillTo]]"></firebase-query>
+        <firebase-query id="hmoQuery" path="/{{myKey}}/hmo" data="{{myhmos}}" order-by-child="name"></firebase-query>
+        <firebase-query id="locationQuery" path="/{{myKey}}/locations" data="{{mylocations}}" order-by-child="location_name"></firebase-query>
+
+        <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+
+            <neon-animatable>
+                <div class="textTemp" style$="{{_fit(showDate)}}">
+                    <div hidden="{{showDate}}"> Billing</div>
+                    <div hidden="{{!showDate}}">
+                        <paper-input label="Date" type="date" value="{{todayDate}}" style="width:150px">
+                            <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                        </paper-input>
+                        <div style="margin-left:4px;margin-top:-10px;">
+                            <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                        </div>
+                    </div>
+                </div>
+                <paper-button class="billBtn" on-tap="_showBillDialog">Add Collection</paper-button>
+                <div id="billHolder">
+                    <div class="docu2" style="padding:0">
+                        <div style$="{{_ifSelect(selectedItem.length)}}" class="toolbar-select">
+                            <div style="padding:6px; margin-top:3px; margin-left:6px; flex: 1;">
+                                [[selectedItem.length]] item(s) selected
+                            </div>
+                            <div style="text-align:right; flex: 1;">
+                                <!-- <paper-icon-button hidden="{{_ifSelectMore(selectedItem.length)}}" id="edit" icon="datatable:editable"
+                                    no-ink on-tap="_editBill"></paper-icon-button> -->
+                                <paper-icon-button id="delete" icon="my-icons:delete-forever" no-ink on-tap="_deleteBill"></paper-icon-button>
+
+                                <!-- <paper-tooltip for="edit" position="bottom">Edit</paper-tooltip> -->
+                                <paper-tooltip for="delete" position="bottom">Delete</paper-tooltip>
+                            </div>
+                        </div>
+                        <div style="padding:16px">
+                            <span style="font-weight: 400; font-size: 12px; float: right">
+                                {{_billingRef(ref)}}
+                            </span>
+                            <paper-input style="width:250px" label="Remarks" value="{{remarks}}" always-float-label></paper-input>
+                            <paper-datatable id="billingDatatable" data="{{billingData}}" header-fixed multi-selection
+                                selectable selected-items="{{selectedItem}}">
+                                <!-- <paper-datatable-column header="No" type="Number" property="num"></paper-datatable-column> -->
+                                <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
+                                <paper-datatable-column header="Collect from" type="String" property="collectFrom"></paper-datatable-column>
+                                <paper-datatable-column header="Amount" type="Number" property="amount"></paper-datatable-column>
+                            </paper-datatable>
+                            <div style="padding: 16px;">
+                                <div style="float: right;" class="primary">TOTAL: {{total}}.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+            </neon-animatable>
+
+            <neon-animatable>
+                <div class="docu">
+                    <div class="details">
+                        <div>
+                            <!-- <paper-dropdown-input style="width: 100%" id="dropdService" label="Service *" items="[[myservices]]"
+                                filter-property="service" value="{{service}}" selected-item="{{selectedService}}">
+                                <template>
+                                    <template is="dom-repeat" items="[[items]]" as="item">
+                                        <paper-item id="[[item.rate]]">[[item.service]]</paper-item>
+                                    </template>
+                                </template>
+                            </paper-dropdown-input>
+                            <paper-input id="amount" label="Amount" allowed-pattern="[\d]" prevent-invalid-input value="{{amount}}"></paper-input> -->
+
+                            <paper-dropdown-menu class="billDropdown" label="Collect from *">
+                                <paper-listbox id="dropdSelectedBillTo" slot="dropdown-content" attr-for-selected="name"
+                                    selected="{{selectedBillTo}}">
+                                    <paper-item name="patient">Patient</paper-item>
+                                    <paper-item name="philhealth">PHILHEALTH</paper-item>
+                                    <paper-item name="hmo">HMO</paper-item>
+                                    <paper-item name="hospital">Hospital</paper-item>
+                                </paper-listbox>
+                            </paper-dropdown-menu>
+
+                            <iron-pages attr-for-selected="name" selected="{{selectedBillTo}}">
+                                <div name="patient">
+                                    <paper-input readonly label="Patient" value="{{myPatient.name}}"></paper-input>
+                                </div>
+
+                                <div name="hmo">
+                                    <div hidden="[[!useInsurance]]">
+                                        <paper-input readonly label="HMO" value="{{myPatient.hmo}}"></paper-input>
+                                        <a class="aHref" hidden="[[!useInsurance]]" id="href1" on-tap="_changeHMO">Change</a>
+                                    </div>
+
+                                    <div hidden="[[useInsurance]]">
+                                        <paper-dropdown-input id="dropdHMO" class="billDropdown" label="HMO" items="[[myhmos]]"
+                                            filter-property="name" value="{{selectedHMO}}">
+                                            <template>
+                                                <template is="dom-repeat" items="[[items]]" as="item">
+                                                    <paper-item>[[item.name]]</paper-item>
+                                                </template>
+                                            </template>
+                                        </paper-dropdown-input>
+                                        <a class="aHref" hidden="[[useInsurance]]" id="href2" on-tap="_cancelChangeHMO">Use
+                                            default HMO</a>
+                                    </div>
+                                </div>
+
+                                <div name="hospital">
+                                    <paper-dropdown-input id="dropdHospital" class="billDropdown" label="Hospital"
+                                        items="[[mylocations]]" filter-property="location_name" value="{{location}}">
+                                        <template>
+                                            <template is="dom-repeat" items="[[items]]" as="item">
+                                                <paper-item>[[item.location_name]]</paper-item>
+                                            </template>
+                                        </template>
+                                    </paper-dropdown-input>
+                                </div>
+                            </iron-pages>
+
+                            <div style="padding: 8px;" hidden$="[[!patientBillTo]]">
+                                <div hidden$="[[_selectedItemC(selectedItemC.length)]]" class="toolbar-select">
+                                    <div style="padding: 6px; margin-left: 6px;">
+                                        [[selectedItemC.length]] item(s) selected
+                                    </div>
+                                </div>
+                                <paper-datatable id="billingCDatatable" data="{{myAllBill}}" header-fixed
+                                    multi-selection selectable selected-items="{{selectedItemC}}">
+                                    <paper-datatable-column header="Services" type="String" property="service"></paper-datatable-column>
+                                    <paper-datatable-column header="Collect from" type="String" property="billTo"></paper-datatable-column>
+                                    <paper-datatable-column header="Amount" type="Number" property="amount"></paper-datatable-column>
+                                </paper-datatable>
+                            </div>
+
+                            <span style="color: red; font-size: 12px; margin-top:16px; ">{{billErr}}</span>
+                        </div>
+
+                        <div style="height: 40px; margin-top:16px">
+                            <paper-button class="buttonCancel" on-tap="_cancelBilling">Cancel</paper-button>
+                            <paper-button class="buttonAdd" id="onEnter" on-tap="_addBilling">{{_displayText(selectedItem)}}</paper-button>
+                        </div>
+                    </div>
+                </div>
+            </neon-animatable>
+
+        </neon-animated-pages>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-collection-datatable',
+
+            properties: {
+                item: Object,
+                myKey: String,
+                myPatient: Object,
+                ref: String,
+                selectedPage: {
+                    type: Number,
+                    value: 0
+                },
+                entryanimation: {
+                    type: String,
+                    value: "slide-from-right-animation"
+                },
+                exitanimation: {
+                    type: String,
+                    value: "slide-left-animation"
+                },
+                billingData: {
+                    type: Array,
+                    value: [],
+                    notify: true
+                },
+                remarks: {
+                    type: String,
+                    notify: true
+                },
+                total: {
+                    type: String,
+                    notify: true
+                },
+                showDate: {
+                    type: Boolean,
+                    value: false
+                },
+                todayDate: {
+                    type: String,
+                    notify: true
+                },
+                favhide: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+                logs: {
+                    type: Array,
+                    value: [],
+                    notify: true
+                },
+                patientBillTo: {
+                    type: String,
+                    value: ""
+                }
+            },
+
+            ready() {
+                if (!this.todayDate) {
+                    this.todayDate = formatTodayDate(new Date());
+                }
+            },
+
+            observers: [
+                '_todayDateChanged(todayDate)',
+                '_selectedServiceChanged(selectedService)',
+                '_billingDataChanged(billingData)',
+                '_hasInsuranceChanged(hasInsurance)',
+                '_myPatientChanged(myPatient)',
+                '_queryChanged(selectedBillTo, useInsurance, selectedHMO, location)'
+            ],
+
+            _todayDateChanged(date) {
+                var monthNames = [
+                    "January", "February", "March",
+                    "April", "May", "June", "July",
+                    "August", "September", "October",
+                    "November", "December"
+                ];
+
+                var d = new Date(date);
+                if (date) {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+                    this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+                    this.text = 'Please choose date.';
+                }
+            },
+
+            _myPatientChanged(e) {
+                if (e.hmo) {
+                    this.hasInsurance = true;
+                    this.useInsurance = true;
+                } else {
+                    this.hasInsurance = false;
+                    this.useInsurance = false;
+                }
+            },
+
+            _queryChanged(selectedBillTo, useInsurance, selectedHMO, location) {
+                if (selectedBillTo) {
+                    Polymer.dom(this.root).querySelector("#billingCDatatable").deselectAll();
+                    var service_bill_to;
+                    switch (selectedBillTo) {
+                        case "patient":
+                            service_bill_to = this.myPatient.name;
+                            break;
+                        case "philhealth":
+                            service_bill_to = "PHILHEALTH";
+                            break;
+                        case "hmo":
+                            service_bill_to = useInsurance ? this.myPatient.hmo : selectedHMO;
+                            break;
+                        case "hospital":
+                            service_bill_to = location;
+                            break;
+                    }
+
+                    this.patientBillTo = service_bill_to ? this.myPatient.name + "_" + service_bill_to + "_false" : "";
+                }
+            },
+
+            _hasInsuranceChanged(e) {
+                if (!e) {
+                    this.$.href1.style.display = "none";
+                    this.$.href2.style.display = "none";
+                }
+            },
+
+            _changeHMO() {
+                this.useInsurance = false;
+            },
+
+            _cancelChangeHMO() {
+                this.useInsurance = true;
+            },
+
+            _showBillDialog() {
+                if (this.selectedItem.length > 0) {
+                    Polymer.dom(this.root).querySelector("#billingDatatable").deselectAll();
+                }
+
+                this.entryanimation = 'fade-in-animation';
+                this.exitanimation = 'fade-out-animation';
+                this.favhide = true;
+                this.selectedPage = 1;
+            },
+
+            _editBill() {
+                this.entryanimation = 'fade-in-animation';
+                this.exitanimation = 'fade-out-animation';
+                this.favhide = true;
+                this.selectedPage = 1;
+
+                this.$.dropdService.value = this.selectedItem[0].service;
+                this.$.amount.value = this.selectedItem[0].amount;
+                this.$.dropdSelectedBillTo.selected = this.selectedItem[0].service_bill_to;
+                this.$.dropdHMO.value = this.selectedItem[0].billTo;
+                this.$.dropdHospital.value = this.selectedItem[0].billTo;
+                this.useInsurance = this.selectedItem[0].use_insurance;
+            },
+
+            _deleteBill() {
+                if (this.selectedItem.length > 0) {
+                    var self = this;
+                    var billDataRef = firebase.database().ref('/' + this.myKey + '/billing_data');
+
+                    function removeByKey(array, params) {
+                        array.some(function (item, index) {
+                            if (array[index][params.key] === params.value) {
+                                // found it!
+                                if (array[index]._key) {
+                                    self.logs.push({
+                                        action: "remove",
+                                        data: array[index]
+                                    });
+                                    self.notifyPath('logs', self.logs.slice());
+
+                                    billDataRef.child(array[index].billing_data_key).update({
+                                        patient_billTo_collected: self.myPatient.name + "_" + array[index].collectFrom + "_false",
+                                        collected: false
+                                    });
+                                };
+
+                                array.splice(index, 1);
+                                return true; // stops the loop
+                            }
+                            return false;
+                        });
+                        return array;
+                    }
+
+                    var listOfItems = this.billingData;
+                    var deleteList = this.selectedItem;
+
+                    for (var i = 0; i < deleteList.length; ++i) {
+                        removeByKey(listOfItems, {
+                            key: 'num',
+                            value: deleteList[i].num,
+                        });
+                    }
+
+                    this.billingData = [];
+                    this.billingData = listOfItems;
+                    Polymer.dom(this.root).querySelector("#billingDatatable").deselectAll();
+                }
+            },
+
+            _billingDataChanged(e) {
+                if (e.length > 0) {
+                    var amounts = [];
+
+                    e.forEach(element => {
+                        amounts.push(parseInt(element.amount));
+                    });
+
+                    function getSum(total, num) {
+                        return total + num;
+                    }
+
+                    function addCommas(intNum) {
+                        return (intNum + '').replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+                    }
+
+                    this.total = addCommas(amounts.reduce(getSum));
+                }
+                else {
+                    this.total = 0;
+                }
+            },
+
+            _clearErr() {
+                this.billErr = '';
+            },
+
+            _selectedServiceChanged(e) {
+                this.billErr = '';
+                if (e) {
+                    this.amount = parseInt(e.id);
+                }
+            },
+
+            _addBilling() {
+                // patientBillTo
+                if (this.patientBillTo) {
+                    if (this.selectedItemC.length > 0) {
+                        this.selectedItemC = this.selectedItemC.map(item => {
+                            return {
+                                billing_data_key: item.$key,
+                                amount: item.amount,
+                                collectFrom: item.billTo,
+                                num: item.num,
+                                patient: this.myPatient.name,
+                                service: item.service,
+                                service_collect_from: item.service_bill_to,
+                                use_insurance: item.use_insurance
+                            };
+                        });
+
+                        this.billingData = uniqueArray(this.billingData.concat(this.selectedItemC));
+
+                        var data = this.selectedItemC.map(item => {
+                            return {
+                                action: "add",
+                                data: item
+                            }
+                        });
+
+                        function uniqueArray(array) {
+                            array = array.filter((array, index, self) =>
+                                index === self.findIndex((data) => (
+                                    data.billing_data_key === array.billing_data_key
+                                ))
+                            );
+
+                            return array;
+                        };
+
+                        this.logs = this.logs.concat(data);
+                        // var number = new Date().getTime();
+                        // var data = {
+                        //     num: number,
+                        //     service: this.service,
+                        //     amount: parseInt(this.amount),
+                        //     billTo: service_bill_to,
+                        //     service_bill_to: this.selectedBillTo,
+                        //     use_insurance: this.useInsurance
+                        // }
+                        // this.billingData.push(data);
+                        // this.logs.push({
+                        //     action: "add",
+                        //     data: data
+                        // });
+
+                        // this.notifyPath('logs', this.logs.slice());
+                        // this.notifyPath("billingData", this.billingData.slice());
+                        this.selectedPage = 0;
+                        this.favhide = false;
+                        this._clear();
+                    } else {
+                        this.billErr = 'Ops! Please select at least one item.';
+                    }
+                }
+                else {
+                    this.billErr = 'Ops! Dont leave any field empty.';
+                }
+            },
+
+            _cancelBilling() {
+                this.selectedPage = 0;
+                this.favhide = false;
+                this._clear();
+            },
+
+            onEnter() {
+                this._addBilling();
+            },
+
+            _clear() {
+                // set everything to default value
+                // this.$.dropdService.value = null;
+                // this.$.amount.value = null;
+                this.$.dropdSelectedBillTo.selected = null;
+                this.$.dropdHMO.value = null;
+                this.$.dropdHospital.value = null;
+                this.useInsurance = this.hasInsurance;
+                this.billErr = null;
+                Polymer.dom(this.root).querySelector("#billingCDatatable").deselectAll();
+                this.patientBillTo = "";
+            },
+
+            _ifSelect(e) {
+                if (e > 0) return "display: flex";
+                else return "display: none";
+            },
+
+            _ifSelectMore(e) {
+                if (e > 1) return true;
+                else return false;
+            },
+
+            _displayText(e) {
+                if (e[0]) return "SAVE";
+                else return "ADD";
+            },
+
+            _fit(e) {
+                if (e) return "margin-top: 6px;";
+                else return "margin-top: 32px;";
+            },
+
+            _billingRef(e) {
+                if (e) return "Ref.# " + e;
+                else return "(Ref.# will be generated upon submit)";
+            },
+
+            _selectedItemC(e) {
+                if (e > 0) return false;
+                return true;
+            }
+
+        })
+    </script>
+</dom-module>

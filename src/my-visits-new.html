@@ -1,0 +1,1084 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/sl-gallery/sl-gallery.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
+
+<link rel="import" href="global-functions.html">
+<link rel="import" href="image-resize.html">
+<link rel="import" href="time-element.html">
+<link rel="import" href="my-billing-datatable.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-visits-new">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            app-header paper-icon-button {
+                --paper-icon-button-ink-color: #000000;
+            }
+
+            app-drawer-layout:not([narrow]) [drawer-toggle] {
+                display: none;
+            }
+
+            app-drawer {
+                --app-drawer-content-container: {
+                    background-color: #F4F5F6;
+                }
+            }
+
+            paper-icon-button.menu {
+                margin-right: 15px;
+            }
+
+            paper-item {
+                height: 64px;
+            }
+
+            .mnu {
+                padding: 16px;
+            }
+
+            paper-fab {
+                background: #1976d2;
+            }
+
+            .labelitem {
+                padding: 0px;
+                margin: 0;
+            }
+
+            @media (min-width: 800px) {
+                .footer {
+                    position: absolute;
+                    bottom: 16px;
+                    width: 100%;
+                }
+
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 48px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 48px;
+                    bottom: 48px;
+                }
+
+                .vid-6 {
+                    width: 30%;
+                }
+
+                .galleryHolder {
+                    padding: 16px;
+                    border: 1px solid gray
+                }
+
+                .div1 {
+                    flex: 1;
+                }
+
+                .divHolder {
+                    display: flex;
+                }
+            }
+
+            @media (max-width: 800px) {
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 16px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 16px;
+                    bottom: 48px;
+                }
+
+                .docu {
+                    margin-left: 16px;
+                    margin-right: 16px;
+                }
+
+                .vid-s-9 {
+                    width: 90%;
+                }
+
+                .galleryHolder {
+                    padding: 6px;
+                    border: 1px solid gray
+                }
+
+                .div1 {
+                    flex: 1;
+                }
+
+                .divHolder {
+                    display: block;
+                }
+            }
+
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+            }
+
+            paper-item:hover {
+                background: rgba(104, 58, 183, 0.26);
+                cursor: pointer;
+            }
+
+            .avatar {
+                height: 45px;
+                width: 45px;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: transparent;
+            }
+
+            .pad {
+                padding: 0 16px;
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .col-md {
+                padding: 6px;
+            }
+
+            .primary {
+                font-size: 14px;
+                font-weight: 400;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .longText {
+                color: gray;
+                /* display: none; */
+            }
+
+            /* #textera {
+                padding: 16px;
+                font-size: 14px;
+                font-weight: 300;
+                width: 95%;
+                font-family: Arial;
+            } */
+
+            #noRecordList {
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                padding: 16px;
+                text-align: center;
+                display: none;
+            }
+
+            #list {
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                padding: 0;
+                display: none;
+            }
+
+            #attachment-icon {
+                float: right;
+                cursor: pointer;
+                bottom: 16px;
+                left: 10px;
+            }
+
+            #attachment-icon:hover {
+                color: dimgray;
+            }
+
+            #gallery-image:hover {
+                opacity: 0.7;
+            }
+
+            #gallery-image {
+                transition: 0.3s;
+            }
+
+            .large {
+                --paper-avatar-width: 150px;
+                cursor: pointer;
+            }
+
+            paper-progress.blue {
+                --paper-progress-active-color: var(--paper-light-blue-500);
+                --paper-progress-secondary-color: var(--paper-light-blue-100);
+                width: 100%;
+            }
+
+            .textTemp {
+                color: rgb(100, 100, 100);
+                font-weight: 500;
+                font-size: 14px;
+                margin-top: 32px;
+                margin-left: 16px;
+            }
+        </style>
+
+        <firebase-query id="filterQuery" path="/{{myKey}}/patients" data="{{thypatients}}" order-by-child="personal/name"
+            start-at="{{filterValue}}" limit-to-first="{{myLimit}}">
+        </firebase-query>
+
+        <firebase-query id="lastCaseQuery" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{myPatientKey}}"
+            data="{{mycases}}" limit-to-last="1">
+        </firebase-query>
+
+        <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+
+            <app-header-layout id="appheader" has-scrolling-region>
+                <app-header fixed slot="header">
+                    <app-toolbar>
+                        <a href="{{prevRoute}}">
+                            <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
+                        </a>
+                        <div main-title>Add Visit</div>
+                    </app-toolbar>
+                </app-header>
+
+                <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+                    <neon-animatable>
+
+                        <paper-progress hidden="{{!isLoading}}" indeterminate class="blue"></paper-progress>
+                        <div class="docu">
+                            <div class="details">
+                                <paper-input on-keyup="_ack" label="Patient *" value="{{filterValue}}" placeholder="Search patient"></paper-input>
+                                <div id="noRecordList"> No record found. </div>
+                                <paper-listbox id="list">
+                                    <template id="thypatientTemp" is="dom-repeat" items="[[thypatients]]">
+                                        <paper-item on-tap="_bind">[[item.personal.name]]</paper-item>
+                                    </template>
+                                </paper-listbox>
+                            </div>
+                        </div>
+
+                        <div id="patientProfile" class="docu" style="margin-top:-16px; display:none;">
+                            <div class="details" style="display: flex;">
+                                <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(selectedPatient.profile)}}"></iron-image>
+                                <div style="margin-left:10px; font-weight:400; color:black">
+                                    <span style="font-size:11px;display:block" class="longText">{{selectedPatient.no}}</span>
+                                    <span class="primary">{{filterValue}}</span>
+                                    <span class="longText" style="font-weight:400;display:block">{{_calculate(selectedPatient.personal.birthday)}}{{_comma(selectedPatient.personal.birthday)}}
+                                        {{selectedPatient.personal.sex}}
+                                    </span>
+                                    <span class="longText" style="font-weight:400;display:block">{{_hmo(selectedPatient.insurance.primary_insurance)}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="lastVisit" class="docu" style="margin-top:-16px; display:none">
+                            <div class="details">
+                                <div id="showed" id="prev">
+                                    <div>{{noprev}}</div>
+                                    <template is="dom-repeat" items="[[mycases]]">
+
+                                        <firebase-query path="/{{myKey}}/cases/{{item.$key}}/attachment" data="{{myimaging}}">
+                                        </firebase-query>
+
+                                        <div style="margin-bottom:16px;">
+                                            <span class="primary" style="color:black; font-weight:400; margin-right:2px;">Last
+                                                Visit
+                                            </span>
+                                            <iron-icon icon="my-icons:watch-later"></iron-icon>
+                                            <span style="font-size:14px; margin-top:10px;">{{_getDate(item.timestamp)}}</span>
+                                            <!-- <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(item.timestamp)}}">{{_timeStampToDateTime(item.timestamp)}}</time-ago> -->
+                                        </div>
+
+                                        <div hidden$="{{!item.complain}}">
+                                            <span class="longText">Chief Complaint</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.complain}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.history}}">
+                                            <span class="longText">History</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.history}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.laboratory}}">
+                                            <span class="longText">Laboratory</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.laboratory}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.subjective}}">
+                                            <span class="longText">Subjective</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.subjective}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.objective}}">
+                                            <span class="longText">Objective</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.objective}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.assessment}}">
+                                            <span class="longText">Assessment</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.assessment}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.imaging}}">
+                                            <span class="longText">Imaging</span>
+                                            <div class="galleryHolder">
+                                                <sl-gallery id="gallery"></sl-gallery>
+                                            </div>
+                                            <br>
+                                        </div>
+
+                                        <div hidden$="{{!item.pe}}">
+                                            <span class="longText">Physical Exam</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.pe}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.diagnosis}}">
+                                            <span class="longText">Diagnosis</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.diagnosis}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.treatment}}">
+                                            <span class="longText">Treatment</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.treatment}}</div>
+                                        </div>
+
+                                        <div hidden$="{{!item.plan}}">
+                                            <span class="longText">Plan</span>
+                                            <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{item.plan}}</div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="textTemp"> Choose a template </div>
+                        <div class="divHolder">
+                            <div class="div1" align="center">
+                                <div on-tap="_selectNormal" class="docu2" align="center">
+                                    <paper-avatar class="large" label="Default"></paper-avatar>
+                                    <h3>Default</h3>
+                                </div>
+                            </div>
+                            <div class="div1" align="center">
+                                <div on-tap="_selectSOAP" class="docu2" align="center">
+                                    <paper-avatar class="large" label="SOAP"></paper-avatar>
+                                    <h3>SOAP</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <br>
+                        <br>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="details">
+                                <paper-input label="Date" type="date" value="{{todayDate}}" style="width:150px">
+                                    <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                                </paper-input>
+                                <div style="margin-left:4px;margin-top:-10px;">
+                                    <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                                </div>
+                                <paper-textarea hidden="{{soap}}" label="Chief complaint *" value="{{complain}}"></paper-textarea>
+                                <paper-textarea hidden="{{soap}}" label="History" value="{{history}}"></paper-textarea>
+                                <paper-textarea hidden="{{soap}}" label="Laboratory" value="{{laboratory}}"></paper-textarea>
+
+                                <paper-textarea hidden="{{normal}}" label="Subjective *" value="{{subjective}}"></paper-textarea>
+                                <paper-textarea hidden="{{normal}}" label="Objective" value="{{objective}}"></paper-textarea>
+                                <paper-textarea hidden="{{normal}}" label="Assessment" value="{{assessment}}"></paper-textarea>
+
+                                <div style="font-size:16px; margin-top:16px;">Imaging</div>
+                                <div style="border:1px solid gray; padding:6px;">
+                                    <input on-change="_changeAttach" type="file" id="myFile" accept="image/*" multiple="multiple" />
+                                    <output style="font-size:14px;" id="fileList"></output>
+                                </div>
+                                <paper-textarea hidden="{{soap}}" label="Physical Exam" value="{{pe}}"></paper-textarea>
+                                <paper-textarea hidden="{{soap}}" label="Diagnosis" value="{{diagnosis}}"></paper-textarea>
+                                <paper-textarea hidden="{{soap}}" label="Treatment" value="{{treatment}}"></paper-textarea>
+
+                                <paper-textarea label="Plan" value="{{plan}}"></paper-textarea>
+                            </div>
+                        </div>
+                        <br>
+                        <br>
+                        <br>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <my-billing-datatable id="billingDatatable" my-patient="[[myPatient]]" billing-data="{{billingData}}"
+                            remarks="{{remarks}}" total="{{total}}" my-key="{{myKey}}" favhide="{{favhide}}"></my-billing-datatable>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="details">
+                                <div id="saveSuccess" style="color: green; display:none">Visit successfully saved.
+                                    <p id="p" style="margin-top:-4px">Billing ref.# <b style="color:#1976d2">[[billReference]]</b></p>
+                                </div>
+                                <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while
+                                    saving data.
+                                </div>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                </neon-animated-pages>
+
+            </app-header-layout>
+
+            <div class="footer">
+                <div hidden$="[[favlefthide]]">
+                    <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
+                </div>
+                <div hidden$="[[favrighthide]]">
+                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right"
+                        on-tap="_select2"></paper-fab>
+                </div>
+            </div>
+
+        </app-drawer-layout>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-visits-new',
+
+            properties: {
+                narrow: {
+                    type: Boolean,
+                    notify: true
+                },
+                myQueue: String,
+                queueKey: String,
+                queueDate: String,
+                queueNo: Number,
+                params: Object,
+                myLocation: String,
+                prevRoute: String,
+                filterValue: String,
+                myKey: String,
+                selectedPage: {
+                    type: Number,
+                    value: 0
+                },
+                myLimit: {
+                    type: Number,
+                    value: 5
+                },
+                entryanimation: {
+                    type: String,
+                    value: "slide-from-right-animation"
+                },
+                exitanimation: {
+                    type: String,
+                    value: "slide-left-animation"
+                },
+                favlefthide: {
+                    type: Boolean,
+                    value: true
+                },
+                favrighthide: {
+                    type: Boolean,
+                    value: true
+                },
+                lastPushTime: {
+                    type: Number,
+                    value: 0
+                },
+                service_no: {
+                    type: Number,
+                    value: 0
+                },
+                attachment: {
+                    type: Array,
+                    value: []
+                },
+                isLoading: {
+                    type: Boolean,
+                    value: false
+                },
+            },
+
+            ready() {
+                if (this.myQueue) {
+                    this.filterValue = this.params.n;
+                    this.queueKey = this.params.q;
+                    this.queueDate = this.params.d;
+                    this.queueNo = parseInt(this.params.no);
+                }
+
+                this._clear();
+                this.todayDate = formatTodayDate(new Date());
+            },
+
+            observers: [
+                '_patientChanged(filterValue)',
+                '_showFab1(subjective, complain, todayDate)',
+                '_myimagingChanged(myimaging)',
+                '_mytimeCheckChanged(mycases, todayDate)',
+                '_thypatientsChanged(thypatients.length)',
+                '_favhideChanged(favhide)'
+            ],
+
+            _patientChanged(patient) {
+                if (!patient) {
+                    Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'none';
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                    this.$.noRecordList.style.display = "none";
+                    this.favrighthide = true;
+                } else {
+                    this.isLoading = true;
+                    this.filterValue = patient.toUpperCase();
+                    Polymer.dom(this.root).querySelector("#list").style.display = 'block';
+                }
+            },
+
+            _thypatientsChanged(e) {
+                if (e === 0) {
+                    setTimeout(() => {
+                        if (this.isLoading) {
+                            this.isLoading = false;
+                            this.$.noRecordList.style.display = "block";
+                        }
+                    }, 5000);
+                } else {
+                    this.isLoading = false;
+                    this.$.noRecordList.style.display = "none";
+                }
+            },
+
+            _bind(e) {
+                this.favrighthide = false;
+                this.selectedPatient = this.$.thypatientTemp.itemForElement(e.target);
+
+                this.filterValue = this.selectedPatient.personal.name;
+                this.myPatientKey = this.selectedPatient.$key;
+                this.myPatient = {
+                    name: this.selectedPatient.personal.name,
+                    hmo: this.selectedPatient.insurance.primary_insurance
+                }
+
+                Polymer.dom(this.root).querySelector("#list").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'block';
+                Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'block';
+            },
+
+            _myimagingChanged(e) {
+                if (e) {
+                    const gallery = Polymer.dom(this.root).querySelector('#gallery');
+
+                    if (gallery) {
+                        e.forEach(img => {
+                            const el = document.createElement('sl-gallery-image');
+                            el.setAttribute('src', img.url);
+                            el.setAttribute('small', img.url);
+                            el.setAttribute('id', 'gallery-image');
+                            gallery.appendChild(el);
+                        });
+                    }
+                }
+            },
+
+            _favhideChanged(e) {
+                if (e) {
+                    this.favrighthide = true;
+                    this.favlefthide = true;
+                } else {
+                    if (this.selectedPage === 3) {
+                        this.favlefthide = false;
+                        this.favrighthide = false;
+                    }
+                }
+            },
+
+            _mytimeCheckChanged(lastVisit, date) {
+                if (lastVisit.length > 0) this.noprev = '';
+                else this.noprev = 'No previous visit.';
+
+                var monthNames = [
+                    "January", "February", "March",
+                    "April", "May", "June", "July",
+                    "August", "September", "October",
+                    "November", "December"
+                ];
+
+                var d = new Date(date);
+                if (date) {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+                    this.text = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+                    this.text = 'Please choose date.';
+                }
+
+                var x = 0;
+                if (date < formatTodayDate(new Date())) {
+                    if (lastVisit.length > 0) {
+                        lastVisit.forEach(element => {
+                            if (date === element.created) {
+                                x = element.timestamp;
+                            }
+                        });
+                        this.lastPushTime = x;
+                    }
+                } else { this.lastPushTime = x; }
+            },
+
+            _selectNormal() {
+                this.normal = true;
+                this.soap = false;
+                this.template = 'Normal';
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                this.selectedPage = parseInt(this.selectedPage) + 1;
+            },
+
+            _selectSOAP() {
+                this.normal = false;
+                this.soap = true;
+                this.template = 'SOAP';
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                this.selectedPage = parseInt(this.selectedPage) + 1;
+            },
+
+            _showFab1(subjective, complain, date) {
+                if (this.normal === true) {
+                    if (!complain || !date) {
+                        this.favrighthide = true;
+                    } else {
+                        this.favrighthide = false;
+                    }
+                }
+                else {
+                    if (!subjective || !date) {
+                        this.favrighthide = true;
+                    } else {
+                        this.favrighthide = false;
+                    }
+                }
+            },
+
+            _changeAttach(e) {
+                var list = Polymer.dom(this.root).querySelector("#fileList");
+                if (e.target.files.length > 0) {
+
+                    var files = e.target.files;
+                    var self = this;
+                    for (var index = 0, file; file = files[index]; index++) {
+                        if (file.size > 9999) {
+                            ImageTools.resize(file, {
+                                width: 440, // maximum width
+                                height: 400 // maximum height
+                            }, function (blob, didItResize) {
+                                self.attachment.push(blob);
+                            });
+                        } else {
+                            self.attachment.push(file);
+                        }
+                    }
+
+                    if (files.length > 1) {
+                        var output = [];
+                        for (var i = 0, f; f = files[i]; i++) {
+                            output.push('<li>', escape(f.name), '</li>');
+                            // output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ')</li>');
+                            // output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                            //     f.size, ' bytes, last modified: ',
+                            //     f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                            //     '</li>');
+                        }
+                        list.innerHTML = '<ul>' + output.join('') + '</ul>';
+                    }
+                    else {
+                        list.innerHTML = '';
+                    }
+                }
+                else {
+                    this.attachment = [];
+                    list.innerHTML = '';
+                }
+            },
+
+            _select1(e) {
+                this.entryanimation = "slide-from-left-animation";
+                this.exitanimation = "slide-right-animation";
+
+                if (this.selectedPage <= 3) {
+                    if (this.selectedPage != 0) {
+                        this.selectedPage = this.selectedPage - 1;
+
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+                        Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+
+                        if (this.selectedPage == 0) {
+                            this.favlefthide = true;
+                        }
+
+                        if (this.selectedPage == 1) {
+                            this.favrighthide = true;
+                            this._clear();
+                        }
+                        else {
+                            this.favrighthide = false;
+                        }
+
+                        if (this.selectedPage == 2) {
+                            this.favrighthide = false;
+                        }
+
+                    }
+                    else {
+                        this.favlefthide = true;
+                        this.favrighthide = false;
+                    }
+                }
+                else {
+                    this.selectedPage = 3;
+                }
+
+            },
+
+            _select2(e) {
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+                if (this.selectedPage >= 0) {
+                    if (this.selectedPage != 4) {
+
+                        this.selectedPage = this.selectedPage + 1;
+                        this.favlefthide = false;
+
+                        if (this.selectedPage == 0) {
+                            this.favlefthide = false;
+                            this.favrighthide = true;
+                        }
+
+                        if (this.selectedPage == 1) {
+                            this.favlefthide = false;
+                            this.favrighthide = true;
+                        }
+
+                        if (this.selectedPage == 3) {
+                            if (this.billingData.length > 0) {
+                                this.favrighthide = false;
+                            }
+                            else {
+                                this.favlefthide = false;
+                                this.favrighthide = false;
+                            }
+                        }
+
+                        if (this.selectedPage == 3) {
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                            Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                        }
+                    }
+
+                    if (this.selectedPage == 4) {
+                        this._submitToFireB();
+                        this.favlefthide = true;
+                        this.favrighthide = true;
+                    }
+                }
+                else {
+                    this.selectedPage = 0;
+                    this.favlefthide = true;
+                    this.favrighthide = true;
+                }
+            },
+
+            _submitToFireB() {
+                var mykey = this.myKey;
+                var today = this.todayDate;
+                var timestamp = firebase.database.ServerValue.TIMESTAMP;
+                var order = firebase.database.ServerValue.TIMESTAMP;
+                var newPushKey;
+                var self = this;
+                var ref = firebase.database().ref("/" + mykey + "/cases");
+
+                this.lastPushTime = new Date(today).getTime();
+                if (today < formatTodayDate(new Date())) {
+                    newPushKey = generatePushID(today, this.lastPushTime);
+                    timestamp = this.lastPushTime;
+                    order = this.lastPushTime;
+                }
+
+                var data = {
+                    patient: this.filterValue,
+                    complain: this.complain,
+                    history: this.history,
+                    diagnosis: this.diagnosis,
+                    treatment: this.treatment,
+                    patientkey: this.selectedPatient.$key,
+                    profile: this.selectedPatient.profile ? this.selectedPatient.profile : null,
+                    patientinfo: {
+                        num: this.selectedPatient.no,
+                        birthday: this.selectedPatient.personal.birthday,
+                        gender: this.selectedPatient.personal.sex,
+                        hmo: this.selectedPatient.insurance.primary_insurance
+                    },
+                    timestamp: timestamp,
+                    order: order,
+                    created: today,
+                    laboratory: this.laboratory,
+                    pe: this.pe,
+                    plan: this.plan,
+                    subjective: this.subjective,
+                    objective: this.objective,
+                    assessment: this.assessment,
+                    template: this.template,
+                    clinic_location: this.myLocation,
+                    imaging: this.attachment.length > 0 ? true : false
+                }
+
+                var data2 = {
+                    timestamp: timestamp,
+                    order: order,
+                    created: today,
+                    clinic_location: this.myLocation,
+                    billing_total: this.total,
+                    patientinfo: {
+                        name: this.filterValue,
+                        profile: this.selectedPatient.profile ? this.selectedPatient.profile : null,
+                        num: this.selectedPatient.no,
+                        birthday: this.selectedPatient.personal.birthday,
+                        gender: this.selectedPatient.personal.sex,
+                        hmo: this.selectedPatient.insurance.primary_insurance
+                    },
+                    remarks: this.remarks ? this.remarks : "No Remarks"
+                }
+
+                var fbPushKey;
+                this.$.saveRunning.style.display = 'block';
+                if (newPushKey) {
+                    ref.child(newPushKey).set(data);
+                    var fbPushKey = newPushKey;
+                }
+                else {
+                    var push = ref.push(data);
+                    var fbPushKey = push.key;
+                }
+
+                if (fbPushKey) {
+                    self._updateOrder(mykey, fbPushKey, data2, self.billingData, self);
+                    self._reportsUpdate(today, mykey);
+
+                    if (self.myQueue) {
+                        self._locateNextQueue(mykey, self.queueKey, self.queueDate, self.queueNo, self.myLocation, fbPushKey)
+                    }
+
+                    if (self.attachment.length > 0) {
+                        for (var i = 0, file; file = self.attachment[i]; i++) {
+                            var name = new Date().getTime() + "." + file.type.split("/")[1];
+                            var storageRef = firebase.storage().ref('attachment/' + name);
+
+                            storageRef.put(file).then(function (snapshot) {
+                                ref.child(fbPushKey + "/attachment").push({
+                                    url: snapshot.downloadURL,
+                                    type: snapshot.metadata.contentType.split("/")[1],
+                                    name: snapshot.metadata.name
+                                });
+                            });
+                        }
+                    }
+
+                    self.$.saveRunning.style.display = 'none';
+                    self.$.saveSuccess.style.display = 'block';
+                } else {
+                    self.$.saveRunning.style.display = 'none';
+                    self.$.saveFailed.style.display = 'block';
+                }
+            },
+
+            _updateOrder(mykey, fbPushKey, data2, billingData, self) {
+                var postRef = firebase.database().ref("/" + mykey + "/cases/" + fbPushKey);
+                var noRef = firebase.database().ref("/" + mykey + "/uniqueId/billing");
+                var billRef = firebase.database().ref('/' + mykey + '/billing');
+                var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
+
+                postRef.once('value').then(function (snapshot) {
+                    if (snapshot.exists()) {
+                        var negativeTime = snapshot.val().order * -1;
+                        postRef.update({ order: negativeTime });
+
+                        if (billingData.length > 0) {
+                            data2.order = negativeTime;
+                            noRef.once('value').then(function (data) {
+                                var num = (data.val() ? data.val() : 0) + 1;
+                                var no = generateUniqueId(num);
+                                data2.ref = no;
+
+                                billRef.child(fbPushKey).set(data2).then(function () {
+                                    noRef.set(num);
+                                    self.billReference = no;
+
+                                    billingData.forEach(element => {
+                                        element.billing_key = fbPushKey;
+                                        element.billing_ref = no;
+                                        billDataRef.push(element);
+                                    });
+                                });
+                            });
+                        } else {
+                            self.billReference = "----";
+                        }
+                    }
+                });
+            },
+
+            _reportsUpdate(today, mykey) {
+                var mm = today.substring(0, 7);
+                var yy = today.substring(0, 4);
+
+                var dayRef = firebase.database().ref("/" + mykey + "/reports/daily/" + today + '/visits');
+                dayRef.once('value').then(function (snapshot) {
+                    dayRef.set(snapshot.val() + 1);
+                });
+
+                var yearRef = firebase.database().ref("/" + mykey + "/reports/yearly/" + yy + '/visits');
+                yearRef.once('value').then(function (snapshot) {
+                    yearRef.set(snapshot.val() + 1);
+                });
+
+                var monthRef = firebase.database().ref("/" + mykey + "/reports/monthly/" + mm + '/visits');
+                monthRef.once('value').then(function (snapshot) {
+                    monthRef.set(snapshot.val() + 1);
+                });
+            },
+
+            _locateNextQueue(mykey, queueKey, queueDate, queueNo, myLocation, visitKey) {
+                var ref = firebase.database().ref("/" + mykey + "/queue/" + myLocation + "/" + queueDate);
+                ref.child(queueKey).update({ isNext: false, isQueue: false, xy: "x", visit_refKey: visitKey }).then(function () {
+                    ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
+                        if (!hasNext.exists()) {
+                            ref.orderByChild("queueNo").startAt(queueNo + 1).once("value").then(function (findNext) {
+                                if (findNext.exists()) {
+                                    var done = false;
+                                    findNext.forEach(element => {
+                                        if (done) return;
+                                        if (!element.val().isCancel && element.val().isQueue) {
+                                            ref.child(element.key).update({ isNext: true });
+                                            done = true;
+                                            return;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                })
+            },
+
+            randomString(n) {
+                var r = "";
+                while (n--) r += String.fromCharCode((r = Math.random() * 62 | 0, r += r > 9 ? (r < 36 ? 55 : 61) : 48));
+                return r;
+
+                // var rand = Math.random().toString(36).slice(-8);
+            },
+
+            _clear() {
+                this.complain = null;
+                this.history = null;
+                this.laboratory = null;
+                this.pe = null;
+                this.diagnosis = null;
+                this.treatment = null;
+                this.plan = null;
+                this.attachment = null;
+
+                this.subjective = null;
+                this.objective = null;
+                this.assessment = null;
+
+                this.billingData = [];
+                this.attachment = [];
+                this.$.myFile.value = null;
+
+                this.$.billingDatatable._clear();
+            },
+
+            _calculate(e) {
+                if (e) {
+                    return getAge(e);
+                }
+                else {
+                    return '';
+                }
+            },
+
+            _patientImg(e) {
+                if (e) return e;
+                else return '../images/user.png';
+            },
+
+            _comma(e) {
+                if (e) {
+                    return ',';
+                }
+            },
+
+            _hmo(e) {
+                if (e) {
+                    return 'HMO: ' + e;
+                }
+            },
+
+            _ack() {
+                Polymer.dom(this.root).querySelector("#patientProfile").style.display = 'none';
+                Polymer.dom(this.root).querySelector("#lastVisit").style.display = 'none';
+                this.$.noRecordList.style.display = "none";
+            },
+
+            _timeStampToDateTime(ts) {
+                return new Date(ts);
+            },
+
+            _getDate(ts) {
+                return formatLocalDateString(ts);
+            },
+
+        })
+
+    </script>
+</dom-module>

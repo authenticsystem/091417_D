@@ -1,0 +1,485 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
+
+<!-- <link rel="import" href="search-bar.html"> -->
+<link rel="import" href="global-functions.html">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-queue-patients">
+    <template>
+        <style include="shared-styles">
+            :host {
+                height: 100vh;
+                margin: 0;
+
+                display: flex;
+                flex-direction: column;
+            }
+
+            .item {
+                @apply --layout-horizontal;
+                padding: 15px;
+                background-color: white;
+                border-bottom: 1px solid #ddd;
+                cursor: pointer;
+                /* margin-bottom: 5px; */
+            }
+
+            .item:hover {
+                box-shadow: 0 6px 20px 0px rgba(0, 0, 0, 0.2);
+            }
+
+            .avatar {
+                height: 45px;
+                width: 45px;
+                border: 2px solid white;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: #DDD;
+            }
+
+            .pad {
+                margin-left: 10px;
+                @apply --layout-flex;
+                @apply --layout-vertical;
+            }
+
+            .primary {
+                font-size: 14px;
+                font-weight: 400;
+            }
+
+            .shortText,
+            .longText {
+                font-size: 14px;
+            }
+
+            .longText {
+                color: gray;
+                /* display: none; */
+            }
+
+            .spacer {
+                @apply --layout-flex;
+            }
+
+            @media (max-width: 768px) {
+                iron-list {
+                    margin: 8px;
+                    display: flex;
+                    flex-direction: column;
+                    /* margin-top: 0px; */
+                    /* height: 100vh; */
+                    /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
+                }
+
+                #noRecord {
+                    margin: 8px;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                /* paper-search-bar {
+                    margin-left: 80px;
+                    width: 50%;
+                    color: black;
+                } */
+            }
+
+            @media (min-width: 768px) {
+                iron-list {
+                    width: 736px;
+                    margin: 16px auto;
+                    /* margin-top: 0px; */
+                    /* height: 100vh; */
+                    /* box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2); */
+                }
+
+                #noRecord {
+                    width: 736px;
+                    margin: 16px auto;
+                }
+
+                /* paper-search-bar {
+                    margin-left: 50px;
+                    width: 50%;
+                    color: black;
+                } */
+
+            }
+
+            #tool2 {
+                background-color: white;
+            }
+
+            #btn-arrow {
+                color: black;
+            }
+
+            #btn-menu {
+                color: gray;
+                position: fixed;
+                right: 35px;
+            }
+
+            paper-fab.fab-menu {
+                position: fixed;
+                right: 32px;
+                bottom: 32px;
+            }
+
+            paper-fab.fab-search {
+                position: fixed;
+                right: 40px;
+                bottom: 104px;
+            }
+
+            paper-icon-button.menu {
+                margin-right: 16px;
+            }
+
+            .action paper-button {
+                height: 32px;
+                font-size: 12px;
+                font-weight: 400;
+                width: 80px;
+            }
+
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+            }
+
+            paper-toggle-button.green {
+                --paper-toggle-button-checked-bar-color: white;
+                --paper-toggle-button-checked-button-color: violet;
+                --paper-toggle-button-checked-ink-color: white;
+                --paper-toggle-button-label-color: rgb(247, 223, 223);
+                --paper-toggle-button-label-spacing: 6px;
+                font-size: 16px;
+            }
+
+            .clinic {
+                /* position: absolute;
+                right: 25px;
+                top: 50px;
+                font-size: 14px; */
+                font-size: 12px;
+            }
+
+            paper-spinner {
+                margin-top: 3px;
+            }
+        </style>
+
+        <app-header-layout fullbleed has-scrolling-region>
+            <app-header fixed slot="header">
+                <app-toolbar primary id="tool2">
+                    <a href="{{prevRoute}}">
+                        <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back"></paper-icon-button>
+                    </a>
+                    <div style="width:100%">
+                        <paper-search-bar id="search" placeholder="LASTNAME, FIRSTNAME MIDDLENAME" query="{{search}}"
+                            disable-filter-button></paper-search-bar>
+                    </div>
+                    <!-- <template is="dom-if" if="{{search}}">
+                        <paper-icon-button id="btn-menu" icon="my-icons:close" on-tap="toggleClear"></paper-icon-button>
+                    </template> -->
+                </app-toolbar>
+            </app-header>
+
+            <firebase-query disabled id="defaultQuery" path="/{{myKey}}/patients" data="{{mypatients}}" order-by-child="personal/name"
+                start-at="{{search}}" limit-to-first="15">
+            </firebase-query>
+
+            <div id="noRecord">
+                <div class="item">
+                    <div style="margin:auto">
+                        {{record}}
+                    </div>
+                </div>
+            </div>
+
+            <iron-list id="ironlist" items="[[mypatients]]" as="item" selected-item="{{selectedItem}}"
+                selection-enabled scroll-target="threshold">
+                <template>
+                    <div class="divSeparator">
+                        <div class$="[[getClassForItem(item, selected)]]" tabindex$="[[tabIndex]]">
+                            <div>
+                                <iron-image preload fade class="avatar" sizing="cover" src$="{{_patientImg(item.profile)}}"></iron-image>
+                            </div>
+                            <div class="pad">
+                                <div style="font-size:11px" class="longText">[[item.no]]</div>
+                                <div class="primary">[[item.personal.lastname]], [[item.personal.firstname]]
+                                    [[item.personal.middlename]]
+                                </div>
+                                <div class="longText">{{_ageCal(item.personal.birthday)}}{{_comma(item.personal.birthday)}}
+                                    [[item.personal.sex]]
+                                </div>
+                                <div class="longText">[[_hmo(item.insurance.primary_insurance)]]</div>
+                                <div class="longText">[[item.lastchiefcomplaint]]</div>
+                            </div>
+                            <div class="clinic">[[item.personal.clinic_location]]</div>
+                        </div>
+                    </div>
+                </template>
+            </iron-list>
+
+            <iron-scroll-threshold id="threshold" lower-threshold="100" on-lower-threshold="loadMoreData">
+            </iron-scroll-threshold>
+
+        </app-header-layout>
+
+        <salte-dialog no-auto-fullscreen id="dateDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #1E88E5">Add to queue</h2>
+            <span>
+                <paper-input disabled="[[isLoading]]" type="date" value="{{todayDate}}" label="Pick a date"
+                    always-float-label>
+                    <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+                </paper-input>
+                <div style="margin-left:4px;margin-top:-6px;">
+                    <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+                </div>
+            </span>
+            <div class="buttons">
+                <paper-spinner active="[[isLoading]]"></paper-spinner>
+                <paper-button disabled="[[isLoading]]" autofocus on-tap="_addPatient2Queue">OK</paper-button>
+                <paper-button disabled="[[isLoading]]" dialog-dismiss>Cancel</paper-button>
+            </div>
+        </salte-dialog>
+
+        <salte-dialog no-auto-fullscreen id="errDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #F44336">Request denied!</h2>
+            <span>Unable adding patient to queue.
+                <br>Patient already queued on {{doneQueueDate}}.</span>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </salte-dialog>
+
+        <salte-dialog no-auto-fullscreen id="confirmDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <h2 style="font-size: 16px; background: #43A047">Request success!</h2>
+            <span>Patient successfully added to queue.</span>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </salte-dialog>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-queue-patients',
+
+            properties: {
+                prevRoute: String,
+                myLocation: String,
+                myLocationCode: String,
+                myKey: String
+            },
+
+            observers: [
+                '_searchChanged(search)',
+                '_mypatientsChanged(mypatients.*)',
+                'todayDateChanged(todayDate)',
+                '_selectedItemChanged(selectedItem)'
+            ],
+
+            ready() {
+                this.$.search.focus();
+                this.todayDate = formatTodayDate(new Date());
+                this.$.defaultQuery.disabled = false;
+            },
+
+            _selectedItemChanged(e) {
+                if (e) {
+                    this.personalQueue = {
+                        firstname: e.personal.firstname,
+                        middlename: e.personal.middlename,
+                        lastname: e.personal.lastname,
+                        birthday: e.personal.birthday ? e.personal.birthday : null,
+                        sex: e.personal.sex,
+                        name: e.personal.name,
+                        hmo: e.insurance.primary_insurance
+                    }
+
+                    this.p_profile = e.profile;
+                    this.selectedKey = e.$key;
+                    this.no = e.no;
+                    this.$.dateDialog.open();
+                    this.$.ironlist.clearSelection();
+                }
+            },
+
+            todayDateChanged(date) {
+                if (date) {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+                    this.text = formatWeekDate(date);
+                }
+                else {
+                    Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+                    this.text = 'Please pick a date.';
+                }
+            },
+
+            _searchChanged(search) {
+                this.search = search.toUpperCase();
+            },
+
+            _mypatientsChanged() {
+                if (this.mypatients.length > 0) {
+                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+                } else {
+                    Polymer.dom(this.root).querySelector("#noRecord").style.display = 'block';
+                    this._fetching();
+                }
+            },
+
+            _addPatient2Queue() {
+                var mykey = this.myKey
+                var pickDate = this.todayDate;
+                this.doneQueueDate = formatWeekDate(pickDate);
+                var self = this;
+
+                var queueData = {
+                    patient_info: this.personalQueue,
+                    patient_profile: this.p_profile ? this.p_profile : null,
+                    patient_refKey: this.selectedKey,
+                    patient_no: this.no,
+                    queueLocation: this.myLocation,
+                    isCancel: false,
+                    isQueue: true,
+                    isNext: true,
+                    queueNo: 1,
+                    xy: "y"
+                }
+
+                if (pickDate) {
+                    self.isLoading = true;
+                    var queueRef = firebase.database().ref("/" + mykey + "/queue/" + queueData.queueLocation + "/" + pickDate);
+                    queueRef.orderByChild("patient_no").equalTo(self.no).limitToLast(1).once("value").then(function (data) {
+                        if (data.exists()) {
+                            if (Object.values(data.val())[0].isCancel) {
+                                self._locateNextQueue(mykey, queueData, pickDate, self, queueRef);
+                            }
+                            else {
+                                self.isLoading = false;
+                                self.$.errDialog.open();
+                            }
+                        }
+                        else {
+                            self._locateNextQueue(mykey, queueData, pickDate, self, queueRef);
+                        }
+                    });
+
+                }
+            },
+
+            _locateNextQueue(mykey, queueData, pickDate, self, queueRef) {
+                queueRef.once('value').then(function (snapshot) {
+                    if (snapshot.exists()) {
+                        queueRef.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
+                            if (hasNext.exists()) {
+                                queueData.isNext = false;
+                                queueData.queueNo = snapshot.numChildren() + 1;
+                                queueRef.push(queueData).then(function () {
+                                    self.isLoading = false;
+                                    self.$.dateDialog.close();
+                                    self.$.confirmDialog.open();
+                                });
+                            }
+                            else {
+                                queueData.queueNo = snapshot.numChildren() + 1;
+                                queueRef.push(queueData).then(function () {
+                                    self.isLoading = false;
+                                    self.$.dateDialog.close();
+                                    self.$.confirmDialog.open();
+                                });
+                            }
+                        });
+                    }
+                    else {
+                        queueRef.push(queueData).then(function () {
+                            self.isLoading = false;
+                            self.$.dateDialog.close();
+                            self.$.confirmDialog.open();
+                        });
+                    }
+                });
+            },
+
+            _fetching() {
+                this.record = 'Loading data . . .';
+                setTimeout((e) => {
+                    this.record = 'No record found.';
+                }, 3000);
+            },
+
+            loadMoreData() {
+                // load async stuff. e.g. XHR
+                this.$.threshold.clearTriggers();
+            },
+
+            _ageCal(bday) {
+                if (bday) {
+                    return getAge(bday);
+                }
+                else {
+                    return '';
+                }
+            },
+
+            _patientImg(e) {
+                if (e) return e;
+                else return '../images/user.png';
+            },
+
+            getClassForItem(item, selected) {
+                return selected ? 'item expanded' : 'item';
+            },
+
+            toggleClear() {
+                this.search = '';
+            },
+
+            _comma(e) {
+                if (e) {
+                    return ',';
+                }
+            },
+
+            _hmo(e) {
+                if (e) {
+                    return 'HMO: ' + e;
+                }
+            }
+
+        })
+
+    </script>
+</dom-module>

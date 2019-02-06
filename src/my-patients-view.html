@@ -1,0 +1,943 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+
+<!-- <link rel="import" href="my-visits-new.html">
+<link rel="import" href="my-visits-view.html">
+<link rel="import" href="my-visits-edit.html"> -->
+<link rel="import" href="global-functions.html">
+<link rel="import" href="my-gallery.html">
+<link rel="import" href="time-element.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-patients-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+      app-header {
+        color: rgb(255, 255, 255);
+        background-color: #673AB7;
+      }
+
+      paper-icon-button.menu {
+        margin-right: 16px;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-drawer {
+        --app-drawer-content-container: {
+          background-color: #F4F5F6;
+        }
+      }
+
+      paper-item {
+        height: 64px;
+      }
+
+      paper-item:hover {
+        background: rgba(104, 58, 183, 0.26);
+        cursor: pointer;
+      }
+
+      #item {
+        height: 0;
+      }
+
+      .mnu {
+        padding: 13px;
+      }
+
+      paper-fab.fab-menu {
+        position: fixed;
+        right: 32px;
+        bottom: 32px;
+      }
+
+      paper-fab.fab-menu2 {
+        position: fixed;
+        right: 41px;
+        bottom: 100px;
+      }
+
+      paper-fab.fab-menu3 {
+        position: fixed;
+        right: 41px;
+        bottom: 155px;
+      }
+
+      @media (min-width: 800px) {
+        .footer {
+          position: absolute;
+          bottom: 16px;
+          width: 100%;
+        }
+        .paper-fab-0 {
+          position: absolute;
+          left: 48px;
+          bottom: 48px;
+        }
+
+        .paper-fab-1 {
+          position: absolute;
+          right: 48px;
+          bottom: 48px;
+        }
+
+        #info {
+          display: flex;
+        }
+
+        .docu1 {
+          margin-bottom: -16px;
+        }
+
+        .docu {
+          padding: 0;
+        }
+
+        .vid-6 {
+          width: 30%;
+        }
+
+        .galleryHolder {
+          padding: 16px;
+          border: 1px solid gray
+        }
+      }
+
+      @media (max-width: 800px) {
+        .paper-fab-0 {
+          position: absolute;
+          left: 16px;
+          bottom: 48px;
+        }
+
+        .paper-fab-1 {
+          position: absolute;
+          right: 16px;
+          bottom: 48px;
+        }
+
+        .docu {
+          padding: 0;
+          margin-top: 0;
+          margin-bottom: 0;
+          width: 100%;
+          margin-right: 0;
+          overflow-x: hidden;
+          /* margin-left: 16px;
+          margin-right: 16px; */
+        }
+
+        .docu1 {
+          overflow-x: hidden;
+          margin: 8px;
+        }
+
+        .vid-s-9 {
+          width: 90%;
+        }
+
+        .galleryHolder {
+          padding: 6px;
+          border: 1px solid gray
+        }
+      }
+
+      .avatar {
+        height: 70px;
+        width: 70px;
+        border-radius: 50%;
+        box-sizing: border-box;
+        background-color: #DDD;
+      }
+
+      .pad {
+        padding: 0 16px;
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
+
+      .primary {
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .shortText,
+      .longText {
+        font-size: 14px;
+      }
+
+      .longText {
+        color: gray;
+        /* display: none; */
+      }
+
+      .attachment-icon {
+        float: right;
+        cursor: pointer;
+        bottom: 16px;
+        left: 10px;
+      }
+
+      .attachment-icon:hover {
+        color: dimgray;
+      }
+
+      #myImg:hover {
+        opacity: 0.7;
+      }
+
+      #myImg {
+        transition: 0.3s;
+      }
+
+      .action paper-button {
+        height: 32px;
+        font-size: 12px;
+        font-weight: 400;
+        width: 80px;
+      }
+
+      paper-button.green {
+        background-color: var(--paper-green-500);
+        color: white;
+      }
+
+      paper-spinner {
+        margin-top: 3px;
+      }
+    </style>
+
+    <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+      <app-header-layout id="appheader" has-scrolling-region>
+        <app-header fixed slot="header">
+          <app-toolbar>
+            <a href="{{prevRoute}}">
+              <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
+            </a>
+            <div main-title>{{no}}</div>
+            <paper-icon-button icon="my-icons:print" on-click="_print"></paper-icon-button>
+            <paper-menu-button horizontal-align="right">
+              <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+              <paper-listbox style="cursor:pointer" slot="dropdown-content">
+                <paper-item on-tap="_send2Que">Add to queue</paper-item>
+              </paper-listbox>
+            </paper-menu-button>
+          </app-toolbar>
+          <paper-tabs selected="{{selectedPage}}" scrollable fit-container>
+            <paper-tab>Patient</paper-tab>
+            <paper-tab style$="{{_roleChecked(myRole)}}">Visits</paper-tab>
+          </paper-tabs>
+        </app-header>
+
+        <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+
+          <neon-animatable>
+
+            <firebase-query id="query" path="/{{myKey}}/patients" order-by-key equal-to="{{viewKey}}" data="{{mypatient}}"
+              limit-to-first="1">
+            </firebase-query>
+
+            <div class="docu" id="printMe">
+              <div class="docu-header" style="padding:16px; display: flex; margin-bottom:3px;">
+                <img class="avatar" src="{{p_profile}}"></img>
+                <div style="margin-left:10px; padding:8px; font-weight:400; color:black">
+                  {{name}}
+                  <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}} {{sex}}</span>
+                  <span class="longText" style="font-weight:400;display:block">[[_hmo(indicate)]]</span>
+                </div>
+              </div>
+
+              <div class="details" style="padding:18px">
+                <!-- <div >Basic Information</div> -->
+                <div style="font-weight:bold; margin-top:16px; padding:5px; background:rgb(236, 235, 235)">Basic
+                  Information</div>
+                <table style="margin-bottom:6px; padding:6px;">
+                  <tr>
+                    <td>
+                      <span class="longText">Email address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{email}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Birth date</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{bday}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Marital Status</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{status}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Contact no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{contact}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Street address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{address}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Occupation</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{occupation}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Employer</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{employer}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Employer phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{emp_phone}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Referred to clinic by</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{referredby}}</td>
+                  </tr>
+                </table>
+
+                <div style="font-weight:bold;  margin-top:16px;  padding:5px; background:rgb(236, 235, 235)">Insurance</div>
+                <table style="padding:6px">
+                  <tr>
+                    <td>
+                      <span class="longText">ID Card no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{card}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Birth date</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{bdate}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Address</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{in_address}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Home phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{home_phone}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Primary Insurance</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{indicate}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Relationship to patient</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{p_relation}}</td>
+                  </tr>
+                </table>
+
+                <div style="font-weight:bold; margin-top:16px;  padding:5px; background:rgb(236, 235, 235)">In-case of
+                  emergency</div>
+                <table style="padding:6px">
+                  <tr>
+                    <td>
+                      <span class="longText">Name</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{name_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Relationship to patient</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{relation_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Home phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{phone_e}}</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="longText">Work phone no.</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td style="color:rgb(37, 37, 37)">{{work_phone}}</td>
+                  </tr>
+                </table>
+                <br>
+              </div>
+
+            </div>
+          </neon-animatable>
+
+          <neon-animatable>
+
+            <firebase-query id="query" path="/{{myKey}}/cases" order-by-child="patientkey" equal-to="{{viewKey}}" data="{{mycases}}"
+              limit-to-first="15">
+            </firebase-query>
+
+            <div id="noRecord" class="docu1" style="padding:16px;">
+              <div class="details">
+                No record found.
+              </div>
+            </div>
+
+            <div style="margin-bottom: 26px;">
+              <template is="dom-repeat" items="{{_descending(mycases)}}" as="caseses">
+
+                <div class="docu1" style="padding:16px;" id="printMe">
+                  <!-- <div class="docu-header">Cases</div> -->
+                  <div class="details">
+                    <!-- <div style="font-weight:bold">{{_date(item.timestamp)}}</div> -->
+                    <iron-icon icon="my-icons:watch-later"></iron-icon>
+                    <time-ago style="font-size:14px; margin-top:10px;" datetime$="{{_timeStampToDateTime(caseses.timestamp)}}">{{_timeStampToDateTime(caseses.timestamp)}}</time-ago>
+                    <br>
+                    <br>
+                    <div hidden$="{{!caseses.complain}}">
+                      <span class="longText">Chief Complaint</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.complain}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.subjective}}">
+                      <span class="longText">Subjective</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.subjective}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.objective}}">
+                      <span class="longText">Objective</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.objective}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.assessment}}">
+                      <span class="longText">Assessment</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.assessment}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.history}}">
+                      <span class="longText">History</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.history}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.laboratory}}">
+                      <span class="longText">Laboratory</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.laboratory}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.imaging}}">
+                      <span class="longText">Imaging</span>
+                      <div class="galleryHolder">
+                        <my-gallery id="gallery">
+                          <template is="dom-repeat" items="{{_array(caseses.attachment)}}" as="img">
+                            <sl-gallery-image id="myImg" src="[[img.url]]" small="[[img.url]]"></sl-gallery-image>
+                          </template>
+                        </my-gallery>
+                      </div>
+                    </div>
+                    <br>
+
+                    <div hidden$="{{!caseses.pe}}">
+                      <span class="longText">Physical Exam</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.pe}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.diagnosis}}">
+                      <span class="longText">Diagnosis</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.diagnosis}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.treatment}}">
+                      <span class="longText">Treatment</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.treatment}}</div>
+                    </div>
+
+                    <div hidden$="{{!caseses.plan}}">
+                      <span class="longText">Plan</span>
+                      <div style="padding-bottom:10px;color:rgb(37, 37, 37)">{{caseses.plan}}</div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </neon-animatable>
+
+        </neon-animated-pages>
+
+        <!-- <paper-fab id="more-fab" class="fab-menu" icon="my-icons:add" on-tap="_showMini" title="More options"></paper-fab> -->
+        <paper-fab id="less-fab" style="display:none" class="fab-menu" icon="my-icons:clear" on-tap="_hideMini" title="Hide options"></paper-fab>
+        <paper-fab class="fab-menu2" style="display:none" mini icon="my-icons:folder-open" on-tap="_newVisit" title="Add visit"></paper-fab>
+        <paper-fab class="fab-menu3" style="display:none" mini icon="my-icons:list" title="Add to queue"></paper-fab>
+      </app-header-layout>
+    </app-drawer-layout>
+
+    <salte-dialog no-auto-fullscreen id="addDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2 style="font-size: 16px; background: #1E88E5">Confirmation required!</h2>
+      <span>Would you like to add this patient to queue?</span>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus on-tap="_selectDate">Yes</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
+      </div>
+    </salte-dialog>
+
+    <salte-dialog no-auto-fullscreen id="dateDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2 style="font-size: 16px; background: #1E88E5">Add to queue</h2>
+      <span>
+        <paper-input disabled="[[isLoading]]" type="date" value="{{todayDate}}" label="Pick a date" always-float-label>
+          <iron-icon icon="my-icons:event" slot="prefix"></iron-icon>
+        </paper-input>
+        <div style="margin-left:4px;margin-top:-6px;">
+          <span id="dateText" style="font-size:14px; color:gray; font-weight:50">{{text}}</span>
+        </div>
+      </span>
+      <div class="buttons">
+        <paper-spinner active="[[isLoading]]"></paper-spinner>
+        <paper-button disabled="[[isLoading]]" autofocus on-tap="_addPatient2Queue">OK</paper-button>
+        <paper-button disabled="[[isLoading]]" dialog-dismiss>Cancel</paper-button>
+      </div>
+    </salte-dialog>
+
+    <salte-dialog no-auto-fullscreen id="queInfoDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2 style="font-size: 16px; background: #1E88E5">Queue details!</h2>
+      <span>Currently no. {{queueNo}} in queue.
+        <br>Queue added on {{queueDate}} at {{queueLocation}}.</span>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus>OK</paper-button>
+      </div>
+    </salte-dialog>
+
+    <salte-dialog no-auto-fullscreen id="confirmDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2 style="font-size: 16px; background: #43A047">Request success!</h2>
+      <span>Patient successfully added to queue.</span>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus>OK</paper-button>
+      </div>
+    </salte-dialog>
+
+    <salte-dialog no-auto-fullscreen id="locationDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2 style="font-size: 16px; background: #F44336">Request denied!</h2>
+      <span>Unable adding patient to queue.
+        <br>Please set your location and try again.</span>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus>OK</paper-button>
+      </div>
+    </salte-dialog>
+
+    <salte-dialog no-auto-fullscreen id="errDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2 style="font-size: 16px; background: #F44336">Request denied!</h2>
+      <span>Unable adding patient to queue.
+        <br>Patient already queued on {{doneQueueDate}}.</span>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus>OK</paper-button>
+      </div>
+    </salte-dialog>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-patients-view',
+
+      properties: {
+        narrow: {
+          type: Boolean,
+          notify: true
+        },
+        prevRoute: String,
+        myLocation: String,
+        myLocationCode: String,
+        myKey: String,
+        myRole: String,
+        params: Object,
+        selectedPage: {
+          type: Number,
+          value: 0
+        },
+        entryanimation: {
+          type: String,
+          value: "slide-from-right-animation"
+        },
+        isSelectDoc: {
+          type: Boolean,
+          value: true
+        },
+        exitanimation: {
+          type: String,
+          value: "slide-left-animation"
+        },
+        viewKey: String,
+        personalQueue: Object,
+        filterValue: String
+      },
+
+      observers: [
+        'mypatientChanged(mypatient)',
+        'mycaseChanged(mycases)',
+        'selectedPageChanged(selectedPage)',
+        'todayDateChanged(todayDate)'
+      ],
+
+      ready() {
+        this.viewKey = this.params.ref;
+        this.todayDate = formatTodayDate(new Date());
+      },
+
+      todayDateChanged(date) {
+        if (date) {
+          Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:14px;color:gray');
+          this.text = formatWeekDate(date);
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#dateText").setAttribute('style', 'font-size:12px;color:red');
+          this.text = 'Please pick a date.';
+        }
+      },
+
+      _newVisit() {
+        window.location.hash = '/absolute';
+      },
+
+      _selectDate() {
+        this.$.dateDialog.open();
+      },
+
+      _addPatient2Queue() {
+        var mykey = this.myKey;
+        var pickDate = this.todayDate;
+        this.doneQueueDate = formatWeekDate(pickDate);
+        var self = this;
+
+        var queueData = {
+          patient_info: this.personalQueue,
+          patient_profile: this.p_profile ? this.p_profile : null,
+          patient_refKey: this.viewKey,
+          patient_no: this.no,
+          queueLocation: this.myLocation,
+          isCancel: false,
+          isQueue: true,
+          isNext: true,
+          queueNo: 1,
+          xy: "y"
+        }
+
+        if (pickDate) {
+          self.isLoading = true;
+          var queueRef = firebase.database().ref("/" + mykey + "/queue/" + queueData.queueLocation + "/" + pickDate);
+          queueRef.orderByChild("patient_no").equalTo(self.no).limitToLast(1).once("value").then(function (data) {
+            if (data.exists()) {
+              if (Object.values(data.val())[0].isCancel) {
+                self._locateNextQueue(mykey, queueData, pickDate, self, queueRef);
+              }
+              else {
+                self.isLoading = false;
+                self.$.errDialog.open();
+              }
+            }
+            else {
+              self._locateNextQueue(mykey, queueData, pickDate, self, queueRef);
+            }
+          });
+        }
+      },
+
+      _locateNextQueue(mykey, queueData, pickDate, self, queueRef) {
+        queueRef.once('value').then(function (snapshot) {
+          if (snapshot.exists()) {
+            queueRef.orderByChild("isNext").equalTo(true).once('value').then(function (hasNext) {
+              if (hasNext.exists()) {
+                queueData.isNext = false;
+                queueData.queueNo = snapshot.numChildren() + 1;
+                queueRef.push(queueData).then(function () {
+                  self.isLoading = false;
+                  self.$.dateDialog.close();
+                  self.$.confirmDialog.open();
+                });
+              }
+              else {
+                queueData.queueNo = snapshot.numChildren() + 1;
+                queueRef.push(queueData).then(function () {
+                  self.isLoading = false;
+                  self.$.dateDialog.close();
+                  self.$.confirmDialog.open();
+                });
+              }
+            });
+          }
+          else {
+            queueRef.push(queueData).then(function () {
+              self.isLoading = false;
+              self.$.dateDialog.close();
+              self.$.confirmDialog.open();
+            });
+          }
+        });
+      },
+
+      _send2Que() {
+        if (this.myLocation == '(not set)') {
+          Polymer.dom(this.root).querySelector("#locationDialog").open();
+        }
+        else {
+          Polymer.dom(this.root).querySelector("#addDialog").open();
+        }
+      },
+
+      _queInfo() {
+        Polymer.dom(this.root).querySelector("#queInfoDialog").open();
+      },
+
+      selectedPageChanged(e) {
+        if (e == 0) {
+          this.entryanimation = "slide-from-right-animation";
+          this.exitanimation = "slide-left-animation";
+        }
+        else {
+          this.entryanimation = "slide-from-left-animation";
+          this.exitanimation = "slide-right-animation";
+        }
+      },
+
+      mycaseChanged(c) {
+        if (c.length > 0) {
+          Polymer.dom(this.root).querySelector("#noRecord").style.display = 'none';
+        }
+      },
+
+      mypatientChanged() {
+        if (this.mypatient.length > 0) {
+
+          if (this.mypatient[0].profile) {
+            this.p_profile = this.mypatient[0].profile;
+          }
+          else {
+            this.p_profile = '../images/user.png';
+          }
+
+          if (this.mypatient[0].personal.referred) {
+            if (this.mypatient[0].personal.referred == 'Dr') {
+              this.referredby = 'Dr. ' + this.mypatient[0].personal.doctor;
+            }
+            else if (this.mypatient[0].personal.referred == 'Hospital') {
+              this.referredby = this.mypatient[0].personal.hospital;
+            }
+            else {
+              this.referredby = this.mypatient[0].personal.referred;
+            }
+          }
+
+          if (this.mypatient[0].personal.birthday) {
+            Date.shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            var birthday = new Date(this.mypatient[0].personal.birthday);
+            this.bday = birthday.getDate() + '-' + Date.shortMonths[birthday.getMonth()] + '-' + birthday.getFullYear();
+
+            this.age = getAge(this.mypatient[0].personal.birthday);
+          }
+          else {
+            this.age = '';
+          }
+
+          this.email = this.mypatient[0].personal.email;
+          this.contact = this.mypatient[0].personal.contact;
+          this.address = this.mypatient[0].personal.address;
+          this.occupation = this.mypatient[0].personal.occupation;
+          this.employer = this.mypatient[0].personal.employer;
+          this.emp_phone = this.mypatient[0].personal.emp_phone;
+          this.sex = this.mypatient[0].personal.sex;
+          this.status = this.mypatient[0].personal.status;
+          this.name = this.mypatient[0].personal.name;
+          this.filterValue = this.mypatient[0].personal.name;
+          this.no = this.mypatient[0].no;
+
+          this.card = this.mypatient[0].insurance.card;
+          this.bdate = this.mypatient[0].insurance.birthday;
+          this.in_address = this.mypatient[0].insurance.address;
+          this.home_phone = this.mypatient[0].insurance.home_phone;
+          this.indicate = this.mypatient[0].insurance.primary_insurance;
+          this.p_relation = this.mypatient[0].insurance.relationship;
+
+          this.name_e = this.mypatient[0].emergency.name;
+          this.relation_e = this.mypatient[0].emergency.relationship;
+          this.phone_e = this.mypatient[0].emergency.home_phone;
+          this.work_phone = this.mypatient[0].emergency.work_phone;
+
+          this.personalQueue = {
+            firstname: this.mypatient[0].personal.firstname,
+            middlename: this.mypatient[0].personal.middlename,
+            lastname: this.mypatient[0].personal.lastname,
+            birthday: this.mypatient[0].personal.birthday ? this.mypatient[0].personal.birthday : null,
+            sex: this.mypatient[0].personal.sex,
+            name: this.mypatient[0].personal.name,
+            hmo: this.mypatient[0].insurance.primary_insurance
+          }
+        }
+      },
+
+      _print() {
+        var content = Polymer.dom(this.root).querySelector("#printMe").innerHTML;
+        var mywindow = window.open('', 'Print', 'height=600,width=800,resizable=no');
+        mywindow.document.write(content);
+        mywindow.print();
+        mywindow.close();
+      },
+
+      _roleChecked(e) {
+        if (e == 'Secretary') return 'display:none';
+        else return 'display:block';
+      },
+
+      _array(e) {
+        if (e) return Object.values(e);
+        else return '';
+      },
+
+      _descending(data) {
+        return data.reverse();
+      },
+
+      _timeStampToDateTime(ts) {
+        return new Date(ts);
+      },
+
+      _date(e) {
+        if (e) {
+          var date = new Date(e);
+          var options = {
+            weekday: "long", year: "numeric", month: "short",
+            day: "numeric", hour: "2-digit", minute: "2-digit"
+          };
+
+          return date.toLocaleTimeString("en-us", options);
+        }
+      },
+
+      _showMini() {
+        Polymer.dom(this.root).querySelector("#more-fab").style.display = 'none';
+        Polymer.dom(this.root).querySelector("#less-fab").style.display = 'block';
+        Polymer.dom(this.root).querySelector(".fab-menu2").style.display = 'block';
+        Polymer.dom(this.root).querySelector(".fab-menu3").style.display = 'block';
+      },
+
+      _hideMini() {
+        Polymer.dom(this.root).querySelector("#more-fab").style.display = 'block';
+        Polymer.dom(this.root).querySelector("#less-fab").style.display = 'none';
+        Polymer.dom(this.root).querySelector(".fab-menu2").style.display = 'none';
+        Polymer.dom(this.root).querySelector(".fab-menu3").style.display = 'none';
+      },
+
+      _changepic() {
+        if (event.target.files[0]) {
+          Polymer.dom(this.root).querySelector("#profilePic").src = URL.createObjectURL(event.target.files[0]);
+        }
+      },
+
+      toggleDrawer() {
+        this.dispatchEvent(new CustomEvent('toggleDrawer', {
+          bubbles: true, composed: true, detail: {
+            narrow: this.$.narrow
+          }
+        }));
+        this.$.narrow = !this.$.narrow;
+      },
+
+      _comma(e) {
+        if (e) {
+          return ',';
+        }
+      },
+
+      _hmo(e) {
+        if (e) {
+          return 'HMO: ' + e;
+        }
+      }
+
+    })
+  </script>
+</dom-module>

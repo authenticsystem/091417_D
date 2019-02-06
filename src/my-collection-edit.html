@@ -1,0 +1,465 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
+<link rel="import" href="../bower_components/salte-dialog/salte-dialog.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../bower_components/paper-dropdown-input/paper-dropdown-input.html">
+
+<link rel="import" href="global-functions.html">
+<link rel="import" href="my-collection-datatable.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="my-collection-edit">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+            }
+
+            app-header {
+                color: rgb(255, 255, 255);
+                background-color: #673AB7;
+            }
+
+            app-header paper-icon-button {
+                --paper-icon-button-ink-color: #000000;
+            }
+
+            app-drawer-layout:not([narrow]) [drawer-toggle] {
+                display: none;
+            }
+
+            app-drawer {
+                --app-drawer-content-container: {
+                    background-color: #F4F5F6;
+                }
+            }
+
+            paper-icon-button.menu {
+                margin-right: 15px;
+            }
+
+            paper-item {
+                height: 64px;
+            }
+
+            paper-fab {
+                background: #1976d2;
+            }
+
+            @media (min-width: 800px) {
+                .footer {
+                    position: absolute;
+                    bottom: 16px;
+                    width: 100%;
+                }
+
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 48px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 48px;
+                    bottom: 48px;
+                }
+
+                .textTemp {
+                    margin-left: 140px;
+                }
+            }
+
+            @media (max-width: 800px) {
+                .paper-fab-0 {
+                    position: absolute;
+                    left: 16px;
+                    bottom: 48px;
+                }
+
+                .paper-fab-1 {
+                    position: absolute;
+                    right: 16px;
+                    bottom: 48px;
+                }
+
+                .docu {
+                    margin-left: 16px;
+                    margin-right: 16px;
+                }
+
+                .textTemp {
+                    margin-left: 16px;
+                }
+            }
+
+            .avatar {
+                height: 45px;
+                width: 45px;
+                border-radius: 50%;
+                box-sizing: border-box;
+                background-color: transparent;
+            }
+
+            .textTemp {
+                color: rgb(100, 100, 100);
+                font-weight: 500;
+                font-size: 14px;
+                margin-top: 20px;
+                margin-bottom: -16px;
+            }
+        </style>
+
+        <firebase-query path="/{{myKey}}/collection" order-by-key equal-to="{{editKey}}" data="{{mybilling}}"
+            limit-to-first="1"></firebase-query>
+
+        <app-drawer-layout fullbleed narrow="{{narrow}}" id="drawerLayout">
+
+            <app-header-layout id="appheader" has-scrolling-region>
+                <app-header fixed slot="header">
+                    <app-toolbar>
+                        <a href="{{prevRoute}}">
+                            <paper-icon-button noink class="menu" style="color: white;" icon="my-icons:arrow-back"></paper-icon-button>
+                        </a>
+                        <div main-title>Edit Ref. # {{ref}}</div>
+                    </app-toolbar>
+                </app-header>
+
+                <neon-animated-pages selected="{{selectedPage}}" entry-animation="{{entryanimation}}" exit-animation="{{exitanimation}}">
+
+                    <neon-animatable>
+                        <div class="textTemp">
+                            Patient
+                        </div>
+
+                        <div class="docu">
+                            <div class="details" style="display: flex;">
+                                <img class="avatar" src="{{profile}}"></img>
+                                <div style="margin-left:10px; font-weight:400; color:black">
+                                    <span style="font-size:11px;display:block" class="longText">{{myPatient.num}}</span>
+                                    <span class="primary">{{myPatient.name}}</span>
+                                    <span class="longText" style="font-weight:400;display:block">{{age}}{{_comma(age)}}
+                                        {{myPatient.gender}}</span>
+                                    <span class="longText" style="font-weight:400;display:block">{{_hmo(myPatient.hmo)}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <my-collection-datatable id="billingDatatable" my-patient="[[myPatient]]" billing-data="{{billingData}}"
+                            remarks="{{remarks}}" total="{{total}}" my-key="{{myKey}}" show-date="true" today-date="{{todayDate}}"
+                            favhide="{{favhide}}" logs="{{logs}}" ref="{{ref}}"></my-collection-datatable>
+                    </neon-animatable>
+
+                    <neon-animatable>
+                        <div class="docu">
+                            <div class="details">
+                                <div id="saveSuccess" style="color: green; display:none">
+                                    Collection successfully saved.
+                                </div>
+                                <div id="saveRunning" style="color: orange; display:none">Saving data. .</div>
+                                <div id="saveFailed" style="color: red; display:none">Opps! Something went wrong while
+                                    saving data.
+                                </div>
+                            </div>
+                        </div>
+                    </neon-animatable>
+
+                </neon-animated-pages>
+
+            </app-header-layout>
+
+            <div class="footer">
+                <div hidden$="[[favlefthide]]">
+                    <paper-fab id="favleft" class="paper-fab-0" icon="my-icons:chevron-left" on-tap="_select1"></paper-fab>
+                </div>
+                <div hidden$="[[favrighthide]]">
+                    <paper-fab style="background: #1976d2;" id="favright" class="paper-fab-1" icon="my-icons:chevron-right"
+                        on-tap="_select2"></paper-fab>
+                </div>
+            </div>
+
+        </app-drawer-layout>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-collection-edit',
+
+            properties: {
+                narrow: {
+                    type: Boolean,
+                    notify: true
+                },
+                editKey: String,
+                myLocation: String,
+                prevRoute: String,
+                myKey: String,
+                params: Object,
+                selectedPage: {
+                    type: Number,
+                    value: 0
+                },
+                entryanimation: {
+                    type: String,
+                    value: "slide-from-right-animation"
+                },
+                exitanimation: {
+                    type: String,
+                    value: "slide-left-animation"
+                },
+                favlefthide: {
+                    type: Boolean,
+                    value: true
+                },
+                favrighthide: {
+                    type: Boolean,
+                    value: false
+                },
+                todayDate: String,
+                storeDate: String,
+                lastPushTime: {
+                    type: Number,
+                    value: 0
+                }
+            },
+
+            ready() {
+                this.logs = [];
+                this.editKey = this.params.ref;
+            },
+
+            observers: [
+                '_todayDateChanged(todayDate)',
+                '_billingDataChanged(billingData)',
+                '_mybillingChanged(mybilling)',
+                '_favhideChanged(favhide)'
+            ],
+
+            _mybillingChanged(e) {
+                if (e.length > 0) {
+                    this.ref = e[0].ref;
+                    this.todayDate = formatTodayDate(new Date(e[0].created));
+                    this.storeDate = formatTodayDate(new Date(e[0].created));
+                    if (e[0].remarks !== "No Remarks") {
+                        this.remarks = e[0].remarks;
+                    }
+                    this.clinic = e[0].clinic_location;
+
+                    this.profile = e[0].patientinfo.profile ? e[0].patientinfo.profile : '../images/user.png';
+                    this.age = e[0].patientinfo.birthday ? getAge(e[0].patientinfo.birthday) : '';
+                    this.myPatient = e[0].patientinfo;
+                    var self = this;
+
+                    firebase.database().ref('/' + this.myKey + '/collection_data').orderByChild('collection_ref').equalTo(e[0].ref)
+                        .once('value', function (snapshot) {
+                            self.billingData = snapshotToArray(snapshot);
+                        });
+                }
+            },
+
+            _favhideChanged(e) {
+                if (e) {
+                    this.favrighthide = true;
+                    this.favlefthide = true;
+                } else {
+                    if (this.selectedPage !== 0) {
+                        this.favlefthide = false;
+                        if (this.todayDate && this.billingData.length > 0) this.favrighthide = false;
+                        else this.favrighthide = true;
+                    }
+                }
+            },
+
+            _todayDateChanged(e) {
+                if (this.selectedPage !== 0) {
+                    if (e && this.billingData.length > 0) this.favrighthide = false;
+                    else this.favrighthide = true;
+                }
+            },
+
+            _billingDataChanged(e) {
+                if (this.selectedPage !== 0) {
+                    if (e.length > 0 && this.todayDate) this.favrighthide = false;
+                    else this.favrighthide = true;
+                }
+            },
+
+            _select1(e) {
+                this.entryanimation = "slide-from-left-animation";
+                this.exitanimation = "slide-right-animation";
+
+                this.favlefthide = false;
+                this.favrighthide = false;
+
+                Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: #1976d2;");
+                Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:chevron-right");
+
+                if (this.selectedPage !== 0) {
+                    this.selectedPage = this.selectedPage - 1;
+                }
+                if (this.selectedPage === 0) {
+                    this.favlefthide = true;
+                }
+            },
+
+            _select2(e) {
+                this.entryanimation = "slide-from-right-animation";
+                this.exitanimation = "slide-left-animation";
+
+                this.favlefthide = false;
+                this.favrighthide = false;
+
+                if (this.selectedPage != 2) {
+                    this.selectedPage = this.selectedPage + 1;
+                }
+
+                if (this.selectedPage === 1) {
+                    Polymer.dom(this.root).querySelector("#favright").setAttribute("style", "background: green;");
+                    Polymer.dom(this.root).querySelector("#favright").setAttribute("icon", "my-icons:done");
+                    if (!this.todayDate || this.billingData.length === 0) {
+                        this.favrighthide = true;
+                    } else {
+                        this.favrighthide = false;
+                    }
+                }
+
+                if (this.selectedPage === 2) {
+                    this._submitToFireB();
+                    this.favlefthide = true;
+                    this.favrighthide = true;
+                }
+            },
+
+            _submitToFireB() {
+                var self = this;
+                var mykey = this.myKey;
+                var today = this.todayDate;
+                var timestamp = firebase.database.ServerValue.TIMESTAMP;
+                var order = firebase.database.ServerValue.TIMESTAMP;
+                var newPushKey;
+
+                var collRef = firebase.database().ref('/' + mykey + '/collection');
+                var collDataRef = firebase.database().ref('/' + mykey + '/collection_data');
+                var billDataRef = firebase.database().ref('/' + mykey + '/billing_data');
+                var recRef = firebase.database().ref('/' + mykey + '/receivables');
+                this.lastPushTime = new Date(today).getTime();
+
+                var bol = today !== this.storeDate;
+                if (bol === false) {
+                    var dataToSave = {
+                        clinic_location: this.clinic ? this.clinic : this.myLocation,
+                        collection_total: this.total,
+                        remarks: this.remarks ? this.remarks : "No Remarks"
+                    }
+                }
+                else {
+                    newPushKey = generatePushID(today, this.lastPushTime);
+                    timestamp = this.lastPushTime;
+                    order = this.lastPushTime;
+                    var dataToSave = {
+                        timestamp: timestamp,
+                        order: order,
+                        created: today,
+                        clinic_location: this.clinic ? this.clinic : this.myLocation,
+                        collection_total: this.total,
+                        remarks: this.remarks ? this.remarks : "No Remarks",
+                        ref: this.ref,
+                        patientinfo: this.myPatient
+                    }
+                }
+
+                this.$.saveRunning.style.display = 'block';
+                if (newPushKey) {
+                    collRef.child(newPushKey).set(dataToSave).then(function () {
+                        collRef.child(self.editKey).remove();
+                        collRef.child(newPushKey).once('value').then(function (snapshot) {
+                            if (snapshot.exists()) {
+                                var order = snapshot.val().order * -1;
+                                collRef.child(newPushKey).update({ order: order });
+                            }
+                        });
+                        saveBillingData(newPushKey);
+                        self.$.saveRunning.style.display = 'none';
+                        self.$.saveSuccess.style.display = 'block';
+                    }).catch(function (error) {
+                        console.error(error);
+                        self.$.saveRunning.style.display = 'none';
+                        self.$.saveFailed.style.display = 'block';
+                    });
+                }
+                else {
+                    collRef.child(self.editKey).update(dataToSave).then(function () {
+                        saveBillingData(self.editKey);
+                        self.$.saveRunning.style.display = 'none';
+                        self.$.saveSuccess.style.display = 'block';
+                    }).catch(function (error) {
+                        console.error(error);
+                        self.$.saveRunning.style.display = 'none';
+                        self.$.saveFailed.style.display = 'block';
+                    });
+                }
+
+                function saveBillingData(fbPushKey) {
+                    if (self.logs.length > 0) {
+                        self.logs.forEach(element => {
+                            if (element.action === "remove") {
+                                recRef.child(element.data.service_collect_from).once('value', function (snapshot) {
+                                    var total = snapshot.val() ? snapshot.val() : 0;
+                                    total += element.data.amount;
+                                    recRef.child(element.data.service_collect_from).set(total);
+                                    collDataRef.child(element.data._key).remove();
+                                });
+                            } else if (element.action === "add") {
+                                billDataRef.child(element.data.billing_data_key).update({
+                                    patient_billTo_collected: self.myPatient.name + "_" + element.data.collectFrom + "_true",
+                                    collected: true
+                                });
+
+                                element.data.collection_key = fbPushKey;
+                                element.data.collection_ref = self.ref;
+                                element.data.patient = self.myPatient.name;
+                                collDataRef.push(element.data);
+                                recRef.child(element.data.service_collect_from).once('value', function (snapshot) {
+                                    var total = snapshot.val() ? snapshot.val() : 0;
+                                    total -= element.data.amount;
+                                    recRef.child(element.data.service_collect_from).set(total);
+                                });
+                            }
+                        });
+                    }
+                }
+            },
+
+            _comma(e) {
+                if (e) {
+                    return ',';
+                }
+            },
+
+            _hmo(e) {
+                if (e) {
+                    return 'HMO: ' + e;
+                }
+            },
+
+        })
+
+    </script>
+</dom-module>
