@@ -1,47 +1,42 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/my-app.html",
-  "fragments": [
-    "src/my-dashboard.html",
-    "src/my-patients.html",
-    "src/my-visits.html",
-    "src/my-account.html",
-    "src/search-bar.html",
-    "src/time-element.html",
-    "src/chartjs.html",
-    "src/image-resize.html",
-    "src/sortable-list.html",
-    "assets/image-resize.js",
-    "assets/image-tools.js",
-    "src/my-view2.html",
-    "src/my-view404.html"
-  ],
+  "shell": "src/my-app.js",
   "sources": [
-    "src/**/*",
     "images/**/*",
-    "assets/*.js",
-    "assets/*.json",
-    "assets/*.mp3"
+    "src/_data/*"
   ],
   "extraDependencies": [
     "manifest.json",
     "sw-notification.js",
-    "bower_components/webcomponentsjs/*.js"
+    "node_modules/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.js",
+    "node_modules/web-animations-js/web-animations-next-lite.min.js",
+    "node_modules/@webcomponents/webcomponentsjs/*.js",
+    "!node_modules/@webcomponents/webcomponentsjs/gulpfile.js",
+    "node_modules/@webcomponents/webcomponentsjs/bundles/*.js"
   ],
-  "lint": {
-    "rules": [
-      "polymer-2"
-    ]
-  },
   "builds": [
     {
-      "preset": "es5-bundled"
-    },
-    {
-      "preset": "es6-bundled"
-    },
-    {
-      "preset": "es6-unbundled"
+      "name": "es5-bundled",
+      "js": {
+        "minify": true,
+        "compile": true,
+        "transformModulesToAmd": true
+      },
+      "css": {
+        "minify": true
+      },
+      "html": {
+        "minify": true
+      },
+      "bundle": true,
+      "addServiceWorker": true
     }
-  ]
+  ],
+  "moduleResolution": "node",
+  "npm": true,
+  "lint": {
+    "rules": [
+      "polymer-3"
+    ]
+  }
 }

@@ -1,0 +1,154 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "$uid": {
+      "patients": {
+        ".indexOn": [
+          "no",
+          "profile",
+          "personal/name",
+          "personal/firstname",
+          "personal/middlename",
+          "personal/lastname"
+        ]
+      },
+      "queue": {
+        "$uid": {
+          "$uid": {
+            ".indexOn": [
+              "patient_no",
+              "xy",
+              "queueLocation",
+              "patient_refKey",
+              "queueNo",
+              "isNext",
+              "isQueue",
+              "isCancel"
+            ]
+          }
+        }
+      },
+      "cases": {
+        ".indexOn": [
+          "imaging",
+          "patientkey",
+          "profile",
+          "complain",
+          "patient",
+          "order",
+          "timestamp",
+          "attachment/type"
+        ]
+      },
+      "billing": {
+        ".indexOn": [
+          "order",
+          "timestamp",
+          "patient",
+          "ref",
+          "patientinfo/name"
+        ]
+      },
+      "billing_data": {
+        ".indexOn": [
+          "billing_key",
+          "billing_ref",
+          "service_bill_to",
+          "billTo",
+          "patient_billTo_collected"
+        ]
+      },
+      "collection": {
+        ".indexOn": [
+          "order",
+          "patientinfo/name"
+        ]
+      },
+      "collection_data": {
+        ".indexOn": [
+          "billing_ref",
+          "collection_ref"
+        ]
+      },
+      "reports": {
+        "daily": {
+          ".indexOn": [
+            "patients",
+            "visits"
+          ]
+        },
+        "monthly": {
+          ".indexOn": [
+            "patients",
+            "visits"
+          ]
+        },
+        "yearly": {
+          ".indexOn": [
+            "patients",
+            "visits"
+          ]
+        }
+      },
+      "secretary": {
+        ".indexOn": [
+          "cellphone",
+          "code",
+          "name/firstname"
+        ]
+      },
+      "doctors": {
+        ".indexOn": [
+          "code",
+          "location"
+        ]
+      },
+      "locations": {
+        ".indexOn": [
+          "location_active",
+          "code",
+          "location_name",
+          "location_code",
+          "location_mini"
+        ]
+      },
+      "uniqueId": {
+        ".indexOn": [
+          "patients",
+          "billing",
+          "collection"
+        ]
+      },
+      "services": {
+        "$uid": {
+          ".indexOn": [
+            "service"
+          ]
+        }
+      },
+      "hmo": {
+        "$uid": {
+          ".indexOn": [
+            "shortName",
+            "name"
+          ]
+        }
+      }
+    },
+    "accounts": {
+      ".indexOn": [
+        "uid",
+        "code",
+        "active",
+        "cellphone"
+      ]
+    },
+    "secretary": {
+      ".indexOn": [
+        "name",
+        "cellphone"
+      ]
+    }
+  }
+}
