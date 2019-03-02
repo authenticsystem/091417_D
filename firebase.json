@@ -1,0 +1,15 @@
+{
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "hosting": {
+    "public": "build/es5-bundled",
+    "ignore": [
+      "firebase.json",
+      "**/.*"
+    ]
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/my-app.js",
+  "sources": [
+    "images/**/*",
+    "src/_data/*"
+  ],
+  "extraDependencies": [
+    "manifest.json",
+    "sw-notification.js",
+    "node_modules/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.js",
+    "node_modules/web-animations-js/web-animations-next-lite.min.js",
+    "node_modules/@webcomponents/webcomponentsjs/*.js",
+    "!node_modules/@webcomponents/webcomponentsjs/gulpfile.js",
+    "node_modules/@webcomponents/webcomponentsjs/bundles/*.js"
+  ],
+  "builds": [
+    {
+      "name": "es5-bundled",
+      "js": {
+        "minify": true,
+        "compile": true,
+        "transformModulesToAmd": true
+      },
+      "css": {
+        "minify": true
+      },
+      "html": {
+        "minify": true
+      },
+      "bundle": true,
+      "addServiceWorker": true
+    }
+  ],
+  "moduleResolution": "node",
+  "npm": true,
+  "lint": {
+    "rules": [
+      "polymer-3"
+    ]
+  }
+}

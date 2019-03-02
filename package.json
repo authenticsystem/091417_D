@@ -1,0 +1,53 @@
+{
+  "name": "base-emr",
+  "version": "1.0.0",
+  "description": "An Elecronic Medical Records Web Application",
+  "author": "Authentic System Solutions",
+  "scripts": {
+    "start": "polymer serve",
+    "build": "polymer build",
+    "serve:build": "cd build && cd es5-bundled && polymer serve"
+  },
+  "dependencies": {
+    "@polymer/app-layout": "^3.0.0",
+    "@polymer/app-route": "^3.0.0",
+    "@polymer/iron-collapse": "^3.0.1",
+    "@polymer/iron-flex-layout": "^3.0.0",
+    "@polymer/iron-form": "^3.0.1",
+    "@polymer/iron-icon": "^3.0.1",
+    "@polymer/iron-iconset-svg": "^3.0.0",
+    "@polymer/iron-image": "^3.0.1",
+    "@polymer/iron-list": "^3.0.1",
+    "@polymer/iron-media-query": "^3.0.0",
+    "@polymer/iron-pages": "^3.0.0",
+    "@polymer/iron-scroll-threshold": "^3.0.1",
+    "@polymer/neon-animation": "^3.0.1",
+    "@polymer/paper-badge": "^3.0.1",
+    "@polymer/paper-button": "^3.0.1",
+    "@polymer/paper-checkbox": "^3.1.0",
+    "@polymer/paper-dialog": "^3.0.1",
+    "@polymer/paper-dropdown-menu": "^3.0.1",
+    "@polymer/paper-fab": "^3.0.1",
+    "@polymer/paper-icon-button": "^3.0.0",
+    "@polymer/paper-input": "^3.0.1",
+    "@polymer/paper-item": "^3.0.1",
+    "@polymer/paper-listbox": "^3.0.1",
+    "@polymer/paper-menu-button": "^3.0.1",
+    "@polymer/paper-radio-group": "^3.0.1",
+    "@polymer/paper-spinner": "^3.0.1",
+    "@polymer/paper-tabs": "^3.0.1",
+    "@polymer/paper-toast": "^3.0.1",
+    "@polymer/polymer": "^3.1.0",
+    "@silverlinkz/sl-gallery": "^2.3.1",
+    "@webcomponents/webcomponentsjs": "^2.2.7",
+    "chart.js": "^2.7.3",
+    "chartjs-plugin-datalabels": "^0.5.0",
+    "compressorjs": "^1.0.5",
+    "g-element": "^2.1.0",
+    "time-elements": "^1.2.0",
+    "web-animations-js": "^2.3.1"
+  },
+  "engines": {
+    "node": ">=8.0"
+  }
+}

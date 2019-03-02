@@ -1,0 +1,21 @@
+{
+  "name": "BaseEMR",
+  "short_name": "BaseEMR",
+  "description": "An Elecronic Medical Records Web Application",
+  "icons": [
+    {
+      "src": "images/manifest/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/manifest/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#7E57C2",
+  "background_color": "#7E57C2"
+}
