@@ -2,7 +2,7 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { fbSnapshotToArray, getAge, formatDate } from '../shared-functions.js';
+import { fbSnapshotToArray, getAge, formatDate } from 'g-element/src/sharedFunctions.js';
 import { itemStyles, itemPlaceholder } from '../shared-styles2.js';
 import '@polymer/paper-dialog/paper-dialog.js';
 
@@ -31,7 +31,7 @@ class SearchPatients extends PolymerElement {
                 <app-toolbar class="search">
                     <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle="" on-tap="_toggleBack"></paper-icon-button>
                     <div style="width:100%">
-                        <g-search id="search" placeholder="Lastname, Firstname Middlename..." query="{{search}}"></g-search>
+                        <g-search-bar id="search" placeholder="Lastname, Firstname Middlename..." query="{{search}}"></g-search-bar>
                     </div>
                 </app-toolbar>
             </app-header>

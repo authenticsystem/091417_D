@@ -1,7 +1,7 @@
 import '@polymer/polymer/polymer-legacy.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { fbSnapshotToArray } from '../shared-functions.js';
+import { fbSnapshotToArray } from 'g-element/src/sharedFunctions.js';
 
 Polymer({
     _template: html`

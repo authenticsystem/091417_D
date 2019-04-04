@@ -1,5 +1,5 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
-import { fbSnapshotToArray } from '../shared-functions.js';
+import { fbSnapshotToArray } from 'g-element/src/sharedFunctions.js';
 import 'g-element/elements/g-datatable/g-datatable.js';
 
 class MyUsers extends PolymerElement {

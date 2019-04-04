@@ -1,8 +1,8 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { ScriptLoader } from '../script-loader.js';
-import { fbSnapshotToArray, formatDate } from '../shared-functions.js';
+import { ScriptLoader } from 'g-element/src/scriptLoader.js';
+import { fbSnapshotToArray, formatDate } from 'g-element/src/sharedFunctions.js';
 import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
 import 'chart.js/dist/Chart.min.js';
 
@@ -188,7 +188,7 @@ class MyDashboard extends PolymerElement {
 
     ready() {
         super.ready();
-        new ScriptLoader().require([
+        new ScriptLoader([
             "node_modules/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.js"
         ], function () {
             this.scriptsLoaded = true;

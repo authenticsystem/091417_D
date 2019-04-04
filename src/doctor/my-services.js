@@ -1,6 +1,6 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { itemStyles } from '../shared-styles2.js';
-import { capitalizeString, fbSnapshotToArray } from '../shared-functions.js';
+import { capitalizeString, fbSnapshotToArray } from 'g-element/src/sharedFunctions.js';
 import 'g-element/elements/g-avatar';
 import '@polymer/paper-dialog/paper-dialog.js';
 

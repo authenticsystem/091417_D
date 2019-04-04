@@ -2,7 +2,7 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { fbSnapshotToArray, getAge } from '../shared-functions.js';
+import { fbSnapshotToArray, getAge } from 'g-element/src/sharedFunctions.js';
 import { itemStyles, itemPlaceholder } from '../shared-styles2.js';
 import 'time-elements/dist/time-elements.js';
 import '../_elements/item-card.js';
@@ -93,7 +93,7 @@ class MyBilling extends PolymerElement {
                     <app-toolbar class="search">
                         <paper-icon-button id="btn-arrow" icon="my-icons:arrow-back" drawer-toggle="" on-tap="_toggleSearch"></paper-icon-button>
                         <div style="width:100%">
-                            <g-search id="search" placeholder="Lastname, Firstname Middlename..." query="{{search}}"></g-search>
+                            <g-search-bar id="search" placeholder="Lastname, Firstname Middlename..." query="{{search}}"></g-search-bar>
                         </div>
                     </app-toolbar>
                 </div>

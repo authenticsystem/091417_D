@@ -1,5 +1,5 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
-import { formatDate } from '../shared-functions.js';
+import { formatDate } from 'g-element/src/sharedFunctions.js';
 import '@polymer/iron-image/iron-image.js';
 import '@polymer/iron-list/iron-list.js';
 import '@polymer/iron-scroll-threshold/iron-scroll-threshold.js';
@@ -8,7 +8,7 @@ import '@polymer/paper-listbox/paper-listbox.js';
 import '@polymer/paper-menu-button/paper-menu-button.js';
 import '@polymer/paper-badge/paper-badge.js';
 import 'g-element/elements/g-notification.js';
-import 'g-element/elements/g-search.js';
+import 'g-element/elements/g-search-bar.js';
 
 class MyDoctor extends PolymerElement {
     static get template() {

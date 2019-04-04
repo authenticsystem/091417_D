@@ -2,8 +2,10 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { fbSnapshotToArray, getAge, formatDate } from '../shared-functions.js';
+import { fbSnapshotToArray, getAge, formatDate } from 'g-element/src/sharedFunctions.js';
 import { itemPlaceholder } from '../shared-styles2.js';
+import 'g-element/elements/g-dialog.js';
+import '@polymer/neon-animation/animations/scale-up-animation.js';
 import '../_elements/sortable-list.js';
 
 class MyQueue extends PolymerElement {
@@ -13,7 +15,6 @@ class MyQueue extends PolymerElement {
         this.isHidden = true;
         this.queue = [];
         this.pickDate = formatDate(new Date(), 'yyyy-mm-dd');
-        this.hideFabMini = true;
     }
 
     static get template() {
@@ -21,12 +22,6 @@ class MyQueue extends PolymerElement {
         ${itemPlaceholder}
         <style include="shared-styles">
             :host { display: block; }
-
-            a { 
-                text-decoration: none;
-                outline: none;
-                -moz-outline-style: none;
-            }
 
             paper-fab.fab-menu-s { 
                 position: absolute;
@@ -169,18 +164,6 @@ class MyQueue extends PolymerElement {
                 margin-top: 10px;
             }
 
-            /* .cancel2 {
-                display: none;
-                color: #F44336;
-                font-size: 12px;
-                padding: 4px;
-                border: 2px solid #F44336;
-                border-radius: 6px;
-                height: 17px;
-                margin-top: 36px;
-                margin-right: -56px;
-            } */
-
             .more-vert {
                 color: #673AB7; 
                 left: 12px;
@@ -237,7 +220,7 @@ class MyQueue extends PolymerElement {
 
                     <iron-scroll-threshold>
                         <template id="exceptionTemplate" is="dom-repeat" items="[[exceptionItems]]">
-                            <div class="list2">
+                            <div class="list2" on-tap="_selectList2">
                                 <div class\$="[[_getClassForItem(item.isNext, item.isQueue)]]">
                                     <div style="font-size:16px;" class="long-text">[[item.queueNo]]</div>
                                     <div style="padding:6px"></div>
@@ -254,24 +237,13 @@ class MyQueue extends PolymerElement {
                                         <div class="long-text">[[_hmo(item.patient_info.hmo)]]</div>
                                     </div>
                                     <div hidden="[[!item.isCancel]]" class="cancel">Cancelled</div>
-                                    <paper-menu-button hidden="[[item.isCancel]]" close-on-activate horizontal-align="right" class="more-vert">
-                                        <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-                                        <paper-listbox slot="dropdown-content">
-                                            <a href="/visits/edit/v/?ref=[[item.visit_refKey]]">
-                                                <paper-item>Edit Visit</paper-item>
-                                            </a>
-                                            <a href="/patients/detail/p/?ref=[[item.patient_refKey]]">
-                                                <paper-item>View Patient</paper-item>
-                                            </a>
-                                        </paper-listbox>
-                                    </paper-menu-button>
                                 </div>
                             </div>
                         </template>
 
                         <sortable-list class="sortList" sortable=".list" on-select="_selectedIndex" on-drop="_dropIndex">
                             <template id="includedTemplate" is="dom-repeat" items="[[includedItems]]">
-                                <div class="list">
+                                <div class="list" on-tap="_selectList">
                                     <div class\$="[[_getClassForItem(item.isNext, item.isQueue)]]">
                                         <div style="font-size:16px;" class="long-text">[[item.queueNo]]</div>
                                         <div style="padding:6px"></div>
@@ -286,27 +258,13 @@ class MyQueue extends PolymerElement {
                                             </div>
                                             <div class="long-text">[[_hmo(item.patient_info.hmo)]]</div>
                                         </div>
-                                        <paper-menu-button close-on-activate horizontal-align="right" class="more-vert">
-                                            <paper-icon-button icon="my-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-                                            <paper-listbox slot="dropdown-content">
-                                                <paper-item on-tap="_cancelQueue">Cancel Queue</paper-item>
-                                                <a hidden="[[!item.isNext]]" href="/visits/new/v?n=[[item.patient_info.name]]&q=[[item.$key]]&no=[[item.queueNo]]&d=[[pickDate]]">
-                                                    <paper-item>Add Visit</paper-item>
-                                                </a>
-                                                <a hidden="[[item.isNext]]" href="/patients/edit/p/?ref=[[item.patient_refKey]]&q=[[item.$key]]&d=[[pickDate]]">
-                                                    <paper-item>Edit Patient</paper-item>
-                                                </a>
-                                            </paper-listbox>
-                                        </paper-menu-button>
                                     </div>
                                 </div>
                             </template>
                         </sortable-list>
                     </iron-scroll-threshold>
 
-                    <paper-fab class="fab-menu" id="mainFab" icon="my-icons:add" on-tap="_toggleFabMini"></paper-fab>
-                    <paper-fab hidden="[[hideFabMini]]" class="fab-menu-n" mini="" icon="my-icons:person-add" on-tap="_newPatient" title="new patient"></paper-fab>
-                    <paper-fab hidden="[[hideFabMini]]" class="fab-menu-s" mini="" icon="my-icons:search" on-tap="_searchPatient" title="search patient"></paper-fab>
+                    <paper-fab class="fab-menu" icon="my-icons:add" on-tap="_toggleNew"></paper-fab>
                 </app-header-layout>
             </div>
             <div name="/search/q">
@@ -315,6 +273,57 @@ class MyQueue extends PolymerElement {
                 </template>
             </div>
         </iron-pages>
+
+        <g-dialog with-backdrop no-auto-fullscreen id="locationDialog" entry-animation="scale-up-animation">
+            <h2 style="font-size: 16px; background: #F44336">Request denied!</h2>
+            <span>Unable adding patient to queue. <br>Please set your location and try again.</span>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus>OK</paper-button>
+            </div>
+        </g-dialog>
+
+        <g-dialog with-backdrop no-auto-fullscreen id="doneDialog" entry-animation="scale-up-animation">
+            <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
+            <span>
+                <paper-button hidden="[[_selected.isCancel]]" on-tap="_editVisit" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Edit Visit</paper-button>
+                <paper-button on-tap="_viewPatient" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>View Patient Detail's</paper-button>
+            </span>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </g-dialog>
+
+        <g-dialog with-backdrop no-auto-fullscreen id="notDoneDialog" entry-animation="scale-up-animation">
+            <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
+            <span>
+                <paper-button on-tap="_cancelQueue" style="background: #F44336; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Cancel Queue</paper-button>
+                <paper-button on-tap="_addVisit" hidden="[[!_selected.isNext]]" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Add Visit</paper-button>
+                <paper-button on-tap="_editPatient" hidden="[[_selected.isNext]]" style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm>Edit Patient Detail's</paper-button>
+            </span>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </g-dialog>
+
+        <g-dialog with-backdrop no-auto-fullscreen id="newDialog" entry-animation="scale-up-animation">
+            <h2 style="font-size: 16px; background: #673AB7">What would you like to do?</h2>
+            <span>
+                <paper-button style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm on-tap="_searchPatient">Search existing patient</paper-button>
+                <paper-button style="background: #1E88E5; margin-bottom: 6px; color: white; border-radius: 0;" dialog-confirm on-tap="_newPatient">Add new patient</paper-button>
+            </span>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </g-dialog>
+
+        <g-dialog with-backdrop no-auto-fullscreen id="confirmationDialog" entry-animation="scale-up-animation">
+            <h2 style="font-size: 16px; background: #1E88E5">Confirmation required!</h2>
+            <span>Sure you want to cancel this queue? <br>This action can't be undone.</span>
+            <div class="buttons">
+                <paper-button dialog-confirm autofocus on-tap="_confirmCancel">Yes</paper-button>
+                <paper-button dialog-dismiss>No</paper-button>
+            </div>
+        </g-dialog>
         `;
     }
 
@@ -422,39 +431,74 @@ class MyQueue extends PolymerElement {
         }
     }
 
-    _cancelQueue(e) {
-        if (confirm("Sure you want to cancel this queue?\nThis action can't be undone.")) {
-            var data = this.$.includedTemplate.itemForElement(e.target);
-            var startNo = data.queueNo + 1;
-            var ref = firebase.database().ref("/" + this.myData.code + "/queue/" + this.myData.location + "/" + this.pickDate);
-            var self = this;
+    _selectList(e) {
+        this._selected = e.model.item;
+        document.body.appendChild(this.$.notDoneDialog);
+        this.$.notDoneDialog.open();
+    }
 
-            ref.child(data.$key).update({
-                isQueue: false,
-                isNext: false,
-                isCancel: true,
-                xy: "x"
-            }).then(function () {
-                ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
-                    if (!hasNext.exists()) {
-                        ref.orderByChild("queueNo").startAt(startNo).once("value").then(function (findNext) {
-                            if (findNext.exists()) {
-                                var done = false;
-                                findNext.forEach(element => {
-                                    if (done) return;
-                                    if (!element.val().isCancel && element.val().isQueue) {
-                                        ref.child(element.key).update({ isNext: true });
-                                        done = true;
-                                        return;
-                                    }
-                                });
-                                if (done) alert("Queue successfully cancelled!");
-                            }
-                        });
-                    }
-                });
+    _selectList2(e) {
+        this._selected = e.model.item;
+        document.body.appendChild(this.$.doneDialog);
+        this.$.doneDialog.open();
+    }
+
+    _cancelQueue() {
+        document.body.appendChild(this.$.confirmationDialog);
+        this.$.confirmationDialog.open();
+    }
+
+    _confirmCancel() {
+        var data = this._selected;
+        var startNo = data.queueNo + 1;
+        var ref = firebase.database().ref("/" + this.myData.code + "/queue/" + this.myData.location + "/" + this.pickDate);
+        var self = this;
+
+        ref.child(data.$key).update({
+            isQueue: false,
+            isNext: false,
+            isCancel: true,
+            xy: "x"
+        }).then(function () {
+            ref.orderByChild("isNext").equalTo(true).once("value").then(function (hasNext) {
+                if (!hasNext.exists()) {
+                    ref.orderByChild("queueNo").startAt(startNo).once("value").then(function (findNext) {
+                        if (findNext.exists()) {
+                            var done = false;
+                            findNext.forEach(element => {
+                                if (done) return;
+                                if (!element.val().isCancel && element.val().isQueue) {
+                                    ref.child(element.key).update({ isNext: true });
+                                    done = true;
+                                    return;
+                                }
+                            });
+                            if (done) alert("Queue successfully cancelled!");
+                        }
+                    });
+                }
             });
-        }
+        });
+    }
+
+    _addVisit() {
+        window.history.pushState({}, null, '/visits/new/v?n=' + this._selected.patient_info.name + '&q=' + this._selected.$key + '&no=' + this._selected.queueNo + '&d=' + this.pickDate);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+    }
+
+    _editVisit() {
+        window.history.pushState({}, null, '/visits/edit/v/?ref=' + this._selected.visit_refKey);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+    }
+
+    _editPatient() {
+        window.history.pushState({}, null, '/patients/edit/p/?ref=' + this._selected.patient_refKey + '&q=' + this._selected.$key + '&d=' + this.pickDate);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+    }
+
+    _viewPatient() {
+        window.history.pushState({}, null, '/patients/detail/p/?ref=' + this._selected.patient_refKey);
+        window.dispatchEvent(new CustomEvent('location-changed'));
     }
 
     _noData(e, l) {
@@ -482,24 +526,19 @@ class MyQueue extends PolymerElement {
         }));
     }
 
-    _toggleFabMini() {
-        if (this.hideFabMini) this.$.mainFab.icon = "my-icons:close";
-        else this.$.mainFab.icon = "my-icons:add";
-        this.hideFabMini = !this.hideFabMini;
+    _toggleNew() {
+        document.body.appendChild(this.$.newDialog);
+        this.$.newDialog.open();
     }
 
     _newPatient() {
         window.history.pushState({}, null, '/patients/new/p?d=' + this.pickDate);
         window.dispatchEvent(new CustomEvent('location-changed'));
-        this.hideFabMini = true;
-        this.$.mainFab.icon = "my-icons:add";
     }
 
     _searchPatient() {
         window.history.pushState({}, null, '/queue/search/q');
         window.dispatchEvent(new CustomEvent('location-changed'));
-        this.hideFabMini = true;
-        this.$.mainFab.icon = "my-icons:add";
     }
 
     _showLoader(show) {

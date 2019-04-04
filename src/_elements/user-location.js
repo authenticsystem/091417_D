@@ -1,7 +1,7 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { itemStyles } from '../shared-styles2.js';
-import { capitalizeString, fbSnapshotToArray } from '../shared-functions.js';
-import { ShortUniqueId } from '../shortUniqueId.js';
+import { capitalizeString, fbSnapshotToArray } from 'g-element/src/sharedFunctions.js';
+import { ShortUniqueId } from 'g-element/src/shortUniqueId.js';
 import 'g-element/elements/g-avatar';
 import '@polymer/paper-dialog/paper-dialog.js';
 

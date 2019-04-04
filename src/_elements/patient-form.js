@@ -1,5 +1,5 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
-import { formatDate, calculateAge, toIdString } from '../shared-functions.js';
+import { formatDate, calculateAge, toIdString } from 'g-element/src/sharedFunctions.js';
 import Compressor from 'compressorjs';
 import '@polymer/neon-animation/neon-animated-pages.js';
 import '@polymer/neon-animation/neon-animatable.js';

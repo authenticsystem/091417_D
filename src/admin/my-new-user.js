@@ -1,7 +1,7 @@
 
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
-import { ShortUniqueId } from '../shortUniqueId.js';
-import { capitalizeString } from '../shared-functions.js';
+import { ShortUniqueId } from 'g-element/src/shortUniqueId.js';
+import { capitalizeString } from 'g-element/src/sharedFunctions.js';
 import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
 import '@polymer/paper-listbox/paper-listbox.js';
 import 'g-element/elements/g-datatable/g-datatable.js';

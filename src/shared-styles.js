@@ -46,11 +46,11 @@ $_documentContainer.innerHTML = `<dom-module id="shared-styles">
       }
 
       app-header paper-icon-button {
+        color: white;
         --paper-icon-button-ink-color: white;
       }
 
-      app-toolbar.search{
-        background: white; 
+      app-toolbar.search {
         color: black;
       }
 
@@ -354,6 +354,12 @@ $_documentContainer.innerHTML = `<dom-module id="shared-styles">
 
       paper-button.primary.loading:hover{
         background-color:  #fff;
+      }
+
+      paper-textarea:focus {
+        outline: none;
+        -moz-outline: none;
+        -webkit-outline: none;
       }
 
       paper-item {

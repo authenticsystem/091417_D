@@ -2,7 +2,7 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { fbSnapshotToArray, getAge, formatDate, generatePushID, toIdString } from '../shared-functions.js';
+import { fbSnapshotToArray, getAge, formatDate, generatePushID, toIdString } from 'g-element/src/sharedFunctions.js';
 import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import Compressor from 'compressorjs';
 import '@polymer/neon-animation/neon-animated-pages.js';

@@ -12,7 +12,7 @@ import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { setPassiveTouchGestures, setRootPath } from '@polymer/polymer/lib/utils/settings.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { ScriptLoader } from './script-loader.js';
+import { ScriptLoader } from 'g-element/src/scriptLoader.js';
 import { sharedLoader } from './shared-loader.js';
 import { firebaseDev, firebaseLive } from './_data/config.js';
 import '@polymer/iron-pages/iron-pages.js';
@@ -68,6 +68,20 @@ class MyApp extends PolymerElement {
           justify-content: center;
           z-index: 2;
         }
+
+        .reloadButton {
+          color: yellow;
+          font-size: 15px;
+          cursor: pointer;
+          text-transform: none;
+          padding: 0;
+          margin-left: 6px;
+        }
+
+        .reloadButton:hover {
+          color: yellow;
+          opacity: 0.8;
+        }
       </style>
 
       <div id="overlay">
@@ -121,6 +135,10 @@ class MyApp extends PolymerElement {
           </template>
         </template>
       </template>
+
+      <paper-toast id="toast" duration="0" text="New version available">
+        <paper-button class="reloadButton" noink onclick="window.location.reload(true)">Update Now</paper-button>
+      </paper-toast>
     `;
   }
 
@@ -153,7 +171,7 @@ class MyApp extends PolymerElement {
 
   ready() {
     super.ready();
-    new ScriptLoader().require([
+    new ScriptLoader([
       "https://www.gstatic.com/firebasejs/5.8.3/firebase-auth.js",
       "https://www.gstatic.com/firebasejs/5.8.3/firebase-database.js",
       "https://www.gstatic.com/firebasejs/5.8.3/firebase-storage.js",
@@ -177,6 +195,8 @@ class MyApp extends PolymerElement {
       // Initialize event listener
       this.addEventListener('signOut', () => this._signOut());
       this.addEventListener('showLoader', (e) => this._showLoader(e.detail));
+      // window event listener
+      window.addEventListener('app-update', () => { this.$.toast.open(); });
     }.bind(this));
   }
 
@@ -219,7 +239,7 @@ class MyApp extends PolymerElement {
       var time = 1;
       if (!path) {
         this._showLoader(true);
-        this.time = 500;
+        time = 500;
       }
 
       this._debounceJob = Debouncer.debounce(this._debounceJob,

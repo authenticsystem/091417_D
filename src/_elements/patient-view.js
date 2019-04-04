@@ -1,5 +1,5 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
-import { getAge, formatDate, fbSnapshotToArray } from '../shared-functions.js';
+import { getAge, formatDate, fbSnapshotToArray } from 'g-element/src/sharedFunctions.js';
 import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/neon-animation/neon-animated-pages.js';
 import '@polymer/neon-animation/neon-animatable.js';

@@ -2,7 +2,7 @@ import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { messagingStyles } from '../shared-styles2.js';
-import { fbSnapshotToArray, chatTimeAndDate, smooth_scroll_to } from '../shared-functions.js';
+import { fbSnapshotToArray, chatTimeAndDate, smooth_scroll_to } from 'g-element/src/sharedFunctions.js';
 import '@polymer/paper-input/paper-textarea.js';
 import '@polymer/iron-collapse/iron-collapse.js';
 import '@polymer/paper-item/paper-item-body.js';

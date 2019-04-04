@@ -1,7 +1,7 @@
 import '@polymer/polymer/polymer-legacy.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { fbSnapshotToArray, formatDate, addCommas } from '../shared-functions.js';
+import { fbSnapshotToArray, formatDate, addCommas } from 'g-element/src/sharedFunctions.js';
 import '@polymer/neon-animation/neon-animated-pages.js';
 import '@polymer/neon-animation/neon-animatable.js';
 import '@polymer/neon-animation/animations/fade-in-animation.js';
@@ -100,9 +100,9 @@ Polymer({
             <neon-animatable>
                 <template is="dom-if" if="[[_isPageOne(selectedPage)]]" restamp>
                     <div class="polymer-card" style="max-width: 800px;">                  
-                        <g-input-suggest field="service" data="[[services]]" label="Service *" selected-item="{{service}}" value="[[serviceValue]]"></g-input-suggest>
+                        <g-input-suggest searchable always-float-label placeholder="Search service..." text-property="service" items="[[services]]" label="Service *" selected-item="{{service}}" text="[[serviceValue]]"></g-input-suggest>
                         <paper-input label="Amount" allowed-pattern="[\\d]" prevent-invalid-input="" always-float-label value="{{service.rate}}"></paper-input>
-                        <g-input-suggest data="[[billToList]]" label="Bill to" value="{{billTo}}"></g-input-suggest>
+                        <g-input-suggest items="[[billToList]]" label="Bill to" text="{{billTo}}"></g-input-suggest>
 
                         <iron-pages attr-for-selected="name" selected="[[_toLowerCase(billTo)]]">
                             <div name="patient">
@@ -116,13 +116,13 @@ Polymer({
                                 </div>
 
                                 <div hidden="[[_patientHasInsurance(useInsurance, patientHMO)]]">
-                                    <g-input-suggest field="name" data="[[hmos]]" label="HMO" value="{{hmo}}"></g-input-suggest>
+                                    <g-input-suggest text-property="name" items="[[hmos]]" label="HMO" text="{{hmo}}"></g-input-suggest>
                                     <a style="font-size: 12px;" hidden="[[useInsurance]]" on-tap="_toggleChangeHMO">Use default HMO!</a>
                                 </div>
                             </div>
 
                             <div name="hospital">
-                                <g-input-suggest field="location_name" data="[[hospitals]]" label="Hospital" value="{{hospital}}"></g-input-suggest>
+                                <g-input-suggest text-property="location_name" items="[[hospitals]]" label="Hospital" text="{{hospital}}"></g-input-suggest>
                             </div>
                         </iron-pages>
                         

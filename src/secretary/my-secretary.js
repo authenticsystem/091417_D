@@ -1,5 +1,5 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
-import { fbSnapshotToArray } from '../shared-functions.js';
+import { fbSnapshotToArray } from 'g-element/src/sharedFunctions.js';
 import '@polymer/iron-image/iron-image.js';
 import '@polymer/iron-list/iron-list.js';
 import '@polymer/iron-scroll-threshold/iron-scroll-threshold.js';
@@ -9,7 +9,7 @@ import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/paper-menu-button/paper-menu-button.js';
 import '@polymer/paper-badge/paper-badge.js';
 import 'g-element/elements/g-notification.js';
-import 'g-element/elements/g-search.js';
+import 'g-element/elements/g-search-bar.js';
 
 class MySecretary extends PolymerElement {
     static get template() {

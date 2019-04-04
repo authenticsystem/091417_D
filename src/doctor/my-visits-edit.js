@@ -1,5 +1,5 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
-import { fbSnapshotToArray, getAge, toIdString } from '../shared-functions.js';
+import { fbSnapshotToArray, getAge, toIdString } from 'g-element/src/sharedFunctions.js';
 import Compressor from 'compressorjs';
 import '@polymer/paper-input/paper-textarea.js';
 import '@silverlinkz/sl-gallery';

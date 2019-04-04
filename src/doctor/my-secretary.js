@@ -1,6 +1,6 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
-import { ShortUniqueId } from '../shortUniqueId.js';
-import { capitalizeString, fbSnapshotToArray } from '../shared-functions.js';
+import { ShortUniqueId } from 'g-element/src/shortUniqueId.js';
+import { capitalizeString, fbSnapshotToArray } from 'g-element/src/sharedFunctions.js';
 import 'g-element/elements/g-datatable/g-datatable.js';
 import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
 
