@@ -549,11 +549,6 @@ class MyQueue extends mixinBehaviors([IronResizableBehavior], PolymerElement) {
     _searchPatient() {
         window.history.pushState({}, null, '/queue/search/q');
         window.dispatchEvent(new CustomEvent('location-changed'));
-    }
-
-    _showLoader(show) {
-        this.dispatchEvent(new CustomEvent('showLoader', {
-            bubbles: true, composed: true, detail: show
         }));
     }
 }
